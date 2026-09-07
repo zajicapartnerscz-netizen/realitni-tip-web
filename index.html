@@ -1130,15 +1130,34 @@
       <div id="rkTableWrap"></div>
     </section>
 
-    <!-- ============== PROVIZNÍ SCHÉMA (placeholder, bod 9 zadání) ============== -->
+    <!-- ============== PROVIZNÍ SCHÉMA (Leader/Administrátor) ==============
+         Milník 6 (Část D, sekce 7 a 8.6.3 zadání) — verzovaná provizní
+         schémata (insert-only historie přes RPC vytvorit_provizni_schema),
+         zvýraznění aktuálně platné verze, formulář nové verze s live
+         náhledem součtu a jednoduchá simulace výpočtu. -->
     <section id="provizeScreen" class="page" hidden>
       <div class="section-head">
         <h2>Provizní schéma</h2>
-        <p>Verzování sazeb, platnost a simulace výpočtu (sekce 7 a 8.6.3 zadání).</p>
+        <p>Verze schémat, jejich platnost (Platné od/do), sazby, simulace výpočtu a kontrola součtu (sekce 7 a 8.6.3 zadání). Součet sazeb nesmí překročit 30 % — vynuceno na serveru, ne jen v UI.</p>
       </div>
-      <div class="placeholder-box">
-        <div class="placeholder-icon">🚧</div>
-        <p><strong>Tato část zatím není postavena</strong> — bude v budoucím milníku. Provizní modul (verzovaná schémata, výpočet 20/5/3/2 %, kontrola součtu) není nikde v appce implementovaný, žádná data se zde nezobrazují ani nevymýšlí.</p>
+
+      <div id="provizeBanner"></div>
+
+      <div class="toolbar-row-end">
+        <button class="btn-small" id="provizeAddOpenBtn" type="button">+ Vytvořit novou verzi</button>
+      </div>
+
+      <div id="provizeFormWrap"></div>
+
+      <div id="provizeTableWrap"></div>
+
+      <div class="card detail-card" style="margin-top:18px;">
+        <h3 class="detail-section-title" style="margin-top:0;">Simulace výpočtu</h3>
+        <p class="dt-muted" style="margin-top:-6px;">Podle aktuálně platného schématu — kolik by při dané ceně nemovitosti dostal tipař, sponzor, Leader a kolik by zůstalo jako marže provozovateli.</p>
+        <div class="form-grid">
+          <div class="field"><label for="provizeSimCena">Cena nemovitosti (Kč)</label><input type="number" id="provizeSimCena" min="0" step="1" placeholder="např. 5000000"></div>
+        </div>
+        <div id="provizeSimResult"></div>
       </div>
     </section>
 
@@ -1931,6 +1950,7 @@
     if (tab === "tipy") fetchTipyTable();
     if (tab === "users") fetchUsersTable();
     if (tab === "rk") refreshRkSection();
+    if (tab === "provize") fetchProvizeScreen();
     if (tab === "audit") fetchAuditTable();
   }
 
@@ -2456,11 +2476,14 @@
     renderTipyTable(rows);
   }
 
-  // Sloupce přesně dle sekce 8.4 zadání v2.1. Odhadovaná/Vyplacená
-  // provize NEEXISTUJÍ v datech (provizní modul není postavený) -
-  // zobrazují se jako "—" s vysvětlujícím tooltipem, nikdy žádná
-  // vymyšlená čísla. ŽÁDNÁ tlačítka pro změnu stavu v řádcích - klik na
-  // řádek otevře Detail a ověření tipu (8.4.1).
+  // Sloupce přesně dle sekce 8.4 zadání v2.1. Milník 6 (Část D) — sloupec
+  // "Odhadovaná provize" teď čte skutečně vypočtenou hodnotu
+  // `tips.odhadovana_provize` (dopočítává server trigger
+  // tips_snapshot_a_vypocet_provize ze snapshotovaného provizního
+  // schématu × cena, BEZ marže) - "—" jen když chybí cena i schéma.
+  // "Vyplacená provize" zůstává "—" (modul Výplaty, mimo rozsah tohoto
+  // milníku - žádná vymyšlená čísla). ŽÁDNÁ tlačítka pro změnu stavu v
+  // řádcích - klik na řádek otevře Detail tipu (8.4.1).
   function renderTipyTable(rows) {
     var columns = [
       { key: "vlozeno_kdy", label: "Datum vytvoření",
@@ -2479,10 +2502,11 @@
       { key: "pozadovana_cena", label: "Požadovaná cena",
         get: function (r) { return r.pozadovana_cena != null ? Number(r.pozadovana_cena) : -1; },
         render: function (r) { return escapeHtml(formatCena(r.pozadovana_cena)); } },
-      { key: "odh_provize", label: "Odhadovaná provize", sortable: false, get: function () { return ""; },
-        render: function () { return '<span class="dt-muted" title="Provizní modul zatím není postavený — bude v budoucím milníku">—</span>'; } },
+      { key: "odh_provize", label: "Odhadovaná provize",
+        get: function (r) { return r.odhadovana_provize != null ? Number(r.odhadovana_provize) : -1; },
+        render: function (r) { return r.odhadovana_provize != null ? escapeHtml(formatCena(r.odhadovana_provize)) : '<span class="dt-muted" title="Chybí cena a/nebo provizní schéma pro výpočet">—</span>'; } },
       { key: "vypl_provize", label: "Vyplacená provize", sortable: false, get: function () { return ""; },
-        render: function () { return '<span class="dt-muted" title="Provizní modul zatím není postavený — bude v budoucím milníku">—</span>'; } }
+        render: function () { return '<span class="dt-muted" title="Modul Výplaty zatím není postavený — bude v budoucím milníku">—</span>'; } }
     ];
 
     var statusOptions = STAV_CODES.map(function (code) { return { value: code, label: STAV_LABELS[code] }; });
@@ -2514,6 +2538,7 @@
 
   var detailTip = null;
   var detailReturnTab = "list";
+  var detailTipSchema = null; // Milník 6 (Část D) - provizní schéma snapshotované u aktuálně otevřeného tipu, pro rozpis provize
 
   function detailItem(label, value) {
     return '<div class="detail-item"><div class="detail-label">' + escapeHtml(label) + '</div><div class="detail-value">' + escapeHtml(value || "—") + '</div></div>';
@@ -2537,6 +2562,16 @@
 
     var canEdit = currentUser && (currentUser.role === "leader" || currentUser.role === "administrator");
     if (canEdit) await fetchRkAktivniList();
+
+    // Milník 6 (Část D) - dohledání snapshotovaného schématu pro rozpis
+    // odhadované provize (jen pro canEdit pohled, viz renderTipDetail).
+    // SELECT na provizni_schema je otevřený všem přihlášeným (RLS), tady
+    // ho ale volá jen Leader/Administrátor.
+    detailTipSchema = null;
+    if (canEdit && detailTip.provizni_schema_id) {
+      var schemaResult = await sb.from("provizni_schema").select("*").eq("id", detailTip.provizni_schema_id).single();
+      if (!schemaResult.error) detailTipSchema = schemaResult.data;
+    }
 
     renderTipDetail();
   }
@@ -2609,11 +2644,51 @@
       editHtml = '<div class="card detail-card"><div class="detail-item"><div class="detail-label">Status ověření</div><div class="detail-value">' + stavPillHtml(t.stav) + '</div></div></div>';
     }
 
+    var provizeHtml = canEdit ? provizniRozpisHtml(t, detailTipSchema) : "";
     var timelineHtml = '<h3 class="detail-section-title">Časová osa</h3><div class="timeline open" id="detailTimeline"></div>';
 
-    el("detailContentWrap").innerHTML = infoHtml + editHtml + timelineHtml;
+    el("detailContentWrap").innerHTML = infoHtml + editHtml + provizeHtml + timelineHtml;
     fetchAndRenderTimeline(t.id, el("detailTimeline"));
     if (canEdit) wireDetailEditForm();
+  }
+
+  // Milník 6 (Část D, sekce 8.4.1 zadání) — rozpis odhadované provize pro
+  // Leadera/Administrátora: kolik by (podle snapshotovaného schématu u
+  // TOHOTO tipu) dostal tipař/sponzor/Leader a kolik marže zůstává
+  // provozovateli. Jen informativní zobrazení, nic se tu neukládá - žádné
+  // skutečné nároky/výplaty (to je modul Výplaty, mimo rozsah).
+  function provizniRozpisHtml(t, schema) {
+    var zaklad = t.odhadovana_cena != null ? Number(t.odhadovana_cena) : (t.pozadovana_cena != null ? Number(t.pozadovana_cena) : null);
+    if (zaklad == null) {
+      return '<div class="card detail-card"><h3 class="detail-section-title" style="margin-top:0;">Rozpis odhadované provize</h3>' +
+        '<p class="dt-muted">Chybí požadovaná i odhadovaná cena — provizi nelze spočítat.</p></div>';
+    }
+    if (!schema) {
+      return '<div class="card detail-card"><h3 class="detail-section-title" style="margin-top:0;">Rozpis odhadované provize</h3>' +
+        '<p class="dt-muted">Tento tip nemá přiřazené provizní schéma (vznikl před zavedením provizního modulu).</p></div>';
+    }
+    var sazbaTipar = Number(schema.sazba_tipar), sazbaSponzor = Number(schema.sazba_sponzor);
+    var sazbaLeader = Number(schema.sazba_leader), sazbaMarze = Number(schema.sazba_marze);
+    var castkaTipar = zaklad * sazbaTipar / 100;
+    var castkaSponzor = zaklad * sazbaSponzor / 100;
+    var castkaLeader = zaklad * sazbaLeader / 100;
+    var castkaMarze = zaklad * sazbaMarze / 100;
+    var celkemSit = castkaTipar + castkaSponzor + castkaLeader;
+    var platnost = formatDateTime(schema.platne_od) + (schema.platne_do ? " – " + formatDateTime(schema.platne_do) : " – stále platné");
+
+    return '<div class="card detail-card">' +
+      '<h3 class="detail-section-title" style="margin-top:0;">Rozpis odhadované provize</h3>' +
+      '<div class="detail-grid">' +
+        detailItem("Základ (cena)", formatCena(zaklad)) +
+        detailItem("Použité schéma", (schema.nazev || "(bez názvu)") + " · " + platnost) +
+        detailItem("Tipař (" + sazbaTipar + " %)", formatCena(castkaTipar)) +
+        detailItem("Sponzor (" + sazbaSponzor + " %)", formatCena(castkaSponzor)) +
+        detailItem("Leader (" + sazbaLeader + " %)", formatCena(castkaLeader)) +
+        detailItem("Marže systému (" + sazbaMarze + " %)", formatCena(castkaMarze)) +
+        detailItem("Provize sítě celkem (tipař+sponzor+Leader)", formatCena(celkemSit)) +
+      '</div>' +
+      '<p class="dt-muted" style="margin-top:8px;">Marže zůstává provozovateli — není součástí částky vyplácené síti. Sazby jsou snapshot schématu platného v okamžiku vložení tohoto tipu; pozdější změna sazeb tento výpočet zpětně nemění.</p>' +
+    '</div>';
   }
 
   function updateDetailConditionalFields() {
@@ -2722,6 +2797,9 @@
     }
     if (msg.indexOf("Administrator nemuze byt sponzorem") !== -1) {
       return "Administrátor nemůže být sponzorem.";
+    }
+    if (msg.indexOf("Sponzor je povinny") !== -1) {
+      return "Sponzor je povinný a nelze ho vynulovat (jen Leader jako kořen stromu smí být bez sponzora). Zvolte prosím sponzora ve formuláři.";
     }
     if (msg.indexOf("cyklus") !== -1) {
       return "Tato změna by vytvořila cyklus ve stromu sponzorů.";
@@ -2905,16 +2983,84 @@
 
   // ---------------- Milník 4: "Audit log" (samostatná záložka) ----------------
 
+  // Milník 6 (bug 3+4 zadání) — action rozlišuje aktivaci/deaktivaci od
+  // obecné úpravy (viz upravit_uzivatele) a RK má vlastní trigger
+  // (vytvoreni_rk/uprava_rk/smazani_rk). Mapa je jediné místo, kde se
+  // interní kód akce překládá na český popisek.
+  var AUDIT_ACTION_LABELS = {
+    zmena_sponzora: "Změna sponzora",
+    oprava_stavu_tipu: "Oprava stavu tipu",
+    uprava_uzivatele: "Úprava uživatele",
+    aktivace_uzivatele: "Aktivace uživatele",
+    deaktivace_uzivatele: "Deaktivace uživatele",
+    vytvoreni_rk: "Založení RK",
+    uprava_rk: "Úprava RK",
+    smazani_rk: "Smazání RK"
+  };
+
   function auditActionLabel(action) {
-    if (action === "zmena_sponzora") return "Změna sponzora";
-    if (action === "oprava_stavu_tipu") return "Oprava stavu tipu";
-    return action || "?";
+    return AUDIT_ACTION_LABELS[action] || action || "?";
   }
 
   function jmenoUzivatele(id) {
     if (!id) return "—";
     var u = adminUsersById[id];
     return u ? (celeJmeno(u) || id) : id;
+  }
+
+  // Milník 6 (bod 2 zadání, bug 4) — čitelný diff místo syrového JSON
+  // blobu old_value/new_value. Pro každé pole, které se mezi starou a
+  // novou hodnotou liší, vypíše se řádek "Pole: stará → nová". sponsor_id
+  // se dohledá na jméno přes adminUsersById (naplněné ve fetchAuditTable),
+  // boolean aktivni se přeloží na Aktivní/Vymazán, ostatní pole zůstávají
+  // jako text. Řádky RK (id/vytvoreno_kdy) se z diffu vynechávají -
+  // nejsou pro čtenáře logu užitečné.
+  var AUDIT_FIELD_LABELS = {
+    jmeno: "Jméno", prijmeni: "Příjmení", telefon: "Telefon", email: "E-mail",
+    sponsor_id: "Sponzor", aktivni: "Aktivní stav",
+    nazev: "Název", ico: "IČO", dic: "DIČ", adresa: "Adresa",
+    kontaktni_osoba: "Kontaktní osoba"
+  };
+  var AUDIT_FIELDS_SKIP = { id: true, vytvoreno_kdy: true };
+  var AUDIT_RK_ACTIONS = { vytvoreni_rk: true, uprava_rk: true, smazani_rk: true };
+
+  function auditFieldValueLabel(field, value, isRk) {
+    if (value === null || value === undefined) return "—";
+    if (field === "sponsor_id") return jmenoUzivatele(value);
+    if (field === "aktivni") return value ? "Aktivní" : (isRk ? "Neaktivní" : "Vymazán");
+    return String(value);
+  }
+
+  function auditDiffHtml(row) {
+    var oldVal = row.old_value || {};
+    var newVal = row.new_value || {};
+    var isRk = !!AUDIT_RK_ACTIONS[row.action];
+    var fields = [];
+    var seen = {};
+    Object.keys(oldVal).concat(Object.keys(newVal)).forEach(function (f) {
+      if (seen[f] || AUDIT_FIELDS_SKIP[f]) return;
+      seen[f] = true;
+      fields.push(f);
+    });
+
+    var lines = [];
+    fields.forEach(function (f) {
+      var before = oldVal.hasOwnProperty(f) ? oldVal[f] : undefined;
+      var after = newVal.hasOwnProperty(f) ? newVal[f] : undefined;
+      if (before === after) return;
+      if (JSON.stringify(before) === JSON.stringify(after)) return;
+      var label = AUDIT_FIELD_LABELS[f] || f;
+      if (before === undefined) {
+        lines.push(escapeHtml(label) + ": " + escapeHtml(auditFieldValueLabel(f, after, isRk)));
+      } else if (after === undefined) {
+        lines.push(escapeHtml(label) + ": " + escapeHtml(auditFieldValueLabel(f, before, isRk)) + " → smazáno");
+      } else {
+        lines.push(escapeHtml(label) + ": " + escapeHtml(auditFieldValueLabel(f, before, isRk)) + " → " + escapeHtml(auditFieldValueLabel(f, after, isRk)));
+      }
+    });
+
+    if (!lines.length) return '<span class="dt-muted">—</span>';
+    return lines.join("<br>");
   }
 
   var auditTable = null;
@@ -2926,6 +3072,8 @@
       { key: "action", label: "Akce", get: function (r) { return auditActionLabel(r.action); } },
       { key: "actor", label: "Provedl", get: function (r) { return jmenoUzivatele(r.actor_id); } },
       { key: "target", label: "Týká se", get: function (r) { return jmenoUzivatele(r.target_user_id); } },
+      { key: "zmeny", label: "Změny", sortable: false, className: "dt-wrap", get: function () { return ""; },
+        render: function (r) { return auditDiffHtml(r); } },
       { key: "reason", label: "Důvod", className: "dt-wrap", get: function (r) { return r.reason || ""; }, render: function (r) { return escapeHtml(r.reason || "—"); } }
     ];
 
@@ -2969,6 +3117,216 @@
       return;
     }
     renderAuditTable(result.data || []);
+  }
+
+  // ---------------- Milník 6 (Část D): "Provizní schéma" (sekce 7 + 8.6.3) ----------------
+  //
+  // Historie verzí je insert-only (žádný přímý UPDATE/DELETE z klienta -
+  // provizni_schema má jen SELECT RLS politiku). Nová verze jde výhradně
+  // přes RPC vytvorit_provizni_schema, která atomicky uzavře předchozí
+  // aktivní verzi (platne_do = now()) a vloží novou. Součet sazeb <= 30 %
+  // se kontroluje v UI (live náhled) i na serveru (RPC vrátí chybu,
+  // nikdy tise nezkrátí částky - sekce 7.4 zadání).
+
+  function provizniSchemaErrorMessage(error) {
+    if (!error) return "Nastala neočekávaná chyba. Zkuste to prosím znovu.";
+    var msg = error.message || "";
+    if (error.code === "42501" || msg.indexOf("Nemate opravneni") !== -1) {
+      return "Nemáte oprávnění vytvořit nové provizní schéma.";
+    }
+    if (msg.indexOf("prekracuje povolenych 30 procent") !== -1) {
+      return "Součet sazeb překračuje povolených 30 %. Snižte prosím některou ze sazeb.";
+    }
+    if (msg.indexOf("povinne") !== -1) {
+      return "Všechny čtyři sazby jsou povinné.";
+    }
+    if (msg.indexOf("zaporne") !== -1) {
+      return "Sazby nesmí být záporné.";
+    }
+    return "Schéma se nepodařilo uložit (" + escapeHtml(msg || "neznámá chyba") + ").";
+  }
+
+  var provizeTable = null;
+  var provizeSchemaRows = [];
+  var provizeAktualni = null; // řádek s platne_do IS NULL (aktuálně platná verze)
+
+  function provizeSoucet(t, s, l, m) {
+    return (Number(t) || 0) + (Number(s) || 0) + (Number(l) || 0) + (Number(m) || 0);
+  }
+
+  function renderProvizeTable(rows) {
+    var columns = [
+      { key: "nazev", label: "Název", get: function (r) { return r.nazev || ""; },
+        render: function (r) { return escapeHtml(r.nazev || "(bez názvu)") + (isAktivniSchema(r) ? ' <span class="pill pill-tip_overen_hledame_rk">Aktuálně platné</span>' : ""); } },
+      { key: "sazba_tipar", label: "Tipař %", get: function (r) { return Number(r.sazba_tipar); } },
+      { key: "sazba_sponzor", label: "Sponzor %", get: function (r) { return Number(r.sazba_sponzor); } },
+      { key: "sazba_leader", label: "Leader %", get: function (r) { return Number(r.sazba_leader); } },
+      { key: "sazba_marze", label: "Marže %", get: function (r) { return Number(r.sazba_marze); } },
+      { key: "soucet", label: "Součet %", get: function (r) { return provizeSoucet(r.sazba_tipar, r.sazba_sponzor, r.sazba_leader, r.sazba_marze); } },
+      { key: "platne_od", label: "Platné od", get: function (r) { return r.platne_od ? new Date(r.platne_od).getTime() : 0; },
+        render: function (r) { return escapeHtml(formatDateTime(r.platne_od)); } },
+      { key: "platne_do", label: "Platné do", get: function (r) { return r.platne_do ? new Date(r.platne_do).getTime() : Number.MAX_SAFE_INTEGER; },
+        render: function (r) { return r.platne_do ? escapeHtml(formatDateTime(r.platne_do)) : '<span class="dt-muted">stále platné</span>'; } },
+      { key: "vytvoril", label: "Vytvořil", get: function (r) { return (r.vytvoril_id && celeJmeno(adminUsersById[r.vytvoril_id])) || ""; },
+        render: function (r) { return escapeHtml((r.vytvoril_id && celeJmeno(adminUsersById[r.vytvoril_id])) || "—"); } }
+    ];
+
+    if (provizeTable) {
+      provizeTable.setRows(rows);
+    } else {
+      provizeTable = initDataTable(el("provizeTableWrap"), {
+        columns: columns,
+        rows: rows,
+        rowId: function (r) { return r.id; },
+        searchPlaceholder: "Hledat v historii schémat…",
+        emptyMessage: "Zatím žádné provizní schéma.",
+        itemNoun: "verzí",
+        initialSortKey: "platne_od",
+        initialSortDir: "desc"
+      });
+    }
+  }
+
+  function isAktivniSchema(r) {
+    return !!(r && provizeAktualni && r.id === provizeAktualni.id);
+  }
+
+  function closeProvizeForm() {
+    el("provizeFormWrap").innerHTML = "";
+  }
+
+  function openProvizeForm() {
+    el("provizeFormWrap").innerHTML =
+      '<div class="card detail-card">' +
+        '<h3 class="detail-section-title" style="margin-top:0;">Vytvořit novou verzi provizního schématu</h3>' +
+        '<p class="dt-muted" style="margin-top:-6px;">Uložením se aktuálně platná verze uzavře (nastaví se jí „Platné do“ na teď) a založí se nová, platná od teď. Historie se nikdy nepřepisuje.</p>' +
+        '<form id="provizeFormPanel" novalidate>' +
+          '<div class="form-grid">' +
+            '<div class="field col-span-2"><label for="pfNazev">Název (nepovinné)</label><input type="text" id="pfNazev" placeholder="např. Výchozí schéma 2026"></div>' +
+            '<div class="field"><label for="pfTipar">Tipař (%)</label><input type="number" id="pfTipar" min="0" step="0.1" value="20"></div>' +
+            '<div class="field"><label for="pfSponzor">Sponzor (%)</label><input type="number" id="pfSponzor" min="0" step="0.1" value="5"></div>' +
+            '<div class="field"><label for="pfLeader">Leader (%)</label><input type="number" id="pfLeader" min="0" step="0.1" value="3"></div>' +
+            '<div class="field"><label for="pfMarze">Marže (%)</label><input type="number" id="pfMarze" min="0" step="0.1" value="2"></div>' +
+          '</div>' +
+          '<p id="pfSoucetInfo" style="margin:4px 0 0;"></p>' +
+          '<div class="form-actions">' +
+            '<button class="btn-primary" type="submit" id="provizeFormSaveBtn" style="width:auto;">Uložit novou verzi</button>' +
+            '<button class="btn-ghost" type="button" id="provizeFormCancelBtn">Zrušit</button>' +
+          '</div>' +
+        '</form>' +
+      '</div>';
+
+    function updateSoucetInfo() {
+      var soucet = provizeSoucet(el("pfTipar").value, el("pfSponzor").value, el("pfLeader").value, el("pfMarze").value);
+      var info = el("pfSoucetInfo");
+      var over = soucet > 30;
+      info.innerHTML = 'Součet sazeb: <strong>' + soucet.toLocaleString("cs-CZ") + ' %</strong>' + (over ? ' — <span style="color:var(--danger);">překračuje povolených 30 %, uložení bude odmítnuto</span>' : ' z povolených 30 %.');
+      var saveBtn = el("provizeFormSaveBtn");
+      if (saveBtn) saveBtn.disabled = over;
+    }
+    ["pfTipar", "pfSponzor", "pfLeader", "pfMarze"].forEach(function (id) {
+      el(id).addEventListener("input", updateSoucetInfo);
+    });
+    updateSoucetInfo();
+
+    el("provizeFormCancelBtn").addEventListener("click", closeProvizeForm);
+    el("provizeFormPanel").addEventListener("submit", function (e) {
+      e.preventDefault();
+      submitProvizeForm();
+    });
+
+    el("provizeFormWrap").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  async function submitProvizeForm() {
+    var nazev = el("pfNazev").value.trim() || null;
+    var tipar = Number(el("pfTipar").value);
+    var sponzor = Number(el("pfSponzor").value);
+    var leader = Number(el("pfLeader").value);
+    var marze = Number(el("pfMarze").value);
+
+    if ([tipar, sponzor, leader, marze].some(function (n) { return isNaN(n) || n < 0; })) {
+      showBanner(el("provizeBanner"), "error", "Všechny sazby musí být nezáporná čísla.");
+      return;
+    }
+    if (provizeSoucet(tipar, sponzor, leader, marze) > 30) {
+      showBanner(el("provizeBanner"), "error", "Součet sazeb překračuje povolených 30 %.");
+      return;
+    }
+
+    var submitBtn = el("provizeFormSaveBtn");
+    if (submitBtn) submitBtn.disabled = true;
+    showBanner(el("provizeBanner"), null, null);
+
+    var result = await sb.rpc("vytvorit_provizni_schema", {
+      p_nazev: nazev,
+      p_sazba_tipar: tipar,
+      p_sazba_sponzor: sponzor,
+      p_sazba_leader: leader,
+      p_sazba_marze: marze
+    });
+
+    if (submitBtn) submitBtn.disabled = false;
+
+    if (result.error) {
+      console.error("Chyba při vytváření provizního schématu:", result.error);
+      showBanner(el("provizeBanner"), "error", provizniSchemaErrorMessage(result.error));
+      return;
+    }
+
+    closeProvizeForm();
+    showBanner(el("provizeBanner"), "ok", "Nová verze provizního schématu byla vytvořena.");
+    setTimeout(function () { showBanner(el("provizeBanner"), null, null); }, 5000);
+    await fetchProvizeScreen();
+  }
+
+  function renderProvizeSimulace() {
+    var cenaRaw = el("provizeSimCena").value;
+    var wrap = el("provizeSimResult");
+    if (cenaRaw === "" || cenaRaw == null) { wrap.innerHTML = ""; return; }
+    var cena = Number(cenaRaw);
+    if (isNaN(cena) || cena < 0) { wrap.innerHTML = '<p class="dt-muted">Zadejte prosím platnou kladnou cenu.</p>'; return; }
+    if (!provizeAktualni) { wrap.innerHTML = '<p class="dt-muted">Zatím není založené žádné provizní schéma.</p>'; return; }
+
+    var s = provizeAktualni;
+    var tipar = cena * Number(s.sazba_tipar) / 100;
+    var sponzor = cena * Number(s.sazba_sponzor) / 100;
+    var leader = cena * Number(s.sazba_leader) / 100;
+    var marze = cena * Number(s.sazba_marze) / 100;
+    var celkemSit = tipar + sponzor + leader;
+
+    wrap.innerHTML = '<div class="detail-grid" style="margin-top:10px;">' +
+      detailItem("Tipař (" + s.sazba_tipar + " %)", formatCena(tipar)) +
+      detailItem("Sponzor (" + s.sazba_sponzor + " %)", formatCena(sponzor)) +
+      detailItem("Leader (" + s.sazba_leader + " %)", formatCena(leader)) +
+      detailItem("Marže systému (" + s.sazba_marze + " %)", formatCena(marze)) +
+      detailItem("Provize sítě celkem", formatCena(celkemSit)) +
+    '</div>';
+  }
+
+  async function fetchProvizeScreen() {
+    if (!currentUser) return;
+    closeProvizeForm();
+
+    // Jména tvůrců schémat - stejný vzor jako Audit log/Tipy (Leader a
+    // Admin vidí všechny profily přes existující RLS politiku).
+    var profilesResult = await sb.from("profiles").select("id, jmeno, prijmeni, role, sponsor_id, invite_code").order("jmeno");
+    if (!profilesResult.error) {
+      adminUsersById = {};
+      (profilesResult.data || []).forEach(function (u) { if (u && u.id) adminUsersById[u.id] = u; });
+    }
+
+    var result = await sb.from("provizni_schema").select("*").order("platne_od", { ascending: false });
+    if (result.error) {
+      console.error("Chyba při načítání provizních schémat:", result.error);
+      el("provizeTableWrap").innerHTML = '<div class="empty-state"><p>Provizní schémata se nepodařilo načíst.</p></div>';
+      return;
+    }
+    provizeSchemaRows = result.data || [];
+    provizeAktualni = provizeSchemaRows.filter(function (r) { return r.platne_do == null; })[0] || null;
+
+    renderProvizeTable(provizeSchemaRows);
+    renderProvizeSimulace();
   }
 
   // ---------------- wiring ----------------
@@ -3052,6 +3410,11 @@
     // Milník 5 (bod 5 zadání) — "+ Přidat RK" nad tabulkou otevírá
     // sdílený formulář (openRkForm bez targetId = režim přidání).
     el("rkAddOpenBtn").addEventListener("click", function () { openRkForm(null); });
+
+    // Milník 6 (Část D) — "+ Vytvořit novou verzi" nad historií schémat
+    // a živý přepočet simulace při psaní ceny.
+    el("provizeAddOpenBtn").addEventListener("click", openProvizeForm);
+    el("provizeSimCena").addEventListener("input", renderProvizeSimulace);
   }
 
   // ---------------- boot ----------------
