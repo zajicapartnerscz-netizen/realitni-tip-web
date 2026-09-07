@@ -604,13 +604,15 @@
 
   /* ---------- Milník 3: životní cyklus tipu ---------- */
 
-  .pill-novy { background: var(--info-soft); color: var(--info); }
-  .pill-validovan { background: var(--ok-soft); color: var(--ok); }
-  .pill-zamitnut { background: var(--danger-soft); color: var(--danger); }
-  .pill-vraceno_k_doplneni { background: var(--warn-soft); color: var(--warn); }
-  .pill-predano_rk { background: var(--info-soft); color: var(--info); }
-  .pill-realizovano { background: var(--ok-soft); color: var(--ok); }
-  .pill-zruseno { background: var(--danger-soft); color: var(--danger); }
+  /* Milník 4 (sekce 5.1 zadání v2.1) — 7 nových interních kódů stavu
+     ověření tipu (žádná tabulka přechodů, volný výběr). */
+  .pill-ceka_na_overeni { background: var(--info-soft); color: var(--info); }
+  .pill-probiha_overeni { background: var(--warn-soft); color: var(--warn); }
+  .pill-nepodarilo_se_zastihnout { background: var(--danger-soft); color: var(--danger); }
+  .pill-potrebujeme_doplnit_informace { background: var(--warn-soft); color: var(--warn); }
+  .pill-zamitnuto { background: var(--danger-soft); color: var(--danger); }
+  .pill-tip_overen_hledame_rk { background: var(--ok-soft); color: var(--ok); }
+  .pill-predano_rk { background: var(--ok-soft); color: var(--ok); }
 
   .dup-flag { font-size: 11.5px; color: var(--danger); font-weight: 600; }
 
@@ -679,6 +681,109 @@
   .rk-add-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
   .rk-add-form .field { margin-bottom: 0; min-width: 220px; flex: 1 1 220px; }
 
+  /* ---------- Milník 4: tabulky s hledáním + řazením (znovupoužitelné) ---------- */
+
+  .tabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tab { flex: 0 0 auto; }
+
+  .dt-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .dt-search {
+    flex: 1 1 220px;
+    min-width: 160px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    padding: 9px 12px;
+    color: var(--text);
+  }
+  .dt-search:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); outline: none; }
+  .dt-select-filter {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    padding: 9px 12px;
+    color: var(--text);
+    flex: 0 0 auto;
+  }
+  .dt-count { font-size: 12px; color: var(--text-muted); margin: -2px 0 10px; }
+
+  .dt-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-m);
+    background: var(--surface);
+    box-shadow: var(--shadow-card);
+  }
+  .dt-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .dt-table th, .dt-table td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .dt-table td.dt-wrap { white-space: normal; }
+  .dt-table tbody tr:last-child td { border-bottom: none; }
+  .dt-table th.dt-sortable {
+    cursor: pointer;
+    user-select: none;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    white-space: nowrap;
+  }
+  .dt-table th.dt-sortable:hover { color: var(--accent); }
+  .dt-table th:not(.dt-sortable) {
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .dt-sort-arrow { font-size: 10px; margin-left: 2px; }
+  .dt-row-clickable { cursor: pointer; }
+  .dt-row-clickable:hover { background: var(--surface-2); }
+  .dt-empty-row td { text-align: center; color: var(--text-muted); padding: 32px 16px; white-space: normal; }
+  .dt-muted { color: var(--text-muted); }
+
+  /* ---------- Milník 4: obrazovka Detail a ověření tipu ---------- */
+
+  .detail-back-btn { margin-bottom: 16px; }
+  .detail-card { margin-bottom: 20px; }
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 20px;
+  }
+  @media (max-width: 640px) { .detail-grid { grid-template-columns: 1fr; } }
+  .detail-item { margin-bottom: 14px; }
+  .detail-item .detail-label { font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; color: var(--text-muted); }
+  .detail-item .detail-value { font-size: 14.5px; color: var(--text); margin-top: 2px; }
+  .detail-section-title { font-size: 17px; margin: 26px 0 14px; }
+  .owner-badge { font-weight: 600; }
+  .owner-badge.owner-me { color: var(--accent); }
+
+  /* ---------- Milník 4: placeholder záložky (bod 9 zadání) ---------- */
+
+  .placeholder-box {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-l);
+  }
+  .placeholder-box .placeholder-icon { font-size: 30px; margin-bottom: 10px; }
+  .placeholder-box p { max-width: 380px; margin: 0 auto; font-size: 14px; }
+  .placeholder-box strong { color: var(--text); }
+
   [hidden] { display: none !important; }
 </style>
 </head>
@@ -698,11 +803,22 @@
   </header>
 
   <div class="tabs-wrap" id="tabsWrap" hidden>
+    <!-- Milník 4 (bod 9 zadání): "Administrace" jako sloučená záložka mizí -
+         pevné pořadí v DOM pokrývá všechny role, viditelnost jednotlivých
+         tlačítek řídí JS podle role (applyNavForRole). Pořadí odpovídá
+         přesně zadání: Tipař má jen první 3, Leader všech 10, Administrátor
+         všechny KROMĚ prvních 3 (Nový tip/Moje tipy/Moje síť). -->
     <nav class="tabs" role="tablist" aria-label="Navigace">
       <button class="tab" id="tabNewBtn" role="tab" type="button" aria-selected="false">+ Nový tip</button>
       <button class="tab" id="tabListBtn" role="tab" type="button" aria-selected="false">Moje tipy</button>
       <button class="tab" id="tabNetworkBtn" role="tab" type="button" aria-selected="false">Moje síť</button>
-      <button class="tab" id="tabAdminBtn" role="tab" type="button" aria-selected="false" hidden>Administrace</button>
+      <button class="tab" id="tabTipyBtn" role="tab" type="button" aria-selected="false" hidden>Tipy</button>
+      <button class="tab" id="tabUsersBtn" role="tab" type="button" aria-selected="false" hidden>Uživatelé</button>
+      <button class="tab" id="tabRkBtn" role="tab" type="button" aria-selected="false" hidden>Realitní kanceláře</button>
+      <button class="tab" id="tabProvizeBtn" role="tab" type="button" aria-selected="false" hidden>Provizní schéma</button>
+      <button class="tab" id="tabVyplatyBtn" role="tab" type="button" aria-selected="false" hidden>Výplaty</button>
+      <button class="tab" id="tabObsahBtn" role="tab" type="button" aria-selected="false" hidden>Obsah</button>
+      <button class="tab" id="tabAuditBtn" role="tab" type="button" aria-selected="false" hidden>Audit log</button>
     </nav>
   </div>
 
@@ -826,6 +942,19 @@
               <span class="error-msg">Zadejte prosím lokalitu (obec).</span>
             </div>
 
+            <div class="field" id="f_TypTransakce">
+              <label for="in_TypTransakce">Typ transakce</label>
+              <select id="in_TypTransakce">
+                <option value="Prodej">Prodej</option>
+                <option value="Pronájem">Pronájem</option>
+              </select>
+            </div>
+
+            <div class="field" id="f_PozadovanaCena">
+              <label for="in_PozadovanaCena">Požadovaná cena (Kč)</label>
+              <input type="number" id="in_PozadovanaCena" placeholder="nepovinné" min="0" step="1" inputmode="numeric">
+            </div>
+
             <div class="field col-span-2" id="f_Popis">
               <label for="in_Popis">Stručný popis</label>
               <textarea id="in_Popis" rows="3" placeholder="Cokoliv důležitého pro Leadera a realitní kancelář…"></textarea>
@@ -849,11 +978,14 @@
       </div>
     </section>
 
-    <!-- ============== LIST SCREEN ============== -->
+    <!-- ============== LIST SCREEN ("Moje tipy") ==============
+         Milník 4 (bod 2/3 zadání): JEDNA tabulka = vlastní tipy (plná
+         data) + tipy PŘÍMO podřízených tipařů (anonymizovaně dle 3.1).
+         ŽÁDNÉ vkládání sítě sem už nepatří (to je "Moje síť"). -->
     <section id="listScreen" class="page" hidden>
       <div class="section-head">
         <h2>Moje tipy</h2>
-        <p>Přehled všech tipů, které jste zatím vložili.</p>
+        <p>Vaše vlastní tipy (plná data) a tipy tipařů, které přímo sponzorujete (anonymizovaně — bez telefonu, e-mailu a přesné lokality).</p>
       </div>
 
       <div id="listBanner"></div>
@@ -861,11 +993,14 @@
       <div id="tipListWrap"></div>
     </section>
 
-    <!-- ============== NETWORK SCREEN ============== -->
+    <!-- ============== NETWORK SCREEN ("Moje síť") ==============
+         Milník 4 (bod 2, sekce 8.5 zadání v2.1): VÝHRADNĚ dashboard/strom
+         — vlastní pozvánkový odkaz + tabulka podřízených uživatelů.
+         ŽÁDNÉ tipy tady. Administrátor tuto záložku nemá vůbec. -->
     <section id="networkScreen" class="page" hidden>
       <div class="section-head">
-        <h2 id="networkTitle">Moje síť</h2>
-        <p id="networkSubtitle">Váš pozvánkový odkaz a přehled lidí, které jste (přímo i nepřímo) přivedli.</p>
+        <h2>Moje síť</h2>
+        <p>Váš pozvánkový odkaz a tabulka lidí, které jste (přímo i nepřímo) přivedli.</p>
       </div>
 
       <div id="networkBanner"></div>
@@ -878,30 +1013,70 @@
       <div class="stat-row" id="networkStats"></div>
 
       <div id="networkListWrap"></div>
-
-      <div class="subsection" id="networkTipsSection">
-        <h3 id="networkTipsTitle">Tipy v mé síti</h3>
-        <p class="subsection-sub" id="networkTipsSub">Anonymizovaný přehled — jen iniciála klienta, stav a datum. Kompletní údaje klienta vidí jen autor tipu, Leader a Administrátor.</p>
-        <div id="networkTipsWrap"></div>
-      </div>
     </section>
 
-    <!-- ============== ADMIN SCREEN ============== -->
-    <section id="adminScreen" class="page" hidden>
+    <!-- ============== TIPY SCREEN (Leader/Administrátor) ==============
+         Milník 4 (bod 4, sekce 8.4 zadání v2.1) — NAHRAZUJE starou
+         "Všechny tipy v systému". Hromadná tabulka VŠECH tipů, žádná
+         tlačítka pro změnu stavu v řádcích - klik na řádek otevře Detail
+         a ověření tipu (8.4.1, sekce "DETAIL SCREEN" níže). -->
+    <section id="tipyScreen" class="page" hidden>
       <div class="section-head">
-        <h2>Administrace</h2>
-        <p>Správa uživatelů a sponzorů (Leader, Administrátor) a auditní stopa změn.</p>
+        <h2>Tipy</h2>
+        <p>Všechny tipy v systému. Klikněte na řádek pro otevření obrazovky „Detail a ověření tipu“.</p>
       </div>
 
-      <div id="adminBanner"></div>
+      <div id="tipyBanner"></div>
 
-      <div id="adminUsersWrap"></div>
+      <div id="tipyTableWrap"></div>
+    </section>
+
+    <!-- ============== DETAIL A OVĚŘENÍ TIPU ==============
+         Milník 4 (bod 7, sekce 8.4.1 zadání v2.1) — NENÍ samostatná
+         záložka v navigaci, otevírá se kliknutím na řádek v "Tipy" nebo
+         na vlastní tip v "Moje tipy". -->
+    <section id="detailScreen" class="page" hidden>
+      <button class="btn-ghost detail-back-btn" id="detailBackBtn" type="button">← Zpět</button>
+
+      <div class="section-head">
+        <h2>Detail a ověření tipu</h2>
+        <p id="detailSubtitle"></p>
+      </div>
+
+      <div id="detailBanner"></div>
+
+      <div id="detailContentWrap"></div>
+    </section>
+
+    <!-- ============== UŽIVATELÉ (Leader/Administrátor) ==============
+         Milník 4 (bod 9, sekce 8.6.1 zadání v2.1) — samostatná záložka
+         místo dřívější podsekce "Administrace". -->
+    <section id="usersScreen" class="page" hidden>
+      <div class="section-head">
+        <h2>Uživatelé</h2>
+        <p>Správa uživatelů, sponzorů a rolí. Změna sponzora vyžaduje povinný důvod a je vidět v auditním logu.</p>
+      </div>
+
+      <div id="usersBanner"></div>
+
+      <div id="usersSponsorPanelWrap"></div>
+
+      <div id="usersTableWrap"></div>
+    </section>
+
+    <!-- ============== REALITNÍ KANCELÁŘE (Leader/Administrátor) ============== -->
+    <section id="rkScreen" class="page" hidden>
+      <div class="section-head">
+        <h2>Realitní kanceláře</h2>
+        <p>Evidence RK pro předávání tipů — kontakty, výkon a vlastní přístup RK jsou mimo rozsah tohoto milníku.</p>
+      </div>
+
+      <div id="rkBanner"></div>
+
+      <div id="rkTableWrap"></div>
 
       <div class="subsection">
-        <h3>Realitní kanceláře</h3>
-        <p class="subsection-sub">Základní evidence RK pro předávání tipů — kontakty, výkon a vlastní přístup RK jsou mimo rozsah tohoto milníku (viz docs/milnik3_zivotni_cyklus.md).</p>
-        <div id="rkBanner"></div>
-        <div id="rkListWrap"></div>
+        <h3>Přidat realitní kancelář</h3>
         <form id="rkAddForm" class="rk-add-form" novalidate>
           <div class="field">
             <label for="in_RkNazev">Název RK</label>
@@ -910,12 +1085,52 @@
           <button class="btn-small" id="rkAddBtn" type="submit">Přidat RK</button>
         </form>
       </div>
+    </section>
 
-      <div class="subsection">
-        <h3>Auditní log</h3>
-        <p class="subsection-sub">Administrátor vidí vše, ostatní jen vlastní akce (vynuceno na serveru přes Row Level Security).</p>
-        <div id="auditLogWrap"></div>
+    <!-- ============== PROVIZNÍ SCHÉMA (placeholder, bod 9 zadání) ============== -->
+    <section id="provizeScreen" class="page" hidden>
+      <div class="section-head">
+        <h2>Provizní schéma</h2>
+        <p>Verzování sazeb, platnost a simulace výpočtu (sekce 7 a 8.6.3 zadání).</p>
       </div>
+      <div class="placeholder-box">
+        <div class="placeholder-icon">🚧</div>
+        <p><strong>Tato část zatím není postavena</strong> — bude v budoucím milníku. Provizní modul (verzovaná schémata, výpočet 20/5/3/2 %, kontrola součtu) není nikde v appce implementovaný, žádná data se zde nezobrazují ani nevymýšlí.</p>
+      </div>
+    </section>
+
+    <!-- ============== VÝPLATY (placeholder, bod 9 zadání) ============== -->
+    <section id="vyplatyScreen" class="page" hidden>
+      <div class="section-head">
+        <h2>Výplaty</h2>
+        <p>Finanční závazky, schválení a export pro účetnictví (sekce 8.6.4 zadání).</p>
+      </div>
+      <div class="placeholder-box">
+        <div class="placeholder-icon">🚧</div>
+        <p><strong>Tato část zatím není postavena</strong> — bude v budoucím milníku. Bez provizního modulu nevznikají žádné vyplatitelné nároky, které by se daly zobrazit.</p>
+      </div>
+    </section>
+
+    <!-- ============== OBSAH (placeholder, bod 9 zadání) ============== -->
+    <section id="obsahScreen" class="page" hidden>
+      <div class="section-head">
+        <h2>Obsah</h2>
+        <p>Novinky, školení, FAQ, smlouvy a šablony oznámení (sekce 8.6.5 zadání).</p>
+      </div>
+      <div class="placeholder-box">
+        <div class="placeholder-icon">🚧</div>
+        <p><strong>Tato část zatím není postavena</strong> — bude v budoucím milníku. Žádný CMS/editor obsahu zatím v appce neexistuje.</p>
+      </div>
+    </section>
+
+    <!-- ============== AUDIT LOG (Leader/Administrátor) ============== -->
+    <section id="auditScreen" class="page" hidden>
+      <div class="section-head">
+        <h2>Audit log</h2>
+        <p>Administrátor vidí vše, Leader jen vlastní zásahy (vynuceno na serveru přes Row Level Security).</p>
+      </div>
+
+      <div id="auditTableWrap"></div>
     </section>
   </main>
 </div>
@@ -949,43 +1164,25 @@
   var ROLE_LABELS = { tipar: "tipař", leader: "leader", administrator: "administrátor" };
   var ROLE_LABELS_CAP = { tipar: "Tipař", leader: "Leader", administrator: "Administrátor" };
 
-  // Milník 3 — životní cyklus tipu: interní kódy stavu (CHECK constraint
-  // v DB) vs. hezké české názvy pro zobrazení. Mapování je jen v UI,
-  // v databázi zůstávají interní kódy bez diakritiky (viz
-  // docs/milnik3_zivotni_cyklus.md).
+  // Milník 4 (sekce 5.1 zadání v2.1) — status ověření tipu je JEDEN
+  // volný výběr ze 7 hodnot (interní kódy = CHECK constraint v DB),
+  // Leader/Administrátor smí nastavit kteroukoli kdykoli - ŽÁDNÁ
+  // tabulka povolených přechodů (na rozdíl od Milníku 3). Mapování na
+  // hezké české názvy je jen v UI, STAV_CODES určuje pořadí v
+  // dropdownu na obrazovce Detail a ověření tipu (8.4.1).
   var STAV_LABELS = {
-    novy: "Nový",
-    validovan: "Validován",
-    zamitnut: "Zamítnut",
-    vraceno_k_doplneni: "Vrácen k doplnění",
-    predano_rk: "Předán RK",
-    realizovano: "Realizováno",
-    zruseno: "Zrušeno"
+    ceka_na_overeni: "Čeká na ověření",
+    probiha_overeni: "Probíhá ověření",
+    nepodarilo_se_zastihnout: "Nepodařilo se zastihnout",
+    potrebujeme_doplnit_informace: "Potřebujeme doplnit informace",
+    zamitnuto: "Zamítnuto",
+    tip_overen_hledame_rk: "Tip ověřen, hledáme RK",
+    predano_rk: "Předáno RK"
   };
-
-  // Povolené běžné přechody (mimo opravu Leaderem) - musí odpovídat
-  // rozhodovací tabulce uvnitř RPC posunout_stav_tipu. Slouží jen k
-  // vykreslení správných akčních tlačítek v UI; skutečné vynucení je
-  // vždy na serveru.
-  var STAV_PRECHODY = {
-    novy: [
-      { stav: "validovan", label: "Validovat", duvodPovinny: false },
-      { stav: "zamitnut", label: "Zamítnout", duvodPovinny: true },
-      { stav: "vraceno_k_doplneni", label: "Vrátit k doplnění", duvodPovinny: true }
-    ],
-    vraceno_k_doplneni: [
-      { stav: "novy", label: "Vrátit do stavu Nový", duvodPovinny: false },
-      { stav: "zamitnut", label: "Zamítnout", duvodPovinny: true }
-    ],
-    validovan: [
-      { stav: "predano_rk", label: "Předat RK", duvodPovinny: false, potrebujeRk: true },
-      { stav: "zamitnut", label: "Zamítnout", duvodPovinny: true }
-    ],
-    predano_rk: [
-      { stav: "realizovano", label: "Realizováno", duvodPovinny: false },
-      { stav: "zruseno", label: "Zrušeno", duvodPovinny: false }
-    ]
-  };
+  var STAV_CODES = [
+    "ceka_na_overeni", "probiha_overeni", "nepodarilo_se_zastihnout",
+    "potrebujeme_doplnit_informace", "zamitnuto", "tip_overen_hledame_rk", "predano_rk"
+  ];
 
   var sb = null;
   var currentUser = null; // { id, email, jmeno, role, invite_code }
@@ -1040,12 +1237,25 @@
   // ---------------- Milník 3: životní cyklus tipu — helpery ----------------
 
   function stavLabel(stav) {
-    return STAV_LABELS[stav] || stav || "Nový";
+    return STAV_LABELS[stav] || stav || "Čeká na ověření";
   }
 
   function stavPillHtml(stav) {
-    var cls = "pill pill-" + (stav && STAV_LABELS[stav] ? stav : "novy");
+    var cls = "pill pill-" + (stav && STAV_LABELS[stav] ? stav : "ceka_na_overeni");
     return '<span class="' + cls + '">' + escapeHtml(stavLabel(stav)) + '</span>';
+  }
+
+  function stavSelectOptionsHtml(selected) {
+    return STAV_CODES.map(function (code) {
+      return '<option value="' + escapeHtml(code) + '"' + (code === selected ? ' selected' : '') + '>' + escapeHtml(STAV_LABELS[code]) + '</option>';
+    }).join("");
+  }
+
+  function formatCena(value) {
+    if (value === null || value === undefined || value === "") return "—";
+    var num = Number(value);
+    if (isNaN(num)) return "—";
+    return num.toLocaleString("cs-CZ") + " Kč";
   }
 
   // "kdo" u záznamu časové osy: vlastní jméno, jinak jméno z cache
@@ -1072,8 +1282,8 @@
     if (msg.indexOf("Opravu stavu smi provest pouze Leader") !== -1) {
       return "Opravu stavu smí provést pouze Leader.";
     }
-    if (msg.indexOf("neni povolen") !== -1) {
-      return "Tento přechod stavu není povolen.";
+    if (msg.indexOf("Neznamy stav") !== -1) {
+      return "Neznámý status ověření.";
     }
     if (msg.indexOf("Duvod je pro tento prechod povinny") !== -1 || msg.indexOf("Duvod opravy je povinny") !== -1) {
       return "Důvod je pro tuto akci povinný.";
@@ -1094,6 +1304,166 @@
       return "Původní tip musí být vložen dříve než ten, který se označuje jako duplicitní.";
     }
     return "Akci se nepodařilo provést (" + escapeHtml(msg || "neznámá chyba") + ").";
+  }
+
+  // ---------------- Milník 4: znovupoužitelná tabulka (hledání + řazení) ----------------
+  //
+  // Jedna společná JS pomůcka pro VŠECHNY tabulkové seznamy v appce (bod 1
+  // zadání uživatele) — "Moje síť", "Moje tipy", "Tipy", "Uživatelé",
+  // "Realitní kanceláře", "Audit log". Vykreslí pole hledání (client-side
+  // fulltext přes viditelný/vyhledávatelný text řádku), volitelný
+  // rozevírací filtr a <table> s klikacími nadpisy sloupců (asc/desc
+  // toggle, šipka u aktivního řazení). Žádná data sama nenačítá - dostane
+  // hotové pole objektů a definici sloupců, volající kód si řídí fetch.
+  //
+  // config:
+  //   columns: [{ key, label, get(row)->hodnota pro hledání/řazení,
+  //               render(row)->HTML pro buňku (nepovinné, jinak escapeHtml(get)),
+  //               sortable (výchozí true), className (nepovinné) }]
+  //   rows: pole objektů
+  //   rowId(row)->string, onRowClick(row) (nepovinné - řádek je pak klikací)
+  //   searchPlaceholder, emptyMessage
+  //   selectFilter: { get(row)->hodnota, options:[{value,label}], allLabel } (nepovinné)
+  //   initialSortKey/initialSortDir
+  function initDataTable(container, config) {
+    var state = {
+      query: "",
+      sortKey: config.initialSortKey || (config.columns[0] && config.columns[0].key) || null,
+      sortDir: config.initialSortDir || "asc",
+      filterValue: ""
+    };
+
+    function applyRows() {
+      var rows = (config.rows || []).slice();
+
+      if (config.selectFilter && state.filterValue) {
+        rows = rows.filter(function (r) { return config.selectFilter.get(r) === state.filterValue; });
+      }
+
+      if (state.query) {
+        var q = state.query.toLowerCase();
+        rows = rows.filter(function (r) {
+          return config.columns.some(function (c) {
+            var v = c.get(r);
+            return v != null && String(v).toLowerCase().indexOf(q) !== -1;
+          });
+        });
+      }
+
+      if (state.sortKey) {
+        var col = null;
+        for (var i = 0; i < config.columns.length; i++) { if (config.columns[i].key === state.sortKey) { col = config.columns[i]; break; } }
+        if (col) {
+          rows.sort(function (a, b) {
+            var va = col.get(a); var vb = col.get(b);
+            if (va == null) va = "";
+            if (vb == null) vb = "";
+            var cmp;
+            if (typeof va === "number" && typeof vb === "number") cmp = va - vb;
+            else cmp = String(va).localeCompare(String(vb), "cs", { numeric: true });
+            return state.sortDir === "asc" ? cmp : -cmp;
+          });
+        }
+      }
+
+      return rows;
+    }
+
+    function render() {
+      var rows = applyRows();
+
+      var filterHtml = "";
+      if (config.selectFilter) {
+        var opts = '<option value="">' + escapeHtml(config.selectFilter.allLabel || "Vše") + '</option>' +
+          config.selectFilter.options.map(function (o) {
+            return '<option value="' + escapeHtml(o.value) + '"' + (o.value === state.filterValue ? ' selected' : '') + '>' + escapeHtml(o.label) + '</option>';
+          }).join("");
+        filterHtml = '<select class="dt-select-filter">' + opts + '</select>';
+      }
+
+      var theadHtml = "<tr>" + config.columns.map(function (c) {
+        var sortable = c.sortable !== false;
+        var arrow = "";
+        if (sortable && state.sortKey === c.key) {
+          arrow = '<span class="dt-sort-arrow">' + (state.sortDir === "asc" ? "▲" : "▼") + '</span>';
+        }
+        return '<th' + (sortable ? ' class="dt-sortable" data-sort-key="' + escapeHtml(c.key) + '"' : '') + '>' +
+          escapeHtml(c.label) + arrow + '</th>';
+      }).join("") + "</tr>";
+
+      var bodyHtml = "";
+      if (!rows.length) {
+        bodyHtml = '<tr class="dt-empty-row"><td colspan="' + config.columns.length + '">' + escapeHtml(config.emptyMessage || "Žádná data k zobrazení.") + '</td></tr>';
+      } else {
+        rows.forEach(function (r) {
+          var cells = config.columns.map(function (c) {
+            var html = c.render ? c.render(r) : escapeHtml(c.get(r) != null ? c.get(r) : "—");
+            return '<td' + (c.className ? ' class="' + c.className + '"' : '') + '>' + html + '</td>';
+          }).join("");
+          var rid = config.rowId ? config.rowId(r) : "";
+          // rowClickable(row) umožňuje, aby jen NĚKTERÉ řádky byly klikací
+          // (např. "Moje tipy" - vlastní řádky otevírají Detail, anonymizované
+          // řádky podřízených ne, protože žádná další data k zobrazení nejsou).
+          var clickable = !!config.onRowClick && (!config.rowClickable || config.rowClickable(r));
+          bodyHtml += '<tr' + (clickable ? ' class="dt-row-clickable" tabindex="0" role="button"' : '') +
+            ' data-row-id="' + escapeHtml(rid) + '" data-clickable="' + (clickable ? "1" : "0") + '">' + cells + '</tr>';
+        });
+      }
+
+      var countHtml = '<div class="dt-count">' + rows.length + (config.rows && rows.length !== config.rows.length ? ' z ' + config.rows.length : '') + ' ' + (config.itemNoun || 'záznamů') + '</div>';
+
+      container.innerHTML =
+        '<div class="dt-toolbar">' +
+          '<input type="text" class="dt-search" placeholder="' + escapeHtml(config.searchPlaceholder || "Hledat…") + '" value="' + escapeHtml(state.query) + '">' +
+          filterHtml +
+        '</div>' +
+        countHtml +
+        '<div class="dt-table-wrap"><table class="dt-table"><thead>' + theadHtml + '</thead><tbody>' + bodyHtml + '</tbody></table></div>';
+
+      var searchEl = container.querySelector(".dt-search");
+      searchEl.addEventListener("input", function () {
+        var caret = this.selectionStart;
+        state.query = this.value;
+        render();
+        var freshInput = container.querySelector(".dt-search");
+        freshInput.focus();
+        try { freshInput.setSelectionRange(caret, caret); } catch (e) { /* noop */ }
+      });
+
+      var filterEl = container.querySelector(".dt-select-filter");
+      if (filterEl) {
+        filterEl.addEventListener("change", function () {
+          state.filterValue = this.value;
+          render();
+        });
+      }
+
+      container.querySelectorAll("th.dt-sortable").forEach(function (th) {
+        th.addEventListener("click", function () {
+          var key = th.getAttribute("data-sort-key");
+          if (state.sortKey === key) { state.sortDir = state.sortDir === "asc" ? "desc" : "asc"; }
+          else { state.sortKey = key; state.sortDir = "asc"; }
+          render();
+        });
+      });
+
+      if (config.onRowClick) {
+        container.querySelectorAll('tbody tr[data-clickable="1"]').forEach(function (tr) {
+          tr.addEventListener("click", function () { config.onRowClick(tr.getAttribute("data-row-id")); });
+          tr.addEventListener("keydown", function (e) {
+            if (e.key === "Enter" || e.key === " ") { e.preventDefault(); config.onRowClick(tr.getAttribute("data-row-id")); }
+          });
+        });
+      }
+
+      if (config.wireExtra) config.wireExtra(container, rows);
+    }
+
+    render();
+    return {
+      setRows: function (newRows) { config.rows = newRows; render(); },
+      rerender: render
+    };
   }
 
   // Vždy explicitní plný select seřazený podle času - žádné patchování
@@ -1175,22 +1545,58 @@
       .join("");
   }
 
-  function renderRkList() {
-    if (!rkAktivniList.length) {
-      el("rkListWrap").innerHTML = '<div class="empty-state"><p>Zatím nejsou zavedeny žádné realitní kanceláře.</p></div>';
+  var rkTable = null; // instance initDataTable pro záložku "Realitní kanceláře"
+
+  // Milník 4 (bod 1, sekce 8.6.2 zadání v2.1) — tabulka VŠECH RK (aktivní
+  // i neaktivní), ne jen aktivních jako rkAktivniList (ten zůstává pro
+  // výběr při "Předáno RK" na obrazovce Detail). Sloupce: Název,
+  // Aktivita, Počet přiřazených tipů, Založena.
+  async function renderRkTable() {
+    var result = await sb.from("realitni_kancelare").select("id, nazev, aktivni, vytvoreno_kdy").order("nazev");
+    if (result.error) {
+      console.error("Chyba při načítání realitních kanceláří:", result.error);
+      showBanner(el("rkBanner"), "error", "Nepodařilo se načíst seznam realitních kanceláří.");
       return;
     }
-    var html = '<div class="rk-list">';
-    rkAktivniList.forEach(function (rk) {
-      html += '<div class="rk-item">' + escapeHtml(rk.nazev) + '</div>';
-    });
-    html += "</div>";
-    el("rkListWrap").innerHTML = html;
+    var rkList = result.data || [];
+
+    // Počet přiřazených tipů se počítá vždy čerstvě (ne z cache
+    // allTipsById, která se plní jen při návštěvě záložky "Tipy" - RK
+    // tabulka musí ukazovat správné číslo, i když ji Leader/Admin otevře
+    // jako první obrazovku po přihlášení).
+    var pocty = {};
+    var tipsRkResult = await sb.from("tips").select("rk_id").not("rk_id", "is", null);
+    if (!tipsRkResult.error) {
+      (tipsRkResult.data || []).forEach(function (t) { if (t && t.rk_id) pocty[t.rk_id] = (pocty[t.rk_id] || 0) + 1; });
+    }
+
+    var columns = [
+      { key: "nazev", label: "Název", get: function (r) { return r.nazev || ""; } },
+      { key: "aktivni", label: "Aktivita", get: function (r) { return r.aktivni ? "Aktivní" : "Neaktivní"; },
+        render: function (r) { return r.aktivni ? '<span class="pill pill-tip_overen_hledame_rk">Aktivní</span>' : '<span class="pill pill-zamitnuto">Neaktivní</span>'; } },
+      { key: "pocet_tipu", label: "Počet přiřazených tipů", get: function (r) { return pocty[r.id] || 0; } },
+      { key: "vytvoreno_kdy", label: "Založena", get: function (r) { return r.vytvoreno_kdy ? new Date(r.vytvoreno_kdy).getTime() : 0; },
+        render: function (r) { return escapeHtml(formatDateTime(r.vytvoreno_kdy)); } }
+    ];
+
+    if (rkTable) {
+      rkTable.setRows(rkList);
+    } else {
+      rkTable = initDataTable(el("rkTableWrap"), {
+        columns: columns,
+        rows: rkList,
+        rowId: function (r) { return r.id; },
+        searchPlaceholder: "Hledat realitní kancelář…",
+        emptyMessage: "Zatím nejsou zavedeny žádné realitní kanceláře.",
+        itemNoun: "RK",
+        initialSortKey: "nazev"
+      });
+    }
   }
 
   async function refreshRkSection() {
     await fetchRkAktivniList();
-    renderRkList();
+    await renderRkTable();
   }
 
   async function submitAddRk(nazev) {
@@ -1274,14 +1680,32 @@
     return "Tip se nepodařilo uložit. Zkuste to prosím znovu.";
   }
 
-  // ---------------- view switching ----------------
+  // ---------------- Milník 4: view switching (10 možných záložek + Detail) ----------------
+
+  var ALL_SCREEN_IDS = [
+    "newTipScreen", "listScreen", "networkScreen", "tipyScreen", "detailScreen",
+    "usersScreen", "rkScreen", "provizeScreen", "vyplatyScreen", "obsahScreen", "auditScreen"
+  ];
+  var TAB_SCREEN = {
+    "new": "newTipScreen", list: "listScreen", network: "networkScreen", tipy: "tipyScreen",
+    users: "usersScreen", rk: "rkScreen", provize: "provizeScreen", vyplaty: "vyplatyScreen",
+    obsah: "obsahScreen", audit: "auditScreen"
+  };
+  var TAB_BUTTON = {
+    "new": "tabNewBtn", list: "tabListBtn", network: "tabNetworkBtn", tipy: "tabTipyBtn",
+    users: "tabUsersBtn", rk: "tabRkBtn", provize: "tabProvizeBtn", vyplaty: "tabVyplatyBtn",
+    obsah: "tabObsahBtn", audit: "tabAuditBtn"
+  };
+
+  function hideAllScreens() {
+    ALL_SCREEN_IDS.forEach(function (id) { el(id).hidden = true; });
+  }
 
   function showAuthScreen() {
     el("topbar").hidden = true;
     el("tabsWrap").hidden = true;
     el("authScreen").hidden = false;
-    el("newTipScreen").hidden = true;
-    el("listScreen").hidden = true;
+    hideAllScreens();
   }
 
   function showAppScreen() {
@@ -1293,19 +1717,39 @@
 
   function setActiveTab(tab) {
     activeTab = tab;
-    el("tabNewBtn").setAttribute("aria-selected", String(tab === "new"));
-    el("tabListBtn").setAttribute("aria-selected", String(tab === "list"));
-    el("tabNetworkBtn").setAttribute("aria-selected", String(tab === "network"));
-    el("tabAdminBtn").setAttribute("aria-selected", String(tab === "admin"));
-    el("newTipScreen").hidden = tab !== "new";
-    el("listScreen").hidden = tab !== "list";
-    el("networkScreen").hidden = tab !== "network";
-    el("adminScreen").hidden = tab !== "admin";
+    hideAllScreens();
+    var screenId = TAB_SCREEN[tab] || "listScreen";
+    el(screenId).hidden = false;
 
-    if (tab === "network") fetchMyNetwork();
-    // Audit log potřebuje mapu id -> jméno ze seznamu uživatelů, proto
-    // počkáme na fetchAdminUsers, než dohledáváme jména v auditním logu.
-    if (tab === "admin") { fetchAdminUsers().then(fetchAuditLog); refreshRkSection(); }
+    Object.keys(TAB_BUTTON).forEach(function (key) {
+      el(TAB_BUTTON[key]).setAttribute("aria-selected", String(key === tab));
+    });
+
+    if (tab === "list") fetchMyTips(currentUser.id);
+    if (tab === "network") fetchMyNetworkTable();
+    if (tab === "tipy") fetchTipyTable();
+    if (tab === "users") fetchUsersTable();
+    if (tab === "rk") refreshRkSection();
+    if (tab === "audit") fetchAuditTable();
+  }
+
+  // Bod 9 zadání uživatele — "Administrace" jako sloučená záložka mizí,
+  // nahrazují ji samostatné položky. Pevné pořadí v DOM (viz nav v HTML)
+  // pokrývá všechny 3 role, tahle funkce jen (ne)skrývá tlačítka:
+  //   Tipař:          Nový tip, Moje tipy, Moje síť (beze změny v počtu)
+  //   Leader:         všech 10 (přidává Tipy/Uživatelé/RK/Provize/Výplaty/Obsah/Audit)
+  //   Administrátor:  všechny KROMĚ Nový tip/Moje tipy/Moje síť (beze změny z předchozí opravy)
+  function applyNavForRole(role) {
+    var isAdmin = role === "administrator";
+    var isStaff = role === "leader" || role === "administrator";
+
+    el("tabNewBtn").hidden = isAdmin;
+    el("tabListBtn").hidden = isAdmin;
+    el("tabNetworkBtn").hidden = isAdmin;
+
+    ["tabTipyBtn", "tabUsersBtn", "tabRkBtn", "tabProvizeBtn", "tabVyplatyBtn", "tabObsahBtn", "tabAuditBtn"].forEach(function (id) {
+      el(id).hidden = !isStaff;
+    });
   }
 
   // ---------------- auth view (login/register toggle) ----------------
@@ -1445,27 +1889,20 @@
     el("userNameLabel").innerHTML =
       "Přihlášen(a) jako <strong>" + escapeHtml(jmeno) + "</strong> · " + escapeHtml(roleLabel);
 
-    // Záložka Administrace je vidět jen pro leader/administrator - ale
-    // skutečné oprávnění vždy vynucují RLS politiky a RPC funkce na
-    // serveru (viz je_leader_nebo_admin/je_administrator), skrytí tabu
-    // je jen pohodlí v UI, ne bezpečnostní mechanismus.
-    el("tabAdminBtn").hidden = !(role === "leader" || role === "administrator");
-
-    // Bod 3 opravy zpětné vazby: Administrátor není autorem tipů ani
-    // součástí stromu sponzorů - záložky "+ Nový tip", "Moje tipy" a
-    // "Moje síť" (v jeho případě přejmenovaná na "Všechny tipy") pro něj
-    // dávají smysl jen ta poslední. Skrytí je opět jen UX - server (RLS)
-    // by stejně žádný zápis/nesmyslný dotaz neautorizovaného typu neprovedl.
+    // Milník 4 (bod 9 zadání) — "Administrace" jako sloučená záložka
+    // zmizela, nahradily ji samostatné položky přímo v navigaci; jejich
+    // (ne)viditelnost i tak zůstává jen pohodlí v UI, skutečné oprávnění
+    // vždy vynucují RLS politiky a RPC funkce na serveru.
     var isAdmin = role === "administrator";
-    el("tabNewBtn").hidden = isAdmin;
-    el("tabListBtn").hidden = isAdmin;
-    applyNetworkScreenForRole();
+    applyNavForRole(role);
 
-    activeTab = isAdmin ? "network" : "list";
+    activeTab = isAdmin ? "tipy" : "list";
+    // showAppScreen() -> setActiveTab(activeTab) už samo zavolá
+    // fetchMyTips()/fetchTipyTable() pro první záložku - druhý explicitní
+    // fetch tady by byl jen zbytečný duplicitní dotaz navíc.
     showAppScreen();
 
     if (!isAdmin) {
-      await fetchMyTips(user.id);
       subscribeRealtime(user.id);
     }
   }
@@ -1476,11 +1913,20 @@
     adminUsersById = {};
     allTipsById = {};
     rkAktivniList = [];
+    usersRowsCache = [];
+    sponsorPanelTargetId = null;
+    detailTip = null;
+    // Reset instancí tabulek, ať se po dalším přihlášení postaví znovu
+    // od nuly (jiná role/jiná data - initDataTable si jinak drží
+    // config.rows ze starého přihlášení jen do prvního setRows).
+    mojeTipyTable = null;
+    mojeSitTable = null;
+    tipyTable = null;
+    usersTable = null;
+    rkTable = null;
+    auditTable = null;
     unsubscribeRealtime();
-    el("tabAdminBtn").hidden = true;
-    el("tabNewBtn").hidden = false;
-    el("tabListBtn").hidden = false;
-    el("tabNetworkBtn").textContent = "Moje síť";
+    applyNavForRole("tipar");
 
     el("loginForm").reset();
     setFieldError(el("loginEmailField"), false);
@@ -1539,6 +1985,7 @@
     var submitBtn = el("tipSubmitBtn");
     submitBtn.disabled = true;
 
+    var pozadovanaCenaRaw = el("in_PozadovanaCena").value;
     var payload = {
       autor_id: currentUser.id,
       jmeno_klienta: el("in_JmenoKlienta").value.trim(),
@@ -1547,6 +1994,10 @@
       typ_nemovitosti: el("in_TypNemovitosti").value,
       lokalita: el("in_Lokalita").value.trim(),
       popis: el("in_Popis").value.trim() || null,
+      // Milník 4 (bod 5 zadání uživatele) - typ transakce a požadovaná
+      // cena nastavuje tipař rovnou při vložení, obojí sloupce v `tips`.
+      typ_transakce: el("in_TypTransakce").value,
+      pozadovana_cena: pozadovanaCenaRaw === "" ? null : Number(pozadovanaCenaRaw),
       souhlas: true
       // stav a vlozeno_kdy necháváme na výchozí hodnotě v databázi
     };
@@ -1568,59 +2019,69 @@
     await fetchMyTips(currentUser.id);
   }
 
-  // ---------------- tips list ----------------
+  // ---------------- Milník 4: "Moje tipy" (tabulka: vlastní + přímí podřízení) ----------------
 
-  function renderTipsEmpty() {
-    el("tipListWrap").innerHTML =
-      '<div class="empty-state"><p>Zatím jste nevložili žádný tip. Přidejte první tip pomocí záložky <strong>„+ Nový tip“</strong>.</p></div>';
-  }
+  var mojeTipyTable = null; // instance initDataTable pro "Moje tipy"
 
-  // Renderuje výhradně přes escapeHtml pole po poli - nikdy nevkládá
-  // syrový objekt/JSON řádku do DOM (viz požadavek Krok 4, bod 7).
-  function renderTips(rows) {
-    if (!rows || !rows.length) { renderTipsEmpty(); return; }
-
-    var html = '<div class="tip-list">';
-    rows.forEach(function (t) {
-      if (!t || typeof t !== "object") return; // obranně přeskoč jakýkoli nevalidní záznam
-      html += '' +
-        '<div class="tip-card" data-tip-id="' + escapeHtml(t.id) + '">' +
-          '<div class="tip-card-top">' +
-            '<div class="tip-client">' + escapeHtml(t.jmeno_klienta || "(bez jména)") + '</div>' +
-            stavPillHtml(t.stav) +
-          '</div>' +
-          '<div class="tip-meta">' +
-            '<span>' + escapeHtml(t.lokalita || "") + '</span>' +
-            (t.typ_nemovitosti ? '<span class="dot"></span><span>' + escapeHtml(t.typ_nemovitosti) + '</span>' : '') +
-          '</div>' +
-          (t.popis ? '<div class="tip-desc">' + escapeHtml(truncate(t.popis, 140)) + '</div>' : '') +
-          '<div class="tip-date">' + escapeHtml(formatDateTime(t.vlozeno_kdy)) + '</div>' +
-          '<div class="tip-actions">' +
-            '<button type="button" class="btn-small btn-small-ghost timeline-toggle-btn">Historie</button>' +
-          '</div>' +
-          '<div class="timeline"></div>' +
-        '</div>';
-    });
-    html += "</div>";
-    el("tipListWrap").innerHTML = html;
-    wireTimelineToggle(el("tipListWrap"));
-  }
-
-  // Vždy explicitní plný select - žádné skládání z realtime payloadu
-  // (viz požadavek Krok 4, bod 7 - oprava bugu z minulé verze).
+  // Bod 3 zadání uživatele: JEDNA tabulka spojující vlastní tipy (plná
+  // data - autor je vždy vidí celé) a tipy PŘÍMO podřízených tipařů
+  // (anonymizovaně, přes RPC moje_prime_tipy() - viz
+  // docs/milnik4_navigace_a_stavy.md pro zdůvodnění, proč vedle
+  // moje_sit_tipy() z Milníku 3 a ne místo ní).
   async function fetchMyTips(userId) {
-    var result = await sb.from("tips")
-      .select("*")
-      .eq("autor_id", userId)
-      .order("vlozeno_kdy", { ascending: false });
-
-    if (result.error) {
-      console.error("Chyba při načítání tipů:", result.error);
+    var ownResult = await sb.from("tips").select("*").eq("autor_id", userId).order("vlozeno_kdy", { ascending: false });
+    if (ownResult.error) {
+      console.error("Chyba při načítání vlastních tipů:", ownResult.error);
       showBanner(el("listBanner"), "error", "Nepodařilo se načíst vaše tipy. Zkuste to prosím znovu.");
       return;
     }
 
-    renderTips(result.data || []);
+    var subResult = await sb.rpc("moje_prime_tipy");
+    if (subResult.error) {
+      console.error("Chyba při načítání tipů přímo podřízených tipařů:", subResult.error);
+    }
+
+    var rows = [];
+    (ownResult.data || []).forEach(function (t) {
+      if (!t || typeof t !== "object") return;
+      rows.push({ kind: "own", id: t.id, ciLabel: "Já", klientLabel: t.jmeno_klienta || "(bez jména)", stav: t.stav, datum: t.vlozeno_kdy });
+    });
+    (subResult.data || []).forEach(function (t) {
+      if (!t || typeof t !== "object") return;
+      rows.push({ kind: "sub", id: t.tip_id, ciLabel: t.autor_jmeno || "(neznámý)", klientLabel: "Klient " + (t.anon_klient || "?"), stav: t.stav, datum: t.vlozeno_kdy });
+    });
+
+    renderMojeTipyTable(rows);
+  }
+
+  function renderMojeTipyTable(rows) {
+    var columns = [
+      { key: "ci", label: "Čí", get: function (r) { return r.ciLabel; },
+        render: function (r) { return r.kind === "own" ? '<span class="owner-badge owner-me">Já</span>' : escapeHtml(r.ciLabel); } },
+      { key: "klient", label: "Klient", get: function (r) { return r.klientLabel; } },
+      { key: "stav", label: "Stav", get: function (r) { return stavLabel(r.stav); }, render: function (r) { return stavPillHtml(r.stav); } },
+      { key: "datum", label: "Datum", get: function (r) { return r.datum ? new Date(r.datum).getTime() : 0; },
+        render: function (r) { return escapeHtml(formatDateTime(r.datum)); } }
+    ];
+
+    if (mojeTipyTable) {
+      mojeTipyTable.setRows(rows);
+      return;
+    }
+    mojeTipyTable = initDataTable(el("tipListWrap"), {
+      columns: columns,
+      rows: rows,
+      rowId: function (r) { return r.kind + ":" + r.id; },
+      // Klikací je jen vlastní tip (otevře čtecí Detail); anonymizovaný
+      // řádek podřízeného už zobrazuje vše, co je vidět (3.1).
+      rowClickable: function (r) { return r.kind === "own"; },
+      onRowClick: function (rowId) { openTipDetail(rowId.slice(4), "list"); },
+      searchPlaceholder: "Hledat v mých tipech…",
+      emptyMessage: "Zatím žádné tipy — vaše vlastní ani od přímo podřízených tipařů.",
+      itemNoun: "tipů",
+      initialSortKey: "datum",
+      initialSortDir: "desc"
+    });
   }
 
   function subscribeRealtime(userId) {
@@ -1647,7 +2108,9 @@
     }
   }
 
-  // ---------------- moje síť ----------------
+  // ---------------- Milník 4: "Moje síť" (výhradně dashboard/strom) ----------------
+
+  var mojeSitTable = null;
 
   function copyInviteLink() {
     var text = el("inviteLinkText").textContent || "";
@@ -1666,425 +2129,341 @@
     }
   }
 
-  function renderNetworkEmpty() {
-    el("networkListWrap").innerHTML =
-      '<div class="empty-state"><p>Zatím jste nikoho nepozvali. Sdílejte svůj odkaz výše a začněte budovat vlastní síť.</p></div>';
-  }
+  // Bod 2 zadání uživatele: "Moje síť" je VÝHRADNĚ vlastní pozvánkový
+  // odkaz + tabulka podřízených uživatelů z moje_sit() RPC. ŽÁDNÉ tipy.
+  // Administrátor tuto záložku nemá vůbec (viz applyNavForRole).
+  async function fetchMyNetworkTable() {
+    if (!currentUser) return;
+    el("inviteLinkText").textContent = location.origin + location.pathname + "?ref=" + (currentUser.invite_code || "");
 
-  // Renderuje výhradně přes escapeHtml pole po poli, nikdy syrový objekt do DOM.
-  function renderNetworkList(rows) {
+    var result = await sb.rpc("moje_sit");
+    if (result.error) {
+      console.error("Chyba při načítání sítě:", result.error);
+      showBanner(el("networkBanner"), "error", "Nepodařilo se načíst přehled sítě. Zkuste to prosím znovu.");
+      return;
+    }
+    var rows = result.data || [];
+
     var direct = 0;
-    (rows || []).forEach(function (r) { if (r && r.uroven === 1) direct++; });
-
+    rows.forEach(function (r) { if (r && r.uroven === 1) direct++; });
     el("networkStats").innerHTML =
       '<div class="stat-tile"><div class="stat-num">' + direct + '</div><div class="stat-label">přímo pozvaní</div></div>' +
-      '<div class="stat-tile"><div class="stat-num">' + (rows ? rows.length : 0) + '</div><div class="stat-label">celkem v mé síti</div></div>';
+      '<div class="stat-tile"><div class="stat-num">' + rows.length + '</div><div class="stat-label">celkem v mé síti</div></div>';
 
-    if (!rows || !rows.length) { renderNetworkEmpty(); return; }
+    var columns = [
+      { key: "jmeno", label: "Jméno", get: function (r) { return r.jmeno || "(bez jména)"; } },
+      { key: "uroven", label: "Úroveň", get: function (r) { return r.uroven != null ? r.uroven : 0; },
+        render: function (r) { return escapeHtml("úroveň " + (r.uroven != null ? r.uroven : "?")); } },
+      { key: "pocet_tipu", label: "Počet tipů", get: function (r) { return r.pocet_tipu != null ? r.pocet_tipu : 0; } }
+    ];
 
-    var html = '<div class="net-list">';
-    rows.forEach(function (r) {
-      if (!r || typeof r !== "object") return;
-      html += '' +
-        '<div class="net-item">' +
-          '<span class="net-uroven">úroveň ' + escapeHtml(String(r.uroven != null ? r.uroven : "?")) + '</span>' +
-          '<span class="net-jmeno">' + escapeHtml(r.jmeno || "(bez jména)") + '</span>' +
-          '<span class="net-pocet">' + escapeHtml(String(r.pocet_tipu != null ? r.pocet_tipu : 0)) + ' tipů</span>' +
-        '</div>';
-    });
-    html += "</div>";
-    el("networkListWrap").innerHTML = html;
-  }
-
-  function renderNetworkTipsEmpty() {
-    el("networkTipsWrap").innerHTML =
-      '<div class="empty-state"><p>V síti zatím nejsou žádné tipy.</p></div>';
-  }
-
-  // rows z sb.rpc('moje_sit_tipy') (běžný tipař/sponzor) - anonymizovaný
-  // klient (jen iniciála), žádný telefon/e-mail/popis.
-  function renderNetworkTipsAnonymized(rows) {
-    if (!rows || !rows.length) { renderNetworkTipsEmpty(); return; }
-    var html = '<div class="tip-list">';
-    rows.forEach(function (t) {
-      if (!t || typeof t !== "object") return;
-      html += '' +
-        '<div class="tip-card">' +
-          '<div class="tip-card-top">' +
-            '<div class="tip-client">' + escapeHtml(t.autor_jmeno || "(neznámý)") + ' · klient ' + escapeHtml(t.anon_klient || "?") + '</div>' +
-            stavPillHtml(t.stav) +
-          '</div>' +
-          '<div class="tip-date">' + escapeHtml(formatDateTime(t.vlozeno_kdy)) + '</div>' +
-        '</div>';
-    });
-    html += "</div>";
-    el("networkTipsWrap").innerHTML = html;
-  }
-
-  // rows z přímého sb.from('tips').select('*') pro Leadera/Administrátora
-  // (bod 2 opravy zpětné vazby) - KOMPLETNÍ údaje tipu, bez anonymizace.
-  // Jméno autora se dohledá z už načtené mapy profilů (adminUsersById),
-  // stejně jako v Administraci.
-  // Milník 3: navíc hezký název stavu, akční tlačítka podle aktuálního
-  // stavu a role, "Opravit stav" (jen Leader), "Označit jako duplicitní"
-  // a rozbalitelná časová osa.
-  function renderNetworkTipsFull(rows) {
-    if (!rows || !rows.length) { renderNetworkTipsEmpty(); return; }
-    var isLeader = currentUser && currentUser.role === "leader";
-    var html = '<div class="tip-list">';
-    rows.forEach(function (t) {
-      if (!t || typeof t !== "object") return;
-      var autorJmeno = (t.autor_id && adminUsersById[t.autor_id] && adminUsersById[t.autor_id].jmeno) || "(neznámý autor)";
-      var prechody = STAV_PRECHODY[t.stav] || [];
-      var actionButtonsHtml = prechody.map(function (opt) {
-        return '<button type="button" class="btn-small tip-action-btn" data-target-stav="' + escapeHtml(opt.stav) +
-          '" data-label="' + escapeHtml(opt.label) + '" data-duvod-povinny="' + (opt.duvodPovinny ? "1" : "0") +
-          '" data-potrebuje-rk="' + (opt.potrebujeRk ? "1" : "0") + '">' + escapeHtml(opt.label) + '</button>';
-      }).join("");
-
-      var duplicitniHtml = "";
-      if (t.duplicitni_s) {
-        var puvodni = allTipsById[t.duplicitni_s];
-        var puvodniLabel = puvodni ? (puvodni.jmeno_klienta || "(bez jména)") + " · " + formatDateTime(puvodni.vlozeno_kdy) : t.duplicitni_s;
-        duplicitniHtml = '<div class="dup-flag">Duplicitní s tipem: ' + escapeHtml(puvodniLabel) + '</div>';
-      }
-
-      html += '' +
-        '<div class="tip-card" data-tip-id="' + escapeHtml(t.id) + '">' +
-          '<div class="tip-card-top">' +
-            '<div class="tip-client">' + escapeHtml(t.jmeno_klienta || "(bez jména)") + ' · autor ' + escapeHtml(autorJmeno) + '</div>' +
-            stavPillHtml(t.stav) +
-          '</div>' +
-          '<div class="tip-meta">' +
-            '<span>' + escapeHtml(t.lokalita || "(bez lokality)") + '</span>' +
-            '<span class="dot"></span><span>' + escapeHtml(t.telefon || "(bez telefonu)") + '</span>' +
-            (t.email ? '<span class="dot"></span><span>' + escapeHtml(t.email) + '</span>' : '') +
-            (t.typ_nemovitosti ? '<span class="dot"></span><span>' + escapeHtml(t.typ_nemovitosti) + '</span>' : '') +
-          '</div>' +
-          (t.popis ? '<div class="tip-desc">' + escapeHtml(truncate(t.popis, 140)) + '</div>' : '') +
-          '<div class="tip-date">' + escapeHtml(formatDateTime(t.vlozeno_kdy)) + '</div>' +
-          duplicitniHtml +
-          '<div class="tip-actions">' +
-            actionButtonsHtml +
-            '<button type="button" class="btn-small btn-small-ghost timeline-toggle-btn">Historie</button>' +
-            (isLeader ? '<button type="button" class="btn-small btn-small-ghost oprava-toggle-btn">Opravit stav</button>' : '') +
-            '<button type="button" class="btn-small btn-small-ghost dup-toggle-btn">Označit jako duplicitní</button>' +
-          '</div>' +
-          '<form class="mini-form action-form"></form>' +
-          (isLeader ? '<form class="mini-form oprava-form"></form>' : '') +
-          '<form class="mini-form dup-form"></form>' +
-          '<div class="timeline"></div>' +
-        '</div>';
-    });
-    html += "</div>";
-    el("networkTipsWrap").innerHTML = html;
-    wireTimelineToggle(el("networkTipsWrap"));
-    wireTipActionForms(el("networkTipsWrap"));
-  }
-
-  // Sestaví a otevře formulář pro konkrétní přechod stavu (tlačítko
-  // Validovat/Zamítnout/Vrátit k doplnění/Předat RK/Realizováno/Zrušeno).
-  function openActionForm(formEl, opt) {
-    var fields = "";
-    if (opt.potrebujeRk) {
-      fields += '<div class="field"><label>Realitní kancelář *</label><select class="af-rk-select"><option value="">— vyberte RK —</option>' + rkSelectOptionsHtml() + '</select></div>';
-    }
-    fields += '<div class="field field-reason"><label>' + (opt.duvodPovinny ? "Důvod (povinný) *" : "Poznámka (nepovinné)") + '</label>' +
-      '<input type="text" class="af-reason-input" placeholder="' + (opt.duvodPovinny ? "Povinné zdůvodnění pro časovou osu" : "Nepovinná poznámka") + '"></div>';
-    fields += '<button type="submit" class="btn-small">Potvrdit: ' + escapeHtml(opt.label) + '</button>';
-    fields += '<button type="button" class="btn-small btn-small-ghost af-cancel-btn">Zrušit</button>';
-    formEl.innerHTML = fields;
-    formEl.dataset.targetStav = opt.stav;
-    formEl.dataset.duvodPovinny = opt.duvodPovinny ? "1" : "0";
-    formEl.classList.add("open");
-    formEl.querySelector(".af-cancel-btn").addEventListener("click", function () {
-      formEl.classList.remove("open");
-      formEl.innerHTML = "";
-    });
-  }
-
-  function openOpravaForm(formEl) {
-    var options = Object.keys(STAV_LABELS).map(function (key) {
-      return '<option value="' + escapeHtml(key) + '">' + escapeHtml(STAV_LABELS[key]) + '</option>';
-    }).join("");
-    formEl.innerHTML =
-      '<div class="mini-form-note">Opravu smí provést pouze Leader; každá oprava je vidět v časové ose i v auditním logu.</div>' +
-      '<div class="field"><label>Nový (opravený) stav *</label><select class="of-stav-select">' + options + '</select></div>' +
-      '<div class="field field-reason"><label>Důvod opravy (povinný) *</label><input type="text" class="of-reason-input" placeholder="Povinné zdůvodnění pro auditní log"></div>' +
-      '<button type="submit" class="btn-small">Opravit stav</button>' +
-      '<button type="button" class="btn-small btn-small-ghost of-cancel-btn">Zrušit</button>';
-    formEl.classList.add("open");
-    formEl.querySelector(".of-cancel-btn").addEventListener("click", function () {
-      formEl.classList.remove("open");
-      formEl.innerHTML = "";
-    });
-  }
-
-  function openDupForm(formEl, tipId) {
-    var options = Object.keys(allTipsById)
-      .filter(function (id) { return id !== tipId; })
-      .map(function (id) { return allTipsById[id]; })
-      .sort(function (a, b) { return new Date(a.vlozeno_kdy) - new Date(b.vlozeno_kdy); })
-      .map(function (t) {
-        return '<option value="' + escapeHtml(t.id) + '">' + escapeHtml(t.jmeno_klienta || "(bez jména)") + ' · ' + escapeHtml(formatDateTime(t.vlozeno_kdy)) + '</option>';
-      }).join("");
-    formEl.innerHTML =
-      '<div class="mini-form-note">Platí pravidlo priority — vybraný originál musí být vložen dříve než tento tip.</div>' +
-      '<div class="field"><label>Původní (skutečný) tip *</label><select class="df-original-select"><option value="">— vyberte tip —</option>' + options + '</select></div>' +
-      '<div class="field field-reason"><label>Poznámka (nepovinné)</label><input type="text" class="df-poznamka-input" placeholder="Nepovinná poznámka"></div>' +
-      '<button type="submit" class="btn-small">Označit jako duplicitní</button>' +
-      '<button type="button" class="btn-small btn-small-ghost df-cancel-btn">Zrušit</button>';
-    formEl.classList.add("open");
-    formEl.querySelector(".df-cancel-btn").addEventListener("click", function () {
-      formEl.classList.remove("open");
-      formEl.innerHTML = "";
-    });
-  }
-
-  // Společné wiring pro akční tlačítka/formuláře nad tipy v pohledu
-  // Leadera/Administrátora ("Všechny tipy v systému").
-  function wireTipActionForms(rootEl) {
-    rootEl.querySelectorAll(".tip-action-btn").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var card = btn.closest("[data-tip-id]");
-        var formEl = card.querySelector(".action-form");
-        openActionForm(formEl, {
-          stav: btn.getAttribute("data-target-stav"),
-          label: btn.getAttribute("data-label"),
-          duvodPovinny: btn.getAttribute("data-duvod-povinny") === "1",
-          potrebujeRk: btn.getAttribute("data-potrebuje-rk") === "1"
-        });
-      });
-    });
-
-    rootEl.querySelectorAll(".action-form").forEach(function (formEl) {
-      formEl.addEventListener("submit", function (e) {
-        e.preventDefault();
-        var card = formEl.closest("[data-tip-id]");
-        var tipId = card.getAttribute("data-tip-id");
-        var targetStav = formEl.dataset.targetStav;
-        var duvodPovinny = formEl.dataset.duvodPovinny === "1";
-        var reasonInput = formEl.querySelector(".af-reason-input");
-        var reasonVal = reasonInput ? reasonInput.value.trim() : "";
-        var rkSelect = formEl.querySelector(".af-rk-select");
-        var rkVal = rkSelect ? (rkSelect.value || null) : null;
-        submitPosunoutStav(tipId, targetStav, duvodPovinny ? reasonVal : null, duvodPovinny ? null : (reasonVal || null), rkVal, formEl);
-      });
-    });
-
-    rootEl.querySelectorAll(".oprava-toggle-btn").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var card = btn.closest("[data-tip-id]");
-        var formEl = card.querySelector(".oprava-form");
-        if (formEl.classList.contains("open")) { formEl.classList.remove("open"); formEl.innerHTML = ""; return; }
-        openOpravaForm(formEl);
-      });
-    });
-    rootEl.querySelectorAll(".oprava-form").forEach(function (formEl) {
-      formEl.addEventListener("submit", function (e) {
-        e.preventDefault();
-        var card = formEl.closest("[data-tip-id]");
-        var tipId = card.getAttribute("data-tip-id");
-        var stavVal = formEl.querySelector(".of-stav-select").value;
-        var reasonVal = formEl.querySelector(".of-reason-input").value.trim();
-        submitOpravitStav(tipId, stavVal, reasonVal, formEl);
-      });
-    });
-
-    rootEl.querySelectorAll(".dup-toggle-btn").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var card = btn.closest("[data-tip-id]");
-        var tipId = card.getAttribute("data-tip-id");
-        var formEl = card.querySelector(".dup-form");
-        if (formEl.classList.contains("open")) { formEl.classList.remove("open"); formEl.innerHTML = ""; return; }
-        openDupForm(formEl, tipId);
-      });
-    });
-    rootEl.querySelectorAll(".dup-form").forEach(function (formEl) {
-      formEl.addEventListener("submit", function (e) {
-        e.preventDefault();
-        var card = formEl.closest("[data-tip-id]");
-        var tipId = card.getAttribute("data-tip-id");
-        var puvodniId = formEl.querySelector(".df-original-select").value;
-        var poznamkaVal = formEl.querySelector(".df-poznamka-input").value.trim();
-        submitOznacitDuplicitu(tipId, puvodniId, poznamkaVal, formEl);
-      });
-    });
-  }
-
-  async function submitPosunoutStav(tipId, novyStav, duvod, poznamka, rkId, formEl) {
-    var submitBtn = formEl.querySelector("button[type=submit]");
-    if (submitBtn) submitBtn.disabled = true;
-    showBanner(el("networkBanner"), null, null);
-
-    var result = await sb.rpc("posunout_stav_tipu", {
-      p_tip_id: tipId, p_novy_stav: novyStav, p_duvod: duvod || null, p_poznamka: poznamka || null, p_rk_id: rkId || null
-    });
-
-    if (result.error) {
-      console.error("Chyba při změně stavu tipu:", result.error);
-      if (submitBtn) submitBtn.disabled = false;
-      showBanner(el("networkBanner"), "error", stavZmenaErrorMessage(result.error));
-      return;
-    }
-
-    showBanner(el("networkBanner"), "ok", "Stav tipu byl změněn na „" + stavLabel(novyStav) + "“.");
-    setTimeout(function () { showBanner(el("networkBanner"), null, null); }, 5000);
-    await fetchAllTipsForLeaderOrAdmin();
-  }
-
-  async function submitOpravitStav(tipId, novyStav, duvod, formEl) {
-    var submitBtn = formEl.querySelector("button[type=submit]");
-    if (submitBtn) submitBtn.disabled = true;
-    showBanner(el("networkBanner"), null, null);
-
-    var result = await sb.rpc("opravit_stav_tipu", { p_tip_id: tipId, p_novy_stav: novyStav, p_duvod: duvod });
-
-    if (result.error) {
-      console.error("Chyba při opravě stavu tipu:", result.error);
-      if (submitBtn) submitBtn.disabled = false;
-      showBanner(el("networkBanner"), "error", stavZmenaErrorMessage(result.error));
-      return;
-    }
-
-    showBanner(el("networkBanner"), "ok", "Stav tipu byl opraven na „" + stavLabel(novyStav) + "“.");
-    setTimeout(function () { showBanner(el("networkBanner"), null, null); }, 5000);
-    await fetchAllTipsForLeaderOrAdmin();
-  }
-
-  async function submitOznacitDuplicitu(tipId, puvodniId, poznamka, formEl) {
-    if (!puvodniId) {
-      showBanner(el("networkBanner"), "error", "Vyberte prosím původní tip.");
-      return;
-    }
-    var submitBtn = formEl.querySelector("button[type=submit]");
-    if (submitBtn) submitBtn.disabled = true;
-    showBanner(el("networkBanner"), null, null);
-
-    var result = await sb.rpc("oznacit_jako_duplicitu", { p_tip_id: tipId, p_puvodni_tip_id: puvodniId, p_poznamka: poznamka || null });
-
-    if (result.error) {
-      console.error("Chyba při označování duplicity:", result.error);
-      if (submitBtn) submitBtn.disabled = false;
-      showBanner(el("networkBanner"), "error", stavZmenaErrorMessage(result.error));
-      return;
-    }
-
-    showBanner(el("networkBanner"), "ok", "Tip byl označen jako duplicitní.");
-    setTimeout(function () { showBanner(el("networkBanner"), null, null); }, 5000);
-    await fetchAllTipsForLeaderOrAdmin();
-  }
-
-  // Přizpůsobí nadpisy a viditelnost částí obrazovky "Moje síť" roli
-  // přihlášeného uživatele (bod 2 a 3 opravy zpětné vazby):
-  // - tipař/sponzor: "Moje síť" + anonymizovaný přehled tipů jen z vlastní podsítě.
-  // - leader: pořád "Moje síť" (je kořenem stromu), ale sekce tipů je teď
-  //   systémová a bez anonymizace ("Všechny tipy v systému").
-  // - administrator: není součástí stromu, takže nemá vlastní síť - celá
-  //   záložka se přejmenuje a ukazuje rovnou "Všechny tipy v systému" bez
-  //   pozvánkového odkazu/statistik/seznamu sítě.
-  function applyNetworkScreenForRole() {
-    var role = currentUser ? currentUser.role : "tipar";
-    var isAdmin = role === "administrator";
-
-    el("tabNetworkBtn").textContent = isAdmin ? "Všechny tipy" : "Moje síť";
-
-    el("inviteBoxWrap").hidden = isAdmin;
-    el("networkStats").hidden = isAdmin;
-    el("networkListWrap").hidden = isAdmin;
-
-    if (isAdmin) {
-      el("networkTitle").textContent = "Všechny tipy v systému";
-      el("networkSubtitle").textContent = "Administrátor není součástí stromu sponzorů - přehled všech tipů v systému, se všemi údaji.";
-      // Podsekce by jinak duplikovala stejný nadpis - u admina je zbytečná,
-      // obsah (networkTipsWrap) necháváme přímo pod hlavním nadpisem.
-      el("networkTipsTitle").hidden = true;
-      el("networkTipsSub").hidden = true;
-    } else if (role === "leader") {
-      el("networkTitle").textContent = "Moje síť";
-      el("networkSubtitle").textContent = "Váš pozvánkový odkaz a přehled lidí, které jste (přímo i nepřímo) přivedli.";
-      el("networkTipsTitle").hidden = false;
-      el("networkTipsSub").hidden = false;
-      el("networkTipsTitle").textContent = "Všechny tipy v systému";
-      el("networkTipsSub").textContent = "Jako Leader vidíte kompletní údaje (telefon, lokalita, e-mail, popis) u úplně všech tipů v systému, ne jen ve vlastní podsíti.";
+    if (mojeSitTable) {
+      mojeSitTable.setRows(rows);
     } else {
-      el("networkTitle").textContent = "Moje síť";
-      el("networkSubtitle").textContent = "Váš pozvánkový odkaz a přehled lidí, které jste (přímo i nepřímo) přivedli.";
-      el("networkTipsTitle").hidden = false;
-      el("networkTipsSub").hidden = false;
-      el("networkTipsTitle").textContent = "Tipy v mé síti";
-      el("networkTipsSub").textContent = "Anonymizovaný přehled — jen iniciála klienta, stav a datum. Kompletní údaje klienta vidí jen autor tipu, Leader a Administrátor.";
+      mojeSitTable = initDataTable(el("networkListWrap"), {
+        columns: columns,
+        rows: rows,
+        rowId: function (r) { return r.id; },
+        searchPlaceholder: "Hledat v síti…",
+        emptyMessage: "Zatím jste nikoho nepozvali. Sdílejte svůj odkaz výše a začněte budovat vlastní síť.",
+        itemNoun: "lidí",
+        initialSortKey: "uroven"
+      });
     }
   }
 
-  // Systémový (nikoli jen vlastní podsítě) přehled tipů pro Leadera/Administrátora
-  // - přímý select nad `tips` (RLS politika "Leader a Admin vidi vsechny tipy"),
-  // žádná anonymizace. Jméno autora dohledáme z čerstvě načteného seznamu
-  // profilů (stejný vzor jako v Administraci - žádné cachování mezi voláními).
-  async function fetchAllTipsForLeaderOrAdmin() {
+  // ---------------- Milník 4: "Tipy" (Leader/Administrátor, sekce 8.4) ----------------
+
+  var tipyTable = null;
+
+  async function fetchTipyTable() {
     var tipsResult = await sb.from("tips").select("*").order("vlozeno_kdy", { ascending: false });
     if (tipsResult.error) {
-      console.error("Chyba při načítání všech tipů:", tipsResult.error);
-      showBanner(el("networkBanner"), "error", "Nepodařilo se načíst přehled tipů. Zkuste to prosím znovu.");
-      renderNetworkTipsEmpty();
+      console.error("Chyba při načítání tipů:", tipsResult.error);
+      showBanner(el("tipyBanner"), "error", "Nepodařilo se načíst seznam tipů. Zkuste to prosím znovu.");
       return;
     }
-
     var profilesResult = await sb.from("profiles").select("id, jmeno, role, sponsor_id, invite_code").order("jmeno");
     if (profilesResult.error) {
-      console.error("Chyba při načítání uživatelů pro jména autorů:", profilesResult.error);
+      console.error("Chyba při načítání uživatelů pro jména tipařů:", profilesResult.error);
     } else {
       adminUsersById = {};
       (profilesResult.data || []).forEach(function (u) { if (u && u.id) adminUsersById[u.id] = u; });
     }
 
-    // Cache pro výběr "původního" tipu v akci Označit jako duplicitní a
-    // pro dohledání jmen u již označených duplicit; a čerstvý seznam
-    // aktivních RK pro výběr při akci Předat RK (Milník 3).
     var rows = tipsResult.data || [];
     allTipsById = {};
     rows.forEach(function (t) { if (t && t.id) allTipsById[t.id] = t; });
-    await fetchRkAktivniList();
 
-    renderNetworkTipsFull(rows);
+    renderTipyTable(rows);
   }
 
-  async function fetchMyNetwork() {
-    if (!currentUser) return;
-    applyNetworkScreenForRole();
+  // Sloupce přesně dle sekce 8.4 zadání v2.1. Odhadovaná/Vyplacená
+  // provize NEEXISTUJÍ v datech (provizní modul není postavený) -
+  // zobrazují se jako "—" s vysvětlujícím tooltipem, nikdy žádná
+  // vymyšlená čísla. ŽÁDNÁ tlačítka pro změnu stavu v řádcích - klik na
+  // řádek otevře Detail a ověření tipu (8.4.1).
+  function renderTipyTable(rows) {
+    var columns = [
+      { key: "vlozeno_kdy", label: "Datum vytvoření",
+        get: function (r) { return r.vlozeno_kdy ? new Date(r.vlozeno_kdy).getTime() : 0; },
+        render: function (r) { return escapeHtml(formatDateTime(r.vlozeno_kdy)); } },
+      { key: "jmeno_klienta", label: "Klient", get: function (r) { return r.jmeno_klienta || ""; } },
+      { key: "kontakt", label: "Kontakt", className: "dt-wrap",
+        get: function (r) { return (r.telefon || "") + " " + (r.email || ""); },
+        render: function (r) { return escapeHtml(r.telefon || "—") + (r.email ? '<br><span class="dt-muted">' + escapeHtml(r.email) + '</span>' : ''); } },
+      { key: "typ_nemovitosti", label: "Nemovitost", get: function (r) { return r.typ_nemovitosti || ""; } },
+      { key: "lokalita", label: "Lokalita", get: function (r) { return r.lokalita || ""; } },
+      { key: "typ_transakce", label: "Typ transakce", get: function (r) { return r.typ_transakce || ""; },
+        render: function (r) { return escapeHtml(r.typ_transakce || "—"); } },
+      { key: "autor", label: "Tipař", get: function (r) { return (r.autor_id && adminUsersById[r.autor_id] && adminUsersById[r.autor_id].jmeno) || ""; } },
+      { key: "stav", label: "Status ověření", get: function (r) { return stavLabel(r.stav); }, render: function (r) { return stavPillHtml(r.stav); } },
+      { key: "pozadovana_cena", label: "Požadovaná cena",
+        get: function (r) { return r.pozadovana_cena != null ? Number(r.pozadovana_cena) : -1; },
+        render: function (r) { return escapeHtml(formatCena(r.pozadovana_cena)); } },
+      { key: "odh_provize", label: "Odhadovaná provize", sortable: false, get: function () { return ""; },
+        render: function () { return '<span class="dt-muted" title="Provizní modul zatím není postavený — bude v budoucím milníku">—</span>'; } },
+      { key: "vypl_provize", label: "Vyplacená provize", sortable: false, get: function () { return ""; },
+        render: function () { return '<span class="dt-muted" title="Provizní modul zatím není postavený — bude v budoucím milníku">—</span>'; } }
+    ];
 
-    var role = currentUser.role;
+    var statusOptions = STAV_CODES.map(function (code) { return { value: code, label: STAV_LABELS[code] }; });
 
-    if (role !== "administrator") {
-      // Leader i tipař/sponzor jsou součástí stromu - mají vlastní
-      // pozvánkový odkaz a přehled vlastní podsítě.
-      el("inviteLinkText").textContent = location.origin + location.pathname + "?ref=" + (currentUser.invite_code || "");
-
-      var netResult = await sb.rpc("moje_sit");
-      if (netResult.error) {
-        console.error("Chyba při načítání sítě:", netResult.error);
-        showBanner(el("networkBanner"), "error", "Nepodařilo se načíst přehled sítě. Zkuste to prosím znovu.");
-      } else {
-        renderNetworkList(netResult.data || []);
-      }
-    }
-
-    if (role === "leader" || role === "administrator") {
-      // Bod 2 opravy zpětné vazby: Leader/Administrátor vidí VŠECHNY tipy
-      // v systému přímým selectem, bez anonymizace (ne přes moje_sit_tipy()).
-      await fetchAllTipsForLeaderOrAdmin();
+    if (tipyTable) {
+      tipyTable.setRows(rows);
     } else {
-      var tipsResult = await sb.rpc("moje_sit_tipy");
-      if (tipsResult.error) {
-        console.error("Chyba při načítání tipů sítě:", tipsResult.error);
-        renderNetworkTipsEmpty();
-      } else {
-        renderNetworkTipsAnonymized(tipsResult.data || []);
-      }
+      tipyTable = initDataTable(el("tipyTableWrap"), {
+        columns: columns,
+        rows: rows,
+        rowId: function (r) { return r.id; },
+        onRowClick: function (tipId) { openTipDetail(tipId, "tipy"); },
+        searchPlaceholder: "Hledat (klient, lokalita, tipař…)",
+        emptyMessage: "Zatím žádné tipy v systému.",
+        itemNoun: "tipů",
+        initialSortKey: "vlozeno_kdy",
+        initialSortDir: "desc",
+        selectFilter: { get: function (r) { return r.stav; }, options: statusOptions, allLabel: "Všechny statusy" }
+      });
     }
   }
 
-  // ---------------- administrace ----------------
+  // ---------------- Milník 4: Detail a ověření tipu (sekce 8.4.1) ----------------
+  //
+  // NENÍ samostatná záložka - otevírá se kliknutím na řádek v "Tipy"
+  // (Leader/Administrátor, plné právo editace) nebo na vlastní řádek v
+  // "Moje tipy" (tipař, jen čtení - RLS by RPC stejně odmítla, ale UI
+  // dropdown/uložení rovnou skryjeme).
+
+  var detailTip = null;
+  var detailReturnTab = "list";
+
+  function detailItem(label, value) {
+    return '<div class="detail-item"><div class="detail-label">' + escapeHtml(label) + '</div><div class="detail-value">' + escapeHtml(value || "—") + '</div></div>';
+  }
+
+  async function openTipDetail(tipId, returnTab) {
+    detailReturnTab = returnTab || activeTab;
+    showBanner(el("detailBanner"), null, null);
+    el("detailSubtitle").textContent = "";
+    el("detailContentWrap").innerHTML = '<p class="dt-muted">Načítám…</p>';
+    hideAllScreens();
+    el("detailScreen").hidden = false;
+
+    var result = await sb.from("tips").select("*").eq("id", tipId).single();
+    if (result.error || !result.data) {
+      console.error("Chyba při načítání detailu tipu:", result.error);
+      el("detailContentWrap").innerHTML = '<div class="empty-state"><p>Tip se nepodařilo načíst nebo k němu nemáte přístup.</p></div>';
+      return;
+    }
+    detailTip = result.data;
+
+    var canEdit = currentUser && (currentUser.role === "leader" || currentUser.role === "administrator");
+    if (canEdit) await fetchRkAktivniList();
+
+    renderTipDetail();
+  }
+
+  function closeTipDetail() {
+    detailTip = null;
+    setActiveTab(detailReturnTab || "list");
+  }
+
+  function renderTipDetail() {
+    var t = detailTip;
+    var canEdit = currentUser && (currentUser.role === "leader" || currentUser.role === "administrator");
+    var isLeader = currentUser && currentUser.role === "leader";
+
+    el("detailSubtitle").textContent = t.jmeno_klienta ? ("Klient: " + t.jmeno_klienta) : "";
+
+    var infoHtml = '<div class="card detail-card"><div class="detail-grid">' +
+      detailItem("Klient", t.jmeno_klienta) +
+      detailItem("Telefon", t.telefon) +
+      detailItem("E-mail", t.email) +
+      detailItem("Nemovitost", t.typ_nemovitosti) +
+      detailItem("Lokalita", t.lokalita) +
+      detailItem("Typ transakce", t.typ_transakce) +
+      detailItem("Požadovaná cena", formatCena(t.pozadovana_cena)) +
+      detailItem("Vloženo", formatDateTime(t.vlozeno_kdy)) +
+      '</div>' +
+      (t.popis ? '<div class="detail-item"><div class="detail-label">Popis</div><div class="detail-value">' + escapeHtml(t.popis) + '</div></div>' : '') +
+      '</div>';
+
+    var editHtml;
+    if (canEdit) {
+      // Pole odhadovana_cena/overena_adresa/motivace_prodeje/stav_nemovitosti/
+      // poznamka_leadera doplňuje výhradně Leader/Administrátor právě tady -
+      // nejsou ve výchozím formuláři tipaře (bod 8 zadání uživatele).
+      editHtml = '' +
+        '<div class="card detail-card">' +
+          '<h3 class="detail-section-title" style="margin-top:0;">Status ověření</h3>' +
+          '<form id="detailSaveForm" novalidate>' +
+            '<div class="form-grid">' +
+              '<div class="field"><label for="dtStavSelect">Status ověření *</label><select id="dtStavSelect">' + stavSelectOptionsHtml(t.stav) + '</select></div>' +
+              '<div class="field" id="dtDuvodField" hidden><label for="dtDuvodInput">Důvod (povinné pro „Zamítnuto“) *</label><input type="text" id="dtDuvodInput" placeholder="Povinné zdůvodnění"></div>' +
+              '<div class="field" id="dtRkField" hidden><label for="dtRkSelect">Realitní kancelář (povinné pro „Předáno RK“) *</label><select id="dtRkSelect"><option value="">— vyberte RK —</option>' + rkSelectOptionsHtml() + '</select></div>' +
+              '<div class="field"><label for="dtOdhadovanaCena">Odhadovaná cena (Kč)</label><input type="number" id="dtOdhadovanaCena" min="0" step="1" value="' + (t.odhadovana_cena != null ? escapeHtml(String(t.odhadovana_cena)) : "") + '"></div>' +
+              '<div class="field col-span-2"><label for="dtOverenaAdresa">Ověřená adresa</label><input type="text" id="dtOverenaAdresa" value="' + escapeHtml(t.overena_adresa || "") + '"></div>' +
+              '<div class="field col-span-2"><label for="dtMotivace">Motivace prodeje</label><textarea id="dtMotivace" rows="2">' + escapeHtml(t.motivace_prodeje || "") + '</textarea></div>' +
+              '<div class="field"><label for="dtStavNemovitosti">Stav nemovitosti</label><input type="text" id="dtStavNemovitosti" value="' + escapeHtml(t.stav_nemovitosti || "") + '"></div>' +
+              '<div class="field col-span-2"><label for="dtPoznamkaLeadera">Poznámka Leadera</label><textarea id="dtPoznamkaLeadera" rows="2">' + escapeHtml(t.poznamka_leadera || "") + '</textarea></div>' +
+            '</div>' +
+            '<div class="form-actions"><button class="btn-primary" type="submit" id="dtSaveBtn">Uložit</button></div>' +
+          '</form>' +
+          (isLeader ?
+            '<div style="margin-top:14px;">' +
+              '<button type="button" class="btn-small btn-small-ghost" id="dtOpravaToggleBtn">Opravit stav</button>' +
+              '<form class="mini-form" id="dtOpravaForm"></form>' +
+            '</div>' : '') +
+        '</div>';
+    } else {
+      // Tipař vidí vlastní tip jen ke čtení (3.1) - dropdown/uložení a
+      // doplňková pole Leadera se tu nezobrazují vůbec.
+      editHtml = '<div class="card detail-card"><div class="detail-item"><div class="detail-label">Status ověření</div><div class="detail-value">' + stavPillHtml(t.stav) + '</div></div></div>';
+    }
+
+    var timelineHtml = '<h3 class="detail-section-title">Časová osa</h3><div class="timeline open" id="detailTimeline"></div>';
+
+    el("detailContentWrap").innerHTML = infoHtml + editHtml + timelineHtml;
+    fetchAndRenderTimeline(t.id, el("detailTimeline"));
+    if (canEdit) wireDetailEditForm();
+  }
+
+  function updateDetailConditionalFields() {
+    var stavVal = el("dtStavSelect").value;
+    el("dtDuvodField").hidden = stavVal !== "zamitnuto";
+    el("dtRkField").hidden = stavVal !== "predano_rk";
+    if (stavVal === "predano_rk" && detailTip.rk_id) {
+      var rkSel = el("dtRkSelect");
+      if (rkSel && !rkSel.value) rkSel.value = detailTip.rk_id;
+    }
+  }
+
+  function wireDetailEditForm() {
+    el("dtStavSelect").addEventListener("change", updateDetailConditionalFields);
+    updateDetailConditionalFields();
+
+    el("detailSaveForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      submitDetailSave();
+    });
+
+    var opravaBtn = el("dtOpravaToggleBtn");
+    if (opravaBtn) {
+      opravaBtn.addEventListener("click", function () {
+        var formEl = el("dtOpravaForm");
+        if (formEl.classList.contains("open")) { formEl.classList.remove("open"); formEl.innerHTML = ""; return; }
+        openDetailOpravaForm(formEl);
+      });
+    }
+  }
+
+  function openDetailOpravaForm(formEl) {
+    formEl.innerHTML =
+      '<div class="mini-form-note">Opravu smí provést pouze Leader; každá oprava je vidět v časové ose i v auditním logu.</div>' +
+      '<div class="field"><label>Nový (opravený) stav *</label><select class="of-stav-select">' + stavSelectOptionsHtml(detailTip.stav) + '</select></div>' +
+      '<div class="field field-reason"><label>Důvod opravy (povinný) *</label><input type="text" class="of-reason-input" placeholder="Povinné zdůvodnění pro auditní log"></div>' +
+      '<button type="submit" class="btn-small">Opravit stav</button>' +
+      '<button type="button" class="btn-small btn-small-ghost of-cancel-btn">Zrušit</button>';
+    formEl.classList.add("open");
+    formEl.querySelector(".of-cancel-btn").addEventListener("click", function () { formEl.classList.remove("open"); formEl.innerHTML = ""; });
+    formEl.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var stavVal = formEl.querySelector(".of-stav-select").value;
+      var reasonVal = formEl.querySelector(".of-reason-input").value.trim();
+      submitDetailOpravitStav(stavVal, reasonVal, formEl);
+    });
+  }
+
+  // Jedno uložení pro vše (bod 7 zadání uživatele): posunout_stav_tipu
+  // je rozšířená o volitelné parametry pro doplňková pole Leadera - jde
+  // uložit i BEZE ZMĚNY stavu (RPC vynechá zápis do tip_status_history,
+  // pokud se stav skutečně nemění, viz m4_rpc_posunout_stav_tipu).
+  async function submitDetailSave() {
+    var stavVal = el("dtStavSelect").value;
+    var duvodVal = !el("dtDuvodField").hidden ? el("dtDuvodInput").value.trim() : "";
+    var rkVal = !el("dtRkField").hidden ? (el("dtRkSelect").value || null) : null;
+    var odhadCena = el("dtOdhadovanaCena").value;
+    var overenaAdresa = el("dtOverenaAdresa").value.trim();
+    var motivace = el("dtMotivace").value.trim();
+    var stavNemovitosti = el("dtStavNemovitosti").value.trim();
+    var poznamkaLeadera = el("dtPoznamkaLeadera").value.trim();
+
+    var btn = el("dtSaveBtn");
+    btn.disabled = true;
+    showBanner(el("detailBanner"), null, null);
+
+    var result = await sb.rpc("posunout_stav_tipu", {
+      p_tip_id: detailTip.id,
+      p_novy_stav: stavVal,
+      p_duvod: duvodVal || null,
+      p_poznamka: null,
+      p_rk_id: rkVal,
+      p_odhadovana_cena: odhadCena === "" ? null : Number(odhadCena),
+      p_overena_adresa: overenaAdresa || null,
+      p_motivace_prodeje: motivace || null,
+      p_stav_nemovitosti: stavNemovitosti || null,
+      p_poznamka_leadera: poznamkaLeadera || null
+    });
+
+    btn.disabled = false;
+
+    if (result.error) {
+      console.error("Chyba při ukládání detailu tipu:", result.error);
+      showBanner(el("detailBanner"), "error", stavZmenaErrorMessage(result.error));
+      return;
+    }
+
+    showBanner(el("detailBanner"), "ok", "Uloženo.");
+    setTimeout(function () { showBanner(el("detailBanner"), null, null); }, 4000);
+
+    var refreshed = await sb.from("tips").select("*").eq("id", detailTip.id).single();
+    if (!refreshed.error && refreshed.data) detailTip = refreshed.data;
+    renderTipDetail();
+  }
+
+  async function submitDetailOpravitStav(novyStav, duvod, formEl) {
+    var submitBtn = formEl.querySelector("button[type=submit]");
+    if (submitBtn) submitBtn.disabled = true;
+    showBanner(el("detailBanner"), null, null);
+
+    var result = await sb.rpc("opravit_stav_tipu", { p_tip_id: detailTip.id, p_novy_stav: novyStav, p_duvod: duvod });
+
+    if (result.error) {
+      console.error("Chyba při opravě stavu tipu:", result.error);
+      if (submitBtn) submitBtn.disabled = false;
+      showBanner(el("detailBanner"), "error", stavZmenaErrorMessage(result.error));
+      return;
+    }
+
+    showBanner(el("detailBanner"), "ok", "Stav byl opraven na „" + stavLabel(novyStav) + "“.");
+    setTimeout(function () { showBanner(el("detailBanner"), null, null); }, 4000);
+
+    var refreshed = await sb.from("tips").select("*").eq("id", detailTip.id).single();
+    if (!refreshed.error && refreshed.data) detailTip = refreshed.data;
+    renderTipDetail();
+  }
+
+  // ---------------- Milník 4: "Uživatelé" (dřívější Administrace) ----------------
 
   function adminChangeSponsorError(error) {
     if (!error) return "Nastala neočekávaná chyba. Zkuste to prosím znovu.";
@@ -2104,86 +2483,104 @@
     return "Změnu se nepodařilo uložit (" + escapeHtml(msg || "neznámá chyba") + ").";
   }
 
-  function renderAdminUsers(rows) {
+  var usersTable = null;
+  var usersRowsCache = [];
+  var sponsorPanelTargetId = null;
+
+  // Milník 4 (bod 1, sekce 8.6.1 zadání v2.1) — tabulka s hledáním a
+  // řazením. "Změnit sponzora" otevírá SDÍLENÝ panel nad tabulkou (jeden
+  // formulář, ne 6 skrytých formulářů v řádcích - tabulkové <tr> se
+  // nehodí pro vnořený formulář na míru).
+  function renderUsersTable(rows) {
     adminUsersById = {};
     (rows || []).forEach(function (u) { if (u && u.id) adminUsersById[u.id] = u; });
+    usersRowsCache = rows || [];
 
-    if (!rows || !rows.length) {
-      el("adminUsersWrap").innerHTML = '<div class="empty-state"><p>Žádní uživatelé k zobrazení.</p></div>';
-      return;
+    var columns = [
+      { key: "jmeno", label: "Jméno", get: function (r) { return r.jmeno || "(bez jména)"; } },
+      { key: "role", label: "Role", get: function (r) { return ROLE_LABELS[r.role] || r.role; }, render: function (r) { return roleBadgeHtml(r.role); } },
+      { key: "sponsor", label: "Sponzor",
+        get: function (r) { return r.role === "administrator" ? "" : ((r.sponsor_id && adminUsersById[r.sponsor_id] && adminUsersById[r.sponsor_id].jmeno) || ""); },
+        render: function (r) {
+          if (r.role === "administrator") return '<span class="dt-muted">— (mimo strom)</span>';
+          var jm = r.sponsor_id && adminUsersById[r.sponsor_id] ? adminUsersById[r.sponsor_id].jmeno : null;
+          return escapeHtml(jm || "—");
+        } },
+      { key: "invite_code", label: "Pozvánkový kód", get: function (r) { return r.invite_code || ""; } },
+      { key: "akce", label: "Akce", sortable: false, get: function () { return ""; },
+        render: function (r) {
+          if (r.id === currentUser.id || r.role === "administrator") return "";
+          return '<button type="button" class="btn-small btn-small-ghost users-change-sponsor-btn" data-user-id="' + escapeHtml(r.id) + '">Změnit sponzora</button>';
+        } }
+    ];
+
+    if (usersTable) {
+      usersTable.setRows(rows);
+    } else {
+      usersTable = initDataTable(el("usersTableWrap"), {
+        columns: columns,
+        rows: rows,
+        rowId: function (r) { return r.id; },
+        searchPlaceholder: "Hledat uživatele (jméno, role…)",
+        emptyMessage: "Žádní uživatelé k zobrazení.",
+        itemNoun: "uživatelů",
+        initialSortKey: "jmeno",
+        wireExtra: function (container) {
+          container.querySelectorAll(".users-change-sponsor-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () { openSponsorPanel(btn.getAttribute("data-user-id")); });
+          });
+        }
+      });
     }
-
-    var html = "";
-    rows.forEach(function (u) {
-      if (!u || typeof u !== "object") return;
-      var sponsorJmeno = u.sponsor_id && adminUsersById[u.sponsor_id] ? adminUsersById[u.sponsor_id].jmeno : "—";
-      var isSelf = u.id === currentUser.id;
-      // Bod 3: Administrátor není součástí stromu sponzorů - nikdy se
-      // nesmí nabízet jako sponzor pro kohokoli (backend by to stejně
-      // odmítl přes CHECK/trigger, ale UX má být čistý).
-      var isAdminRow = u.role === "administrator";
-
-      // Bod 4 (bugfix): možnosti sponzora se počítají PRO KAŽDÝ ŘÁDEK
-      // zvlášť a vylučují jen tohoto konkrétního cílového uživatele
-      // (u.id), NIKDY globálně přihlášeného currentUser.id - jinak by
-      // Leader/Admin nemohl sám sebe zvolit jako nového sponzora pro
-      // nikoho jiného (to byl nahlášený bug).
-      var rowOptions = rows
-        .filter(function (o) { return o && o.id !== u.id && o.role !== "administrator"; })
-        .map(function (o) { return '<option value="' + escapeHtml(o.id) + '">' + escapeHtml(o.jmeno || o.id) + '</option>'; })
-        .join("");
-
-      html += '' +
-        '<div class="admin-row" data-user-id="' + escapeHtml(u.id) + '">' +
-          '<div class="admin-row-top">' +
-            '<span class="admin-jmeno">' + escapeHtml(u.jmeno || "(bez jména)") + '</span>' +
-            roleBadgeHtml(u.role) +
-            (isSelf || isAdminRow ? '' : '<button type="button" class="btn-small btn-small-ghost admin-toggle-sponsor-btn">Změnit sponzora</button>') +
-          '</div>' +
-          '<div class="admin-row-meta">Aktuální sponzor: ' + escapeHtml(isAdminRow ? "— (administrátor není součástí stromu)" : sponsorJmeno) + '</div>' +
-          (isSelf || isAdminRow ? '' :
-            '<form class="sponsor-form">' +
-              '<div class="field">' +
-                '<label>Nový sponzor</label>' +
-                '<select class="sponsor-select">' +
-                  '<option value="">— bez sponzora —</option>' +
-                  rowOptions +
-                '</select>' +
-              '</div>' +
-              '<div class="field field-reason">' +
-                '<label>Důvod změny *</label>' +
-                '<input type="text" class="sponsor-reason" placeholder="Povinné zdůvodnění pro auditní log">' +
-              '</div>' +
-              '<button type="submit" class="btn-small">Uložit</button>' +
-            '</form>'
-          ) +
-        '</div>';
-    });
-    el("adminUsersWrap").innerHTML = html;
-
-    // Wiring (po vložení do DOM) - přepínání formuláře a odeslání RPC.
-    el("adminUsersWrap").querySelectorAll(".admin-toggle-sponsor-btn").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var form = btn.closest(".admin-row").querySelector(".sponsor-form");
-        if (form) form.classList.toggle("open");
-      });
-    });
-    el("adminUsersWrap").querySelectorAll(".sponsor-form").forEach(function (form) {
-      form.addEventListener("submit", function (e) {
-        e.preventDefault();
-        var row = form.closest(".admin-row");
-        var targetId = row.getAttribute("data-user-id");
-        var newSponsorId = form.querySelector(".sponsor-select").value || null;
-        var reason = form.querySelector(".sponsor-reason").value.trim();
-        submitChangeSponsor(targetId, newSponsorId, reason, form);
-      });
-    });
   }
 
-  async function submitChangeSponsor(targetId, newSponsorId, reason, formEl) {
-    var submitBtn = formEl ? formEl.querySelector("button[type=submit]") : null;
+  function closeSponsorPanel() {
+    sponsorPanelTargetId = null;
+    el("usersSponsorPanelWrap").innerHTML = "";
+  }
+
+  function openSponsorPanel(targetId) {
+    sponsorPanelTargetId = targetId;
+    var target = adminUsersById[targetId];
+    if (!target) return;
+
+    // Bod 4 (bugfix z Milníku 2) zachován: možnosti sponzora vylučují jen
+    // TOHOTO cílového uživatele, nikdy globálně přihlášeného currentUser.
+    var rowOptions = usersRowsCache
+      .filter(function (o) { return o && o.id !== targetId && o.role !== "administrator"; })
+      .map(function (o) { return '<option value="' + escapeHtml(o.id) + '"' + (o.id === target.sponsor_id ? ' selected' : '') + '>' + escapeHtml(o.jmeno || o.id) + '</option>'; })
+      .join("");
+
+    el("usersSponsorPanelWrap").innerHTML =
+      '<div class="card detail-card">' +
+        '<h3 class="detail-section-title" style="margin-top:0;">Změnit sponzora — ' + escapeHtml(target.jmeno || targetId) + '</h3>' +
+        '<form id="sponsorPanelForm" novalidate>' +
+          '<div class="form-grid">' +
+            '<div class="field"><label>Nový sponzor</label><select id="sponsorPanelSelect"><option value="">— bez sponzora —</option>' + rowOptions + '</select></div>' +
+            '<div class="field"><label>Důvod změny *</label><input type="text" id="sponsorPanelReason" placeholder="Povinné zdůvodnění pro auditní log"></div>' +
+          '</div>' +
+          '<div class="form-actions">' +
+            '<button class="btn-primary" type="submit" id="sponsorPanelSaveBtn" style="width:auto;">Uložit</button>' +
+            '<button class="btn-ghost" type="button" id="sponsorPanelCancelBtn">Zrušit</button>' +
+          '</div>' +
+        '</form>' +
+      '</div>';
+
+    el("sponsorPanelCancelBtn").addEventListener("click", closeSponsorPanel);
+    el("sponsorPanelForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var newSponsorId = el("sponsorPanelSelect").value || null;
+      var reason = el("sponsorPanelReason").value.trim();
+      submitChangeSponsor(sponsorPanelTargetId, newSponsorId, reason);
+    });
+
+    el("usersSponsorPanelWrap").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  async function submitChangeSponsor(targetId, newSponsorId, reason) {
+    var submitBtn = el("sponsorPanelSaveBtn");
     if (submitBtn) submitBtn.disabled = true;
-    showBanner(el("adminBanner"), null, null);
+    showBanner(el("usersBanner"), null, null);
 
     var result = await sb.rpc("zmenit_sponzora", {
       p_target_user_id: targetId,
@@ -2195,29 +2592,33 @@
 
     if (result.error) {
       console.error("Chyba při změně sponzora:", result.error);
-      showBanner(el("adminBanner"), "error", adminChangeSponsorError(result.error));
+      showBanner(el("usersBanner"), "error", adminChangeSponsorError(result.error));
       return;
     }
 
-    showBanner(el("adminBanner"), "ok", "Sponzor byl úspěšně změněn.");
-    setTimeout(function () { showBanner(el("adminBanner"), null, null); }, 5000);
-    await fetchAdminUsers();
-    await fetchAuditLog();
+    closeSponsorPanel();
+    showBanner(el("usersBanner"), "ok", "Sponzor byl úspěšně změněn.");
+    setTimeout(function () { showBanner(el("usersBanner"), null, null); }, 5000);
+    await fetchUsersTable();
   }
 
-  async function fetchAdminUsers() {
+  async function fetchUsersTable() {
     if (!currentUser) return;
+    closeSponsorPanel();
     var result = await sb.from("profiles").select("id, jmeno, role, sponsor_id, invite_code").order("jmeno");
     if (result.error) {
       console.error("Chyba při načítání uživatelů:", result.error);
-      showBanner(el("adminBanner"), "error", "Nepodařilo se načíst seznam uživatelů.");
+      showBanner(el("usersBanner"), "error", "Nepodařilo se načíst seznam uživatelů.");
       return;
     }
-    renderAdminUsers(result.data || []);
+    renderUsersTable(result.data || []);
   }
+
+  // ---------------- Milník 4: "Audit log" (samostatná záložka) ----------------
 
   function auditActionLabel(action) {
     if (action === "zmena_sponzora") return "Změna sponzora";
+    if (action === "oprava_stavu_tipu") return "Oprava stavu tipu";
     return action || "?";
   }
 
@@ -2227,38 +2628,43 @@
     return u ? (u.jmeno || id) : id;
   }
 
-  function renderAuditLog(rows) {
-    if (!rows || !rows.length) {
-      el("auditLogWrap").innerHTML = '<div class="empty-state"><p>Zatím žádné auditní záznamy.</p></div>';
-      return;
+  var auditTable = null;
+
+  function renderAuditTable(rows) {
+    var columns = [
+      { key: "created_at", label: "Datum", get: function (r) { return r.created_at ? new Date(r.created_at).getTime() : 0; },
+        render: function (r) { return escapeHtml(formatDateTime(r.created_at)); } },
+      { key: "action", label: "Akce", get: function (r) { return auditActionLabel(r.action); } },
+      { key: "actor", label: "Provedl", get: function (r) { return jmenoUzivatele(r.actor_id); } },
+      { key: "target", label: "Týká se", get: function (r) { return jmenoUzivatele(r.target_user_id); } },
+      { key: "reason", label: "Důvod", className: "dt-wrap", get: function (r) { return r.reason || ""; }, render: function (r) { return escapeHtml(r.reason || "—"); } }
+    ];
+
+    if (auditTable) {
+      auditTable.setRows(rows);
+    } else {
+      auditTable = initDataTable(el("auditTableWrap"), {
+        columns: columns,
+        rows: rows,
+        rowId: function (r) { return r.id; },
+        searchPlaceholder: "Hledat v auditním logu…",
+        emptyMessage: "Zatím žádné auditní záznamy.",
+        itemNoun: "záznamů",
+        initialSortKey: "created_at",
+        initialSortDir: "desc"
+      });
     }
-    var html = '<div class="audit-list">';
-    rows.forEach(function (a) {
-      if (!a || typeof a !== "object") return;
-      html += '' +
-        '<div class="audit-item">' +
-          '<div class="audit-top">' +
-            '<span class="audit-action">' + escapeHtml(auditActionLabel(a.action)) + '</span>' +
-            '<span class="audit-date">' + escapeHtml(formatDateTime(a.created_at)) + '</span>' +
-          '</div>' +
-          '<div class="audit-detail">Provedl: ' + escapeHtml(jmenoUzivatele(a.actor_id)) +
-            ' · Týká se: ' + escapeHtml(jmenoUzivatele(a.target_user_id)) + '</div>' +
-          (a.reason ? '<div class="audit-detail">Důvod: ' + escapeHtml(a.reason) + '</div>' : '') +
-        '</div>';
-    });
-    html += "</div>";
-    el("auditLogWrap").innerHTML = html;
   }
 
-  async function fetchAuditLog() {
+  async function fetchAuditTable() {
     if (!currentUser) return;
     var result = await sb.from("audit_log").select("*").order("created_at", { ascending: false });
     if (result.error) {
       console.error("Chyba při načítání auditního logu:", result.error);
-      el("auditLogWrap").innerHTML = '<div class="empty-state"><p>Auditní log se nepodařilo načíst.</p></div>';
+      el("auditTableWrap").innerHTML = '<div class="empty-state"><p>Auditní log se nepodařilo načíst.</p></div>';
       return;
     }
-    renderAuditLog(result.data || []);
+    renderAuditTable(result.data || []);
   }
 
   // ---------------- wiring ----------------
@@ -2319,10 +2725,13 @@
 
     el("logoutBtn").addEventListener("click", doLogout);
 
-    el("tabNewBtn").addEventListener("click", function () { setActiveTab("new"); });
-    el("tabListBtn").addEventListener("click", function () { setActiveTab("list"); });
-    el("tabNetworkBtn").addEventListener("click", function () { setActiveTab("network"); });
-    el("tabAdminBtn").addEventListener("click", function () { setActiveTab("admin"); });
+    // Milník 4 (bod 9 zadání) — 10 možných záložek, dynamicky (ne)skryté
+    // podle role přes applyNavForRole(); klik vždy jen setActiveTab(klíč).
+    Object.keys(TAB_BUTTON).forEach(function (tabKey) {
+      el(TAB_BUTTON[tabKey]).addEventListener("click", function () { setActiveTab(tabKey); });
+    });
+
+    el("detailBackBtn").addEventListener("click", closeTipDetail);
 
     el("copyInviteBtn").addEventListener("click", copyInviteLink);
 
