@@ -110,7 +110,7 @@
     border-bottom: 1px solid var(--border);
   }
   .topbar-inner {
-    max-width: 960px;
+    max-width: 1320px;
     margin: 0 auto;
     padding: 14px 20px;
     display: flex;
@@ -146,7 +146,7 @@
 
   .tabs-wrap { background: var(--bg); border-bottom: 1px solid var(--border); }
   .tabs {
-    max-width: 960px;
+    max-width: 1320px;
     margin: 0 auto;
     padding: 14px 20px 0;
     display: flex;
@@ -177,7 +177,11 @@
   main { flex: 1; width: 100%; }
 
   .page {
-    max-width: 960px;
+    /* Milník 5, bod 1 zadání: širší kontejner obsahu - tabulky teď mají
+       výrazně víc sloupců (Realitní kanceláře, Uživatelé), 960px bylo
+       zbytečně úzké a nutilo je do vodorovného scrollu i na běžném
+       desktopu. Auth/topbar/tabs zůstávají v souladu na stejné šířce. */
+    max-width: 1320px;
     margin: 0 auto;
     padding: 28px 20px 64px;
   }
@@ -506,6 +510,14 @@
     border-color: var(--border);
   }
   .btn-small.btn-small-ghost:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+  .btn-small.btn-small-danger {
+    background: transparent;
+    color: var(--danger);
+    border-color: var(--danger);
+  }
+  .btn-small.btn-small-danger:hover { background: var(--danger-soft); }
+
+  .toolbar-row-end { display: flex; justify-content: flex-end; margin-bottom: 12px; }
 
   .stat-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
   .stat-tile {
@@ -804,10 +816,11 @@
 
   <div class="tabs-wrap" id="tabsWrap" hidden>
     <!-- Milník 4 (bod 9 zadání): "Administrace" jako sloučená záložka mizí -
-         pevné pořadí v DOM pokrývá všechny role, viditelnost jednotlivých
-         tlačítek řídí JS podle role (applyNavForRole). Pořadí odpovídá
-         přesně zadání: Tipař má jen první 3, Leader všech 10, Administrátor
-         všechny KROMĚ prvních 3 (Nový tip/Moje tipy/Moje síť). -->
+         DOM pořadí je jen výchozí/neutrální, skutečnou (ne)viditelnost i
+         VIZUÁLNÍ POŘADÍ tlačítek řídí JS podle role (applyNavForRole,
+         přes ROLE_TAB_ORDER + CSS "order" - viz Milník 5, bod 3 zadání,
+         kde se Leaderovi "Přehled leadra" (dřív "Moje síť") posouvá na
+         první místo a "Moje tipy" mizí úplně). -->
     <nav class="tabs" role="tablist" aria-label="Navigace">
       <button class="tab" id="tabNewBtn" role="tab" type="button" aria-selected="false">+ Nový tip</button>
       <button class="tab" id="tabListBtn" role="tab" type="button" aria-selected="false">Moje tipy</button>
@@ -862,16 +875,30 @@
 
           <!-- REGISTER VIEW -->
           <div id="registerView" hidden>
+            <!-- Milník 5 (bod 6 zadání): jedno pole "Jméno a příjmení"
+                 rozdělené na dvě - jmeno/prijmeni jsou od tohoto milníku
+                 samostatné sloupce v profiles, viz handle_new_user()
+                 trigger. Přidáno i nepovinné Telefon - ukládá se stejným
+                 způsobem jako invite_code, přes raw_user_meta_data. -->
             <form id="registerForm" novalidate>
               <div class="field" id="regNameField">
-                <label for="regName">Jméno a příjmení</label>
-                <input type="text" id="regName" autocomplete="name" placeholder="např. Jana Nováková">
-                <span class="error-msg">Zadejte prosím jméno a příjmení.</span>
+                <label for="regName">Jméno</label>
+                <input type="text" id="regName" autocomplete="given-name" placeholder="např. Jana">
+                <span class="error-msg">Zadejte prosím jméno.</span>
+              </div>
+              <div class="field" id="regSurnameField">
+                <label for="regSurname">Příjmení</label>
+                <input type="text" id="regSurname" autocomplete="family-name" placeholder="např. Nováková">
+                <span class="error-msg">Zadejte prosím příjmení.</span>
               </div>
               <div class="field" id="regEmailField">
                 <label for="regEmail">E-mail</label>
                 <input type="email" id="regEmail" autocomplete="email" placeholder="vas@email.cz">
                 <span class="error-msg" id="regEmailError">Zadejte prosím platný e-mail.</span>
+              </div>
+              <div class="field" id="regPhoneField">
+                <label for="regPhone">Telefon (nepovinné)</label>
+                <input type="tel" id="regPhone" autocomplete="tel" placeholder="např. 777 123 456">
               </div>
               <div class="field" id="regPasswordField">
                 <label for="regPassword">Heslo</label>
@@ -993,14 +1020,22 @@
       <div id="tipListWrap"></div>
     </section>
 
-    <!-- ============== NETWORK SCREEN ("Moje síť") ==============
+    <!-- ============== NETWORK SCREEN ("Moje síť" / "Přehled leadra") ==============
          Milník 4 (bod 2, sekce 8.5 zadání v2.1): VÝHRADNĚ dashboard/strom
-         — vlastní pozvánkový odkaz + tabulka podřízených uživatelů.
-         ŽÁDNÉ tipy tady. Administrátor tuto záložku nemá vůbec. -->
+         — vlastní pozvánkový odkaz + tabulka/přehled podřízených.
+         Administrátor tuto záložku nemá vůbec.
+         Milník 5 (bod 3 zadání) — pro LEADERA přejmenováno na "Přehled
+         leadra", posunuto na první místo navigace (landing page po
+         přihlášení) a plochý seznam lidí (dřívější "networkListWrap"
+         tabulka) je pro Leadera ODSTRANĚN - ten teď žije jen v záložce
+         "Uživatelé" (moje_uzivatele()). Zůstává pozvánkový odkaz +
+         agregovaný stat-row dashboard. Tipař má obrazovku beze změny
+         (název "Moje síť", tabulka podřízených zůstává - viz
+         fetchMyNetworkTable v JS, které se podle role větví). -->
     <section id="networkScreen" class="page" hidden>
       <div class="section-head">
-        <h2>Moje síť</h2>
-        <p>Váš pozvánkový odkaz a tabulka lidí, které jste (přímo i nepřímo) přivedli.</p>
+        <h2 id="networkScreenTitle">Moje síť</h2>
+        <p id="networkScreenSubtitle">Váš pozvánkový odkaz a tabulka lidí, které jste (přímo i nepřímo) přivedli.</p>
       </div>
 
       <div id="networkBanner"></div>
@@ -1031,15 +1066,19 @@
       <div id="tipyTableWrap"></div>
     </section>
 
-    <!-- ============== DETAIL A OVĚŘENÍ TIPU ==============
+    <!-- ============== DETAIL TIPU ==============
          Milník 4 (bod 7, sekce 8.4.1 zadání v2.1) — NENÍ samostatná
          záložka v navigaci, otevírá se kliknutím na řádek v "Tipy" nebo
-         na vlastní tip v "Moje tipy". -->
+         na vlastní tip v "Moje tipy".
+         Milník 5 (bod 4 zadání) — přejmenováno z "Detail a ověření tipu"
+         na "Detail tipu" (uživatel: název obrazovky matoucí, vypadalo to
+         jako by šlo jen o status). Tlačítko "Opravit stav" odstraněno z
+         UI (RPC opravit_stav_tipu v DB zůstává, jen se nevolá odsud). -->
     <section id="detailScreen" class="page" hidden>
       <button class="btn-ghost detail-back-btn" id="detailBackBtn" type="button">← Zpět</button>
 
       <div class="section-head">
-        <h2>Detail a ověření tipu</h2>
+        <h2>Detail tipu</h2>
         <p id="detailSubtitle"></p>
       </div>
 
@@ -1050,41 +1089,45 @@
 
     <!-- ============== UŽIVATELÉ (Leader/Administrátor) ==============
          Milník 4 (bod 9, sekce 8.6.1 zadání v2.1) — samostatná záložka
-         místo dřívější podsekce "Administrace". -->
+         místo dřívější podsekce "Administrace".
+         Milník 5 (bod 6 zadání) — data teď jdou přes RPC moje_uzivatele()
+         (Leader nevidí administrátora - vynuceno na SERVERU, ne jen tady
+         v UI), tabulka má nové sloupce a tlačítko "Upravit" nahrazuje
+         dřívější "Změnit sponzora" jedním většim formulářem
+         (upravit_uzivatele RPC). -->
     <section id="usersScreen" class="page" hidden>
       <div class="section-head">
         <h2>Uživatelé</h2>
-        <p>Správa uživatelů, sponzorů a rolí. Změna sponzora vyžaduje povinný důvod a je vidět v auditním logu.</p>
+        <p>Správa uživatelů, sponzorů a stavu účtu. Úprava vyžaduje povinný důvod a je vidět v auditním logu.</p>
       </div>
 
       <div id="usersBanner"></div>
 
-      <div id="usersSponsorPanelWrap"></div>
+      <div id="usersFormWrap"></div>
 
       <div id="usersTableWrap"></div>
     </section>
 
-    <!-- ============== REALITNÍ KANCELÁŘE (Leader/Administrátor) ============== -->
+    <!-- ============== REALITNÍ KANCELÁŘE (Leader/Administrátor) ==============
+         Milník 5 (bod 5 zadání) — rozšířeno o fakturační/kontaktní údaje,
+         tlačítko "+ Přidat RK" nahoře nad tabulkou otevírá sdílený
+         formulář (týž pro přidání i úpravu), mazání ošetřuje FK konflikt
+         nabídkou deaktivace místo tvrdého smazání. -->
     <section id="rkScreen" class="page" hidden>
       <div class="section-head">
         <h2>Realitní kanceláře</h2>
-        <p>Evidence RK pro předávání tipů — kontakty, výkon a vlastní přístup RK jsou mimo rozsah tohoto milníku.</p>
+        <p>Evidence RK pro předávání tipů — kontakty, fakturační údaje a aktivita. Vlastní přístup RK je mimo rozsah tohoto milníku.</p>
       </div>
 
       <div id="rkBanner"></div>
 
-      <div id="rkTableWrap"></div>
-
-      <div class="subsection">
-        <h3>Přidat realitní kancelář</h3>
-        <form id="rkAddForm" class="rk-add-form" novalidate>
-          <div class="field">
-            <label for="in_RkNazev">Název RK</label>
-            <input type="text" id="in_RkNazev" placeholder="např. Realitní kancelář Novák s.r.o.">
-          </div>
-          <button class="btn-small" id="rkAddBtn" type="submit">Přidat RK</button>
-        </form>
+      <div class="toolbar-row-end">
+        <button class="btn-small" id="rkAddOpenBtn" type="button">+ Přidat RK</button>
       </div>
+
+      <div id="rkFormWrap"></div>
+
+      <div id="rkTableWrap"></div>
     </section>
 
     <!-- ============== PROVIZNÍ SCHÉMA (placeholder, bod 9 zadání) ============== -->
@@ -1206,6 +1249,25 @@
       .replace(/"/g, "&quot;");
   }
 
+  // Milník 5 (bod 6 zadání) — od tohoto milníku "jmeno" v profiles
+  // obsahuje jen křestní jméno, příjmení je ve zvláštním sloupci
+  // "prijmeni" (viz migrace m5_profiles_split_jmeno_prijmeni). JEDINÝ
+  // helper pro sestavení celého jména - používá se konzistentně
+  // VŠUDE, kde se dřív skládalo "profil.jmeno" ručně (seznam
+  // uživatelů, strom sítě, sloupec Tipař v Tipy, audit log, Detail
+  // tipu…), aby styl skládání zůstal na jednom místě. Přijímá objekt s
+  // libovolnými klíči "jmeno"/"prijmeni" (profil z `profiles`, řádek z
+  // moje_sit()/moje_uzivatele(), i ad-hoc objekt typu
+  // {jmeno:t.autor_jmeno, prijmeni:t.autor_prijmeni} u anonymizovaných
+  // RPC výstupů).
+  function celeJmeno(profil) {
+    if (!profil) return "";
+    var jmeno = (profil.jmeno || "").trim();
+    var prijmeni = (profil.prijmeni || "").trim();
+    if (jmeno && prijmeni) return jmeno + " " + prijmeni;
+    return jmeno || prijmeni || "";
+  }
+
   function formatDateTime(iso) {
     try {
       var d = new Date(iso);
@@ -1267,9 +1329,9 @@
   // Nikdy nevracíme syrové UUID.
   function historyActorLabel(row) {
     if (!row) return "?";
-    if (currentUser && row.autor_id === currentUser.id) return currentUser.jmeno;
+    if (currentUser && row.autor_id === currentUser.id) return celeJmeno(currentUser);
     var cached = adminUsersById[row.autor_id];
-    if (cached && cached.jmeno) return cached.jmeno;
+    if (cached && cached.jmeno) return celeJmeno(cached);
     return ROLE_LABELS_CAP[row.autor_role] || "Uživatel";
   }
 
@@ -1546,19 +1608,25 @@
   }
 
   var rkTable = null; // instance initDataTable pro záložku "Realitní kanceláře"
+  var rkRowsCache = []; // poslední načtení - pro formulář Upravit a mazání (dohledání názvu v potvrzovacím dialogu)
+  var rkFormTargetId = null; // null = formulář v režimu "přidat", jinak id upravované RK
 
-  // Milník 4 (bod 1, sekce 8.6.2 zadání v2.1) — tabulka VŠECH RK (aktivní
-  // i neaktivní), ne jen aktivních jako rkAktivniList (ten zůstává pro
-  // výběr při "Předáno RK" na obrazovce Detail). Sloupce: Název,
-  // Aktivita, Počet přiřazených tipů, Založena.
+  // Milník 4 (bod 1, sekce 8.6.2 zadání v2.1) + Milník 5 (bod 5 zadání) —
+  // tabulka VŠECH RK (aktivní i neaktivní), ne jen aktivních jako
+  // rkAktivniList (ten zůstává pro výběr při "Předáno RK" na Detailu
+  // tipu). Rozšířeno o IČO/DIČ/adresu/kontaktní osobu/telefon/e-mail a
+  // sloupec Akce (Upravit/Smazat). Sloupec "Stav" v UI vykresluje
+  // existující boolean `aktivni` jako badge - žádný duplicitní sloupec
+  // "stav" v DB (bod 5 zadání výslovně žádal tohle řešení).
   async function renderRkTable() {
-    var result = await sb.from("realitni_kancelare").select("id, nazev, aktivni, vytvoreno_kdy").order("nazev");
+    var result = await sb.from("realitni_kancelare").select("*").order("nazev");
     if (result.error) {
       console.error("Chyba při načítání realitních kanceláří:", result.error);
       showBanner(el("rkBanner"), "error", "Nepodařilo se načíst seznam realitních kanceláří.");
       return;
     }
     var rkList = result.data || [];
+    rkRowsCache = rkList;
 
     // Počet přiřazených tipů se počítá vždy čerstvě (ne z cache
     // allTipsById, která se plní jen při návštěvě záložky "Tipy" - RK
@@ -1572,11 +1640,22 @@
 
     var columns = [
       { key: "nazev", label: "Název", get: function (r) { return r.nazev || ""; } },
-      { key: "aktivni", label: "Aktivita", get: function (r) { return r.aktivni ? "Aktivní" : "Neaktivní"; },
+      { key: "ico", label: "IČO", get: function (r) { return r.ico || ""; }, render: function (r) { return escapeHtml(r.ico || "—"); } },
+      { key: "dic", label: "DIČ", get: function (r) { return r.dic || ""; }, render: function (r) { return escapeHtml(r.dic || "—"); } },
+      { key: "adresa", label: "Adresa", className: "dt-wrap", get: function (r) { return r.adresa || ""; }, render: function (r) { return escapeHtml(r.adresa || "—"); } },
+      { key: "kontaktni_osoba", label: "Kontaktní osoba", get: function (r) { return r.kontaktni_osoba || ""; }, render: function (r) { return escapeHtml(r.kontaktni_osoba || "—"); } },
+      { key: "telefon", label: "Telefon", get: function (r) { return r.telefon || ""; }, render: function (r) { return escapeHtml(r.telefon || "—"); } },
+      { key: "email", label: "E-mail", get: function (r) { return r.email || ""; }, render: function (r) { return escapeHtml(r.email || "—"); } },
+      { key: "aktivni", label: "Stav", get: function (r) { return r.aktivni ? "Aktivní" : "Neaktivní"; },
         render: function (r) { return r.aktivni ? '<span class="pill pill-tip_overen_hledame_rk">Aktivní</span>' : '<span class="pill pill-zamitnuto">Neaktivní</span>'; } },
       { key: "pocet_tipu", label: "Počet přiřazených tipů", get: function (r) { return pocty[r.id] || 0; } },
       { key: "vytvoreno_kdy", label: "Založena", get: function (r) { return r.vytvoreno_kdy ? new Date(r.vytvoreno_kdy).getTime() : 0; },
-        render: function (r) { return escapeHtml(formatDateTime(r.vytvoreno_kdy)); } }
+        render: function (r) { return escapeHtml(formatDateTime(r.vytvoreno_kdy)); } },
+      { key: "akce", label: "Akce", sortable: false, get: function () { return ""; },
+        render: function (r) {
+          return '<button type="button" class="btn-small btn-small-ghost rk-edit-btn" data-rk-id="' + escapeHtml(r.id) + '">Upravit</button> ' +
+                 '<button type="button" class="btn-small btn-small-danger rk-delete-btn" data-rk-id="' + escapeHtml(r.id) + '">Smazat</button>';
+        } }
     ];
 
     if (rkTable) {
@@ -1589,7 +1668,19 @@
         searchPlaceholder: "Hledat realitní kancelář…",
         emptyMessage: "Zatím nejsou zavedeny žádné realitní kanceláře.",
         itemNoun: "RK",
-        initialSortKey: "nazev"
+        initialSortKey: "nazev",
+        wireExtra: function (container) {
+          container.querySelectorAll(".rk-edit-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () { openRkForm(btn.getAttribute("data-rk-id")); });
+          });
+          container.querySelectorAll(".rk-delete-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              var id = btn.getAttribute("data-rk-id");
+              var row = rkRowsCache.filter(function (r) { return r.id === id; })[0];
+              submitDeleteRk(id, row ? row.nazev : "");
+            });
+          });
+        }
       });
     }
   }
@@ -1599,25 +1690,135 @@
     await renderRkTable();
   }
 
-  async function submitAddRk(nazev) {
-    if (!nazev) return;
-    var btn = el("rkAddBtn");
+  function closeRkForm() {
+    rkFormTargetId = null;
+    el("rkFormWrap").innerHTML = "";
+  }
+
+  // Milník 5 (bod 5 zadání): JEDEN sdílený formulář pro "+ Přidat RK" i
+  // pro "Upravit" (stejná pole, jen jiný režim uložení - insert vs.
+  // update). targetId je null v režimu přidání.
+  function openRkForm(targetId) {
+    rkFormTargetId = targetId || null;
+    var target = targetId ? rkRowsCache.filter(function (r) { return r.id === targetId; })[0] : null;
+    var isEdit = !!target;
+    if (targetId && !target) return; // neplatné id - tiše nic neotevřeme
+
+    el("rkFormWrap").innerHTML =
+      '<div class="card detail-card">' +
+        '<h3 class="detail-section-title" style="margin-top:0;">' + (isEdit ? "Upravit realitní kancelář" : "Přidat realitní kancelář") + '</h3>' +
+        '<form id="rkFormPanel" novalidate>' +
+          '<div class="form-grid">' +
+            '<div class="field"><label for="rkfNazev">Název *</label><input type="text" id="rkfNazev" value="' + escapeHtml(target ? target.nazev || "" : "") + '" placeholder="např. Realitní kancelář Novák s.r.o."></div>' +
+            '<div class="field"><label for="rkfIco">IČO</label><input type="text" id="rkfIco" value="' + escapeHtml(target ? target.ico || "" : "") + '"></div>' +
+            '<div class="field"><label for="rkfDic">DIČ</label><input type="text" id="rkfDic" value="' + escapeHtml(target ? target.dic || "" : "") + '"></div>' +
+            '<div class="field col-span-2"><label for="rkfAdresa">Adresa</label><input type="text" id="rkfAdresa" value="' + escapeHtml(target ? target.adresa || "" : "") + '"></div>' +
+            '<div class="field"><label for="rkfKontakt">Kontaktní osoba</label><input type="text" id="rkfKontakt" value="' + escapeHtml(target ? target.kontaktni_osoba || "" : "") + '"></div>' +
+            '<div class="field"><label for="rkfTelefon">Telefon</label><input type="tel" id="rkfTelefon" value="' + escapeHtml(target ? target.telefon || "" : "") + '"></div>' +
+            '<div class="field"><label for="rkfEmail">E-mail</label><input type="email" id="rkfEmail" value="' + escapeHtml(target ? target.email || "" : "") + '"></div>' +
+            '<div class="field-checkbox"><input type="checkbox" id="rkfAktivni"' + ((!target || target.aktivni) ? " checked" : "") + '><label for="rkfAktivni">Aktivní</label></div>' +
+          '</div>' +
+          '<div class="form-actions">' +
+            '<button class="btn-primary" type="submit" id="rkFormSaveBtn" style="width:auto;">' + (isEdit ? "Uložit" : "Přidat RK") + '</button>' +
+            '<button class="btn-ghost" type="button" id="rkFormCancelBtn">Zrušit</button>' +
+          '</div>' +
+        '</form>' +
+      '</div>';
+
+    el("rkFormCancelBtn").addEventListener("click", closeRkForm);
+    el("rkFormPanel").addEventListener("submit", function (e) {
+      e.preventDefault();
+      submitRkForm(isEdit, targetId);
+    });
+    el("rkFormWrap").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  async function submitRkForm(isEdit, targetId) {
+    var nazev = el("rkfNazev").value.trim();
+    if (!nazev) {
+      showBanner(el("rkBanner"), "error", "Zadejte prosím název realitní kanceláře.");
+      return;
+    }
+    var payload = {
+      nazev: nazev,
+      ico: el("rkfIco").value.trim() || null,
+      dic: el("rkfDic").value.trim() || null,
+      adresa: el("rkfAdresa").value.trim() || null,
+      kontaktni_osoba: el("rkfKontakt").value.trim() || null,
+      telefon: el("rkfTelefon").value.trim() || null,
+      email: el("rkfEmail").value.trim() || null,
+      aktivni: el("rkfAktivni").checked
+    };
+
+    var btn = el("rkFormSaveBtn");
     btn.disabled = true;
     showBanner(el("rkBanner"), null, null);
 
-    var result = await sb.from("realitni_kancelare").insert({ nazev: nazev });
+    // Přímý Supabase insert/update - RLS ("Leader a Admin spravuji RK",
+    // FOR ALL) to už povoluje, žádná zvláštní RPC nebyla pro tenhle
+    // jednoduchý CRUD potřeba (na rozdíl od tipů/uživatelů, kde je
+    // potřeba audit log s povinným důvodem).
+    var result = isEdit
+      ? await sb.from("realitni_kancelare").update(payload).eq("id", targetId)
+      : await sb.from("realitni_kancelare").insert(payload);
+
     btn.disabled = false;
 
     if (result.error) {
-      console.error("Chyba při vkládání RK:", result.error);
-      showBanner(el("rkBanner"), "error", "Realitní kancelář se nepodařilo přidat. Zkuste to prosím znovu.");
+      console.error("Chyba při ukládání realitní kanceláře:", result.error);
+      showBanner(el("rkBanner"), "error", "Realitní kancelář se nepodařilo uložit. Zkuste to prosím znovu.");
       return;
     }
 
-    el("rkAddForm").reset();
-    showBanner(el("rkBanner"), "ok", "Realitní kancelář byla přidána.");
+    closeRkForm();
+    showBanner(el("rkBanner"), "ok", isEdit ? "Realitní kancelář byla upravena." : "Realitní kancelář byla přidána.");
     setTimeout(function () { showBanner(el("rkBanner"), null, null); }, 4000);
     await refreshRkSection();
+  }
+
+  // Milník 5 (bod 5 zadání) — `tips.rk_id` má FK na `realitni_kancelare`.
+  // Pokud je RK použitá u nějakého tipu, tvrdé DELETE selže na FK
+  // constraint (23503) - v tom případě místo neuchopitelné chybové
+  // hlášky nabídneme uživateli deaktivaci (aktivni = false) jako
+  // srozumitelnou náhradu smazání.
+  function isForeignKeyViolation(error) {
+    return !!error && (error.code === "23503" || (error.message || "").toLowerCase().indexOf("foreign key") !== -1);
+  }
+
+  async function submitDeleteRk(targetId, nazev) {
+    var label = nazev || "tuto realitní kancelář";
+    if (!window.confirm('Opravdu smazat „' + label + '“?')) return;
+
+    showBanner(el("rkBanner"), null, null);
+    var result = await sb.from("realitni_kancelare").delete().eq("id", targetId);
+
+    if (!result.error) {
+      showBanner(el("rkBanner"), "ok", "Realitní kancelář byla smazána.");
+      setTimeout(function () { showBanner(el("rkBanner"), null, null); }, 4000);
+      await refreshRkSection();
+      return;
+    }
+
+    if (isForeignKeyViolation(result.error)) {
+      var chceDeaktivovat = window.confirm(
+        'Realitní kancelář „' + label + '“ je použitá u existujícího tipu, proto ji nelze smazat. ' +
+        'Chcete ji místo toho označit jako neaktivní?'
+      );
+      if (!chceDeaktivovat) return;
+      var deact = await sb.from("realitni_kancelare").update({ aktivni: false }).eq("id", targetId);
+      if (deact.error) {
+        console.error("Chyba při deaktivaci realitní kanceláře:", deact.error);
+        showBanner(el("rkBanner"), "error", "Deaktivace se nezdařila. Zkuste to prosím znovu.");
+        return;
+      }
+      showBanner(el("rkBanner"), "ok", "Realitní kancelář byla označena jako neaktivní (smazání nebylo možné - je použitá u existujícího tipu).");
+      setTimeout(function () { showBanner(el("rkBanner"), null, null); }, 6000);
+      await refreshRkSection();
+      return;
+    }
+
+    console.error("Chyba při mazání realitní kanceláře:", result.error);
+    showBanner(el("rkBanner"), "error", "Realitní kancelář se nepodařilo smazat. Zkuste to prosím znovu.");
   }
 
   function setFieldError(fieldEl, hasError, message) {
@@ -1733,23 +1934,45 @@
     if (tab === "audit") fetchAuditTable();
   }
 
-  // Bod 9 zadání uživatele — "Administrace" jako sloučená záložka mizí,
-  // nahrazují ji samostatné položky. Pevné pořadí v DOM (viz nav v HTML)
-  // pokrývá všechny 3 role, tahle funkce jen (ne)skrývá tlačítka:
-  //   Tipař:          Nový tip, Moje tipy, Moje síť (beze změny v počtu)
-  //   Leader:         všech 10 (přidává Tipy/Uživatelé/RK/Provize/Výplaty/Obsah/Audit)
-  //   Administrátor:  všechny KROMĚ Nový tip/Moje tipy/Moje síť (beze změny z předchozí opravy)
+  // Milník 4 (bod 9 zadání) — "Administrace" jako sloučená záložka mizí,
+  // nahrazují ji samostatné položky.
+  // Milník 5 (bod 2, 3 zadání) — Leader ztrácí "Moje tipy" (duplicita se
+  // "Tipy", kde stejně vidí úplně všechno) a "Moje síť" (přejmenovaná na
+  // "Přehled leadra") se mu posouvá na první místo jako landing page po
+  // přihlášení. Tipař i Administrátor mají pořadí beze změny. Skutečné
+  // pořadí tlačítek v DOM je pevné (viz HTML) - vizuální pořadí řešíme
+  // přes CSS "order", ne přesouváním uzlů, aby žádná role nesdílela
+  // stopy po pořadí předchozí role po odhlášení/přihlášení jiného účtu.
+  var ROLE_TAB_ORDER = {
+    tipar: ["new", "list", "network"],
+    leader: ["network", "new", "tipy", "users", "rk", "provize", "vyplaty", "obsah", "audit"],
+    administrator: ["tipy", "users", "rk", "provize", "vyplaty", "obsah", "audit"]
+  };
+
   function applyNavForRole(role) {
-    var isAdmin = role === "administrator";
-    var isStaff = role === "leader" || role === "administrator";
-
-    el("tabNewBtn").hidden = isAdmin;
-    el("tabListBtn").hidden = isAdmin;
-    el("tabNetworkBtn").hidden = isAdmin;
-
-    ["tabTipyBtn", "tabUsersBtn", "tabRkBtn", "tabProvizeBtn", "tabVyplatyBtn", "tabObsahBtn", "tabAuditBtn"].forEach(function (id) {
-      el(id).hidden = !isStaff;
+    var order = ROLE_TAB_ORDER[role] || ROLE_TAB_ORDER.tipar;
+    Object.keys(TAB_BUTTON).forEach(function (key) {
+      var btn = el(TAB_BUTTON[key]);
+      var idx = order.indexOf(key);
+      if (idx === -1) {
+        btn.hidden = true;
+        btn.style.order = "";
+      } else {
+        btn.hidden = false;
+        btn.style.order = String(idx);
+      }
     });
+
+    // Bod 3 zadání: stejné tlačítko/obrazovka ("network") se jmenuje
+    // jinak podle role - tipař má dál "Moje síť" (dashboard + tabulka
+    // vlastní sítě beze změny), Leader "Přehled leadra" (dashboard bez
+    // plochého seznamu - viz fetchMyNetworkTable).
+    var isLeader = role === "leader";
+    el(TAB_BUTTON.network).textContent = isLeader ? "Přehled leadra" : "Moje síť";
+    el("networkScreenTitle").textContent = isLeader ? "Přehled leadra" : "Moje síť";
+    el("networkScreenSubtitle").textContent = isLeader
+      ? "Váš pozvánkový odkaz a souhrnný přehled vaší sítě. Seznam jednotlivých uživatelů je v záložce „Uživatelé“."
+      : "Váš pozvánkový odkaz a tabulka lidí, které jste (přímo i nepřímo) přivedli.";
   }
 
   // ---------------- auth view (login/register toggle) ----------------
@@ -1820,11 +2043,18 @@
     doLogin(account.email, DEMO_PASSWORD, el("authBanner"));
   }
 
-  async function doRegister(jmeno, email, password, inviteCode, bannerEl, submitBtn) {
+  // Milník 5 (bod 6 zadání): "Jméno a příjmení" rozdělené na dvě pole +
+  // nepovinný telefon. Vše jde přes raw_user_meta_data stejným způsobem
+  // jako dřív invite_code - handle_new_user() trigger je přečte a uloží
+  // do profiles (jmeno/prijmeni/telefon zvlášť), e-mail si trigger vezme
+  // rovnou z NEW.email (auth.users), ne odsud.
+  async function doRegister(jmeno, prijmeni, telefon, email, password, inviteCode, bannerEl, submitBtn) {
     if (submitBtn) submitBtn.disabled = true;
     showBanner(bannerEl, null, null);
 
     var meta = { jmeno: jmeno }; // role se z klienta neposílá - server ji vždy nastaví na 'tipar'
+    if (prijmeni) meta.prijmeni = prijmeni;
+    if (telefon) meta.telefon = telefon;
     if (inviteCode) meta.invite_code = inviteCode; // server dohledá sponzora podle kódu, neplatný kód se jen ignoruje
 
     var result = await sb.auth.signUp({
@@ -1875,7 +2105,7 @@
     var user = session.user;
     currentUserId = user.id;
 
-    var profileResult = await sb.from("profiles").select("jmeno, role, invite_code").eq("id", user.id).single();
+    var profileResult = await sb.from("profiles").select("jmeno, prijmeni, role, invite_code").eq("id", user.id).single();
     if (profileResult.error) {
       console.error("Nepodařilo se načíst profil uživatele:", profileResult.error);
     }
@@ -1883,11 +2113,11 @@
     var jmeno = profile.jmeno || user.email;
     var role = profile.role || "tipar";
 
-    currentUser = { id: user.id, email: user.email, jmeno: jmeno, role: role, invite_code: profile.invite_code || "" };
+    currentUser = { id: user.id, email: user.email, jmeno: jmeno, prijmeni: profile.prijmeni || "", role: role, invite_code: profile.invite_code || "" };
 
     var roleLabel = ROLE_LABELS[role] || role;
     el("userNameLabel").innerHTML =
-      "Přihlášen(a) jako <strong>" + escapeHtml(jmeno) + "</strong> · " + escapeHtml(roleLabel);
+      "Přihlášen(a) jako <strong>" + escapeHtml(celeJmeno(currentUser) || jmeno) + "</strong> · " + escapeHtml(roleLabel);
 
     // Milník 4 (bod 9 zadání) — "Administrace" jako sloučená záložka
     // zmizela, nahradily ji samostatné položky přímo v navigaci; jejich
@@ -1896,10 +2126,13 @@
     var isAdmin = role === "administrator";
     applyNavForRole(role);
 
-    activeTab = isAdmin ? "tipy" : "list";
+    // Milník 5 (bod 3 zadání) — Leader nemá "Moje tipy", landing page po
+    // přihlášení je teď "Přehled leadra" ("network").
+    activeTab = isAdmin ? "tipy" : (role === "leader" ? "network" : "list");
     // showAppScreen() -> setActiveTab(activeTab) už samo zavolá
-    // fetchMyTips()/fetchTipyTable() pro první záložku - druhý explicitní
-    // fetch tady by byl jen zbytečný duplicitní dotaz navíc.
+    // fetchMyTips()/fetchTipyTable()/fetchMyNetworkTable() pro první
+    // záložku - druhý explicitní fetch tady by byl jen zbytečný
+    // duplicitní dotaz navíc.
     showAppScreen();
 
     if (!isAdmin) {
@@ -1913,8 +2146,11 @@
     adminUsersById = {};
     allTipsById = {};
     rkAktivniList = [];
+    rkRowsCache = [];
+    rkFormTargetId = null;
     usersRowsCache = [];
-    sponsorPanelTargetId = null;
+    usersById = {};
+    userFormTargetId = null;
     detailTip = null;
     // Reset instancí tabulek, ať se po dalším přihlášení postaví znovu
     // od nuly (jiná role/jiná data - initDataTable si jinak drží
@@ -2048,7 +2284,8 @@
     });
     (subResult.data || []).forEach(function (t) {
       if (!t || typeof t !== "object") return;
-      rows.push({ kind: "sub", id: t.tip_id, ciLabel: t.autor_jmeno || "(neznámý)", klientLabel: "Klient " + (t.anon_klient || "?"), stav: t.stav, datum: t.vlozeno_kdy });
+      var subJmeno = celeJmeno({ jmeno: t.autor_jmeno, prijmeni: t.autor_prijmeni });
+      rows.push({ kind: "sub", id: t.tip_id, ciLabel: subJmeno || "(neznámý)", klientLabel: "Klient " + (t.anon_klient || "?"), stav: t.stav, datum: t.vlozeno_kdy });
     });
 
     renderMojeTipyTable(rows);
@@ -2129,9 +2366,15 @@
     }
   }
 
-  // Bod 2 zadání uživatele: "Moje síť" je VÝHRADNĚ vlastní pozvánkový
-  // odkaz + tabulka podřízených uživatelů z moje_sit() RPC. ŽÁDNÉ tipy.
+  // Bod 2 zadání (Milník 4) + bod 3 zadání (Milník 5): vlastní pozvánkový
+  // odkaz + přehled sítě z moje_sit() RPC. ŽÁDNÉ tipy tady.
   // Administrátor tuto záložku nemá vůbec (viz applyNavForRole).
+  //
+  // Milník 5 (bod 3 zadání): pro LEADERA se plochý seznam lidí ODSTRAŇUJE
+  // (zůstává jen ve "Uživatelé") - "network" obrazovka je pro něj čistě
+  // agregovaný dashboard (stat-row). Tipař má obojí beze změny - plochý
+  // seznam vlastní sítě zůstává, protože bod 3 zadání uživatele mluví
+  // výslovně jen o Leaderovi ("Leader — Moje síť → …").
   async function fetchMyNetworkTable() {
     if (!currentUser) return;
     el("inviteLinkText").textContent = location.origin + location.pathname + "?ref=" + (currentUser.invite_code || "");
@@ -2143,15 +2386,30 @@
       return;
     }
     var rows = result.data || [];
+    var isLeader = currentUser.role === "leader";
 
     var direct = 0;
-    rows.forEach(function (r) { if (r && r.uroven === 1) direct++; });
+    var celkemTipu = 0;
+    rows.forEach(function (r) {
+      if (r && r.uroven === 1) direct++;
+      celkemTipu += (r && r.pocet_tipu != null) ? Number(r.pocet_tipu) : 0;
+    });
     el("networkStats").innerHTML =
       '<div class="stat-tile"><div class="stat-num">' + direct + '</div><div class="stat-label">přímo pozvaní</div></div>' +
-      '<div class="stat-tile"><div class="stat-num">' + rows.length + '</div><div class="stat-label">celkem v mé síti</div></div>';
+      '<div class="stat-tile"><div class="stat-num">' + rows.length + '</div><div class="stat-label">celkem v mé síti</div></div>' +
+      (isLeader ? '<div class="stat-tile"><div class="stat-num">' + celkemTipu + '</div><div class="stat-label">tipů v celé síti</div></div>' : '');
+
+    if (isLeader) {
+      // Bod 3 zadání: žádný plochý seznam pro Leadera - jen dashboard
+      // výše. Reset instance tabulky, ať se případně příště (jiná role
+      // ve stejné relaci po odhlášení) postaví znovu od nuly.
+      el("networkListWrap").innerHTML = "";
+      mojeSitTable = null;
+      return;
+    }
 
     var columns = [
-      { key: "jmeno", label: "Jméno", get: function (r) { return r.jmeno || "(bez jména)"; } },
+      { key: "jmeno", label: "Jméno", get: function (r) { return celeJmeno(r) || "(bez jména)"; } },
       { key: "uroven", label: "Úroveň", get: function (r) { return r.uroven != null ? r.uroven : 0; },
         render: function (r) { return escapeHtml("úroveň " + (r.uroven != null ? r.uroven : "?")); } },
       { key: "pocet_tipu", label: "Počet tipů", get: function (r) { return r.pocet_tipu != null ? r.pocet_tipu : 0; } }
@@ -2183,7 +2441,7 @@
       showBanner(el("tipyBanner"), "error", "Nepodařilo se načíst seznam tipů. Zkuste to prosím znovu.");
       return;
     }
-    var profilesResult = await sb.from("profiles").select("id, jmeno, role, sponsor_id, invite_code").order("jmeno");
+    var profilesResult = await sb.from("profiles").select("id, jmeno, prijmeni, role, sponsor_id, invite_code").order("jmeno");
     if (profilesResult.error) {
       console.error("Chyba při načítání uživatelů pro jména tipařů:", profilesResult.error);
     } else {
@@ -2216,7 +2474,7 @@
       { key: "lokalita", label: "Lokalita", get: function (r) { return r.lokalita || ""; } },
       { key: "typ_transakce", label: "Typ transakce", get: function (r) { return r.typ_transakce || ""; },
         render: function (r) { return escapeHtml(r.typ_transakce || "—"); } },
-      { key: "autor", label: "Tipař", get: function (r) { return (r.autor_id && adminUsersById[r.autor_id] && adminUsersById[r.autor_id].jmeno) || ""; } },
+      { key: "autor", label: "Tipař", get: function (r) { return (r.autor_id && celeJmeno(adminUsersById[r.autor_id])) || ""; } },
       { key: "stav", label: "Status ověření", get: function (r) { return stavLabel(r.stav); }, render: function (r) { return stavPillHtml(r.stav); } },
       { key: "pozadovana_cena", label: "Požadovaná cena",
         get: function (r) { return r.pozadovana_cena != null ? Number(r.pozadovana_cena) : -1; },
@@ -2291,10 +2549,16 @@
   function renderTipDetail() {
     var t = detailTip;
     var canEdit = currentUser && (currentUser.role === "leader" || currentUser.role === "administrator");
-    var isLeader = currentUser && currentUser.role === "leader";
 
     el("detailSubtitle").textContent = t.jmeno_klienta ? ("Klient: " + t.jmeno_klienta) : "";
 
+    // Milník 5 (bod 5 zadání, šestý pododstavec): "Požadovaná cena" je
+    // pro Leadera/Administrátora editovatelná v sekci níže, takže se v
+    // téhle READ-ONLY info sekci zobrazuje jen tipaři (aby nebyla
+    // zobrazená duplicitně dvakrát na jedné obrazovce). Autor tipu se
+    // zobrazuje jen canEdit pohledu - z cache adminUsersById (naplněné
+    // při návštěvě "Tipy"); pokud cache prázdná (Detail otevřen jinou
+    // cestou), zobrazí se "—" místo hádání/UUID.
     var infoHtml = '<div class="card detail-card"><div class="detail-grid">' +
       detailItem("Klient", t.jmeno_klienta) +
       detailItem("Telefon", t.telefon) +
@@ -2302,7 +2566,7 @@
       detailItem("Nemovitost", t.typ_nemovitosti) +
       detailItem("Lokalita", t.lokalita) +
       detailItem("Typ transakce", t.typ_transakce) +
-      detailItem("Požadovaná cena", formatCena(t.pozadovana_cena)) +
+      (canEdit ? detailItem("Tipař (autor)", celeJmeno(adminUsersById[t.autor_id])) : detailItem("Požadovaná cena", formatCena(t.pozadovana_cena))) +
       detailItem("Vloženo", formatDateTime(t.vlozeno_kdy)) +
       '</div>' +
       (t.popis ? '<div class="detail-item"><div class="detail-label">Popis</div><div class="detail-value">' + escapeHtml(t.popis) + '</div></div>' : '') +
@@ -2312,15 +2576,24 @@
     if (canEdit) {
       // Pole odhadovana_cena/overena_adresa/motivace_prodeje/stav_nemovitosti/
       // poznamka_leadera doplňuje výhradně Leader/Administrátor právě tady -
-      // nejsou ve výchozím formuláři tipaře (bod 8 zadání uživatele).
+      // nejsou ve výchozím formuláři tipaře (bod 8 zadání Milníku 4).
+      // Milník 5 (bod 5 zadání) — nadpis sekce přejmenován ze "Status
+      // ověření" (matoucí, vypadalo to jako by šlo jen o status) na
+      // "Ověření tipu"; samotné pole si popisek "Status ověření"
+      // ponechává. Tlačítko "Opravit stav" a mini-formulář opravy jsou
+      // ODSTRANĚNY z UI (viz docs/milnik5_ux_opravy.md) - RPC
+      // opravit_stav_tipu v DB zůstává nedotčená, jen se odsud nevolá.
+      // Požadovaná cena je teď i tady editovatelná (bod 5, šestý bod
+      // zadání) - vždy, ne jen když ji tipař nevyplnil.
       editHtml = '' +
         '<div class="card detail-card">' +
-          '<h3 class="detail-section-title" style="margin-top:0;">Status ověření</h3>' +
+          '<h3 class="detail-section-title" style="margin-top:0;">Ověření tipu</h3>' +
           '<form id="detailSaveForm" novalidate>' +
             '<div class="form-grid">' +
               '<div class="field"><label for="dtStavSelect">Status ověření *</label><select id="dtStavSelect">' + stavSelectOptionsHtml(t.stav) + '</select></div>' +
               '<div class="field" id="dtDuvodField" hidden><label for="dtDuvodInput">Důvod (povinné pro „Zamítnuto“) *</label><input type="text" id="dtDuvodInput" placeholder="Povinné zdůvodnění"></div>' +
               '<div class="field" id="dtRkField" hidden><label for="dtRkSelect">Realitní kancelář (povinné pro „Předáno RK“) *</label><select id="dtRkSelect"><option value="">— vyberte RK —</option>' + rkSelectOptionsHtml() + '</select></div>' +
+              '<div class="field"><label for="dtPozadovanaCena">Požadovaná cena (Kč)</label><input type="number" id="dtPozadovanaCena" min="0" step="1" value="' + (t.pozadovana_cena != null ? escapeHtml(String(t.pozadovana_cena)) : "") + '"></div>' +
               '<div class="field"><label for="dtOdhadovanaCena">Odhadovaná cena (Kč)</label><input type="number" id="dtOdhadovanaCena" min="0" step="1" value="' + (t.odhadovana_cena != null ? escapeHtml(String(t.odhadovana_cena)) : "") + '"></div>' +
               '<div class="field col-span-2"><label for="dtOverenaAdresa">Ověřená adresa</label><input type="text" id="dtOverenaAdresa" value="' + escapeHtml(t.overena_adresa || "") + '"></div>' +
               '<div class="field col-span-2"><label for="dtMotivace">Motivace prodeje</label><textarea id="dtMotivace" rows="2">' + escapeHtml(t.motivace_prodeje || "") + '</textarea></div>' +
@@ -2329,11 +2602,6 @@
             '</div>' +
             '<div class="form-actions"><button class="btn-primary" type="submit" id="dtSaveBtn">Uložit</button></div>' +
           '</form>' +
-          (isLeader ?
-            '<div style="margin-top:14px;">' +
-              '<button type="button" class="btn-small btn-small-ghost" id="dtOpravaToggleBtn">Opravit stav</button>' +
-              '<form class="mini-form" id="dtOpravaForm"></form>' +
-            '</div>' : '') +
         '</div>';
     } else {
       // Tipař vidí vlastní tip jen ke čtení (3.1) - dropdown/uložení a
@@ -2358,6 +2626,11 @@
     }
   }
 
+  // Milník 5 (bod 4 zadání): "Opravit stav" tlačítko/mini-formulář
+  // odstraněny z UI - změna stavu se teď dělá prostě výběrem nové
+  // hodnoty v dtStavSelect a Uložit (posunout_stav_tipu beze změny
+  // funkčně). RPC opravit_stav_tipu zůstává v DB nedotčená pro budoucí
+  // použití, jen se odsud nevolá (viz docs/milnik5_ux_opravy.md).
   function wireDetailEditForm() {
     el("dtStavSelect").addEventListener("change", updateDetailConditionalFields);
     updateDetailConditionalFields();
@@ -2365,32 +2638,6 @@
     el("detailSaveForm").addEventListener("submit", function (e) {
       e.preventDefault();
       submitDetailSave();
-    });
-
-    var opravaBtn = el("dtOpravaToggleBtn");
-    if (opravaBtn) {
-      opravaBtn.addEventListener("click", function () {
-        var formEl = el("dtOpravaForm");
-        if (formEl.classList.contains("open")) { formEl.classList.remove("open"); formEl.innerHTML = ""; return; }
-        openDetailOpravaForm(formEl);
-      });
-    }
-  }
-
-  function openDetailOpravaForm(formEl) {
-    formEl.innerHTML =
-      '<div class="mini-form-note">Opravu smí provést pouze Leader; každá oprava je vidět v časové ose i v auditním logu.</div>' +
-      '<div class="field"><label>Nový (opravený) stav *</label><select class="of-stav-select">' + stavSelectOptionsHtml(detailTip.stav) + '</select></div>' +
-      '<div class="field field-reason"><label>Důvod opravy (povinný) *</label><input type="text" class="of-reason-input" placeholder="Povinné zdůvodnění pro auditní log"></div>' +
-      '<button type="submit" class="btn-small">Opravit stav</button>' +
-      '<button type="button" class="btn-small btn-small-ghost of-cancel-btn">Zrušit</button>';
-    formEl.classList.add("open");
-    formEl.querySelector(".of-cancel-btn").addEventListener("click", function () { formEl.classList.remove("open"); formEl.innerHTML = ""; });
-    formEl.addEventListener("submit", function (e) {
-      e.preventDefault();
-      var stavVal = formEl.querySelector(".of-stav-select").value;
-      var reasonVal = formEl.querySelector(".of-reason-input").value.trim();
-      submitDetailOpravitStav(stavVal, reasonVal, formEl);
     });
   }
 
@@ -2402,6 +2649,7 @@
     var stavVal = el("dtStavSelect").value;
     var duvodVal = !el("dtDuvodField").hidden ? el("dtDuvodInput").value.trim() : "";
     var rkVal = !el("dtRkField").hidden ? (el("dtRkSelect").value || null) : null;
+    var pozadovanaCena = el("dtPozadovanaCena").value;
     var odhadCena = el("dtOdhadovanaCena").value;
     var overenaAdresa = el("dtOverenaAdresa").value.trim();
     var motivace = el("dtMotivace").value.trim();
@@ -2422,7 +2670,12 @@
       p_overena_adresa: overenaAdresa || null,
       p_motivace_prodeje: motivace || null,
       p_stav_nemovitosti: stavNemovitosti || null,
-      p_poznamka_leadera: poznamkaLeadera || null
+      p_poznamka_leadera: poznamkaLeadera || null,
+      // Milník 5 (bod 5 zadání, šestý pododstavec) - Požadovaná cena je
+      // teď editovatelná i pro Leadera/Administrátora, ne jen tipařem
+      // při vložení. Stejný "PUT" vzor jako ostatní pole RPC - vždy se
+      // přepíše aktuální hodnotou formuláře.
+      p_pozadovana_cena: pozadovanaCena === "" ? null : Number(pozadovanaCena)
     });
 
     btn.disabled = false;
@@ -2441,38 +2694,34 @@
     renderTipDetail();
   }
 
-  async function submitDetailOpravitStav(novyStav, duvod, formEl) {
-    var submitBtn = formEl.querySelector("button[type=submit]");
-    if (submitBtn) submitBtn.disabled = true;
-    showBanner(el("detailBanner"), null, null);
+  // ---------------- Milník 5 (bod 6 zadání): "Uživatelé" ----------------
+  //
+  // Data jdou přes RPC moje_uzivatele() - NE přímo z `profiles` jako v
+  // Milníku 4. Bezpečnostní důvod: Leader nesmí vidět administrátora, a
+  // to se musí vynucovat NA SERVERU (poučení z kontroly Milníku 4), ne
+  // jen skrytím řádku v UI - moje_uzivatele() u role Leader administrátora
+  // z výsledku úplně vynechává (viz migrace m5_rpc_moje_uzivatele).
+  // "Upravit" tlačítko nahrazuje dřívější "Změnit sponzora" a otevírá
+  // jeden větší formulář (jméno/příjmení/telefon/e-mail/sponzor/aktivní),
+  // uložení jde přes RPC upravit_uzivatele (povinný důvod, audit log).
 
-    var result = await sb.rpc("opravit_stav_tipu", { p_tip_id: detailTip.id, p_novy_stav: novyStav, p_duvod: duvod });
-
-    if (result.error) {
-      console.error("Chyba při opravě stavu tipu:", result.error);
-      if (submitBtn) submitBtn.disabled = false;
-      showBanner(el("detailBanner"), "error", stavZmenaErrorMessage(result.error));
-      return;
-    }
-
-    showBanner(el("detailBanner"), "ok", "Stav byl opraven na „" + stavLabel(novyStav) + "“.");
-    setTimeout(function () { showBanner(el("detailBanner"), null, null); }, 4000);
-
-    var refreshed = await sb.from("tips").select("*").eq("id", detailTip.id).single();
-    if (!refreshed.error && refreshed.data) detailTip = refreshed.data;
-    renderTipDetail();
-  }
-
-  // ---------------- Milník 4: "Uživatelé" (dřívější Administrace) ----------------
-
-  function adminChangeSponsorError(error) {
+  function upravitUzivateleErrorMessage(error) {
     if (!error) return "Nastala neočekávaná chyba. Zkuste to prosím znovu.";
     var msg = error.message || "";
     if (error.code === "42501" || msg.indexOf("Nemate opravneni") !== -1) {
-      return "Nemáte oprávnění měnit sponzora.";
+      return "Nemáte oprávnění tuto akci provést.";
     }
-    if (msg.indexOf("Duvod zmeny je povinny") !== -1) {
-      return "Důvod změny je povinný.";
+    if (msg.indexOf("Administratora nelze") !== -1) {
+      return "Administrátora nelze tímto formulářem upravovat.";
+    }
+    if (msg.indexOf("Duvod upravy je povinny") !== -1) {
+      return "Důvod úpravy je povinný.";
+    }
+    if (msg.indexOf("Jmeno je povinne") !== -1) {
+      return "Jméno je povinné.";
+    }
+    if (msg.indexOf("Administrator nemuze byt sponzorem") !== -1) {
+      return "Administrátor nemůže být sponzorem.";
     }
     if (msg.indexOf("cyklus") !== -1) {
       return "Tato změna by vytvořila cyklus ve stromu sponzorů.";
@@ -2480,37 +2729,42 @@
     if (msg.indexOf("sam sobe sponzorem") !== -1) {
       return "Uživatel nemůže být sám sobě sponzorem.";
     }
+    if (msg.indexOf("Cilovy uzivatel neexistuje") !== -1) {
+      return "Cílový uživatel neexistuje.";
+    }
     return "Změnu se nepodařilo uložit (" + escapeHtml(msg || "neznámá chyba") + ").";
   }
 
   var usersTable = null;
-  var usersRowsCache = [];
-  var sponsorPanelTargetId = null;
+  var usersRowsCache = []; // poslední načtení moje_uzivatele() - pro nabídku sponzora ve formuláři Upravit
+  var usersById = {}; // lokální mapa jen pro tenhle formulář (NEpřepisuje sdílenou adminUsersById)
+  var userFormTargetId = null;
 
-  // Milník 4 (bod 1, sekce 8.6.1 zadání v2.1) — tabulka s hledáním a
-  // řazením. "Změnit sponzora" otevírá SDÍLENÝ panel nad tabulkou (jeden
-  // formulář, ne 6 skrytých formulářů v řádcích - tabulkové <tr> se
-  // nehodí pro vnořený formulář na míru).
+  // Milník 4 (bod 1, sekce 8.6.1 zadání v2.1) + Milník 5 (bod 6 zadání):
+  // tabulka s hledáním a řazením, nové sloupce (Příjmení, Telefon,
+  // E-mail, Přímí podřízení, Velikost týmu, Délka spolupráce, Počet
+  // tipů, Stav), jeden sdílený panel pro formulář Upravit (ne 6
+  // skrytých formulářů v řádcích).
   function renderUsersTable(rows) {
-    adminUsersById = {};
-    (rows || []).forEach(function (u) { if (u && u.id) adminUsersById[u.id] = u; });
+    usersById = {};
+    (rows || []).forEach(function (u) { if (u && u.id) usersById[u.id] = u; });
     usersRowsCache = rows || [];
 
     var columns = [
-      { key: "jmeno", label: "Jméno", get: function (r) { return r.jmeno || "(bez jména)"; } },
+      { key: "jmeno", label: "Jméno", get: function (r) { return r.jmeno || ""; } },
+      { key: "prijmeni", label: "Příjmení", get: function (r) { return r.prijmeni || ""; } },
       { key: "role", label: "Role", get: function (r) { return ROLE_LABELS[r.role] || r.role; }, render: function (r) { return roleBadgeHtml(r.role); } },
-      { key: "sponsor", label: "Sponzor",
-        get: function (r) { return r.role === "administrator" ? "" : ((r.sponsor_id && adminUsersById[r.sponsor_id] && adminUsersById[r.sponsor_id].jmeno) || ""); },
-        render: function (r) {
-          if (r.role === "administrator") return '<span class="dt-muted">— (mimo strom)</span>';
-          var jm = r.sponsor_id && adminUsersById[r.sponsor_id] ? adminUsersById[r.sponsor_id].jmeno : null;
-          return escapeHtml(jm || "—");
-        } },
-      { key: "invite_code", label: "Pozvánkový kód", get: function (r) { return r.invite_code || ""; } },
+      { key: "telefon", label: "Telefon", get: function (r) { return r.telefon || ""; }, render: function (r) { return escapeHtml(r.telefon || "—"); } },
+      { key: "email", label: "E-mail", get: function (r) { return r.email || ""; }, render: function (r) { return escapeHtml(r.email || "—"); } },
+      { key: "primi", label: "Přímí podřízení", get: function (r) { return Number(r.primych_podrizenych || 0); } },
+      { key: "tym", label: "Velikost týmu", get: function (r) { return Number(r.velikost_tymu || 0); } },
+      { key: "dny", label: "Délka spolupráce (dny)", get: function (r) { return Number(r.dny_spoluprace || 0); } },
+      { key: "tipy", label: "Počet tipů", get: function (r) { return Number(r.pocet_tipu || 0); } },
+      { key: "stav", label: "Stav", get: function (r) { return r.aktivni ? "Aktivní" : "Vymazán"; },
+        render: function (r) { return r.aktivni ? '<span class="pill pill-tip_overen_hledame_rk">Aktivní</span>' : '<span class="pill pill-zamitnuto">Vymazán</span>'; } },
       { key: "akce", label: "Akce", sortable: false, get: function () { return ""; },
         render: function (r) {
-          if (r.id === currentUser.id || r.role === "administrator") return "";
-          return '<button type="button" class="btn-small btn-small-ghost users-change-sponsor-btn" data-user-id="' + escapeHtml(r.id) + '">Změnit sponzora</button>';
+          return '<button type="button" class="btn-small btn-small-ghost users-edit-btn" data-user-id="' + escapeHtml(r.id) + '">Upravit</button>';
         } }
     ];
 
@@ -2521,91 +2775,126 @@
         columns: columns,
         rows: rows,
         rowId: function (r) { return r.id; },
-        searchPlaceholder: "Hledat uživatele (jméno, role…)",
+        searchPlaceholder: "Hledat uživatele (jméno, e-mail…)",
         emptyMessage: "Žádní uživatelé k zobrazení.",
         itemNoun: "uživatelů",
         initialSortKey: "jmeno",
         wireExtra: function (container) {
-          container.querySelectorAll(".users-change-sponsor-btn").forEach(function (btn) {
-            btn.addEventListener("click", function () { openSponsorPanel(btn.getAttribute("data-user-id")); });
+          container.querySelectorAll(".users-edit-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () { openUserForm(btn.getAttribute("data-user-id")); });
           });
         }
       });
     }
   }
 
-  function closeSponsorPanel() {
-    sponsorPanelTargetId = null;
-    el("usersSponsorPanelWrap").innerHTML = "";
+  function closeUserForm() {
+    userFormTargetId = null;
+    el("usersFormWrap").innerHTML = "";
   }
 
-  function openSponsorPanel(targetId) {
-    sponsorPanelTargetId = targetId;
-    var target = adminUsersById[targetId];
+  function openUserForm(targetId) {
+    userFormTargetId = targetId;
+    var target = usersById[targetId];
     if (!target) return;
 
-    // Bod 4 (bugfix z Milníku 2) zachován: možnosti sponzora vylučují jen
-    // TOHOTO cílového uživatele, nikdy globálně přihlášeného currentUser.
-    var rowOptions = usersRowsCache
+    // Sponzor smí být kdokoli z výsledku moje_uzivatele() kromě
+    // administrátorů (ti nemůžou být sponzorem - trigger i CHECK to
+    // stejně zamítnou, ale UI jim možnost ani nenabízí) a kromě cílového
+    // uživatele samotného. moje_uzivatele() nevrací volajícího SEBE (jen
+    // "ostatní"), takže pro Leadera přidáváme jeho vlastní řádek ručně -
+    // Leader smí být sponzorem (je součástí stromu, sekce 4 zadání).
+    // Administrátor součástí stromu není, takže se sám jako možnost
+    // nepřidává.
+    var candidateOptions = usersRowsCache
       .filter(function (o) { return o && o.id !== targetId && o.role !== "administrator"; })
-      .map(function (o) { return '<option value="' + escapeHtml(o.id) + '"' + (o.id === target.sponsor_id ? ' selected' : '') + '>' + escapeHtml(o.jmeno || o.id) + '</option>'; })
-      .join("");
+      .map(function (o) { return { id: o.id, label: celeJmeno(o) || o.id }; });
+    if (currentUser.role === "leader") {
+      candidateOptions.unshift({ id: currentUser.id, label: celeJmeno(currentUser) + " (já)" });
+    }
+    var optionsHtml = candidateOptions.map(function (o) {
+      return '<option value="' + escapeHtml(o.id) + '"' + (o.id === target.sponsor_id ? ' selected' : '') + '>' + escapeHtml(o.label) + '</option>';
+    }).join("");
 
-    el("usersSponsorPanelWrap").innerHTML =
+    el("usersFormWrap").innerHTML =
       '<div class="card detail-card">' +
-        '<h3 class="detail-section-title" style="margin-top:0;">Změnit sponzora — ' + escapeHtml(target.jmeno || targetId) + '</h3>' +
-        '<form id="sponsorPanelForm" novalidate>' +
+        '<h3 class="detail-section-title" style="margin-top:0;">Upravit uživatele — ' + escapeHtml(celeJmeno(target) || targetId) + '</h3>' +
+        '<form id="userFormPanel" novalidate>' +
           '<div class="form-grid">' +
-            '<div class="field"><label>Nový sponzor</label><select id="sponsorPanelSelect"><option value="">— bez sponzora —</option>' + rowOptions + '</select></div>' +
-            '<div class="field"><label>Důvod změny *</label><input type="text" id="sponsorPanelReason" placeholder="Povinné zdůvodnění pro auditní log"></div>' +
+            '<div class="field"><label for="ufJmeno">Jméno *</label><input type="text" id="ufJmeno" value="' + escapeHtml(target.jmeno || "") + '"></div>' +
+            '<div class="field"><label for="ufPrijmeni">Příjmení</label><input type="text" id="ufPrijmeni" value="' + escapeHtml(target.prijmeni || "") + '"></div>' +
+            '<div class="field"><label for="ufTelefon">Telefon</label><input type="tel" id="ufTelefon" value="' + escapeHtml(target.telefon || "") + '"></div>' +
+            '<div class="field"><label for="ufEmail">E-mail</label><input type="email" id="ufEmail" value="' + escapeHtml(target.email || "") + '"></div>' +
+            '<div class="field col-span-2"><label for="ufSponsor">Sponzor</label><select id="ufSponsor"><option value="">— bez sponzora —</option>' + optionsHtml + '</select></div>' +
+            '<div class="col-span-2"><div class="field-checkbox"><input type="checkbox" id="ufAktivni"' + (target.aktivni ? ' checked' : '') + '><label for="ufAktivni">Aktivní (odškrtnutím se uživatel označí jako „Vymazán“ - měkké označení, profil a data zůstávají)</label></div></div>' +
+            '<div class="field col-span-2"><label for="ufDuvod">Důvod úpravy *</label><input type="text" id="ufDuvod" placeholder="Povinné zdůvodnění pro auditní log"></div>' +
           '</div>' +
           '<div class="form-actions">' +
-            '<button class="btn-primary" type="submit" id="sponsorPanelSaveBtn" style="width:auto;">Uložit</button>' +
-            '<button class="btn-ghost" type="button" id="sponsorPanelCancelBtn">Zrušit</button>' +
+            '<button class="btn-primary" type="submit" id="userFormSaveBtn" style="width:auto;">Uložit</button>' +
+            '<button class="btn-ghost" type="button" id="userFormCancelBtn">Zrušit</button>' +
           '</div>' +
         '</form>' +
       '</div>';
 
-    el("sponsorPanelCancelBtn").addEventListener("click", closeSponsorPanel);
-    el("sponsorPanelForm").addEventListener("submit", function (e) {
+    el("userFormCancelBtn").addEventListener("click", closeUserForm);
+    el("userFormPanel").addEventListener("submit", function (e) {
       e.preventDefault();
-      var newSponsorId = el("sponsorPanelSelect").value || null;
-      var reason = el("sponsorPanelReason").value.trim();
-      submitChangeSponsor(sponsorPanelTargetId, newSponsorId, reason);
+      submitUpravitUzivatele(userFormTargetId);
     });
 
-    el("usersSponsorPanelWrap").scrollIntoView({ behavior: "smooth", block: "start" });
+    el("usersFormWrap").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  async function submitChangeSponsor(targetId, newSponsorId, reason) {
-    var submitBtn = el("sponsorPanelSaveBtn");
+  async function submitUpravitUzivatele(targetId) {
+    var jmeno = el("ufJmeno").value.trim();
+    if (!jmeno) {
+      showBanner(el("usersBanner"), "error", "Jméno je povinné.");
+      return;
+    }
+    var prijmeni = el("ufPrijmeni").value.trim();
+    var telefon = el("ufTelefon").value.trim() || null;
+    var email = el("ufEmail").value.trim() || null;
+    var sponsorId = el("ufSponsor").value || null;
+    var aktivni = el("ufAktivni").checked;
+    var duvod = el("ufDuvod").value.trim();
+    if (!duvod) {
+      showBanner(el("usersBanner"), "error", "Důvod úpravy je povinný.");
+      return;
+    }
+
+    var submitBtn = el("userFormSaveBtn");
     if (submitBtn) submitBtn.disabled = true;
     showBanner(el("usersBanner"), null, null);
 
-    var result = await sb.rpc("zmenit_sponzora", {
+    var result = await sb.rpc("upravit_uzivatele", {
       p_target_user_id: targetId,
-      p_novy_sponsor_id: newSponsorId,
-      p_duvod: reason
+      p_jmeno: jmeno,
+      p_prijmeni: prijmeni || null,
+      p_telefon: telefon,
+      p_email: email,
+      p_novy_sponsor_id: sponsorId,
+      p_aktivni: aktivni,
+      p_duvod: duvod
     });
 
     if (submitBtn) submitBtn.disabled = false;
 
     if (result.error) {
-      console.error("Chyba při změně sponzora:", result.error);
-      showBanner(el("usersBanner"), "error", adminChangeSponsorError(result.error));
+      console.error("Chyba při úpravě uživatele:", result.error);
+      showBanner(el("usersBanner"), "error", upravitUzivateleErrorMessage(result.error));
       return;
     }
 
-    closeSponsorPanel();
-    showBanner(el("usersBanner"), "ok", "Sponzor byl úspěšně změněn.");
+    closeUserForm();
+    showBanner(el("usersBanner"), "ok", "Uživatel byl upraven.");
     setTimeout(function () { showBanner(el("usersBanner"), null, null); }, 5000);
     await fetchUsersTable();
   }
 
   async function fetchUsersTable() {
     if (!currentUser) return;
-    closeSponsorPanel();
-    var result = await sb.from("profiles").select("id, jmeno, role, sponsor_id, invite_code").order("jmeno");
+    closeUserForm();
+    var result = await sb.rpc("moje_uzivatele");
     if (result.error) {
       console.error("Chyba při načítání uživatelů:", result.error);
       showBanner(el("usersBanner"), "error", "Nepodařilo se načíst seznam uživatelů.");
@@ -2625,7 +2914,7 @@
   function jmenoUzivatele(id) {
     if (!id) return "—";
     var u = adminUsersById[id];
-    return u ? (u.jmeno || id) : id;
+    return u ? (celeJmeno(u) || id) : id;
   }
 
   var auditTable = null;
@@ -2658,6 +2947,21 @@
 
   async function fetchAuditTable() {
     if (!currentUser) return;
+    // jmenoUzivatele() potřebuje adminUsersById naplněné jmény - dřív se
+    // to spoléhalo na to, že Leader/Admin už předtím navštívil "Tipy"
+    // nebo "Uživatelé" (obojí ho mezitím plnilo). Milník 5 (bod 6
+    // zadání) změnil "Uživatelé" tak, aby používaly vlastní omezenou
+    // mapu (usersById, bez administrátora pro Leadera) - Audit log ale
+    // potřebuje umět dohledat i administrátora jako herce/cíl (Admin
+    // vidí zásahy všech), takže si adminUsersById plní sám, přímo z
+    // `profiles` (stejná RLS politika "Leader a Admin vidi vsechny
+    // profily" jako dřív používala "Tipy").
+    var profilesResult = await sb.from("profiles").select("id, jmeno, prijmeni, role, sponsor_id, invite_code").order("jmeno");
+    if (!profilesResult.error) {
+      adminUsersById = {};
+      (profilesResult.data || []).forEach(function (u) { if (u && u.id) adminUsersById[u.id] = u; });
+    }
+
     var result = await sb.from("audit_log").select("*").order("created_at", { ascending: false });
     if (result.error) {
       console.error("Chyba při načítání auditního logu:", result.error);
@@ -2698,12 +3002,17 @@
     el("registerForm").addEventListener("submit", function (e) {
       e.preventDefault();
       var jmeno = el("regName").value.trim();
+      var prijmeni = el("regSurname").value.trim();
+      var telefon = el("regPhone").value.trim();
       var email = el("regEmail").value.trim();
       var password = el("regPassword").value;
       var ok = true;
 
       setFieldError(el("regNameField"), !jmeno);
       if (!jmeno) ok = false;
+
+      setFieldError(el("regSurnameField"), !prijmeni);
+      if (!prijmeni) ok = false;
 
       var emailValid = email && isValidEmail(email);
       setFieldError(el("regEmailField"), !emailValid);
@@ -2720,7 +3029,7 @@
 
       if (!ok) return;
       var inviteCode = el("regInviteCode").value.trim();
-      doRegister(jmeno, email, password, inviteCode, el("authBanner"), el("registerSubmitBtn"));
+      doRegister(jmeno, prijmeni, telefon, email, password, inviteCode, el("authBanner"), el("registerSubmitBtn"));
     });
 
     el("logoutBtn").addEventListener("click", doLogout);
@@ -2740,12 +3049,9 @@
       submitTipForm();
     });
 
-    el("rkAddForm").addEventListener("submit", function (e) {
-      e.preventDefault();
-      var nazev = el("in_RkNazev").value.trim();
-      if (!nazev) return;
-      submitAddRk(nazev);
-    });
+    // Milník 5 (bod 5 zadání) — "+ Přidat RK" nad tabulkou otevírá
+    // sdílený formulář (openRkForm bez targetId = režim přidání).
+    el("rkAddOpenBtn").addEventListener("click", function () { openRkForm(null); });
   }
 
   // ---------------- boot ----------------
