@@ -1,0 +1,1185 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Realitní tip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,480;0,560;0,600;1,480;1,560&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ---------------------------------------------------------------------
+     Realitní tip — Krok 4: samostatná statická stránka (Render) napojená
+     na skutečný Supabase projekt (Postgres + Auth + RLS).
+
+     BEZPEČNOSTNÍ MODEL (viz i patička přihlašovací obrazovky a
+     docs/krok4_supabase.md):
+     Přihlášení a registrace jdou přes Supabase Auth (sb.auth.signInWithPassword
+     / sb.auth.signUp) — heslo se NEPOROVNÁVÁ v tomto JS kódu, ověřuje ho
+     server Supabase. Kdo smí číst/psát které řádky v `tips`/`profiles`
+     vynucuje Row Level Security přímo v Postgresu (politiky na serveru),
+     ne tento prohlížečový kód — stejný princip jako v Kroku 0
+     (Node/Express middleware), jen jinou technologií (Postgres RLS místo
+     Express route handleru). "Publishable" klíč níže je veřejný a je u
+     Supabase běžné mít ho v klientském kódu — bezpečnost nezajišťuje
+     tajnost klíče, ale právě RLS na serveru.
+     ------------------------------------------------------------------- */
+
+  :root {
+    --bg:#F3F6F4; --surface:#FFFFFF; --surface-2:#EAF0EC; --border:#D6E1DA;
+    --text:#152420; --text-muted:#54685D;
+    --accent:#1F6F5C; --accent-hover:#195A4A; --accent-contrast:#FFFFFF; --accent-soft:#DCEEE6;
+    --ok:#2E7D46; --ok-soft:#E3F3E7; --warn:#B8791A; --warn-soft:#FBEEDC;
+    --danger:#B93B3B; --danger-soft:#FBE6E6; --info:#3B6FB9; --info-soft:#E6EEFB;
+
+    --font-display:"Fraunces","Iowan Old Style",Georgia,serif;
+    --font-ui:"Public Sans","Segoe UI",system-ui,sans-serif;
+    --font-mono:"IBM Plex Mono","SFMono-Regular",Consolas,monospace;
+
+    --radius-s:8px; --radius-m:12px; --radius-l:18px;
+    --shadow-card: 0 1px 2px rgba(21,36,32,0.05), 0 1px 1px rgba(21,36,32,0.04);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:#0E1613; --surface:#15201B; --surface-2:#1B2822; --border:#28382F;
+      --text:#E7F1EC; --text-muted:#9FB6A9;
+      --accent:#4FBE9E; --accent-hover:#69CDB1; --accent-contrast:#07130F; --accent-soft:#1B3A31;
+      --ok:#5FCB7C; --ok-soft:#173323; --warn:#E0A94B; --warn-soft:#3A2C13;
+      --danger:#E27272; --danger-soft:#3A1D1D; --info:#7EA8E0; --info-soft:#1B2C42;
+      --shadow-card: 0 1px 2px rgba(0,0,0,0.35), 0 1px 1px rgba(0,0,0,0.25);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg:#0E1613; --surface:#15201B; --surface-2:#1B2822; --border:#28382F;
+    --text:#E7F1EC; --text-muted:#9FB6A9;
+    --accent:#4FBE9E; --accent-hover:#69CDB1; --accent-contrast:#07130F; --accent-soft:#1B3A31;
+    --ok:#5FCB7C; --ok-soft:#173323; --warn:#E0A94B; --warn-soft:#3A2C13;
+    --danger:#E27272; --danger-soft:#3A1D1D; --info:#7EA8E0; --info-soft:#1B2C42;
+    --shadow-card: 0 1px 2px rgba(0,0,0,0.35), 0 1px 1px rgba(0,0,0,0.25);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { height: 100%; margin: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3 { font-family: var(--font-display); font-weight: 600; text-wrap: balance; margin: 0; }
+
+  button, input, select, textarea { font-family: inherit; font-size: inherit; color: inherit; }
+
+  a { color: var(--accent); }
+
+  ::selection { background: var(--accent-soft); color: var(--text); }
+
+  :focus-visible {
+    outline: 2.5px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+
+  /* ---------- layout shell ---------- */
+
+  .app-shell { min-height: 100%; display: flex; flex-direction: column; }
+
+  .db-banner {
+    background: var(--warn-soft);
+    color: var(--warn);
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .brand {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 21px;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+  .brand em { font-style: italic; color: var(--accent); }
+
+  .topbar-user { display: flex; align-items: center; gap: 14px; }
+  .user-name { font-weight: 500; font-size: 14px; color: var(--text-muted); }
+  .user-name strong { color: var(--text); font-weight: 600; }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 7px 14px;
+    border-radius: var(--radius-s);
+    cursor: pointer;
+    font-weight: 500;
+    transition: border-color .15s ease, color .15s ease, background .15s ease;
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .btn-ghost:disabled { opacity: .55; cursor: not-allowed; }
+
+  .tabs-wrap { background: var(--bg); border-bottom: 1px solid var(--border); }
+  .tabs {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 14px 20px 0;
+    display: flex;
+    gap: 6px;
+  }
+  .tab {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    color: var(--text-muted);
+    padding: 9px 18px;
+    border-radius: var(--radius-s) var(--radius-s) 0 0;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    margin-bottom: -1px;
+    transition: color .15s ease, background .15s ease;
+  }
+  .tab:hover { color: var(--text); }
+  .tab[aria-selected="true"] {
+    background: var(--surface);
+    color: var(--accent);
+    font-weight: 600;
+    border-color: var(--border);
+    border-bottom: 1px solid var(--surface);
+  }
+
+  main { flex: 1; width: 100%; }
+
+  .page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 28px 20px 64px;
+  }
+
+  /* ---------- auth screen ---------- */
+
+  .auth-wrap {
+    min-height: calc(100vh - 0px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+  }
+
+  .auth-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-l);
+    box-shadow: var(--shadow-card);
+    padding: 32px 28px 24px;
+  }
+
+  .auth-brand {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 4px;
+  }
+  .auth-brand .brand { font-size: 26px; }
+
+  .auth-sub {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13.5px;
+    margin: 4px 0 22px;
+  }
+
+  .demo-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .btn-demo {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-soft);
+    color: var(--accent);
+    padding: 11px 8px;
+    border-radius: var(--radius-s);
+    font-weight: 600;
+    font-size: 13.5px;
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease, transform .1s ease;
+  }
+  .btn-demo:hover { background: var(--accent); border-color: var(--accent); color: var(--accent-contrast); }
+  .btn-demo:active { transform: translateY(1px); }
+  .btn-demo:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+  .demo-note {
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--text-muted);
+    margin: 0 0 14px;
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-muted);
+    font-size: 12px;
+    margin: 18px 0;
+  }
+  .divider::before, .divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 16px; }
+  .field label { font-size: 13px; font-weight: 600; color: var(--text); }
+  .field .hint { font-size: 12px; color: var(--text-muted); }
+  .field input, .field select, .field textarea {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    padding: 10px 12px;
+    color: var(--text);
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .field input:hover, .field select:hover, .field textarea:hover { border-color: var(--text-muted); }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+    outline: none;
+  }
+  .field.has-error input, .field.has-error select, .field.has-error textarea {
+    border-color: var(--danger);
+  }
+  .field.has-error .error-msg { display: block; }
+  .error-msg {
+    display: none;
+    font-size: 12.5px;
+    color: var(--danger);
+    font-weight: 500;
+  }
+
+  .field-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    padding: 12px 14px;
+    margin-bottom: 6px;
+  }
+  .field-checkbox.has-error { border-color: var(--danger); background: var(--danger-soft); }
+  .field-checkbox input[type="checkbox"] { margin-top: 3px; width: 16px; height: 16px; accent-color: var(--accent); flex-shrink: 0; }
+  .field-checkbox label { font-size: 13px; color: var(--text); cursor: pointer; }
+
+  .btn-primary {
+    width: 100%;
+    background: var(--accent);
+    color: var(--accent-contrast);
+    border: 1px solid var(--accent);
+    padding: 12px 16px;
+    border-radius: var(--radius-s);
+    font-weight: 600;
+    font-size: 14.5px;
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease, transform .1s ease;
+  }
+  .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .btn-primary:active { transform: translateY(1px); }
+  .btn-primary:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+
+  .switch-line {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 13.5px;
+    color: var(--text-muted);
+  }
+  .switch-line button {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    font-size: inherit;
+  }
+  .switch-line button:hover { text-decoration: underline; }
+
+  .auth-footnote {
+    margin-top: 22px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  .banner {
+    border-radius: var(--radius-s);
+    padding: 11px 14px;
+    font-size: 13.5px;
+    font-weight: 500;
+    margin-bottom: 18px;
+  }
+  .banner-error { background: var(--danger-soft); color: var(--danger); }
+  .banner-ok { background: var(--ok-soft); color: var(--ok); }
+
+  /* ---------- form screen ---------- */
+
+  .section-head { margin-bottom: 20px; }
+  .section-head h2 { font-size: 22px; }
+  .section-head p { color: var(--text-muted); font-size: 13.5px; margin: 4px 0 0; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-l);
+    box-shadow: var(--shadow-card);
+    padding: 24px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4px 20px;
+  }
+  @media (min-width: 640px) {
+    .form-grid { grid-template-columns: 1fr 1fr; }
+    .form-grid .col-span-2 { grid-column: 1 / -1; }
+  }
+
+  .form-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 8px;
+  }
+  .form-actions .btn-primary { width: auto; padding: 12px 28px; }
+
+  .required-note { font-size: 12px; color: var(--text-muted); margin-top: -8px; margin-bottom: 18px; }
+
+  /* ---------- list screen ---------- */
+
+  .tip-list { display: flex; flex-direction: column; gap: 12px; }
+
+  .tip-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-m);
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .tip-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .tip-client { font-family: var(--font-display); font-weight: 600; font-size: 17px; }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+    background: var(--info-soft);
+    color: var(--info);
+  }
+  .pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  .tip-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .tip-meta span { display: inline-flex; align-items: center; gap: 5px; }
+  .tip-meta .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--border); }
+
+  .tip-desc { font-size: 13.5px; color: var(--text); }
+
+  .tip-date {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 56px 20px;
+    color: var(--text-muted);
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-l);
+  }
+  .empty-state p { max-width: 340px; margin: 0 auto; font-size: 14px; }
+  .empty-state strong { color: var(--text); }
+
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <div class="db-banner" id="dbBanner" hidden>Nepodařilo se připojit k přihlašovací službě. Zkontrolujte prosím připojení k internetu a načtěte stránku znovu.</div>
+
+  <header class="topbar" id="topbar" hidden>
+    <div class="topbar-inner">
+      <div class="brand">Realitní <em>tip</em></div>
+      <div class="topbar-user">
+        <span class="user-name" id="userNameLabel"></span>
+        <button class="btn-ghost" id="logoutBtn" type="button">Odhlásit se</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="tabs-wrap" id="tabsWrap" hidden>
+    <nav class="tabs" role="tablist" aria-label="Navigace">
+      <button class="tab" id="tabNewBtn" role="tab" type="button" aria-selected="false">+ Nový tip</button>
+      <button class="tab" id="tabListBtn" role="tab" type="button" aria-selected="false">Moje tipy</button>
+    </nav>
+  </div>
+
+  <main>
+    <!-- ============== AUTH SCREEN ============== -->
+    <section id="authScreen">
+      <div class="auth-wrap">
+        <div class="auth-card">
+          <div class="auth-brand"><span class="brand" style="font-size:26px;">Realitní <em>tip</em></span></div>
+          <p class="auth-sub" id="authSubtitle">Přihlaste se ke svému účtu tipaře</p>
+
+          <div id="authBanner"></div>
+
+          <!-- LOGIN VIEW -->
+          <div id="loginView">
+            <div class="demo-row">
+              <button class="btn-demo" id="demoABtn" type="button">Tipař A</button>
+              <button class="btn-demo" id="demoBBtn" type="button">Tipař B</button>
+              <button class="btn-demo" id="demoLeaderBtn" type="button">Leader</button>
+              <button class="btn-demo" id="demoAdminBtn" type="button">Admin</button>
+            </div>
+            <p class="demo-note">Testovací účty — dočasné, do zavedení ostrého přihlašování.</p>
+            <div class="divider">nebo se přihlaste ručně</div>
+
+            <form id="loginForm" novalidate>
+              <div class="field" id="loginEmailField">
+                <label for="loginEmail">E-mail</label>
+                <input type="email" id="loginEmail" autocomplete="email" placeholder="vas@email.cz">
+                <span class="error-msg">Zadejte prosím e-mail.</span>
+              </div>
+              <div class="field" id="loginPasswordField">
+                <label for="loginPassword">Heslo</label>
+                <input type="password" id="loginPassword" autocomplete="current-password" placeholder="Vaše heslo">
+                <span class="error-msg">Zadejte prosím heslo.</span>
+              </div>
+              <button class="btn-primary" id="loginSubmitBtn" type="submit">Přihlásit se</button>
+            </form>
+
+            <p class="switch-line">Nemáte účet? <button type="button" id="goRegisterBtn">Zaregistrujte se</button></p>
+          </div>
+
+          <!-- REGISTER VIEW -->
+          <div id="registerView" hidden>
+            <form id="registerForm" novalidate>
+              <div class="field" id="regNameField">
+                <label for="regName">Jméno a příjmení</label>
+                <input type="text" id="regName" autocomplete="name" placeholder="např. Jana Nováková">
+                <span class="error-msg">Zadejte prosím jméno a příjmení.</span>
+              </div>
+              <div class="field" id="regEmailField">
+                <label for="regEmail">E-mail</label>
+                <input type="email" id="regEmail" autocomplete="email" placeholder="vas@email.cz">
+                <span class="error-msg" id="regEmailError">Zadejte prosím platný e-mail.</span>
+              </div>
+              <div class="field" id="regPasswordField">
+                <label for="regPassword">Heslo</label>
+                <input type="password" id="regPassword" autocomplete="new-password" placeholder="Alespoň 6 znaků">
+                <span class="error-msg">Heslo musí mít alespoň 6 znaků.</span>
+              </div>
+              <button class="btn-primary" id="registerSubmitBtn" type="submit">Vytvořit účet</button>
+            </form>
+
+            <p class="switch-line">Už máte účet? <button type="button" id="goLoginBtn">Přihlaste se</button></p>
+          </div>
+
+          <p class="auth-footnote">Přihlášení a registrace běží přes Supabase Auth, oprávnění k datům vynucuje Row Level Security v Postgresu na straně serveru — stejný princip jako u bezpečnostního testu Krok 0, jen jinou technologií.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== NEW TIP SCREEN ============== -->
+    <section id="newTipScreen" class="page" hidden>
+      <div class="section-head">
+        <h2>Nový tip</h2>
+        <p>Zadejte kontakt na klienta, kterého předáváte realitní kanceláři.</p>
+      </div>
+
+      <div id="tipFormBanner"></div>
+
+      <div class="card">
+        <form id="tipForm" novalidate>
+          <div class="form-grid">
+            <div class="field" id="f_JmenoKlienta">
+              <label for="in_JmenoKlienta">Jméno klienta *</label>
+              <input type="text" id="in_JmenoKlienta" placeholder="Jméno a příjmení klienta">
+              <span class="error-msg">Zadejte prosím jméno klienta.</span>
+            </div>
+
+            <div class="field" id="f_Telefon">
+              <label for="in_Telefon">Telefon *</label>
+              <input type="tel" id="in_Telefon" placeholder="např. 777 123 456" autocomplete="tel">
+              <span class="error-msg">Zadejte prosím telefonní číslo.</span>
+            </div>
+
+            <div class="field" id="f_Email">
+              <label for="in_Email">E-mail</label>
+              <input type="email" id="in_Email" placeholder="jméno@příklad.cz" autocomplete="email">
+              <span class="error-msg">Zadejte prosím platný e-mail.</span>
+            </div>
+
+            <div class="field" id="f_TypNemovitosti">
+              <label for="in_TypNemovitosti">Typ nemovitosti</label>
+              <select id="in_TypNemovitosti">
+                <option value="Byt">Byt</option>
+                <option value="Dům">Dům</option>
+                <option value="Pozemek">Pozemek</option>
+                <option value="Chata">Chata</option>
+                <option value="Komerční">Komerční</option>
+                <option value="Jiné">Jiné</option>
+              </select>
+            </div>
+
+            <div class="field col-span-2" id="f_Lokalita">
+              <label for="in_Lokalita">Lokalita (obec) *</label>
+              <input type="text" id="in_Lokalita" placeholder="např. Praha 5 - Smíchov">
+              <span class="error-msg">Zadejte prosím lokalitu (obec).</span>
+            </div>
+
+            <div class="field col-span-2" id="f_Popis">
+              <label for="in_Popis">Stručný popis</label>
+              <textarea id="in_Popis" rows="3" placeholder="Cokoliv důležitého pro Leadera a realitní kancelář…"></textarea>
+            </div>
+
+            <div class="col-span-2">
+              <div class="field-checkbox" id="f_Souhlas">
+                <input type="checkbox" id="in_Souhlas">
+                <label for="in_Souhlas">Klient souhlasí se zpracováním osobních údajů a předáním kontaktu realitní kanceláři *</label>
+              </div>
+              <span class="error-msg" id="souhlasError">Bez souhlasu klienta nelze tip odeslat.</span>
+            </div>
+
+            <div class="col-span-2 required-note">* povinné pole</div>
+
+            <div class="col-span-2 form-actions">
+              <button class="btn-primary" id="tipSubmitBtn" type="submit">Odeslat tip</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ============== LIST SCREEN ============== -->
+    <section id="listScreen" class="page" hidden>
+      <div class="section-head">
+        <h2>Moje tipy</h2>
+        <p>Přehled všech tipů, které jste zatím vložili.</p>
+      </div>
+
+      <div id="listBanner"></div>
+
+      <div id="tipListWrap"></div>
+    </section>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.115.0/dist/umd/supabase.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  // -------------------------------------------------------------------
+  // Bezpečnostní poznámka (viz i vysvětlení nahoře v <style> a v patičce
+  // přihlašovací obrazovky): toto NENÍ prohlížečové porovnávání hesel —
+  // sb.auth.signInWithPassword / sb.auth.signUp volají skutečný Supabase
+  // Auth server. Kdo smí číst/psát které řádky tabulek `tips` a `profiles`
+  // vynucuje Row Level Security přímo v Postgresu (viz politiky v
+  // Supabase projektu), ne tento klientský kód — obdoba serverové
+  // kontroly z Kroku 0, jen v Postgresu místo Express middlewaru.
+  // Role (`tipar`/`leader`/`administrator`) se nastavuje výhradně na
+  // serveru triggerem při registraci a klient na ni nemá zápisové právo.
+  // -------------------------------------------------------------------
+
+  var SUPABASE_URL = "https://swvzpzkiojysivwdjtuz.supabase.co";
+  var SUPABASE_PUBLISHABLE_KEY = "sb_publishable_imMFjANNsQyqMb1j4rstKA_5XcHHNTp";
+  var DEMO_PASSWORD = "Demo1234!";
+  var DEMO_ACCOUNTS = {
+    a: { email: "tipar-a@demo.realitnitip.cz" },
+    b: { email: "tipar-b@demo.realitnitip.cz" },
+    leader: { email: "leader@demo.realitnitip.cz" },
+    admin: { email: "admin@demo.realitnitip.cz" }
+  };
+  var ROLE_LABELS = { tipar: "tipař", leader: "leader", administrator: "administrátor" };
+
+  var sb = null;
+  var currentUser = null; // { id, email, jmeno, role }
+  var currentUserId = null; // pro rozpoznání skutečné změny přihlášeného uživatele
+  var realtimeChannel = null;
+  var activeTab = "list"; // "new" | "list" — výchozí obrazovka po přihlášení
+
+  // ---------------- helpers ----------------
+
+  function el(id) { return document.getElementById(id); }
+
+  function escapeHtml(str) {
+    return String(str == null ? "" : str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function formatDateTime(iso) {
+    try {
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return "";
+      var dd = String(d.getDate()).padStart(2, "0");
+      var mm = String(d.getMonth() + 1).padStart(2, "0");
+      var yyyy = d.getFullYear();
+      var hh = String(d.getHours()).padStart(2, "0");
+      var min = String(d.getMinutes()).padStart(2, "0");
+      return dd + ". " + mm + ". " + yyyy + " " + hh + ":" + min;
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function truncate(str, n) {
+    if (!str) return "";
+    str = String(str);
+    if (str.length <= n) return str;
+    return str.slice(0, n).trim() + "…";
+  }
+
+  function setFieldError(fieldEl, hasError, message) {
+    if (!fieldEl) return;
+    fieldEl.classList.toggle("has-error", !!hasError);
+    if (message) {
+      var msgEl = fieldEl.querySelector(".error-msg");
+      if (msgEl) msgEl.textContent = message;
+    }
+  }
+
+  function showBanner(containerEl, type, text) {
+    if (!containerEl) return;
+    if (!text) { containerEl.innerHTML = ""; return; }
+    var cls = type === "ok" ? "banner banner-ok" : "banner banner-error";
+    containerEl.innerHTML = '<div class="' + cls + '">' + escapeHtml(text) + "</div>";
+  }
+
+  function isValidEmail(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  }
+
+  // Překlad chyb Supabase Auth do srozumitelné češtiny. Branchujeme na
+  // text hlášky, protože Supabase JS zatím nevrací stabilní strojové
+  // kódy pro všechny tyto stavy stejně konzistentně jako status; pro
+  // "špatné heslo" a "účet neexistuje" Supabase záměrně vrací STEJNOU
+  // obecnou zprávu ("Invalid login credentials") z bezpečnostních
+  // důvodů (aby útočník nemohl enumerovat existující e-maily) a stejně
+  // to zachováváme i tady — nerozlišujeme.
+  function authErrorMessage(error) {
+    if (!error) return "Nastala neočekávaná chyba. Zkuste to prosím znovu.";
+    var msg = (error.message || "").toLowerCase();
+
+    if (msg.indexOf("invalid login credentials") !== -1) {
+      return "Nesprávný e-mail nebo heslo.";
+    }
+    if (msg.indexOf("email not confirmed") !== -1) {
+      return "E-mail zatím není potvrzený. Zkontrolujte prosím schránku a potvrďte registraci, pak se přihlaste.";
+    }
+    if (msg.indexOf("already registered") !== -1 || msg.indexOf("already exists") !== -1) {
+      return "Tento e-mail už je zaregistrovaný. Zkuste se rovnou přihlásit.";
+    }
+    if (msg.indexOf("password") !== -1 && (msg.indexOf("6") !== -1 || msg.indexOf("short") !== -1 || msg.indexOf("weak") !== -1)) {
+      return "Heslo musí mít alespoň 6 znaků.";
+    }
+    if (msg.indexOf("rate limit") !== -1 || msg.indexOf("too many") !== -1) {
+      return "Příliš mnoho pokusů. Zkuste to prosím za chvíli znovu.";
+    }
+    if (msg.indexOf("network") !== -1 || msg.indexOf("fetch") !== -1) {
+      return "Nepodařilo se spojit se serverem. Zkontrolujte prosím připojení k internetu.";
+    }
+    return "Nastala chyba (" + (error.message || error.status || "neznámá") + "). Zkuste to prosím znovu.";
+  }
+
+  function insertErrorMessage(error) {
+    if (!error) return "Nastala neočekávaná chyba. Zkuste to prosím znovu.";
+    if (error.code === "42501") {
+      return "Nemáte oprávnění tento tip vložit.";
+    }
+    return "Tip se nepodařilo uložit. Zkuste to prosím znovu.";
+  }
+
+  // ---------------- view switching ----------------
+
+  function showAuthScreen() {
+    el("topbar").hidden = true;
+    el("tabsWrap").hidden = true;
+    el("authScreen").hidden = false;
+    el("newTipScreen").hidden = true;
+    el("listScreen").hidden = true;
+  }
+
+  function showAppScreen() {
+    el("topbar").hidden = false;
+    el("tabsWrap").hidden = false;
+    el("authScreen").hidden = true;
+    setActiveTab(activeTab);
+  }
+
+  function setActiveTab(tab) {
+    activeTab = tab;
+    var isNew = tab === "new";
+    el("tabNewBtn").setAttribute("aria-selected", String(isNew));
+    el("tabListBtn").setAttribute("aria-selected", String(!isNew));
+    el("newTipScreen").hidden = !isNew;
+    el("listScreen").hidden = isNew;
+  }
+
+  // ---------------- auth view (login/register toggle) ----------------
+
+  function showLoginView() {
+    el("loginView").hidden = false;
+    el("registerView").hidden = true;
+    el("authSubtitle").textContent = "Přihlaste se ke svému účtu tipaře";
+    showBanner(el("authBanner"), null, null);
+  }
+
+  function showRegisterView() {
+    el("loginView").hidden = true;
+    el("registerView").hidden = false;
+    el("authSubtitle").textContent = "Založte si nový účet tipaře";
+    showBanner(el("authBanner"), null, null);
+  }
+
+  // ---------------- auth actions ----------------
+
+  function setAuthButtonsDisabled(disabled) {
+    [el("demoABtn"), el("demoBBtn"), el("demoLeaderBtn"), el("demoAdminBtn"), el("loginSubmitBtn")].forEach(function (b) {
+      if (b) b.disabled = disabled;
+    });
+  }
+
+  function setSupabaseUnavailable() {
+    el("dbBanner").hidden = false;
+    setAuthButtonsDisabled(true);
+    if (el("registerSubmitBtn")) el("registerSubmitBtn").disabled = true;
+  }
+
+  async function doLogin(email, password, bannerEl) {
+    setAuthButtonsDisabled(true);
+    showBanner(bannerEl, null, null);
+    var result = await sb.auth.signInWithPassword({ email: email, password: password });
+    setAuthButtonsDisabled(false);
+    if (result.error) {
+      showBanner(bannerEl, "error", authErrorMessage(result.error));
+      return;
+    }
+    // Úspěch dál řeší posluchač sb.auth.onAuthStateChange (přepnutí na appku).
+  }
+
+  function demoLogin(key) {
+    var account = DEMO_ACCOUNTS[key];
+    if (!account) return;
+    doLogin(account.email, DEMO_PASSWORD, el("authBanner"));
+  }
+
+  async function doRegister(jmeno, email, password, bannerEl, submitBtn) {
+    if (submitBtn) submitBtn.disabled = true;
+    showBanner(bannerEl, null, null);
+
+    var result = await sb.auth.signUp({
+      email: email,
+      password: password,
+      options: { data: { jmeno: jmeno } } // role se z klienta neposílá - server ji vždy nastaví na 'tipar'
+    });
+
+    if (submitBtn) submitBtn.disabled = false;
+
+    if (result.error) {
+      showBanner(bannerEl, "error", authErrorMessage(result.error));
+      return;
+    }
+
+    if (result.data && result.data.session) {
+      // Projekt nemá zapnuté potvrzování e-mailu - uživatel je rovnou
+      // přihlášený, o zbytek se postará onAuthStateChange.
+      return;
+    }
+
+    // Potvrzování e-mailu je zapnuté - session zatím není.
+    showBanner(bannerEl, "ok", "Registrace proběhla, zkontrolujte e-mail a potvrďte účet, pak se přihlaste.");
+    el("registerForm").reset();
+    showLoginView();
+  }
+
+  async function doLogout() {
+    el("logoutBtn").disabled = true;
+    await sb.auth.signOut();
+    el("logoutBtn").disabled = false;
+    // Zbytek (návrat na přihlašovací obrazovku) řeší onAuthStateChange.
+  }
+
+  // ---------------- session handling ----------------
+
+  async function handleSignedIn(session) {
+    var user = session.user;
+    currentUserId = user.id;
+
+    var profileResult = await sb.from("profiles").select("jmeno, role").eq("id", user.id).single();
+    if (profileResult.error) {
+      console.error("Nepodařilo se načíst profil uživatele:", profileResult.error);
+    }
+    var profile = profileResult.data || {};
+    var jmeno = profile.jmeno || user.email;
+    var role = profile.role || "tipar";
+
+    currentUser = { id: user.id, email: user.email, jmeno: jmeno, role: role };
+
+    var roleLabel = ROLE_LABELS[role] || role;
+    el("userNameLabel").innerHTML =
+      "Přihlášen(a) jako <strong>" + escapeHtml(jmeno) + "</strong> · " + escapeHtml(roleLabel);
+
+    activeTab = "list";
+    showAppScreen();
+
+    await fetchMyTips(user.id);
+    subscribeRealtime(user.id);
+  }
+
+  function handleSignedOut() {
+    currentUser = null;
+    currentUserId = null;
+    unsubscribeRealtime();
+
+    el("loginForm").reset();
+    setFieldError(el("loginEmailField"), false);
+    setFieldError(el("loginPasswordField"), false);
+    showBanner(el("authBanner"), null, null);
+    showLoginView();
+    showAuthScreen();
+  }
+
+  // ---------------- tip form ----------------
+
+  function resetTipForm() {
+    el("tipForm").reset();
+    ["f_JmenoKlienta", "f_Telefon", "f_Email", "f_Lokalita"].forEach(function (id) {
+      setFieldError(el(id), false);
+    });
+    el("f_Souhlas").classList.remove("has-error");
+    el("souhlasError").style.display = "none";
+    showBanner(el("tipFormBanner"), null, null);
+  }
+
+  function validateTipForm() {
+    var valid = true;
+    var firstInvalid = null;
+
+    var jmeno = el("in_JmenoKlienta").value.trim();
+    setFieldError(el("f_JmenoKlienta"), !jmeno);
+    if (!jmeno) { valid = false; firstInvalid = firstInvalid || el("in_JmenoKlienta"); }
+
+    var telefon = el("in_Telefon").value.trim();
+    setFieldError(el("f_Telefon"), !telefon);
+    if (!telefon) { valid = false; firstInvalid = firstInvalid || el("in_Telefon"); }
+
+    var email = el("in_Email").value.trim();
+    var emailOk = !email || isValidEmail(email);
+    setFieldError(el("f_Email"), !emailOk);
+    if (!emailOk) { valid = false; firstInvalid = firstInvalid || el("in_Email"); }
+
+    var lokalita = el("in_Lokalita").value.trim();
+    setFieldError(el("f_Lokalita"), !lokalita);
+    if (!lokalita) { valid = false; firstInvalid = firstInvalid || el("in_Lokalita"); }
+
+    var souhlas = el("in_Souhlas").checked;
+    el("f_Souhlas").classList.toggle("has-error", !souhlas);
+    el("souhlasError").style.display = souhlas ? "none" : "block";
+    if (!souhlas) { valid = false; firstInvalid = firstInvalid || el("in_Souhlas"); }
+
+    if (!valid && firstInvalid) firstInvalid.focus();
+    return valid;
+  }
+
+  async function submitTipForm() {
+    if (!currentUser) return;
+    if (!validateTipForm()) return;
+
+    var submitBtn = el("tipSubmitBtn");
+    submitBtn.disabled = true;
+
+    var payload = {
+      autor_id: currentUser.id,
+      jmeno_klienta: el("in_JmenoKlienta").value.trim(),
+      telefon: el("in_Telefon").value.trim(),
+      email: el("in_Email").value.trim() || null,
+      typ_nemovitosti: el("in_TypNemovitosti").value,
+      lokalita: el("in_Lokalita").value.trim(),
+      popis: el("in_Popis").value.trim() || null,
+      souhlas: true
+      // stav a vlozeno_kdy necháváme na výchozí hodnotě v databázi
+    };
+
+    var result = await sb.from("tips").insert(payload);
+    submitBtn.disabled = false;
+
+    if (result.error) {
+      console.error("Chyba při vkládání tipu:", result.error);
+      showBanner(el("tipFormBanner"), "error", insertErrorMessage(result.error));
+      return;
+    }
+
+    resetTipForm();
+    setActiveTab("list");
+    showBanner(el("listBanner"), "ok", "Tip byl úspěšně vložen a čeká na validaci Leaderem.");
+    setTimeout(function () { showBanner(el("listBanner"), null, null); }, 6000);
+
+    await fetchMyTips(currentUser.id);
+  }
+
+  // ---------------- tips list ----------------
+
+  function renderTipsEmpty() {
+    el("tipListWrap").innerHTML =
+      '<div class="empty-state"><p>Zatím jste nevložili žádný tip. Přidejte první tip pomocí záložky <strong>„+ Nový tip“</strong>.</p></div>';
+  }
+
+  // Renderuje výhradně přes escapeHtml pole po poli - nikdy nevkládá
+  // syrový objekt/JSON řádku do DOM (viz požadavek Krok 4, bod 7).
+  function renderTips(rows) {
+    if (!rows || !rows.length) { renderTipsEmpty(); return; }
+
+    var html = '<div class="tip-list">';
+    rows.forEach(function (t) {
+      if (!t || typeof t !== "object") return; // obranně přeskoč jakýkoli nevalidní záznam
+      html += '' +
+        '<div class="tip-card">' +
+          '<div class="tip-card-top">' +
+            '<div class="tip-client">' + escapeHtml(t.jmeno_klienta || "(bez jména)") + '</div>' +
+            '<span class="pill">' + escapeHtml(t.stav || "Nový") + '</span>' +
+          '</div>' +
+          '<div class="tip-meta">' +
+            '<span>' + escapeHtml(t.lokalita || "") + '</span>' +
+            (t.typ_nemovitosti ? '<span class="dot"></span><span>' + escapeHtml(t.typ_nemovitosti) + '</span>' : '') +
+          '</div>' +
+          (t.popis ? '<div class="tip-desc">' + escapeHtml(truncate(t.popis, 140)) + '</div>' : '') +
+          '<div class="tip-date">' + escapeHtml(formatDateTime(t.vlozeno_kdy)) + '</div>' +
+        '</div>';
+    });
+    html += "</div>";
+    el("tipListWrap").innerHTML = html;
+  }
+
+  // Vždy explicitní plný select - žádné skládání z realtime payloadu
+  // (viz požadavek Krok 4, bod 7 - oprava bugu z minulé verze).
+  async function fetchMyTips(userId) {
+    var result = await sb.from("tips")
+      .select("*")
+      .eq("autor_id", userId)
+      .order("vlozeno_kdy", { ascending: false });
+
+    if (result.error) {
+      console.error("Chyba při načítání tipů:", result.error);
+      showBanner(el("listBanner"), "error", "Nepodařilo se načíst vaše tipy. Zkuste to prosím znovu.");
+      return;
+    }
+
+    renderTips(result.data || []);
+  }
+
+  function subscribeRealtime(userId) {
+    unsubscribeRealtime();
+    realtimeChannel = sb
+      .channel("tips-changes-" + userId)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "tips", filter: "autor_id=eq." + userId },
+        function () {
+          // Při jakékoli změně (vložení i případná budoucí úprava stavu
+          // Leaderem) uděláme vždy nový plný select, nikdy nepatchujeme
+          // stav z payloadu události - viz požadavek Krok 4, bod 7.
+          fetchMyTips(userId);
+        }
+      )
+      .subscribe();
+  }
+
+  function unsubscribeRealtime() {
+    if (realtimeChannel) {
+      sb.removeChannel(realtimeChannel);
+      realtimeChannel = null;
+    }
+  }
+
+  // ---------------- wiring ----------------
+
+  function wireEvents() {
+    el("goRegisterBtn").addEventListener("click", showRegisterView);
+    el("goLoginBtn").addEventListener("click", showLoginView);
+
+    el("demoABtn").addEventListener("click", function () { demoLogin("a"); });
+    el("demoBBtn").addEventListener("click", function () { demoLogin("b"); });
+    el("demoLeaderBtn").addEventListener("click", function () { demoLogin("leader"); });
+    el("demoAdminBtn").addEventListener("click", function () { demoLogin("admin"); });
+
+    el("loginForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var email = el("loginEmail").value.trim();
+      var password = el("loginPassword").value;
+      var ok = true;
+
+      var emailValid = email && isValidEmail(email);
+      setFieldError(el("loginEmailField"), !emailValid);
+      if (!emailValid) ok = false;
+
+      if (!password) { setFieldError(el("loginPasswordField"), true); ok = false; }
+      else setFieldError(el("loginPasswordField"), false);
+
+      if (!ok) return;
+      doLogin(email, password, el("authBanner"));
+    });
+
+    el("registerForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var jmeno = el("regName").value.trim();
+      var email = el("regEmail").value.trim();
+      var password = el("regPassword").value;
+      var ok = true;
+
+      setFieldError(el("regNameField"), !jmeno);
+      if (!jmeno) ok = false;
+
+      var emailValid = email && isValidEmail(email);
+      setFieldError(el("regEmailField"), !emailValid);
+      if (!emailValid) {
+        el("regEmailError").textContent = email
+          ? "Zadejte prosím platný e-mail."
+          : "Zadejte prosím e-mail.";
+        ok = false;
+      }
+
+      var passwordValid = password.length >= 6;
+      setFieldError(el("regPasswordField"), !passwordValid);
+      if (!passwordValid) ok = false;
+
+      if (!ok) return;
+      doRegister(jmeno, email, password, el("authBanner"), el("registerSubmitBtn"));
+    });
+
+    el("logoutBtn").addEventListener("click", doLogout);
+
+    el("tabNewBtn").addEventListener("click", function () { setActiveTab("new"); });
+    el("tabListBtn").addEventListener("click", function () { setActiveTab("list"); });
+
+    el("tipForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      submitTipForm();
+    });
+  }
+
+  // ---------------- boot ----------------
+
+  function boot() {
+    wireEvents();
+    showAuthScreen();
+
+    if (typeof supabase === "undefined" || !supabase.createClient) {
+      setSupabaseUnavailable();
+      return;
+    }
+
+    try {
+      sb = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    } catch (e) {
+      console.error("Nepodařilo se vytvořit Supabase klienta:", e);
+      setSupabaseUnavailable();
+      return;
+    }
+
+    // Supabase si session persistuje sama (výchozí persistSession: true
+    // v localStorage) - žádnou vlastní správu session tady nepotřebujeme.
+    // Tento posluchač se při registraci zavolá i hned po připojení
+    // s aktuálním stavem (existující session, nebo žádná).
+    sb.auth.onAuthStateChange(function (event, session) {
+      if (session && session.user) {
+        // Ignorujeme opakované události pro stejného už přihlášeného
+        // uživatele (např. TOKEN_REFRESHED), ať zbytečně neděláme znovu
+        // fetch profilu a nepřezakládáme realtime kanál.
+        if (currentUserId === session.user.id && event !== "SIGNED_IN") {
+          return;
+        }
+        handleSignedIn(session);
+      } else {
+        if (currentUserId === null && event !== "SIGNED_OUT") {
+          return;
+        }
+        handleSignedOut();
+      }
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
+})();
+</script>
+</body>
+</html>
