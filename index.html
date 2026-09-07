@@ -787,13 +787,13 @@
     <!-- ============== NETWORK SCREEN ============== -->
     <section id="networkScreen" class="page" hidden>
       <div class="section-head">
-        <h2>Moje síť</h2>
-        <p>Váš pozvánkový odkaz a přehled lidí, které jste (přímo i nepřímo) přivedli.</p>
+        <h2 id="networkTitle">Moje síť</h2>
+        <p id="networkSubtitle">Váš pozvánkový odkaz a přehled lidí, které jste (přímo i nepřímo) přivedli.</p>
       </div>
 
       <div id="networkBanner"></div>
 
-      <div class="invite-box">
+      <div class="invite-box" id="inviteBoxWrap">
         <code id="inviteLinkText"></code>
         <button class="btn-small" id="copyInviteBtn" type="button">Zkopírovat odkaz</button>
       </div>
@@ -802,9 +802,9 @@
 
       <div id="networkListWrap"></div>
 
-      <div class="subsection">
-        <h3>Tipy v mé síti</h3>
-        <p class="subsection-sub">Anonymizovaný přehled — jen iniciála klienta, stav a datum. Kompletní údaje klienta vidí jen autor tipu, Leader a Administrátor.</p>
+      <div class="subsection" id="networkTipsSection">
+        <h3 id="networkTipsTitle">Tipy v mé síti</h3>
+        <p class="subsection-sub" id="networkTipsSub">Anonymizovaný přehled — jen iniciála klienta, stav a datum. Kompletní údaje klienta vidí jen autor tipu, Leader a Administrátor.</p>
         <div id="networkTipsWrap"></div>
       </div>
     </section>
@@ -1077,7 +1077,17 @@
     var result = await sb.auth.signUp({
       email: email,
       password: password,
-      options: { data: meta }
+      options: {
+        data: meta,
+        // Žádáme Supabase Auth o návrat na aktuální doménu appky (ne na
+        // výchozí Site URL z dashboardu, což bylo typicky localhost) - viz
+        // docs/milnik2_strom_role.md, sekce "Oprava po zpětné vazbě
+        // uživatele". POZOR: samo o sobě to nestačí - GoTrue tuto URL
+        // navíc vyžaduje mít v allow-listu "Redirect URLs" v Supabase
+        // dashboardu (Authentication -> URL Configuration), jinak se i
+        // tak použije jen Site URL. To je ruční krok mimo tento soubor.
+        emailRedirectTo: window.location.origin + window.location.pathname
+      }
     });
 
     if (submitBtn) submitBtn.disabled = false;
@@ -1132,11 +1142,23 @@
     // je jen pohodlí v UI, ne bezpečnostní mechanismus.
     el("tabAdminBtn").hidden = !(role === "leader" || role === "administrator");
 
-    activeTab = "list";
+    // Bod 3 opravy zpětné vazby: Administrátor není autorem tipů ani
+    // součástí stromu sponzorů - záložky "+ Nový tip", "Moje tipy" a
+    // "Moje síť" (v jeho případě přejmenovaná na "Všechny tipy") pro něj
+    // dávají smysl jen ta poslední. Skrytí je opět jen UX - server (RLS)
+    // by stejně žádný zápis/nesmyslný dotaz neautorizovaného typu neprovedl.
+    var isAdmin = role === "administrator";
+    el("tabNewBtn").hidden = isAdmin;
+    el("tabListBtn").hidden = isAdmin;
+    applyNetworkScreenForRole();
+
+    activeTab = isAdmin ? "network" : "list";
     showAppScreen();
 
-    await fetchMyTips(user.id);
-    subscribeRealtime(user.id);
+    if (!isAdmin) {
+      await fetchMyTips(user.id);
+      subscribeRealtime(user.id);
+    }
   }
 
   function handleSignedOut() {
@@ -1145,6 +1167,9 @@
     adminUsersById = {};
     unsubscribeRealtime();
     el("tabAdminBtn").hidden = true;
+    el("tabNewBtn").hidden = false;
+    el("tabListBtn").hidden = false;
+    el("tabNetworkBtn").textContent = "Moje síť";
 
     el("loginForm").reset();
     setFieldError(el("loginEmailField"), false);
@@ -1360,7 +1385,9 @@
       '<div class="empty-state"><p>V síti zatím nejsou žádné tipy.</p></div>';
   }
 
-  function renderNetworkTips(rows) {
+  // rows z sb.rpc('moje_sit_tipy') (běžný tipař/sponzor) - anonymizovaný
+  // klient (jen iniciála), žádný telefon/e-mail/popis.
+  function renderNetworkTipsAnonymized(rows) {
     if (!rows || !rows.length) { renderNetworkTipsEmpty(); return; }
     var html = '<div class="tip-list">';
     rows.forEach(function (t) {
@@ -1378,24 +1405,134 @@
     el("networkTipsWrap").innerHTML = html;
   }
 
-  async function fetchMyNetwork() {
-    if (!currentUser) return;
-    el("inviteLinkText").textContent = location.origin + location.pathname + "?ref=" + (currentUser.invite_code || "");
+  // rows z přímého sb.from('tips').select('*') pro Leadera/Administrátora
+  // (bod 2 opravy zpětné vazby) - KOMPLETNÍ údaje tipu, bez anonymizace.
+  // Jméno autora se dohledá z už načtené mapy profilů (adminUsersById),
+  // stejně jako v Administraci.
+  function renderNetworkTipsFull(rows) {
+    if (!rows || !rows.length) { renderNetworkTipsEmpty(); return; }
+    var html = '<div class="tip-list">';
+    rows.forEach(function (t) {
+      if (!t || typeof t !== "object") return;
+      var autorJmeno = (t.autor_id && adminUsersById[t.autor_id] && adminUsersById[t.autor_id].jmeno) || "(neznámý autor)";
+      html += '' +
+        '<div class="tip-card">' +
+          '<div class="tip-card-top">' +
+            '<div class="tip-client">' + escapeHtml(t.jmeno_klienta || "(bez jména)") + ' · autor ' + escapeHtml(autorJmeno) + '</div>' +
+            '<span class="pill">' + escapeHtml(t.stav || "Nový") + '</span>' +
+          '</div>' +
+          '<div class="tip-meta">' +
+            '<span>' + escapeHtml(t.lokalita || "(bez lokality)") + '</span>' +
+            '<span class="dot"></span><span>' + escapeHtml(t.telefon || "(bez telefonu)") + '</span>' +
+            (t.email ? '<span class="dot"></span><span>' + escapeHtml(t.email) + '</span>' : '') +
+            (t.typ_nemovitosti ? '<span class="dot"></span><span>' + escapeHtml(t.typ_nemovitosti) + '</span>' : '') +
+          '</div>' +
+          (t.popis ? '<div class="tip-desc">' + escapeHtml(truncate(t.popis, 140)) + '</div>' : '') +
+          '<div class="tip-date">' + escapeHtml(formatDateTime(t.vlozeno_kdy)) + '</div>' +
+        '</div>';
+    });
+    html += "</div>";
+    el("networkTipsWrap").innerHTML = html;
+  }
 
-    var netResult = await sb.rpc("moje_sit");
-    if (netResult.error) {
-      console.error("Chyba při načítání sítě:", netResult.error);
-      showBanner(el("networkBanner"), "error", "Nepodařilo se načíst přehled sítě. Zkuste to prosím znovu.");
+  // Přizpůsobí nadpisy a viditelnost částí obrazovky "Moje síť" roli
+  // přihlášeného uživatele (bod 2 a 3 opravy zpětné vazby):
+  // - tipař/sponzor: "Moje síť" + anonymizovaný přehled tipů jen z vlastní podsítě.
+  // - leader: pořád "Moje síť" (je kořenem stromu), ale sekce tipů je teď
+  //   systémová a bez anonymizace ("Všechny tipy v systému").
+  // - administrator: není součástí stromu, takže nemá vlastní síť - celá
+  //   záložka se přejmenuje a ukazuje rovnou "Všechny tipy v systému" bez
+  //   pozvánkového odkazu/statistik/seznamu sítě.
+  function applyNetworkScreenForRole() {
+    var role = currentUser ? currentUser.role : "tipar";
+    var isAdmin = role === "administrator";
+
+    el("tabNetworkBtn").textContent = isAdmin ? "Všechny tipy" : "Moje síť";
+
+    el("inviteBoxWrap").hidden = isAdmin;
+    el("networkStats").hidden = isAdmin;
+    el("networkListWrap").hidden = isAdmin;
+
+    if (isAdmin) {
+      el("networkTitle").textContent = "Všechny tipy v systému";
+      el("networkSubtitle").textContent = "Administrátor není součástí stromu sponzorů - přehled všech tipů v systému, se všemi údaji.";
+      // Podsekce by jinak duplikovala stejný nadpis - u admina je zbytečná,
+      // obsah (networkTipsWrap) necháváme přímo pod hlavním nadpisem.
+      el("networkTipsTitle").hidden = true;
+      el("networkTipsSub").hidden = true;
+    } else if (role === "leader") {
+      el("networkTitle").textContent = "Moje síť";
+      el("networkSubtitle").textContent = "Váš pozvánkový odkaz a přehled lidí, které jste (přímo i nepřímo) přivedli.";
+      el("networkTipsTitle").hidden = false;
+      el("networkTipsSub").hidden = false;
+      el("networkTipsTitle").textContent = "Všechny tipy v systému";
+      el("networkTipsSub").textContent = "Jako Leader vidíte kompletní údaje (telefon, lokalita, e-mail, popis) u úplně všech tipů v systému, ne jen ve vlastní podsíti.";
     } else {
-      renderNetworkList(netResult.data || []);
+      el("networkTitle").textContent = "Moje síť";
+      el("networkSubtitle").textContent = "Váš pozvánkový odkaz a přehled lidí, které jste (přímo i nepřímo) přivedli.";
+      el("networkTipsTitle").hidden = false;
+      el("networkTipsSub").hidden = false;
+      el("networkTipsTitle").textContent = "Tipy v mé síti";
+      el("networkTipsSub").textContent = "Anonymizovaný přehled — jen iniciála klienta, stav a datum. Kompletní údaje klienta vidí jen autor tipu, Leader a Administrátor.";
+    }
+  }
+
+  // Systémový (nikoli jen vlastní podsítě) přehled tipů pro Leadera/Administrátora
+  // - přímý select nad `tips` (RLS politika "Leader a Admin vidi vsechny tipy"),
+  // žádná anonymizace. Jméno autora dohledáme z čerstvě načteného seznamu
+  // profilů (stejný vzor jako v Administraci - žádné cachování mezi voláními).
+  async function fetchAllTipsForLeaderOrAdmin() {
+    var tipsResult = await sb.from("tips").select("*").order("vlozeno_kdy", { ascending: false });
+    if (tipsResult.error) {
+      console.error("Chyba při načítání všech tipů:", tipsResult.error);
+      showBanner(el("networkBanner"), "error", "Nepodařilo se načíst přehled tipů. Zkuste to prosím znovu.");
+      renderNetworkTipsEmpty();
+      return;
     }
 
-    var tipsResult = await sb.rpc("moje_sit_tipy");
-    if (tipsResult.error) {
-      console.error("Chyba při načítání tipů sítě:", tipsResult.error);
-      renderNetworkTipsEmpty();
+    var profilesResult = await sb.from("profiles").select("id, jmeno, role, sponsor_id, invite_code").order("jmeno");
+    if (profilesResult.error) {
+      console.error("Chyba při načítání uživatelů pro jména autorů:", profilesResult.error);
     } else {
-      renderNetworkTips(tipsResult.data || []);
+      adminUsersById = {};
+      (profilesResult.data || []).forEach(function (u) { if (u && u.id) adminUsersById[u.id] = u; });
+    }
+
+    renderNetworkTipsFull(tipsResult.data || []);
+  }
+
+  async function fetchMyNetwork() {
+    if (!currentUser) return;
+    applyNetworkScreenForRole();
+
+    var role = currentUser.role;
+
+    if (role !== "administrator") {
+      // Leader i tipař/sponzor jsou součástí stromu - mají vlastní
+      // pozvánkový odkaz a přehled vlastní podsítě.
+      el("inviteLinkText").textContent = location.origin + location.pathname + "?ref=" + (currentUser.invite_code || "");
+
+      var netResult = await sb.rpc("moje_sit");
+      if (netResult.error) {
+        console.error("Chyba při načítání sítě:", netResult.error);
+        showBanner(el("networkBanner"), "error", "Nepodařilo se načíst přehled sítě. Zkuste to prosím znovu.");
+      } else {
+        renderNetworkList(netResult.data || []);
+      }
+    }
+
+    if (role === "leader" || role === "administrator") {
+      // Bod 2 opravy zpětné vazby: Leader/Administrátor vidí VŠECHNY tipy
+      // v systému přímým selectem, bez anonymizace (ne přes moje_sit_tipy()).
+      await fetchAllTipsForLeaderOrAdmin();
+    } else {
+      var tipsResult = await sb.rpc("moje_sit_tipy");
+      if (tipsResult.error) {
+        console.error("Chyba při načítání tipů sítě:", tipsResult.error);
+        renderNetworkTipsEmpty();
+      } else {
+        renderNetworkTipsAnonymized(tipsResult.data || []);
+      }
     }
   }
 
@@ -1428,31 +1565,41 @@
       return;
     }
 
-    var options = rows
-      .filter(function (u) { return u && u.id !== currentUser.id; })
-      .map(function (u) { return '<option value="' + escapeHtml(u.id) + '">' + escapeHtml(u.jmeno || u.id) + '</option>'; })
-      .join("");
-
     var html = "";
     rows.forEach(function (u) {
       if (!u || typeof u !== "object") return;
       var sponsorJmeno = u.sponsor_id && adminUsersById[u.sponsor_id] ? adminUsersById[u.sponsor_id].jmeno : "—";
       var isSelf = u.id === currentUser.id;
+      // Bod 3: Administrátor není součástí stromu sponzorů - nikdy se
+      // nesmí nabízet jako sponzor pro kohokoli (backend by to stejně
+      // odmítl přes CHECK/trigger, ale UX má být čistý).
+      var isAdminRow = u.role === "administrator";
+
+      // Bod 4 (bugfix): možnosti sponzora se počítají PRO KAŽDÝ ŘÁDEK
+      // zvlášť a vylučují jen tohoto konkrétního cílového uživatele
+      // (u.id), NIKDY globálně přihlášeného currentUser.id - jinak by
+      // Leader/Admin nemohl sám sebe zvolit jako nového sponzora pro
+      // nikoho jiného (to byl nahlášený bug).
+      var rowOptions = rows
+        .filter(function (o) { return o && o.id !== u.id && o.role !== "administrator"; })
+        .map(function (o) { return '<option value="' + escapeHtml(o.id) + '">' + escapeHtml(o.jmeno || o.id) + '</option>'; })
+        .join("");
+
       html += '' +
         '<div class="admin-row" data-user-id="' + escapeHtml(u.id) + '">' +
           '<div class="admin-row-top">' +
             '<span class="admin-jmeno">' + escapeHtml(u.jmeno || "(bez jména)") + '</span>' +
             roleBadgeHtml(u.role) +
-            (isSelf ? '' : '<button type="button" class="btn-small btn-small-ghost admin-toggle-sponsor-btn">Změnit sponzora</button>') +
+            (isSelf || isAdminRow ? '' : '<button type="button" class="btn-small btn-small-ghost admin-toggle-sponsor-btn">Změnit sponzora</button>') +
           '</div>' +
-          '<div class="admin-row-meta">Aktuální sponzor: ' + escapeHtml(sponsorJmeno) + '</div>' +
-          (isSelf ? '' :
+          '<div class="admin-row-meta">Aktuální sponzor: ' + escapeHtml(isAdminRow ? "— (administrátor není součástí stromu)" : sponsorJmeno) + '</div>' +
+          (isSelf || isAdminRow ? '' :
             '<form class="sponsor-form">' +
               '<div class="field">' +
                 '<label>Nový sponzor</label>' +
                 '<select class="sponsor-select">' +
                   '<option value="">— bez sponzora —</option>' +
-                  options +
+                  rowOptions +
                 '</select>' +
               '</div>' +
               '<div class="field field-reason">' +
