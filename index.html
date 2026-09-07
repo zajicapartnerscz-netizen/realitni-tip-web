@@ -460,6 +460,148 @@
   .empty-state p { max-width: 340px; margin: 0 auto; font-size: 14px; }
   .empty-state strong { color: var(--text); }
 
+  /* ---------- síť / administrace ---------- */
+
+  .invite-box {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    padding: 12px 14px;
+    margin-bottom: 6px;
+  }
+  .invite-box code {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    padding: 6px 10px;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    color: var(--text);
+  }
+
+  .btn-small {
+    background: var(--accent);
+    color: var(--accent-contrast);
+    border: 1px solid var(--accent);
+    padding: 7px 13px;
+    border-radius: var(--radius-s);
+    font-weight: 600;
+    font-size: 12.5px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .btn-small:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .btn-small:disabled { opacity: .55; cursor: not-allowed; }
+  .btn-small.btn-small-ghost {
+    background: transparent;
+    color: var(--text-muted);
+    border-color: var(--border);
+  }
+  .btn-small.btn-small-ghost:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+
+  .stat-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+  .stat-tile {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-m);
+    padding: 14px 16px;
+    min-width: 130px;
+    flex: 1 1 130px;
+  }
+  .stat-tile .stat-num { font-family: var(--font-display); font-size: 24px; font-weight: 600; color: var(--accent); }
+  .stat-tile .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  .net-list { display: flex; flex-direction: column; gap: 8px; }
+  .net-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    padding: 10px 14px;
+    font-size: 13.5px;
+  }
+  .net-item .net-jmeno { font-weight: 600; flex: 1 1 auto; }
+  .net-item .net-uroven {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--text-muted);
+    background: var(--surface-2);
+    border-radius: 999px;
+    padding: 2px 9px;
+  }
+  .net-item .net-pocet { font-size: 12.5px; color: var(--text-muted); white-space: nowrap; }
+
+  .role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    padding: 3px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .role-badge.role-tipar { background: var(--info-soft); color: var(--info); }
+  .role-badge.role-leader { background: var(--ok-soft); color: var(--ok); }
+  .role-badge.role-administrator { background: var(--warn-soft); color: var(--warn); }
+
+  .admin-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-m);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .admin-row-top { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .admin-row-top .admin-jmeno { font-weight: 600; font-size: 14.5px; flex: 1 1 auto; }
+  .admin-row-meta { font-size: 12.5px; color: var(--text-muted); }
+
+  .sponsor-form {
+    display: none;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: flex-end;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    padding: 12px;
+    margin-top: 4px;
+  }
+  .sponsor-form.open { display: flex; }
+  .sponsor-form .field { margin-bottom: 0; min-width: 180px; flex: 1 1 180px; }
+  .sponsor-form .field.field-reason { flex: 2 1 240px; }
+
+  .audit-list { display: flex; flex-direction: column; gap: 8px; }
+  .audit-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  .audit-item .audit-top { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; }
+  .audit-item .audit-action { font-weight: 600; }
+  .audit-item .audit-date { font-family: var(--font-mono); font-size: 11.5px; color: var(--text-muted); }
+  .audit-item .audit-detail { color: var(--text-muted); margin-top: 3px; }
+
+  .subsection { margin-top: 32px; }
+  .subsection h3 { font-size: 17px; margin-bottom: 4px; }
+  .subsection p.subsection-sub { color: var(--text-muted); font-size: 13px; margin: 0 0 14px; }
+
   [hidden] { display: none !important; }
 </style>
 </head>
@@ -482,6 +624,8 @@
     <nav class="tabs" role="tablist" aria-label="Navigace">
       <button class="tab" id="tabNewBtn" role="tab" type="button" aria-selected="false">+ Nový tip</button>
       <button class="tab" id="tabListBtn" role="tab" type="button" aria-selected="false">Moje tipy</button>
+      <button class="tab" id="tabNetworkBtn" role="tab" type="button" aria-selected="false">Moje síť</button>
+      <button class="tab" id="tabAdminBtn" role="tab" type="button" aria-selected="false" hidden>Administrace</button>
     </nav>
   </div>
 
@@ -540,6 +684,11 @@
                 <label for="regPassword">Heslo</label>
                 <input type="password" id="regPassword" autocomplete="new-password" placeholder="Alespoň 6 znaků">
                 <span class="error-msg">Heslo musí mít alespoň 6 znaků.</span>
+              </div>
+              <div class="field" id="regInviteCodeField">
+                <label for="regInviteCode" id="regInviteCodeLabel">Kód pozvání (nepovinné)</label>
+                <input type="text" id="regInviteCode" placeholder="kód od tipaře, který vás pozval" autocomplete="off">
+                <span class="hint" id="regInviteCodeHint"></span>
               </div>
               <button class="btn-primary" id="registerSubmitBtn" type="submit">Vytvořit účet</button>
             </form>
@@ -634,6 +783,49 @@
 
       <div id="tipListWrap"></div>
     </section>
+
+    <!-- ============== NETWORK SCREEN ============== -->
+    <section id="networkScreen" class="page" hidden>
+      <div class="section-head">
+        <h2>Moje síť</h2>
+        <p>Váš pozvánkový odkaz a přehled lidí, které jste (přímo i nepřímo) přivedli.</p>
+      </div>
+
+      <div id="networkBanner"></div>
+
+      <div class="invite-box">
+        <code id="inviteLinkText"></code>
+        <button class="btn-small" id="copyInviteBtn" type="button">Zkopírovat odkaz</button>
+      </div>
+
+      <div class="stat-row" id="networkStats"></div>
+
+      <div id="networkListWrap"></div>
+
+      <div class="subsection">
+        <h3>Tipy v mé síti</h3>
+        <p class="subsection-sub">Anonymizovaný přehled — jen iniciála klienta, stav a datum. Kompletní údaje klienta vidí jen autor tipu, Leader a Administrátor.</p>
+        <div id="networkTipsWrap"></div>
+      </div>
+    </section>
+
+    <!-- ============== ADMIN SCREEN ============== -->
+    <section id="adminScreen" class="page" hidden>
+      <div class="section-head">
+        <h2>Administrace</h2>
+        <p>Správa uživatelů a sponzorů (Leader, Administrátor) a auditní stopa změn.</p>
+      </div>
+
+      <div id="adminBanner"></div>
+
+      <div id="adminUsersWrap"></div>
+
+      <div class="subsection">
+        <h3>Auditní log</h3>
+        <p class="subsection-sub">Administrátor vidí vše, ostatní jen vlastní akce (vynuceno na serveru přes Row Level Security).</p>
+        <div id="auditLogWrap"></div>
+      </div>
+    </section>
   </main>
 </div>
 
@@ -666,10 +858,12 @@
   var ROLE_LABELS = { tipar: "tipař", leader: "leader", administrator: "administrátor" };
 
   var sb = null;
-  var currentUser = null; // { id, email, jmeno, role }
+  var currentUser = null; // { id, email, jmeno, role, invite_code }
   var currentUserId = null; // pro rozpoznání skutečné změny přihlášeného uživatele
   var realtimeChannel = null;
-  var activeTab = "list"; // "new" | "list" — výchozí obrazovka po přihlášení
+  var activeTab = "list"; // "new" | "list" | "network" | "admin" — výchozí obrazovka po přihlášení
+  var pendingInviteCode = ""; // z URL ?ref=KOD, přečteno jednou při startu
+  var adminUsersById = {}; // cache posledního načtení seznamu uživatelů pro Administraci (jméno k UUID)
 
   // ---------------- helpers ----------------
 
@@ -703,6 +897,12 @@
     str = String(str);
     if (str.length <= n) return str;
     return str.slice(0, n).trim() + "…";
+  }
+
+  function roleBadgeHtml(role) {
+    var cls = role === "leader" ? "role-leader" : (role === "administrator" ? "role-administrator" : "role-tipar");
+    var label = ROLE_LABELS[role] || role || "?";
+    return '<span class="role-badge ' + cls + '">' + escapeHtml(label) + '</span>';
   }
 
   function setFieldError(fieldEl, hasError, message) {
@@ -784,11 +984,19 @@
 
   function setActiveTab(tab) {
     activeTab = tab;
-    var isNew = tab === "new";
-    el("tabNewBtn").setAttribute("aria-selected", String(isNew));
-    el("tabListBtn").setAttribute("aria-selected", String(!isNew));
-    el("newTipScreen").hidden = !isNew;
-    el("listScreen").hidden = isNew;
+    el("tabNewBtn").setAttribute("aria-selected", String(tab === "new"));
+    el("tabListBtn").setAttribute("aria-selected", String(tab === "list"));
+    el("tabNetworkBtn").setAttribute("aria-selected", String(tab === "network"));
+    el("tabAdminBtn").setAttribute("aria-selected", String(tab === "admin"));
+    el("newTipScreen").hidden = tab !== "new";
+    el("listScreen").hidden = tab !== "list";
+    el("networkScreen").hidden = tab !== "network";
+    el("adminScreen").hidden = tab !== "admin";
+
+    if (tab === "network") fetchMyNetwork();
+    // Audit log potřebuje mapu id -> jméno ze seznamu uživatelů, proto
+    // počkáme na fetchAdminUsers, než dohledáváme jména v auditním logu.
+    if (tab === "admin") { fetchAdminUsers().then(fetchAuditLog); }
   }
 
   // ---------------- auth view (login/register toggle) ----------------
@@ -805,6 +1013,26 @@
     el("registerView").hidden = false;
     el("authSubtitle").textContent = "Založte si nový účet tipaře";
     showBanner(el("authBanner"), null, null);
+    applyPendingInviteCodeToForm();
+  }
+
+  // Pokud uživatel přišel přes odkaz s ?ref=KOD, kód předvyplníme a
+  // uzamkneme (nesmí si sponzora vymyslet), jinak necháme pole prázdné
+  // a editovatelné pro ruční zadání.
+  function applyPendingInviteCodeToForm() {
+    var input = el("regInviteCode");
+    var hint = el("regInviteCodeHint");
+    var label = el("regInviteCodeLabel");
+    if (pendingInviteCode) {
+      input.value = pendingInviteCode;
+      input.readOnly = true;
+      label.textContent = "Kód pozvání";
+      hint.textContent = "Načteno z odkazu, kterým jste přišli.";
+    } else {
+      input.readOnly = false;
+      label.textContent = "Kód pozvání (nepovinné)";
+      hint.textContent = "Máte kód od tipaře, který vás pozval? Zadejte ho sem.";
+    }
   }
 
   // ---------------- auth actions ----------------
@@ -839,14 +1067,17 @@
     doLogin(account.email, DEMO_PASSWORD, el("authBanner"));
   }
 
-  async function doRegister(jmeno, email, password, bannerEl, submitBtn) {
+  async function doRegister(jmeno, email, password, inviteCode, bannerEl, submitBtn) {
     if (submitBtn) submitBtn.disabled = true;
     showBanner(bannerEl, null, null);
+
+    var meta = { jmeno: jmeno }; // role se z klienta neposílá - server ji vždy nastaví na 'tipar'
+    if (inviteCode) meta.invite_code = inviteCode; // server dohledá sponzora podle kódu, neplatný kód se jen ignoruje
 
     var result = await sb.auth.signUp({
       email: email,
       password: password,
-      options: { data: { jmeno: jmeno } } // role se z klienta neposílá - server ji vždy nastaví na 'tipar'
+      options: { data: meta }
     });
 
     if (submitBtn) submitBtn.disabled = false;
@@ -881,7 +1112,7 @@
     var user = session.user;
     currentUserId = user.id;
 
-    var profileResult = await sb.from("profiles").select("jmeno, role").eq("id", user.id).single();
+    var profileResult = await sb.from("profiles").select("jmeno, role, invite_code").eq("id", user.id).single();
     if (profileResult.error) {
       console.error("Nepodařilo se načíst profil uživatele:", profileResult.error);
     }
@@ -889,11 +1120,17 @@
     var jmeno = profile.jmeno || user.email;
     var role = profile.role || "tipar";
 
-    currentUser = { id: user.id, email: user.email, jmeno: jmeno, role: role };
+    currentUser = { id: user.id, email: user.email, jmeno: jmeno, role: role, invite_code: profile.invite_code || "" };
 
     var roleLabel = ROLE_LABELS[role] || role;
     el("userNameLabel").innerHTML =
       "Přihlášen(a) jako <strong>" + escapeHtml(jmeno) + "</strong> · " + escapeHtml(roleLabel);
+
+    // Záložka Administrace je vidět jen pro leader/administrator - ale
+    // skutečné oprávnění vždy vynucují RLS politiky a RPC funkce na
+    // serveru (viz je_leader_nebo_admin/je_administrator), skrytí tabu
+    // je jen pohodlí v UI, ne bezpečnostní mechanismus.
+    el("tabAdminBtn").hidden = !(role === "leader" || role === "administrator");
 
     activeTab = "list";
     showAppScreen();
@@ -905,7 +1142,9 @@
   function handleSignedOut() {
     currentUser = null;
     currentUserId = null;
+    adminUsersById = {};
     unsubscribeRealtime();
+    el("tabAdminBtn").hidden = true;
 
     el("loginForm").reset();
     setFieldError(el("loginEmailField"), false);
@@ -1067,6 +1306,266 @@
     }
   }
 
+  // ---------------- moje síť ----------------
+
+  function copyInviteLink() {
+    var text = el("inviteLinkText").textContent || "";
+    if (!text) return;
+    var done = function () {
+      showBanner(el("networkBanner"), "ok", "Odkaz zkopírován do schránky.");
+      setTimeout(function () { showBanner(el("networkBanner"), null, null); }, 3000);
+    };
+    var fail = function () {
+      showBanner(el("networkBanner"), "error", "Zkopírování se nepodařilo, zkopírujte odkaz prosím ručně.");
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, fail);
+    } else {
+      fail();
+    }
+  }
+
+  function renderNetworkEmpty() {
+    el("networkListWrap").innerHTML =
+      '<div class="empty-state"><p>Zatím jste nikoho nepozvali. Sdílejte svůj odkaz výše a začněte budovat vlastní síť.</p></div>';
+  }
+
+  // Renderuje výhradně přes escapeHtml pole po poli, nikdy syrový objekt do DOM.
+  function renderNetworkList(rows) {
+    var direct = 0;
+    (rows || []).forEach(function (r) { if (r && r.uroven === 1) direct++; });
+
+    el("networkStats").innerHTML =
+      '<div class="stat-tile"><div class="stat-num">' + direct + '</div><div class="stat-label">přímo pozvaní</div></div>' +
+      '<div class="stat-tile"><div class="stat-num">' + (rows ? rows.length : 0) + '</div><div class="stat-label">celkem v mé síti</div></div>';
+
+    if (!rows || !rows.length) { renderNetworkEmpty(); return; }
+
+    var html = '<div class="net-list">';
+    rows.forEach(function (r) {
+      if (!r || typeof r !== "object") return;
+      html += '' +
+        '<div class="net-item">' +
+          '<span class="net-uroven">úroveň ' + escapeHtml(String(r.uroven != null ? r.uroven : "?")) + '</span>' +
+          '<span class="net-jmeno">' + escapeHtml(r.jmeno || "(bez jména)") + '</span>' +
+          '<span class="net-pocet">' + escapeHtml(String(r.pocet_tipu != null ? r.pocet_tipu : 0)) + ' tipů</span>' +
+        '</div>';
+    });
+    html += "</div>";
+    el("networkListWrap").innerHTML = html;
+  }
+
+  function renderNetworkTipsEmpty() {
+    el("networkTipsWrap").innerHTML =
+      '<div class="empty-state"><p>V síti zatím nejsou žádné tipy.</p></div>';
+  }
+
+  function renderNetworkTips(rows) {
+    if (!rows || !rows.length) { renderNetworkTipsEmpty(); return; }
+    var html = '<div class="tip-list">';
+    rows.forEach(function (t) {
+      if (!t || typeof t !== "object") return;
+      html += '' +
+        '<div class="tip-card">' +
+          '<div class="tip-card-top">' +
+            '<div class="tip-client">' + escapeHtml(t.autor_jmeno || "(neznámý)") + ' · klient ' + escapeHtml(t.anon_klient || "?") + '</div>' +
+            '<span class="pill">' + escapeHtml(t.stav || "Nový") + '</span>' +
+          '</div>' +
+          '<div class="tip-date">' + escapeHtml(formatDateTime(t.vlozeno_kdy)) + '</div>' +
+        '</div>';
+    });
+    html += "</div>";
+    el("networkTipsWrap").innerHTML = html;
+  }
+
+  async function fetchMyNetwork() {
+    if (!currentUser) return;
+    el("inviteLinkText").textContent = location.origin + location.pathname + "?ref=" + (currentUser.invite_code || "");
+
+    var netResult = await sb.rpc("moje_sit");
+    if (netResult.error) {
+      console.error("Chyba při načítání sítě:", netResult.error);
+      showBanner(el("networkBanner"), "error", "Nepodařilo se načíst přehled sítě. Zkuste to prosím znovu.");
+    } else {
+      renderNetworkList(netResult.data || []);
+    }
+
+    var tipsResult = await sb.rpc("moje_sit_tipy");
+    if (tipsResult.error) {
+      console.error("Chyba při načítání tipů sítě:", tipsResult.error);
+      renderNetworkTipsEmpty();
+    } else {
+      renderNetworkTips(tipsResult.data || []);
+    }
+  }
+
+  // ---------------- administrace ----------------
+
+  function adminChangeSponsorError(error) {
+    if (!error) return "Nastala neočekávaná chyba. Zkuste to prosím znovu.";
+    var msg = error.message || "";
+    if (error.code === "42501" || msg.indexOf("Nemate opravneni") !== -1) {
+      return "Nemáte oprávnění měnit sponzora.";
+    }
+    if (msg.indexOf("Duvod zmeny je povinny") !== -1) {
+      return "Důvod změny je povinný.";
+    }
+    if (msg.indexOf("cyklus") !== -1) {
+      return "Tato změna by vytvořila cyklus ve stromu sponzorů.";
+    }
+    if (msg.indexOf("sam sobe sponzorem") !== -1) {
+      return "Uživatel nemůže být sám sobě sponzorem.";
+    }
+    return "Změnu se nepodařilo uložit (" + escapeHtml(msg || "neznámá chyba") + ").";
+  }
+
+  function renderAdminUsers(rows) {
+    adminUsersById = {};
+    (rows || []).forEach(function (u) { if (u && u.id) adminUsersById[u.id] = u; });
+
+    if (!rows || !rows.length) {
+      el("adminUsersWrap").innerHTML = '<div class="empty-state"><p>Žádní uživatelé k zobrazení.</p></div>';
+      return;
+    }
+
+    var options = rows
+      .filter(function (u) { return u && u.id !== currentUser.id; })
+      .map(function (u) { return '<option value="' + escapeHtml(u.id) + '">' + escapeHtml(u.jmeno || u.id) + '</option>'; })
+      .join("");
+
+    var html = "";
+    rows.forEach(function (u) {
+      if (!u || typeof u !== "object") return;
+      var sponsorJmeno = u.sponsor_id && adminUsersById[u.sponsor_id] ? adminUsersById[u.sponsor_id].jmeno : "—";
+      var isSelf = u.id === currentUser.id;
+      html += '' +
+        '<div class="admin-row" data-user-id="' + escapeHtml(u.id) + '">' +
+          '<div class="admin-row-top">' +
+            '<span class="admin-jmeno">' + escapeHtml(u.jmeno || "(bez jména)") + '</span>' +
+            roleBadgeHtml(u.role) +
+            (isSelf ? '' : '<button type="button" class="btn-small btn-small-ghost admin-toggle-sponsor-btn">Změnit sponzora</button>') +
+          '</div>' +
+          '<div class="admin-row-meta">Aktuální sponzor: ' + escapeHtml(sponsorJmeno) + '</div>' +
+          (isSelf ? '' :
+            '<form class="sponsor-form">' +
+              '<div class="field">' +
+                '<label>Nový sponzor</label>' +
+                '<select class="sponsor-select">' +
+                  '<option value="">— bez sponzora —</option>' +
+                  options +
+                '</select>' +
+              '</div>' +
+              '<div class="field field-reason">' +
+                '<label>Důvod změny *</label>' +
+                '<input type="text" class="sponsor-reason" placeholder="Povinné zdůvodnění pro auditní log">' +
+              '</div>' +
+              '<button type="submit" class="btn-small">Uložit</button>' +
+            '</form>'
+          ) +
+        '</div>';
+    });
+    el("adminUsersWrap").innerHTML = html;
+
+    // Wiring (po vložení do DOM) - přepínání formuláře a odeslání RPC.
+    el("adminUsersWrap").querySelectorAll(".admin-toggle-sponsor-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var form = btn.closest(".admin-row").querySelector(".sponsor-form");
+        if (form) form.classList.toggle("open");
+      });
+    });
+    el("adminUsersWrap").querySelectorAll(".sponsor-form").forEach(function (form) {
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var row = form.closest(".admin-row");
+        var targetId = row.getAttribute("data-user-id");
+        var newSponsorId = form.querySelector(".sponsor-select").value || null;
+        var reason = form.querySelector(".sponsor-reason").value.trim();
+        submitChangeSponsor(targetId, newSponsorId, reason, form);
+      });
+    });
+  }
+
+  async function submitChangeSponsor(targetId, newSponsorId, reason, formEl) {
+    var submitBtn = formEl ? formEl.querySelector("button[type=submit]") : null;
+    if (submitBtn) submitBtn.disabled = true;
+    showBanner(el("adminBanner"), null, null);
+
+    var result = await sb.rpc("zmenit_sponzora", {
+      p_target_user_id: targetId,
+      p_novy_sponsor_id: newSponsorId,
+      p_duvod: reason
+    });
+
+    if (submitBtn) submitBtn.disabled = false;
+
+    if (result.error) {
+      console.error("Chyba při změně sponzora:", result.error);
+      showBanner(el("adminBanner"), "error", adminChangeSponsorError(result.error));
+      return;
+    }
+
+    showBanner(el("adminBanner"), "ok", "Sponzor byl úspěšně změněn.");
+    setTimeout(function () { showBanner(el("adminBanner"), null, null); }, 5000);
+    await fetchAdminUsers();
+    await fetchAuditLog();
+  }
+
+  async function fetchAdminUsers() {
+    if (!currentUser) return;
+    var result = await sb.from("profiles").select("id, jmeno, role, sponsor_id, invite_code").order("jmeno");
+    if (result.error) {
+      console.error("Chyba při načítání uživatelů:", result.error);
+      showBanner(el("adminBanner"), "error", "Nepodařilo se načíst seznam uživatelů.");
+      return;
+    }
+    renderAdminUsers(result.data || []);
+  }
+
+  function auditActionLabel(action) {
+    if (action === "zmena_sponzora") return "Změna sponzora";
+    return action || "?";
+  }
+
+  function jmenoUzivatele(id) {
+    if (!id) return "—";
+    var u = adminUsersById[id];
+    return u ? (u.jmeno || id) : id;
+  }
+
+  function renderAuditLog(rows) {
+    if (!rows || !rows.length) {
+      el("auditLogWrap").innerHTML = '<div class="empty-state"><p>Zatím žádné auditní záznamy.</p></div>';
+      return;
+    }
+    var html = '<div class="audit-list">';
+    rows.forEach(function (a) {
+      if (!a || typeof a !== "object") return;
+      html += '' +
+        '<div class="audit-item">' +
+          '<div class="audit-top">' +
+            '<span class="audit-action">' + escapeHtml(auditActionLabel(a.action)) + '</span>' +
+            '<span class="audit-date">' + escapeHtml(formatDateTime(a.created_at)) + '</span>' +
+          '</div>' +
+          '<div class="audit-detail">Provedl: ' + escapeHtml(jmenoUzivatele(a.actor_id)) +
+            ' · Týká se: ' + escapeHtml(jmenoUzivatele(a.target_user_id)) + '</div>' +
+          (a.reason ? '<div class="audit-detail">Důvod: ' + escapeHtml(a.reason) + '</div>' : '') +
+        '</div>';
+    });
+    html += "</div>";
+    el("auditLogWrap").innerHTML = html;
+  }
+
+  async function fetchAuditLog() {
+    if (!currentUser) return;
+    var result = await sb.from("audit_log").select("*").order("created_at", { ascending: false });
+    if (result.error) {
+      console.error("Chyba při načítání auditního logu:", result.error);
+      el("auditLogWrap").innerHTML = '<div class="empty-state"><p>Auditní log se nepodařilo načíst.</p></div>';
+      return;
+    }
+    renderAuditLog(result.data || []);
+  }
+
   // ---------------- wiring ----------------
 
   function wireEvents() {
@@ -1119,13 +1618,18 @@
       if (!passwordValid) ok = false;
 
       if (!ok) return;
-      doRegister(jmeno, email, password, el("authBanner"), el("registerSubmitBtn"));
+      var inviteCode = el("regInviteCode").value.trim();
+      doRegister(jmeno, email, password, inviteCode, el("authBanner"), el("registerSubmitBtn"));
     });
 
     el("logoutBtn").addEventListener("click", doLogout);
 
     el("tabNewBtn").addEventListener("click", function () { setActiveTab("new"); });
     el("tabListBtn").addEventListener("click", function () { setActiveTab("list"); });
+    el("tabNetworkBtn").addEventListener("click", function () { setActiveTab("network"); });
+    el("tabAdminBtn").addEventListener("click", function () { setActiveTab("admin"); });
+
+    el("copyInviteBtn").addEventListener("click", copyInviteLink);
 
     el("tipForm").addEventListener("submit", function (e) {
       e.preventDefault();
@@ -1135,9 +1639,26 @@
 
   // ---------------- boot ----------------
 
+  function readInviteCodeFromUrl() {
+    try {
+      var params = new URLSearchParams(location.search);
+      var ref = (params.get("ref") || "").trim();
+      pendingInviteCode = ref;
+    } catch (e) {
+      pendingInviteCode = "";
+    }
+  }
+
   function boot() {
+    readInviteCodeFromUrl();
     wireEvents();
     showAuthScreen();
+    applyPendingInviteCodeToForm();
+    if (pendingInviteCode) {
+      // Přišel s odkazem od konkrétního tipaře - rovnou mu ukážeme
+      // registraci, ne přihlašovací obrazovku.
+      showRegisterView();
+    }
 
     if (typeof supabase === "undefined" || !supabase.createClient) {
       setSupabaseUnavailable();
