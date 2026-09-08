@@ -224,7 +224,9 @@
 
   .demo-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    /* Milník 7: 5. demo tlačítko (RK) přidáno vedle původních 4 - auto-fit
+       místo pevných 2 sloupců, ať se rozloží rovnoměrně bez prázdné buňky. */
+    grid-template-columns: repeat(auto-fit, minmax(85px, 1fr));
     gap: 10px;
     margin-bottom: 8px;
   }
@@ -832,6 +834,9 @@
       <button class="tab" id="tabVyplatyBtn" role="tab" type="button" aria-selected="false" hidden>Výplaty</button>
       <button class="tab" id="tabObsahBtn" role="tab" type="button" aria-selected="false" hidden>Obsah</button>
       <button class="tab" id="tabAuditBtn" role="tab" type="button" aria-selected="false" hidden>Audit log</button>
+      <!-- Milník 7 (Část I): role RK má JEDINOU obrazovku - žádné jiné
+           taby se jí nikdy nezobrazí (viz ROLE_TAB_ORDER.rk = ["rkportal"]). -->
+      <button class="tab" id="tabRkPortalBtn" role="tab" type="button" aria-selected="false" hidden>Moje tipy</button>
     </nav>
   </div>
 
@@ -852,6 +857,7 @@
               <button class="btn-demo" id="demoBBtn" type="button">Tipař B</button>
               <button class="btn-demo" id="demoLeaderBtn" type="button">Leader</button>
               <button class="btn-demo" id="demoAdminBtn" type="button">Admin</button>
+              <button class="btn-demo" id="demoRkBtn" type="button">RK</button>
             </div>
             <p class="demo-note">Testovací účty — dočasné, do zavedení ostrého přihlašování.</p>
             <div class="divider">nebo se přihlaste ručně</div>
@@ -1063,6 +1069,10 @@
 
       <div id="tipyBanner"></div>
 
+      <div class="toolbar-row-end">
+        <button class="btn-small" id="tipyExportBtn" type="button">Export</button>
+      </div>
+
       <div id="tipyTableWrap"></div>
     </section>
 
@@ -1102,6 +1112,10 @@
       </div>
 
       <div id="usersBanner"></div>
+
+      <div class="toolbar-row-end">
+        <button class="btn-small" id="usersExportBtn" type="button">Export</button>
+      </div>
 
       <div id="usersFormWrap"></div>
 
@@ -1161,16 +1175,39 @@
       </div>
     </section>
 
-    <!-- ============== VÝPLATY (placeholder, bod 9 zadání) ============== -->
+    <!-- ============== VÝPLATY (Milník 7, Část G, sekce 8.6.4) ==============
+         Leader/Administrátor - finanční závazky vzniklé po prodeji
+         (poslat_tip_k_vyplate), schválení/vyplacení a export. -->
     <section id="vyplatyScreen" class="page" hidden>
       <div class="section-head">
         <h2>Výplaty</h2>
-        <p>Finanční závazky, schválení a export pro účetnictví (sekce 8.6.4 zadání).</p>
+        <p>Finanční závazky, schválení a export pro účetnictví (sekce 8.6.4 zadání). Splatnost = datum prodeje + 5 dní (7.5). Řádky po splatnosti, které ještě nejsou vyplacené, jsou zvýrazněné.</p>
       </div>
-      <div class="placeholder-box">
-        <div class="placeholder-icon">🚧</div>
-        <p><strong>Tato část zatím není postavena</strong> — bude v budoucím milníku. Bez provizního modulu nevznikají žádné vyplatitelné nároky, které by se daly zobrazit.</p>
+
+      <div id="vyplatyBanner"></div>
+
+      <div class="toolbar-row-end">
+        <button class="btn-small" id="vyplatyExportBtn" type="button">Export</button>
       </div>
+
+      <div id="vyplatyTableWrap"></div>
+    </section>
+
+    <!-- ============== MOJE TIPY (role RK, Milník 7, Část I) ==============
+         JEDINÁ obrazovka pro roli RK - přehled výhradně jí přiřazených
+         tipů (moje_rk_tipy()) + inline formulář na cenu/marži/stav RK/
+         datum prodeje/kupní cenu (aktualizovat_rk_tip()), sekce 5.3/8.6.2. -->
+    <section id="rkPortalScreen" class="page" hidden>
+      <div class="section-head">
+        <h2>Moje tipy</h2>
+        <p>Tipy přiřazené vaší realitní kanceláři. Klikněte na „Upravit“ pro zadání nabídkové ceny, marže a stavu obchodu.</p>
+      </div>
+
+      <div id="rkPortalBanner"></div>
+
+      <div id="rkPortalFormWrap"></div>
+
+      <div id="rkPortalTableWrap"></div>
     </section>
 
     <!-- ============== OBSAH (placeholder, bod 9 zadání) ============== -->
@@ -1198,6 +1235,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.115.0/dist/umd/supabase.js"></script>
+<!-- Milník 7 (Část H): SheetJS pro generování skutečných .xlsx souborů na
+     klientovi - "Export" tlačítka u Uživatelé/Tipy/Výplaty. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 (function () {
   "use strict";
@@ -1221,10 +1261,31 @@
     a: { email: "tipar-a@demo.realitnitip.cz" },
     b: { email: "tipar-b@demo.realitnitip.cz" },
     leader: { email: "leader@demo.realitnitip.cz" },
-    admin: { email: "admin@demo.realitnitip.cz" }
+    admin: { email: "admin@demo.realitnitip.cz" },
+    // Milník 7 (Část I/3): 5. demo tlačítko - RK přihlašovací účet
+    // založený migrací m7_demo_rk_ucet (RPC vytvorit_pristup_rk,
+    // impersonace demo Leadera), viz docs/milnik7_rk_portal_a_vyplaty.md.
+    rk: { email: "rk-demo@demo.realitnitip.cz" }
   };
-  var ROLE_LABELS = { tipar: "tipař", leader: "leader", administrator: "administrátor" };
-  var ROLE_LABELS_CAP = { tipar: "Tipař", leader: "Leader", administrator: "Administrátor" };
+  var ROLE_LABELS = { tipar: "tipař", leader: "leader", administrator: "administrátor", rk: "RK" };
+  var ROLE_LABELS_CAP = { tipar: "Tipař", leader: "Leader", administrator: "Administrátor", rk: "RK" };
+
+  // Milník 7 (sekce 5.3 zadání): "Status RK" - NEZÁVISLÁ druhá stavová
+  // osa u tipu, spravuje výhradně přiřazená RK. Odlišná sada kódů od
+  // STAV_LABELS/STAV_CODES ("Status ověření", Leader/Administrátor) -
+  // obě osy sdílejí časovou osu (tip_status_history.osa), ale mají
+  // vlastní mapování na české názvy a vlastní dropdown.
+  var RK_STAV_LABELS = {
+    oceneno_rk: "Oceněno RK",
+    klient_nepristoupil_ke_koupi: "Klient nepřistoupil ke koupi",
+    podepsana_rezervacni_smlouva: "Podepsaná rezervační smlouva",
+    nemovitost_v_prodeji: "Nemovitost v prodeji",
+    prodano: "Prodáno"
+  };
+  var RK_STAV_CODES = [
+    "oceneno_rk", "klient_nepristoupil_ke_koupi", "podepsana_rezervacni_smlouva",
+    "nemovitost_v_prodeji", "prodano"
+  ];
 
   // Milník 4 (sekce 5.1 zadání v2.1) — status ověření tipu je JEDEN
   // volný výběr ze 7 hodnot (interní kódy = CHECK constraint v DB),
@@ -1309,6 +1370,25 @@
     return str.slice(0, n).trim() + "…";
   }
 
+  // Milník 7 (Část H): jeden sdílený export do skutečného .xlsx (SheetJS,
+  // načteno z CDN - viz <head>). Bere pole řádků, které volající připraví
+  // (typicky initDataTable().getVisibleRows() - "co je zrovna vidět /
+  // vyfiltrované", ne nutně všechna data bez ohledu na filtr, viz
+  // docs/milnik7_rk_portal_a_vyplaty.md). rowMapper(row) vrací pole hodnot
+  // v pořadí headers.
+  function exportToXlsx(filename, sheetName, headers, rows, rowMapper) {
+    if (typeof XLSX === "undefined") {
+      window.alert("Export se nepodařilo spustit (knihovna XLSX se nenačetla). Zkontrolujte prosím připojení k internetu a zkuste to znovu.");
+      return;
+    }
+    var aoa = [headers];
+    (rows || []).forEach(function (r) { aoa.push(rowMapper(r)); });
+    var ws = XLSX.utils.aoa_to_sheet(aoa);
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, sheetName.slice(0, 31));
+    XLSX.writeFile(wb, filename);
+  }
+
   function roleBadgeHtml(role) {
     var cls = role === "leader" ? "role-leader" : (role === "administrator" ? "role-administrator" : "role-tipar");
     var label = ROLE_LABELS[role] || role || "?";
@@ -1330,6 +1410,39 @@
     return STAV_CODES.map(function (code) {
       return '<option value="' + escapeHtml(code) + '"' + (code === selected ? ' selected' : '') + '>' + escapeHtml(STAV_LABELS[code]) + '</option>';
     }).join("");
+  }
+
+  // Milník 7 (5.3): "Status RK" - stejné vzorové helpery jako "Status
+  // ověření" výše, jen nad RK_STAV_LABELS/RK_STAV_CODES.
+  function rkStavLabel(stav) {
+    if (!stav) return "Zatím neoceněno";
+    return RK_STAV_LABELS[stav] || stav;
+  }
+
+  function rkStavPillHtml(stav) {
+    if (!stav) return '<span class="pill pill-ceka_na_overeni">Zatím neoceněno</span>';
+    // Vizuálně odlišené barvy pill (znovupoužití existujících tříd pill-*,
+    // ne nová CSS sada jen pro pět dalších hodnot) - "prodáno" = ok/zelená,
+    // "klient nepřistoupil" = zamítnuto/červená, ostatní = neutrální info.
+    var cls = "pill pill-tip_overen_hledame_rk";
+    if (stav === "prodano") cls = "pill pill-tip_overen_hledame_rk";
+    else if (stav === "klient_nepristoupil_ke_koupi") cls = "pill pill-zamitnuto";
+    else cls = "pill pill-probiha_overeni";
+    return '<span class="' + cls + '">' + escapeHtml(rkStavLabel(stav)) + '</span>';
+  }
+
+  function rkStavSelectOptionsHtml(selected) {
+    return RK_STAV_CODES.map(function (code) {
+      return '<option value="' + escapeHtml(code) + '"' + (code === selected ? ' selected' : '') + '>' + escapeHtml(RK_STAV_LABELS[code]) + '</option>';
+    }).join("");
+  }
+
+  // Kombinovaný lookup pro časovou osu (tip_status_history) - záznamy s
+  // osa='overeni' nesou kódy ze STAV_CODES, záznamy s osa='rk' kódy z
+  // RK_STAV_CODES; obě sady se nikdy nepřekrývají, takže jde bezpečně
+  // zkusit obě mapy.
+  function stavLabelAny(stav) {
+    return STAV_LABELS[stav] || RK_STAV_LABELS[stav] || stav || "?";
   }
 
   function formatCena(value) {
@@ -1543,7 +1656,11 @@
     render();
     return {
       setRows: function (newRows) { config.rows = newRows; render(); },
-      rerender: render
+      rerender: render,
+      // Milník 7 (Část H): export bere přesně to, co je zrovna vidět
+      // (aktuální hledání + filtr), ne nutně úplně všechna data - viz
+      // docs/milnik7_rk_portal_a_vyplaty.md.
+      getVisibleRows: applyRows
     };
   }
 
@@ -1557,13 +1674,17 @@
     var html = "";
     rows.forEach(function (r) {
       if (!r || typeof r !== "object") return;
+      // Milník 7 (5.3): záznam patří buď ose "Status ověření" nebo ose
+      // "Status RK" (sloupec osa) - stavLabelAny zkusí obě mapy, štítek
+      // osy jen u "rk" (aby se od běžných záznamů vizuálně odlišil).
+      var jeRkOsa = r.osa === "rk";
       var prechod = r.predchozi_stav
-        ? (stavLabel(r.predchozi_stav) + " → " + stavLabel(r.novy_stav))
-        : ("Založen ve stavu " + stavLabel(r.novy_stav));
+        ? (stavLabelAny(r.predchozi_stav) + " → " + stavLabelAny(r.novy_stav))
+        : ("Založen ve stavu " + stavLabelAny(r.novy_stav));
       html += '' +
         '<div class="timeline-item' + (r.je_oprava ? ' tl-oprava' : '') + '">' +
           '<div class="tl-top">' +
-            '<span>' + escapeHtml(prechod) + (r.je_oprava ? ' <span class="tl-oprava-badge">(oprava)</span>' : '') + '</span>' +
+            '<span>' + (jeRkOsa ? '<span class="tl-oprava-badge" style="background:var(--info-soft);color:var(--info);">Status RK</span> ' : '') + escapeHtml(prechod) + (r.je_oprava ? ' <span class="tl-oprava-badge">(oprava)</span>' : '') + '</span>' +
             '<span class="tl-date">' + escapeHtml(formatDateTime(r.vytvoreno_kdy)) + '</span>' +
           '</div>' +
           '<div class="tl-meta">Provedl: ' + escapeHtml(historyActorLabel(r)) + '</div>' +
@@ -1629,6 +1750,7 @@
   var rkTable = null; // instance initDataTable pro záložku "Realitní kanceláře"
   var rkRowsCache = []; // poslední načtení - pro formulář Upravit a mazání (dohledání názvu v potvrzovacím dialogu)
   var rkFormTargetId = null; // null = formulář v režimu "přidat", jinak id upravované RK
+  var rkAccessSet = {}; // Milník 7 (Část I/2): rk_id -> true, pokud už RK má vytvořený přihlašovací účet (profiles.role='rk')
 
   // Milník 4 (bod 1, sekce 8.6.2 zadání v2.1) + Milník 5 (bod 5 zadání) —
   // tabulka VŠECH RK (aktivní i neaktivní), ne jen aktivních jako
@@ -1657,6 +1779,14 @@
       (tipsRkResult.data || []).forEach(function (t) { if (t && t.rk_id) pocty[t.rk_id] = (pocty[t.rk_id] || 0) + 1; });
     }
 
+    // Milník 7 (Část I/2): které RK už mají vytvořený přihlašovací účet -
+    // "Vytvořit přístup" se zobrazí jen u RK, které v tomto seznamu nejsou.
+    rkAccessSet = {};
+    var rkProfilesResult = await sb.from("profiles").select("rk_id").eq("role", "rk");
+    if (!rkProfilesResult.error) {
+      (rkProfilesResult.data || []).forEach(function (p) { if (p && p.rk_id) rkAccessSet[p.rk_id] = true; });
+    }
+
     var columns = [
       { key: "nazev", label: "Název", get: function (r) { return r.nazev || ""; } },
       { key: "ico", label: "IČO", get: function (r) { return r.ico || ""; }, render: function (r) { return escapeHtml(r.ico || "—"); } },
@@ -1670,10 +1800,13 @@
       { key: "pocet_tipu", label: "Počet přiřazených tipů", get: function (r) { return pocty[r.id] || 0; } },
       { key: "vytvoreno_kdy", label: "Založena", get: function (r) { return r.vytvoreno_kdy ? new Date(r.vytvoreno_kdy).getTime() : 0; },
         render: function (r) { return escapeHtml(formatDateTime(r.vytvoreno_kdy)); } },
+      { key: "pristup", label: "Přístup", sortable: false, get: function (r) { return rkAccessSet[r.id] ? "Ano" : "Ne"; },
+        render: function (r) { return rkAccessSet[r.id] ? '<span class="pill pill-tip_overen_hledame_rk">Vytvořen</span>' : '<span class="dt-muted">Bez přístupu</span>'; } },
       { key: "akce", label: "Akce", sortable: false, get: function () { return ""; },
         render: function (r) {
           return '<button type="button" class="btn-small btn-small-ghost rk-edit-btn" data-rk-id="' + escapeHtml(r.id) + '">Upravit</button> ' +
-                 '<button type="button" class="btn-small btn-small-danger rk-delete-btn" data-rk-id="' + escapeHtml(r.id) + '">Smazat</button>';
+                 '<button type="button" class="btn-small btn-small-danger rk-delete-btn" data-rk-id="' + escapeHtml(r.id) + '">Smazat</button>' +
+                 (rkAccessSet[r.id] ? '' : ' <button type="button" class="btn-small btn-small-ghost rk-access-btn" data-rk-id="' + escapeHtml(r.id) + '">Vytvořit přístup</button>');
         } }
     ];
 
@@ -1698,6 +1831,9 @@
               var row = rkRowsCache.filter(function (r) { return r.id === id; })[0];
               submitDeleteRk(id, row ? row.nazev : "");
             });
+          });
+          container.querySelectorAll(".rk-access-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () { openRkAccessForm(btn.getAttribute("data-rk-id")); });
           });
         }
       });
@@ -1840,6 +1976,112 @@
     showBanner(el("rkBanner"), "error", "Realitní kancelář se nepodařilo smazat. Zkuste to prosím znovu.");
   }
 
+  // Milník 7 (Část B/4, I/2): "Vytvořit přístup" - Leader/Administrátor
+  // založí RK přihlašovací účet (RPC vytvorit_pristup_rk). Bezpečnostní
+  // rozhodnutí: heslo zadává rovnou Leader/Administrátor ve formuláři a
+  // sdělí ho RK mimo systém (telefonicky/osobně) - nejjednodušší bezpečná
+  // varianta, protože z tohoto prostředí není dostupné odchozí SMTP pro
+  // pozvánkový e-mail. Tlačítko "Vygenerovat" jen usnadní vymyslet silné
+  // heslo, pole je záměrně čitelné (type="text"), aby ho šlo zkopírovat a
+  // předat RK - viz docs/milnik7_rk_portal_a_vyplaty.md.
+  function vytvoritPristupRkErrorMessage(error) {
+    if (!error) return "Nastala neočekávaná chyba. Zkuste to prosím znovu.";
+    var msg = error.message || "";
+    if (error.code === "42501" || msg.indexOf("Nemate opravneni") !== -1) {
+      return "Nemáte oprávnění vytvořit přístup RK.";
+    }
+    if (msg.indexOf("uz ma pristup vytvoreny") !== -1) {
+      return "Tato realitní kancelář už má přístup vytvořený.";
+    }
+    if (msg.indexOf("uz je zaregistrovany") !== -1) {
+      return "Tento e-mail už je zaregistrovaný v systému.";
+    }
+    if (msg.indexOf("Zadejte platny e-mail") !== -1) {
+      return "Zadejte prosím platný e-mail.";
+    }
+    if (msg.indexOf("Heslo musi mit alespon 6 znaku") !== -1) {
+      return "Heslo musí mít alespoň 6 znaků.";
+    }
+    if (msg.indexOf("Jmeno je povinne") !== -1) {
+      return "Jméno je povinné.";
+    }
+    if (msg.indexOf("Realitni kancelar nenalezena") !== -1) {
+      return "Realitní kancelář nebyla nalezena.";
+    }
+    return "Přístup se nepodařilo vytvořit (" + escapeHtml(msg || "neznámá chyba") + ").";
+  }
+
+  function generovatNahodneHeslo() {
+    var znaky = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+    var arr = new Uint32Array(12);
+    (window.crypto || window.msCrypto).getRandomValues(arr);
+    var out = "";
+    for (var i = 0; i < arr.length; i++) out += znaky[arr[i] % znaky.length];
+    return out;
+  }
+
+  function openRkAccessForm(rkId) {
+    var rk = rkRowsCache.filter(function (r) { return r.id === rkId; })[0];
+    if (!rk) return;
+
+    el("rkFormWrap").innerHTML =
+      '<div class="card detail-card">' +
+        '<h3 class="detail-section-title" style="margin-top:0;">Vytvořit přístup — ' + escapeHtml(rk.nazev || "RK") + '</h3>' +
+        '<p class="dt-muted" style="margin-top:-6px;">Heslo zadejte a sdělte RK mimo systém (telefonicky/osobně) - e-mailové pozvánky tento systém nerozesílá.</p>' +
+        '<form id="rkAccessFormPanel" novalidate>' +
+          '<div class="form-grid">' +
+            '<div class="field"><label for="rafJmeno">Jméno *</label><input type="text" id="rafJmeno" value="' + escapeHtml(rk.kontaktni_osoba || rk.nazev || "") + '"></div>' +
+            '<div class="field"><label for="rafPrijmeni">Příjmení</label><input type="text" id="rafPrijmeni" value=""></div>' +
+            '<div class="field col-span-2"><label for="rafEmail">E-mail *</label><input type="email" id="rafEmail" value="' + escapeHtml(rk.email || "") + '"></div>' +
+            '<div class="field col-span-2"><label for="rafHeslo">Heslo * (alespoň 6 znaků)</label><input type="text" id="rafHeslo" placeholder="zadejte nebo vygenerujte"> <button type="button" class="btn-small btn-small-ghost" id="rafGenerovatBtn" style="margin-top:6px;">Vygenerovat</button></div>' +
+          '</div>' +
+          '<div class="form-actions">' +
+            '<button class="btn-primary" type="submit" id="rkAccessSaveBtn" style="width:auto;">Vytvořit přístup</button>' +
+            '<button class="btn-ghost" type="button" id="rkAccessCancelBtn">Zrušit</button>' +
+          '</div>' +
+        '</form>' +
+      '</div>';
+
+    el("rafGenerovatBtn").addEventListener("click", function () { el("rafHeslo").value = generovatNahodneHeslo(); });
+    el("rkAccessCancelBtn").addEventListener("click", closeRkForm);
+    el("rkAccessFormPanel").addEventListener("submit", function (e) {
+      e.preventDefault();
+      submitRkAccessForm(rkId);
+    });
+    el("rkFormWrap").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  async function submitRkAccessForm(rkId) {
+    var jmeno = el("rafJmeno").value.trim();
+    var prijmeni = el("rafPrijmeni").value.trim();
+    var email = el("rafEmail").value.trim();
+    var heslo = el("rafHeslo").value;
+
+    if (!jmeno) { showBanner(el("rkBanner"), "error", "Jméno je povinné."); return; }
+    if (!email || !isValidEmail(email)) { showBanner(el("rkBanner"), "error", "Zadejte prosím platný e-mail."); return; }
+    if (!heslo || heslo.length < 6) { showBanner(el("rkBanner"), "error", "Heslo musí mít alespoň 6 znaků."); return; }
+
+    var btn = el("rkAccessSaveBtn");
+    if (btn) btn.disabled = true;
+    showBanner(el("rkBanner"), null, null);
+
+    var result = await sb.rpc("vytvorit_pristup_rk", {
+      p_rk_id: rkId, p_email: email, p_heslo: heslo, p_jmeno: jmeno, p_prijmeni: prijmeni || null
+    });
+
+    if (btn) btn.disabled = false;
+
+    if (result.error) {
+      console.error("Chyba při vytváření přístupu RK:", result.error);
+      showBanner(el("rkBanner"), "error", vytvoritPristupRkErrorMessage(result.error));
+      return;
+    }
+
+    closeRkForm();
+    showBanner(el("rkBanner"), "ok", 'Přístup byl vytvořen (e-mail: ' + email + ', heslo: ' + heslo + '). Sdělte přihlašovací údaje RK mimo systém - tady se už znovu nezobrazí.');
+    await refreshRkSection();
+  }
+
   function setFieldError(fieldEl, hasError, message) {
     if (!fieldEl) return;
     fieldEl.classList.toggle("has-error", !!hasError);
@@ -1904,17 +2146,20 @@
 
   var ALL_SCREEN_IDS = [
     "newTipScreen", "listScreen", "networkScreen", "tipyScreen", "detailScreen",
-    "usersScreen", "rkScreen", "provizeScreen", "vyplatyScreen", "obsahScreen", "auditScreen"
+    "usersScreen", "rkScreen", "provizeScreen", "vyplatyScreen", "obsahScreen", "auditScreen",
+    "rkPortalScreen"
   ];
   var TAB_SCREEN = {
     "new": "newTipScreen", list: "listScreen", network: "networkScreen", tipy: "tipyScreen",
     users: "usersScreen", rk: "rkScreen", provize: "provizeScreen", vyplaty: "vyplatyScreen",
-    obsah: "obsahScreen", audit: "auditScreen"
+    obsah: "obsahScreen", audit: "auditScreen",
+    rkportal: "rkPortalScreen"
   };
   var TAB_BUTTON = {
     "new": "tabNewBtn", list: "tabListBtn", network: "tabNetworkBtn", tipy: "tabTipyBtn",
     users: "tabUsersBtn", rk: "tabRkBtn", provize: "tabProvizeBtn", vyplaty: "tabVyplatyBtn",
-    obsah: "tabObsahBtn", audit: "tabAuditBtn"
+    obsah: "tabObsahBtn", audit: "tabAuditBtn",
+    rkportal: "tabRkPortalBtn"
   };
 
   function hideAllScreens() {
@@ -1951,7 +2196,9 @@
     if (tab === "users") fetchUsersTable();
     if (tab === "rk") refreshRkSection();
     if (tab === "provize") fetchProvizeScreen();
+    if (tab === "vyplaty") fetchVyplatyTable();
     if (tab === "audit") fetchAuditTable();
+    if (tab === "rkportal") fetchRkPortal();
   }
 
   // Milník 4 (bod 9 zadání) — "Administrace" jako sloučená záložka mizí,
@@ -1966,7 +2213,11 @@
   var ROLE_TAB_ORDER = {
     tipar: ["new", "list", "network"],
     leader: ["network", "new", "tipy", "users", "rk", "provize", "vyplaty", "obsah", "audit"],
-    administrator: ["tipy", "users", "rk", "provize", "vyplaty", "obsah", "audit"]
+    administrator: ["tipy", "users", "rk", "provize", "vyplaty", "obsah", "audit"],
+    // Milník 7 (Část I/1): role RK vidí VÝHRADNĚ jednu obrazovku - žádný
+    // jiný tab se jí nikdy nezobrazí (applyNavForRole skryje vše, co
+    // není v tomto poli).
+    rk: ["rkportal"]
   };
 
   function applyNavForRole(role) {
@@ -2034,7 +2285,7 @@
   // ---------------- auth actions ----------------
 
   function setAuthButtonsDisabled(disabled) {
-    [el("demoABtn"), el("demoBBtn"), el("demoLeaderBtn"), el("demoAdminBtn"), el("loginSubmitBtn")].forEach(function (b) {
+    [el("demoABtn"), el("demoBBtn"), el("demoLeaderBtn"), el("demoAdminBtn"), el("demoRkBtn"), el("loginSubmitBtn")].forEach(function (b) {
       if (b) b.disabled = disabled;
     });
   }
@@ -2148,14 +2399,17 @@
 
     // Milník 5 (bod 3 zadání) — Leader nemá "Moje tipy", landing page po
     // přihlášení je teď "Přehled leadra" ("network").
-    activeTab = isAdmin ? "tipy" : (role === "leader" ? "network" : "list");
+    // Milník 7 (Část I/1) — role RK má jedinou landing page "rkportal".
+    activeTab = isAdmin ? "tipy" : (role === "leader" ? "network" : (role === "rk" ? "rkportal" : "list"));
     // showAppScreen() -> setActiveTab(activeTab) už samo zavolá
     // fetchMyTips()/fetchTipyTable()/fetchMyNetworkTable() pro první
     // záložku - druhý explicitní fetch tady by byl jen zbytečný
     // duplicitní dotaz navíc.
     showAppScreen();
 
-    if (!isAdmin) {
+    // Realtime kanál "tips-changes-*" je filtrovaný na autor_id=uživatel -
+    // RK nikdy není autorem tipu, takže by šlo o prázdný kanál navíc.
+    if (!isAdmin && role !== "rk") {
       subscribeRealtime(user.id);
     }
   }
@@ -2539,6 +2793,7 @@
   var detailTip = null;
   var detailReturnTab = "list";
   var detailTipSchema = null; // Milník 6 (Část D) - provizní schéma snapshotované u aktuálně otevřeného tipu, pro rozpis provize
+  var detailTipMaVyplatu = false; // Milník 7 (Část G) - true, pokud už pro tento tip existují řádky ve "vyplaty" (zabrání duplicitnímu tlačítku "Odeslat k výplatě")
 
   function detailItem(label, value) {
     return '<div class="detail-item"><div class="detail-label">' + escapeHtml(label) + '</div><div class="detail-value">' + escapeHtml(value || "—") + '</div></div>';
@@ -2571,6 +2826,16 @@
     if (canEdit && detailTip.provizni_schema_id) {
       var schemaResult = await sb.from("provizni_schema").select("*").eq("id", detailTip.provizni_schema_id).single();
       if (!schemaResult.error) detailTipSchema = schemaResult.data;
+    }
+
+    // Milník 7 (Část G/4): zjistíme, jestli už tenhle tip byl odeslán k
+    // výplatě (existují-li pro něj řádky vyplaty) - "Odeslat k výplatě"
+    // tlačítko se pak nezobrazí znovu (server by odmítl duplicitu stejně,
+    // ale UI to rovnou skryje).
+    detailTipMaVyplatu = false;
+    if (canEdit) {
+      var vyplataResult = await sb.from("vyplaty").select("id").eq("tip_id", tipId).limit(1);
+      if (!vyplataResult.error) detailTipMaVyplatu = (vyplataResult.data || []).length > 0;
     }
 
     renderTipDetail();
@@ -2644,27 +2909,93 @@
       editHtml = '<div class="card detail-card"><div class="detail-item"><div class="detail-label">Status ověření</div><div class="detail-value">' + stavPillHtml(t.stav) + '</div></div></div>';
     }
 
+    // Milník 7 (5.3): "Status RK" je NEZÁVISLÁ druhá stavová osa, kterou
+    // spravuje výhradně přiřazená RK - Leader/Administrátor ji tady vidí
+    // jen READ-ONLY (bez formuláře), plus tlačítko "Odeslat k výplatě",
+    // aktivní jen když jsou splněné podmínky (7.5/8.6.4).
+    var rkStatusHtml = "";
+    if (canEdit) {
+      var muzeKVyplate = t.rk_stav === "prodano" && t.datum_prodeje && t.kupni_cena != null && !detailTipMaVyplatu;
+      var duvodNemuze = "";
+      if (detailTipMaVyplatu) duvodNemuze = "Tento tip už byl k výplatě odeslán.";
+      else if (t.rk_stav !== "prodano") duvodNemuze = 'Odeslat lze až po Statusu RK „Prodáno" s vyplněným datem prodeje a kupní cenou.';
+
+      rkStatusHtml = '<div class="card detail-card">' +
+        '<h3 class="detail-section-title" style="margin-top:0;">Status RK</h3>' +
+        '<div class="detail-grid">' +
+          detailItem("Status RK", t.rk_stav ? rkStavLabel(t.rk_stav) : "Zatím neoceněno") +
+          detailItem("Nabídková cena RK", formatCena(t.rk_nabidkova_cena)) +
+          detailItem("Marže RK", t.rk_marze_typ ? (t.rk_marze_typ === "procento" ? t.rk_marze_hodnota + " %" : formatCena(t.rk_marze_hodnota)) : "—") +
+          detailItem("Datum prodeje", t.datum_prodeje || "—") +
+          detailItem("Kupní cena", formatCena(t.kupni_cena)) +
+        '</div>' +
+        '<p class="dt-muted" style="margin-top:8px;">Spravuje výhradně přiřazená realitní kancelář (nezávislá stavová osa, sekce 5.3) - editace je jen v jejím portálu, ne odsud.</p>' +
+        '<div class="form-actions" style="margin-top:10px;">' +
+          '<button class="btn-primary" type="button" id="dtPoslatKVyplateBtn" style="width:auto;"' + (muzeKVyplate ? "" : " disabled") + '>Odeslat k výplatě</button>' +
+          (duvodNemuze ? '<span class="dt-muted" style="margin-left:10px;">' + escapeHtml(duvodNemuze) + '</span>' : '') +
+        '</div>' +
+      '</div>';
+    }
+
     var provizeHtml = canEdit ? provizniRozpisHtml(t, detailTipSchema) : "";
     var timelineHtml = '<h3 class="detail-section-title">Časová osa</h3><div class="timeline open" id="detailTimeline"></div>';
 
-    el("detailContentWrap").innerHTML = infoHtml + editHtml + provizeHtml + timelineHtml;
+    el("detailContentWrap").innerHTML = infoHtml + editHtml + rkStatusHtml + provizeHtml + timelineHtml;
     fetchAndRenderTimeline(t.id, el("detailTimeline"));
     if (canEdit) wireDetailEditForm();
+    if (canEdit && el("dtPoslatKVyplateBtn")) {
+      el("dtPoslatKVyplateBtn").addEventListener("click", function () { submitPoslatKVyplate(t.id); });
+    }
   }
 
-  // Milník 6 (Část D, sekce 8.4.1 zadání) — rozpis odhadované provize pro
-  // Leadera/Administrátora: kolik by (podle snapshotovaného schématu u
-  // TOHOTO tipu) dostal tipař/sponzor/Leader a kolik marže zůstává
-  // provozovateli. Jen informativní zobrazení, nic se tu neukládá - žádné
-  // skutečné nároky/výplaty (to je modul Výplaty, mimo rozsah).
+  async function submitPoslatKVyplate(tipId) {
+    var btn = el("dtPoslatKVyplateBtn");
+    if (btn) btn.disabled = true;
+    showBanner(el("detailBanner"), null, null);
+
+    var result = await sb.rpc("poslat_tip_k_vyplate", { p_tip_id: tipId });
+
+    if (result.error) {
+      console.error("Chyba při odesílání tipu k výplatě:", result.error);
+      showBanner(el("detailBanner"), "error", vyplatyErrorMessage(result.error));
+      if (btn) btn.disabled = false;
+      return;
+    }
+
+    showBanner(el("detailBanner"), "ok", 'Tip byl odeslán k výplatě - tři nové závazky (tipař/sponzor/Leader) najdete v záložce „Výplaty".');
+    setTimeout(function () { showBanner(el("detailBanner"), null, null); }, 6000);
+
+    var refreshed = await sb.from("tips").select("*").eq("id", tipId).single();
+    if (!refreshed.error && refreshed.data) detailTip = refreshed.data;
+    detailTipMaVyplatu = true;
+    renderTipDetail();
+  }
+
+  // Milník 6 (Část D) + Milník 7 (KRITICKÁ oprava, sekce 7.1): rozpis
+  // provize pro Leadera/Administrátora - kolik by (podle snapshotovaného
+  // schématu u TOHOTO tipu) dostal tipař/sponzor/Leader a kolik marže
+  // zůstává provozovateli. ZÁKLADEM je od Milníku 7 PROVIZE RK (nabídková
+  // cena × marže, nebo po prodeji kupní cena × marže), NE cena
+  // nemovitosti jako dřív - viz t.odhadovana_provize/t.konecna_provize/
+  // t.provize_je_konecna, dopočítané serverem (tips_snapshot_a_vypocet_provize).
+  // Jen informativní zobrazení, nic se tu neukládá.
   function provizniRozpisHtml(t, schema) {
-    var zaklad = t.odhadovana_cena != null ? Number(t.odhadovana_cena) : (t.pozadovana_cena != null ? Number(t.pozadovana_cena) : null);
+    var jeFinalni = !!t.provize_je_konecna;
+    var zaklad = null;
+    if (jeFinalni) {
+      zaklad = t.rk_marze_typ === "procento" ? (Number(t.kupni_cena) * Number(t.rk_marze_hodnota) / 100) : Number(t.rk_marze_hodnota);
+    } else if (t.rk_nabidkova_cena != null && t.rk_marze_typ != null && t.rk_marze_hodnota != null) {
+      zaklad = t.rk_marze_typ === "procento" ? (Number(t.rk_nabidkova_cena) * Number(t.rk_marze_hodnota) / 100) : Number(t.rk_marze_hodnota);
+    }
+    var nadpis = jeFinalni ? "Rozpis finální provize" : "Rozpis odhadované provize";
+    var znacka = jeFinalni ? ' <span class="pill pill-tip_overen_hledame_rk">Finální</span>' : ' <span class="pill pill-probiha_overeni">Odhad</span>';
+
     if (zaklad == null) {
-      return '<div class="card detail-card"><h3 class="detail-section-title" style="margin-top:0;">Rozpis odhadované provize</h3>' +
-        '<p class="dt-muted">Chybí požadovaná i odhadovaná cena — provizi nelze spočítat.</p></div>';
+      return '<div class="card detail-card"><h3 class="detail-section-title" style="margin-top:0;">' + escapeHtml(nadpis) + '</h3>' +
+        '<p class="dt-muted">RK zatím nezadala nabídkovou cenu a marži — základem provize je provize RK, ne cena nemovitosti (sekce 7.1), bez ní ji nelze spočítat.</p></div>';
     }
     if (!schema) {
-      return '<div class="card detail-card"><h3 class="detail-section-title" style="margin-top:0;">Rozpis odhadované provize</h3>' +
+      return '<div class="card detail-card"><h3 class="detail-section-title" style="margin-top:0;">' + escapeHtml(nadpis) + '</h3>' +
         '<p class="dt-muted">Tento tip nemá přiřazené provizní schéma (vznikl před zavedením provizního modulu).</p></div>';
     }
     var sazbaTipar = Number(schema.sazba_tipar), sazbaSponzor = Number(schema.sazba_sponzor);
@@ -2677,9 +3008,9 @@
     var platnost = formatDateTime(schema.platne_od) + (schema.platne_do ? " – " + formatDateTime(schema.platne_do) : " – stále platné");
 
     return '<div class="card detail-card">' +
-      '<h3 class="detail-section-title" style="margin-top:0;">Rozpis odhadované provize</h3>' +
+      '<h3 class="detail-section-title" style="margin-top:0;">' + escapeHtml(nadpis) + znacka + '</h3>' +
       '<div class="detail-grid">' +
-        detailItem("Základ (cena)", formatCena(zaklad)) +
+        detailItem("Základ (provize RK, " + (jeFinalni ? "z kupní ceny" : "z nabídkové ceny") + ")", formatCena(zaklad)) +
         detailItem("Použité schéma", (schema.nazev || "(bez názvu)") + " · " + platnost) +
         detailItem("Tipař (" + sazbaTipar + " %)", formatCena(castkaTipar)) +
         detailItem("Sponzor (" + sazbaSponzor + " %)", formatCena(castkaSponzor)) +
@@ -2687,7 +3018,10 @@
         detailItem("Marže systému (" + sazbaMarze + " %)", formatCena(castkaMarze)) +
         detailItem("Provize sítě celkem (tipař+sponzor+Leader)", formatCena(celkemSit)) +
       '</div>' +
-      '<p class="dt-muted" style="margin-top:8px;">Marže zůstává provozovateli — není součástí částky vyplácené síti. Sazby jsou snapshot schématu platného v okamžiku vložení tohoto tipu; pozdější změna sazeb tento výpočet zpětně nemění.</p>' +
+      '<p class="dt-muted" style="margin-top:8px;">' + (jeFinalni
+        ? "Definitivní přepočet po prodeji z kupní ceny RK (" + formatCena(t.kupni_cena) + "). DPH u jednotlivých příjemců se připočítává až při odeslání k výplatě (7.5)."
+        : "Odhad z nabídkové ceny RK (" + formatCena(t.rk_nabidkova_cena) + ') — po označení „Prodáno" (Status RK) se přepočte definitivně z kupní ceny.') +
+        ' Marže zůstává provozovateli — není součástí částky vyplácené síti. Sazby jsou snapshot schématu platného v okamžiku vložení tohoto tipu.</p>' +
     '</div>';
   }
 
@@ -2810,6 +3144,18 @@
     if (msg.indexOf("Cilovy uzivatel neexistuje") !== -1) {
       return "Cílový uživatel neexistuje.";
     }
+    if (msg.indexOf("Zmenu role smi provest pouze Administrator") !== -1) {
+      return "Změnu role smí provést pouze Administrátor.";
+    }
+    if (msg.indexOf("Timto formularem lze nastavit jen roli") !== -1) {
+      return "Tímto formulářem lze nastavit jen roli tipař nebo leader.";
+    }
+    if (msg.indexOf("Administratora ani RK nelze") !== -1) {
+      return "Administrátora ani RK nelze tímto formulářem upravovat.";
+    }
+    if (msg.indexOf("uq_single_leader") !== -1 || (error.code === "23505" && msg.indexOf("leader") !== -1)) {
+      return "V systému už existuje jiný Leader - nejdřív mu roli změňte, teprve pak lze nastavit nového.";
+    }
     return "Změnu se nepodařilo uložit (" + escapeHtml(msg || "neznámá chyba") + ").";
   }
 
@@ -2838,6 +3184,8 @@
       { key: "tym", label: "Velikost týmu", get: function (r) { return Number(r.velikost_tymu || 0); } },
       { key: "dny", label: "Délka spolupráce (dny)", get: function (r) { return Number(r.dny_spoluprace || 0); } },
       { key: "tipy", label: "Počet tipů", get: function (r) { return Number(r.pocet_tipu || 0); } },
+      { key: "plati_dph", label: "Plátce DPH", get: function (r) { return r.plati_dph ? "Ano" : "Ne"; },
+        render: function (r) { return r.plati_dph ? '<span class="pill pill-tip_overen_hledame_rk">Plátce DPH</span>' : '<span class="dt-muted">—</span>'; } },
       { key: "stav", label: "Stav", get: function (r) { return r.aktivni ? "Aktivní" : "Vymazán"; },
         render: function (r) { return r.aktivni ? '<span class="pill pill-tip_overen_hledame_rk">Aktivní</span>' : '<span class="pill pill-zamitnuto">Vymazán</span>'; } },
       { key: "akce", label: "Akce", sortable: false, get: function () { return ""; },
@@ -2904,7 +3252,11 @@
             '<div class="field"><label for="ufTelefon">Telefon</label><input type="tel" id="ufTelefon" value="' + escapeHtml(target.telefon || "") + '"></div>' +
             '<div class="field"><label for="ufEmail">E-mail</label><input type="email" id="ufEmail" value="' + escapeHtml(target.email || "") + '"></div>' +
             '<div class="field col-span-2"><label for="ufSponsor">Sponzor</label><select id="ufSponsor"><option value="">— bez sponzora —</option>' + optionsHtml + '</select></div>' +
+            (currentUser.role === "administrator"
+              ? '<div class="field"><label for="ufRole">Role</label><select id="ufRole"><option value="tipar"' + (target.role === "tipar" ? " selected" : "") + '>Tipař</option><option value="leader"' + (target.role === "leader" ? " selected" : "") + '>Leader</option></select></div>'
+              : "") +
             '<div class="col-span-2"><div class="field-checkbox"><input type="checkbox" id="ufAktivni"' + (target.aktivni ? ' checked' : '') + '><label for="ufAktivni">Aktivní (odškrtnutím se uživatel označí jako „Vymazán“ - měkké označení, profil a data zůstávají)</label></div></div>' +
+            '<div class="col-span-2"><div class="field-checkbox"><input type="checkbox" id="ufPlatiDph"' + (target.plati_dph ? ' checked' : '') + '><label for="ufPlatiDph">Plátce DPH (sekce 7.5 - promítne se do výpočtu výplat)</label></div></div>' +
             '<div class="field col-span-2"><label for="ufDuvod">Důvod úpravy *</label><input type="text" id="ufDuvod" placeholder="Povinné zdůvodnění pro auditní log"></div>' +
           '</div>' +
           '<div class="form-actions">' +
@@ -2934,6 +3286,9 @@
     var email = el("ufEmail").value.trim() || null;
     var sponsorId = el("ufSponsor").value || null;
     var aktivni = el("ufAktivni").checked;
+    var platiDph = el("ufPlatiDph").checked;
+    var roleEl = el("ufRole"); // jen pro Administrátora (viz openUserForm)
+    var novaRole = roleEl ? roleEl.value : null;
     var duvod = el("ufDuvod").value.trim();
     if (!duvod) {
       showBanner(el("usersBanner"), "error", "Důvod úpravy je povinný.");
@@ -2952,7 +3307,9 @@
       p_email: email,
       p_novy_sponsor_id: sponsorId,
       p_aktivni: aktivni,
-      p_duvod: duvod
+      p_duvod: duvod,
+      p_plati_dph: platiDph,
+      p_novy_role: novaRole
     });
 
     if (submitBtn) submitBtn.disabled = false;
@@ -2995,7 +3352,13 @@
     deaktivace_uzivatele: "Deaktivace uživatele",
     vytvoreni_rk: "Založení RK",
     uprava_rk: "Úprava RK",
-    smazani_rk: "Smazání RK"
+    smazani_rk: "Smazání RK",
+    // Milník 7
+    zmena_role: "Změna role",
+    vytvoreni_pristupu_rk: "Vytvoření přístupu RK",
+    odeslano_k_vyplate: "Odesláno k výplatě",
+    schvaleni_vyplaty: "Schválení výplaty",
+    oznaceni_vyplaty_vyplacene: "Označení výplaty jako vyplacené"
   };
 
   function auditActionLabel(action) {
@@ -3019,7 +3382,8 @@
     jmeno: "Jméno", prijmeni: "Příjmení", telefon: "Telefon", email: "E-mail",
     sponsor_id: "Sponzor", aktivni: "Aktivní stav",
     nazev: "Název", ico: "IČO", dic: "DIČ", adresa: "Adresa",
-    kontaktni_osoba: "Kontaktní osoba"
+    kontaktni_osoba: "Kontaktní osoba",
+    role: "Role", plati_dph: "Plátce DPH", rk_id: "Realitní kancelář"
   };
   var AUDIT_FIELDS_SKIP = { id: true, vytvoreno_kdy: true };
   var AUDIT_RK_ACTIONS = { vytvoreni_rk: true, uprava_rk: true, smazani_rk: true };
@@ -3308,6 +3672,11 @@
     if (!currentUser) return;
     closeProvizeForm();
 
+    // Milník 7 (Část E): vytvářet nové schéma smí VÝHRADNĚ Administrátor
+    // (RPC to server-side vynucuje - tohle je jen kosmetika navrch, ať
+    // Leader nevidí tlačítko, které by mu server stejně odmítl).
+    el("provizeAddOpenBtn").hidden = currentUser.role !== "administrator";
+
     // Jména tvůrců schémat - stejný vzor jako Audit log/Tipy (Leader a
     // Admin vidí všechny profily přes existující RLS politiku).
     var profilesResult = await sb.from("profiles").select("id, jmeno, prijmeni, role, sponsor_id, invite_code").order("jmeno");
@@ -3329,6 +3698,320 @@
     renderProvizeSimulace();
   }
 
+  // ---------------- Milník 7 (Část I): RK portál ("Moje tipy") ----------------
+  //
+  // JEDINÁ obrazovka pro roli RK (viz ROLE_TAB_ORDER.rk). Data jdou
+  // výhradně přes moje_rk_tipy() (SECURITY DEFINER, vrací jen tipy
+  // přiřazené volající RK a jen obchodně relevantní pole - žádný Status
+  // ověření, poznámka Leadera ani provize sítě, sekce 5.3/7.1 zadání).
+  // Uložení přes aktualizovat_rk_tip() - server znovu ověří, že tip
+  // skutečně patří volající RK (42501 jinak).
+
+  function rkPortalErrorMessage(error) {
+    if (!error) return "Nastala neočekávaná chyba. Zkuste to prosím znovu.";
+    var msg = error.message || "";
+    if (error.code === "42501" || msg.indexOf("vyhrazen realitnim") !== -1) {
+      return "Nemáte oprávnění k tomuto tipu.";
+    }
+    if (msg.indexOf("Prodano") !== -1) {
+      return 'Pro stav „Prodáno" je nutné vyplnit datum prodeje i kupní cenu.';
+    }
+    if (msg.indexOf("Neznamy typ marze") !== -1) return "Neznámý typ marže.";
+    if (msg.indexOf("Neznamy status RK") !== -1) return "Neznámý status RK.";
+    if (msg.indexOf("Tip nenalezen") !== -1) return "Tip nebyl nalezen nebo k němu nemáte přístup.";
+    return "Změnu se nepodařilo uložit (" + escapeHtml(msg || "neznámá chyba") + ").";
+  }
+
+  var rkPortalTable = null;
+  var rkPortalRowsCache = [];
+  var rkPortalFormTargetId = null;
+
+  function renderRkPortalTable(rows) {
+    var columns = [
+      { key: "klient", label: "Klient", get: function (r) { return r.jmeno_klienta || ""; } },
+      { key: "kontakt", label: "Kontakt", className: "dt-wrap",
+        get: function (r) { return (r.telefon || "") + " " + (r.email || ""); },
+        render: function (r) { return escapeHtml(r.telefon || "—") + (r.email ? '<br><span class="dt-muted">' + escapeHtml(r.email) + '</span>' : ''); } },
+      { key: "nemovitost", label: "Nemovitost", get: function (r) { return r.typ_nemovitosti || ""; } },
+      { key: "lokalita", label: "Lokalita", get: function (r) { return r.lokalita || ""; } },
+      { key: "typ_transakce", label: "Typ transakce", get: function (r) { return r.typ_transakce || ""; },
+        render: function (r) { return escapeHtml(r.typ_transakce || "—"); } },
+      { key: "nabidkova_cena", label: "Nabídková cena", get: function (r) { return r.rk_nabidkova_cena != null ? Number(r.rk_nabidkova_cena) : -1; },
+        render: function (r) { return escapeHtml(formatCena(r.rk_nabidkova_cena)); } },
+      { key: "marze", label: "Marže", sortable: false, get: function () { return ""; },
+        render: function (r) {
+          if (r.rk_marze_typ == null || r.rk_marze_hodnota == null) return '<span class="dt-muted">—</span>';
+          return r.rk_marze_typ === "procento" ? escapeHtml(String(r.rk_marze_hodnota)) + " %" : escapeHtml(formatCena(r.rk_marze_hodnota));
+        } },
+      { key: "rk_stav", label: "Status RK", get: function (r) { return rkStavLabel(r.rk_stav); }, render: function (r) { return rkStavPillHtml(r.rk_stav); } },
+      { key: "datum_prodeje", label: "Datum prodeje", get: function (r) { return r.datum_prodeje || ""; },
+        render: function (r) { return escapeHtml(r.datum_prodeje || "—"); } },
+      { key: "kupni_cena", label: "Kupní cena", get: function (r) { return r.kupni_cena != null ? Number(r.kupni_cena) : -1; },
+        render: function (r) { return escapeHtml(formatCena(r.kupni_cena)); } },
+      { key: "akce", label: "Akce", sortable: false, get: function () { return ""; },
+        render: function (r) { return '<button type="button" class="btn-small btn-small-ghost rkportal-edit-btn" data-tip-id="' + escapeHtml(r.tip_id) + '">Upravit</button>'; } }
+    ];
+
+    if (rkPortalTable) {
+      rkPortalTable.setRows(rows);
+    } else {
+      rkPortalTable = initDataTable(el("rkPortalTableWrap"), {
+        columns: columns,
+        rows: rows,
+        rowId: function (r) { return r.tip_id; },
+        searchPlaceholder: "Hledat (klient, lokalita…)",
+        emptyMessage: "Zatím vám nejsou přiřazené žádné tipy.",
+        itemNoun: "tipů",
+        initialSortKey: "klient",
+        wireExtra: function (container) {
+          container.querySelectorAll(".rkportal-edit-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () { openRkPortalForm(btn.getAttribute("data-tip-id")); });
+          });
+        }
+      });
+    }
+  }
+
+  async function fetchRkPortal() {
+    if (!currentUser) return;
+    closeRkPortalForm();
+    var result = await sb.rpc("moje_rk_tipy");
+    if (result.error) {
+      console.error("Chyba při načítání tipů RK:", result.error);
+      showBanner(el("rkPortalBanner"), "error", "Nepodařilo se načíst přiřazené tipy.");
+      return;
+    }
+    rkPortalRowsCache = result.data || [];
+    renderRkPortalTable(rkPortalRowsCache);
+  }
+
+  function closeRkPortalForm() {
+    rkPortalFormTargetId = null;
+    el("rkPortalFormWrap").innerHTML = "";
+  }
+
+  function openRkPortalForm(tipId) {
+    var t = rkPortalRowsCache.filter(function (r) { return r.tip_id === tipId; })[0];
+    if (!t) return;
+    rkPortalFormTargetId = tipId;
+
+    el("rkPortalFormWrap").innerHTML =
+      '<div class="card detail-card">' +
+        '<h3 class="detail-section-title" style="margin-top:0;">Upravit — ' + escapeHtml(t.jmeno_klienta || "tip") + '</h3>' +
+        '<form id="rkPortalFormPanel" novalidate>' +
+          '<div class="form-grid">' +
+            '<div class="field"><label for="rpfCena">Nabídková cena (Kč)</label><input type="number" id="rpfCena" min="0" step="1" value="' + (t.rk_nabidkova_cena != null ? escapeHtml(String(t.rk_nabidkova_cena)) : "") + '"></div>' +
+            '<div class="field"><label for="rpfMarzeTyp">Typ marže</label><select id="rpfMarzeTyp"><option value="procento"' + (t.rk_marze_typ !== "fix" ? " selected" : "") + '>Procento z ceny</option><option value="fix"' + (t.rk_marze_typ === "fix" ? " selected" : "") + '>Pevná částka (Kč)</option></select></div>' +
+            '<div class="field"><label for="rpfMarzeHodnota">Hodnota marže</label><input type="number" id="rpfMarzeHodnota" min="0" step="0.01" value="' + (t.rk_marze_hodnota != null ? escapeHtml(String(t.rk_marze_hodnota)) : "") + '"></div>' +
+            '<div class="field"><label for="rpfStav">Status RK</label><select id="rpfStav"><option value="">— nevybráno —</option>' + rkStavSelectOptionsHtml(t.rk_stav) + '</select></div>' +
+            '<div class="field" id="rpfDatumField"' + (t.rk_stav === "prodano" ? "" : " hidden") + '><label for="rpfDatum">Datum prodeje *</label><input type="date" id="rpfDatum" value="' + escapeHtml(t.datum_prodeje || "") + '"></div>' +
+            '<div class="field" id="rpfKupniField"' + (t.rk_stav === "prodano" ? "" : " hidden") + '><label for="rpfKupni">Kupní cena (Kč) *</label><input type="number" id="rpfKupni" min="0" step="1" value="' + (t.kupni_cena != null ? escapeHtml(String(t.kupni_cena)) : "") + '"></div>' +
+          '</div>' +
+          '<div class="form-actions">' +
+            '<button class="btn-primary" type="submit" id="rkPortalSaveBtn" style="width:auto;">Uložit</button>' +
+            '<button class="btn-ghost" type="button" id="rkPortalCancelBtn">Zrušit</button>' +
+          '</div>' +
+        '</form>' +
+      '</div>';
+
+    function updateConditional() {
+      var isProdano = el("rpfStav").value === "prodano";
+      el("rpfDatumField").hidden = !isProdano;
+      el("rpfKupniField").hidden = !isProdano;
+    }
+    el("rpfStav").addEventListener("change", updateConditional);
+
+    el("rkPortalCancelBtn").addEventListener("click", closeRkPortalForm);
+    el("rkPortalFormPanel").addEventListener("submit", function (e) {
+      e.preventDefault();
+      submitRkPortalForm(tipId);
+    });
+    el("rkPortalFormWrap").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  async function submitRkPortalForm(tipId) {
+    var cenaRaw = el("rpfCena").value;
+    var marzeTyp = el("rpfMarzeTyp").value;
+    var marzeHodnotaRaw = el("rpfMarzeHodnota").value;
+    var stav = el("rpfStav").value || null;
+    var datumEl = el("rpfDatum");
+    var kupniEl = el("rpfKupni");
+    var datum = (stav === "prodano" && datumEl) ? (datumEl.value || null) : null;
+    var kupni = (stav === "prodano" && kupniEl && kupniEl.value !== "") ? Number(kupniEl.value) : null;
+
+    if (stav === "prodano" && (!datum || kupni == null)) {
+      showBanner(el("rkPortalBanner"), "error", 'Pro stav „Prodáno" je nutné vyplnit datum prodeje i kupní cenu.');
+      return;
+    }
+
+    var btn = el("rkPortalSaveBtn");
+    if (btn) btn.disabled = true;
+    showBanner(el("rkPortalBanner"), null, null);
+
+    var result = await sb.rpc("aktualizovat_rk_tip", {
+      p_tip_id: tipId,
+      p_rk_nabidkova_cena: cenaRaw === "" ? null : Number(cenaRaw),
+      p_rk_marze_typ: marzeHodnotaRaw === "" ? null : marzeTyp,
+      p_rk_marze_hodnota: marzeHodnotaRaw === "" ? null : Number(marzeHodnotaRaw),
+      p_rk_stav: stav,
+      p_datum_prodeje: datum,
+      p_kupni_cena: kupni
+    });
+
+    if (btn) btn.disabled = false;
+
+    if (result.error) {
+      console.error("Chyba při ukládání tipu RK:", result.error);
+      showBanner(el("rkPortalBanner"), "error", rkPortalErrorMessage(result.error));
+      return;
+    }
+
+    closeRkPortalForm();
+    showBanner(el("rkPortalBanner"), "ok", "Uloženo.");
+    setTimeout(function () { showBanner(el("rkPortalBanner"), null, null); }, 4000);
+    await fetchRkPortal();
+  }
+
+  // ---------------- Milník 7 (Část G): "Výplaty" (sekce 8.6.4) ----------------
+
+  function vyplatyErrorMessage(error) {
+    if (!error) return "Nastala neočekávaná chyba. Zkuste to prosím znovu.";
+    var msg = error.message || "";
+    if (error.code === "42501" || msg.indexOf("Nemate opravneni") !== -1) {
+      return "Nemáte oprávnění tuto akci provést.";
+    }
+    if (msg.indexOf('RK stav "Prodano"') !== -1 || msg.indexOf("Prodano") !== -1 && msg.indexOf("vcetne") !== -1) {
+      return 'Tip musí mít Status RK „Prodáno" včetně data prodeje a kupní ceny.';
+    }
+    if (msg.indexOf("uz byl k vyplate odeslan") !== -1) {
+      return "Tento tip už byl k výplatě odeslán dříve.";
+    }
+    if (msg.indexOf("nema priradene provizni schema") !== -1) {
+      return "Tip nemá přiřazené provizní schéma, výplatu nelze spočítat.";
+    }
+    if (msg.indexOf("nema vyplnenou marzi") !== -1) {
+      return "Tip nemá vyplněnou marži RK, výplatu nelze spočítat.";
+    }
+    if (msg.indexOf("Tip nenalezen") !== -1) return "Tip nebyl nalezen.";
+    if (msg.indexOf("Vyplata nenalezena") !== -1) return "Výplata nebyla nalezena.";
+    if (msg.indexOf('"Ceka na schvaleni"') !== -1 || msg.indexOf("Schvalit lze jen") !== -1) {
+      return 'Schválit lze jen výplatu ve stavu „Čeká na schválení".';
+    }
+    if (msg.indexOf('"Schvaleno"') !== -1 || msg.indexOf("Oznacit jako vyplacene") !== -1) {
+      return 'Označit jako vyplacené lze jen výplatu ve stavu „Schváleno".';
+    }
+    return "Akci se nepodařilo provést (" + escapeHtml(msg || "neznámá chyba") + ").";
+  }
+
+  var VYPLATA_STAV_LABELS = { ceka_na_schvaleni: "Čeká na schválení", schvaleno: "Schváleno", vyplaceno: "Vyplaceno" };
+  var VYPLATA_ROLE_LABELS = { tipar: "Tipař", sponzor: "Sponzor", leader: "Leader" };
+  var vyplatyTable = null;
+  var vyplatyRowsCache = [];
+
+  function todayIso() {
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+
+  function renderVyplatyTable(rows) {
+    var today = todayIso();
+    var columns = [
+      { key: "prijemce", label: "Příjemce", get: function (r) { return celeJmeno(adminUsersById[r.prijemce_id]) || r.prijemce_id; } },
+      { key: "role", label: "Role", get: function (r) { return VYPLATA_ROLE_LABELS[r.role_prijemce] || r.role_prijemce; } },
+      { key: "tip", label: "Tip (klient)", get: function (r) { return (allTipsById[r.tip_id] && allTipsById[r.tip_id].jmeno_klienta) || r.tip_id; } },
+      { key: "bez_dph", label: "Částka bez DPH", get: function (r) { return Number(r.castka_bez_dph); }, render: function (r) { return escapeHtml(formatCena(r.castka_bez_dph)); } },
+      { key: "s_dph", label: "Částka s DPH", get: function (r) { return Number(r.castka_celkem); }, render: function (r) { return escapeHtml(formatCena(r.castka_celkem)); } },
+      { key: "splatnost", label: "Splatnost", get: function (r) { return r.splatnost_do || ""; },
+        render: function (r) {
+          var poSplatnosti = r.splatnost_do && r.splatnost_do < today && r.stav !== "vyplaceno";
+          return (poSplatnosti ? '<span style="color:var(--danger);font-weight:600;">' : '<span>') + escapeHtml(r.splatnost_do || "—") + '</span>';
+        } },
+      { key: "stav", label: "Stav", get: function (r) { return VYPLATA_STAV_LABELS[r.stav] || r.stav; },
+        render: function (r) {
+          var cls = r.stav === "vyplaceno" ? "pill-tip_overen_hledame_rk" : (r.stav === "schvaleno" ? "pill-probiha_overeni" : "pill-ceka_na_overeni");
+          return '<span class="pill ' + cls + '">' + escapeHtml(VYPLATA_STAV_LABELS[r.stav] || r.stav) + '</span>';
+        } },
+      { key: "akce", label: "Akce", sortable: false, get: function () { return ""; },
+        render: function (r) {
+          if (r.stav === "ceka_na_schvaleni") return '<button type="button" class="btn-small btn-small-ghost vyplata-schvalit-btn" data-id="' + escapeHtml(r.id) + '">Schválit</button>';
+          if (r.stav === "schvaleno") return '<button type="button" class="btn-small btn-small-ghost vyplata-vyplatit-btn" data-id="' + escapeHtml(r.id) + '">Označit vyplacené</button>';
+          return '<span class="dt-muted">—</span>';
+        } }
+    ];
+
+    if (vyplatyTable) {
+      vyplatyTable.setRows(rows);
+    } else {
+      vyplatyTable = initDataTable(el("vyplatyTableWrap"), {
+        columns: columns,
+        rows: rows,
+        rowId: function (r) { return r.id; },
+        searchPlaceholder: "Hledat výplaty…",
+        emptyMessage: 'Zatím žádné výplaty. Vznikají po odeslání prodaného tipu „k výplatě" z Detailu tipu.',
+        itemNoun: "výplat",
+        initialSortKey: "splatnost",
+        selectFilter: { get: function (r) { return r.stav; }, options: Object.keys(VYPLATA_STAV_LABELS).map(function (k) { return { value: k, label: VYPLATA_STAV_LABELS[k] }; }), allLabel: "Všechny stavy" },
+        wireExtra: function (container) {
+          container.querySelectorAll(".vyplata-schvalit-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () { submitSchvalitVyplatu(btn.getAttribute("data-id")); });
+          });
+          container.querySelectorAll(".vyplata-vyplatit-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () { submitOznacitVyplaceno(btn.getAttribute("data-id")); });
+          });
+        }
+      });
+    }
+  }
+
+  async function submitSchvalitVyplatu(id) {
+    showBanner(el("vyplatyBanner"), null, null);
+    var result = await sb.rpc("schvalit_vyplatu", { p_vyplata_id: id });
+    if (result.error) {
+      console.error("Chyba při schvalování výplaty:", result.error);
+      showBanner(el("vyplatyBanner"), "error", vyplatyErrorMessage(result.error));
+      return;
+    }
+    showBanner(el("vyplatyBanner"), "ok", "Výplata byla schválena.");
+    setTimeout(function () { showBanner(el("vyplatyBanner"), null, null); }, 4000);
+    await fetchVyplatyTable();
+  }
+
+  async function submitOznacitVyplaceno(id) {
+    showBanner(el("vyplatyBanner"), null, null);
+    var result = await sb.rpc("oznacit_vyplaceno", { p_vyplata_id: id });
+    if (result.error) {
+      console.error("Chyba při označování výplaty jako vyplacené:", result.error);
+      showBanner(el("vyplatyBanner"), "error", vyplatyErrorMessage(result.error));
+      return;
+    }
+    showBanner(el("vyplatyBanner"), "ok", "Výplata byla označena jako vyplacená.");
+    setTimeout(function () { showBanner(el("vyplatyBanner"), null, null); }, 4000);
+    await fetchVyplatyTable();
+  }
+
+  async function fetchVyplatyTable() {
+    if (!currentUser) return;
+    // Jména příjemců + klienti tipů - stejný vzor jako Audit log/Tipy.
+    var profilesResult = await sb.from("profiles").select("id, jmeno, prijmeni, role, sponsor_id, invite_code").order("jmeno");
+    if (!profilesResult.error) {
+      adminUsersById = {};
+      (profilesResult.data || []).forEach(function (u) { if (u && u.id) adminUsersById[u.id] = u; });
+    }
+    var tipsResult = await sb.from("tips").select("id, jmeno_klienta");
+    if (!tipsResult.error) {
+      (tipsResult.data || []).forEach(function (t) { if (t && t.id) allTipsById[t.id] = Object.assign(allTipsById[t.id] || {}, t); });
+    }
+
+    var result = await sb.from("vyplaty").select("*").order("splatnost_do");
+    if (result.error) {
+      console.error("Chyba při načítání výplat:", result.error);
+      el("vyplatyTableWrap").innerHTML = '<div class="empty-state"><p>Výplaty se nepodařilo načíst.</p></div>';
+      return;
+    }
+    vyplatyRowsCache = result.data || [];
+    renderVyplatyTable(vyplatyRowsCache);
+  }
+
   // ---------------- wiring ----------------
 
   function wireEvents() {
@@ -3339,6 +4022,7 @@
     el("demoBBtn").addEventListener("click", function () { demoLogin("b"); });
     el("demoLeaderBtn").addEventListener("click", function () { demoLogin("leader"); });
     el("demoAdminBtn").addEventListener("click", function () { demoLogin("admin"); });
+    el("demoRkBtn").addEventListener("click", function () { demoLogin("rk"); });
 
     el("loginForm").addEventListener("submit", function (e) {
       e.preventDefault();
@@ -3415,6 +4099,84 @@
     // a živý přepočet simulace při psaní ceny.
     el("provizeAddOpenBtn").addEventListener("click", openProvizeForm);
     el("provizeSimCena").addEventListener("input", renderProvizeSimulace);
+
+    // Milník 7 (Část H) — export do XLSX bere aktuálně vyfiltrovaná data
+    // z initDataTable (getVisibleRows). Rozsah sloupců u Uživatelé je
+    // vynucen podle role V JS (ne jen schováním tlačítka) - Leader jen
+    // jméno/příjmení/e-mail, Administrátor všechny sloupce (8.6.1).
+    el("usersExportBtn").addEventListener("click", function () {
+      if (!usersTable || !currentUser) return;
+      var rows = usersTable.getVisibleRows();
+      if (currentUser.role === "administrator") {
+        exportToXlsx(
+          "uzivatele.xlsx", "Uživatelé",
+          ["Jméno", "Příjmení", "Role", "Telefon", "E-mail", "Plátce DPH", "Přímí podřízení", "Velikost týmu", "Délka spolupráce (dny)", "Počet tipů", "Stav", "Sponzor"],
+          rows,
+          function (r) {
+            return [
+              r.jmeno || "", r.prijmeni || "", ROLE_LABELS_CAP[r.role] || r.role, r.telefon || "", r.email || "",
+              r.plati_dph ? "Ano" : "Ne", Number(r.primych_podrizenych || 0), Number(r.velikost_tymu || 0),
+              Number(r.dny_spoluprace || 0), Number(r.pocet_tipu || 0), r.aktivni ? "Aktivní" : "Vymazán",
+              celeJmeno(usersById[r.sponsor_id]) || ""
+            ];
+          }
+        );
+      } else {
+        // Leader (8.6.1 zadání): jen jméno/příjmení/e-mail, pro hromadné rozesílání.
+        exportToXlsx(
+          "uzivatele-emaily.xlsx", "E-maily",
+          ["Jméno", "Příjmení", "E-mail"],
+          rows,
+          function (r) { return [r.jmeno || "", r.prijmeni || "", r.email || ""]; }
+        );
+      }
+    });
+
+    el("tipyExportBtn").addEventListener("click", function () {
+      if (!tipyTable) return;
+      var rows = tipyTable.getVisibleRows();
+      exportToXlsx(
+        "tipy.xlsx", "Tipy",
+        ["Datum vytvoření", "Klient", "Telefon", "E-mail", "Nemovitost", "Lokalita", "Typ transakce", "Tipař",
+         "Status ověření", "Požadovaná cena", "Odhadovaná provize", "Status RK", "Datum prodeje", "Kupní cena", "Finální provize"],
+        rows,
+        function (r) {
+          return [
+            formatDateTime(r.vlozeno_kdy), r.jmeno_klienta || "", r.telefon || "", r.email || "",
+            r.typ_nemovitosti || "", r.lokalita || "", r.typ_transakce || "",
+            celeJmeno(adminUsersById[r.autor_id]) || "", stavLabel(r.stav),
+            r.pozadovana_cena != null ? Number(r.pozadovana_cena) : "",
+            r.odhadovana_provize != null ? Number(r.odhadovana_provize) : "",
+            r.rk_stav ? rkStavLabel(r.rk_stav) : "",
+            r.datum_prodeje || "",
+            r.kupni_cena != null ? Number(r.kupni_cena) : "",
+            (r.provize_je_konecna && r.konecna_provize != null) ? Number(r.konecna_provize) : ""
+          ];
+        }
+      );
+    });
+
+    el("vyplatyExportBtn").addEventListener("click", function () {
+      if (!vyplatyTable) return;
+      var rows = vyplatyTable.getVisibleRows();
+      exportToXlsx(
+        "vyplaty.xlsx", "Výplaty",
+        ["Příjemce", "Role", "Tip (klient)", "Částka bez DPH", "DPH", "Částka celkem", "Splatnost", "Stav", "Schválil", "Schváleno kdy", "Vyplaceno kdy"],
+        rows,
+        function (r) {
+          return [
+            celeJmeno(adminUsersById[r.prijemce_id]) || r.prijemce_id,
+            VYPLATA_ROLE_LABELS[r.role_prijemce] || r.role_prijemce,
+            (allTipsById[r.tip_id] && allTipsById[r.tip_id].jmeno_klienta) || r.tip_id,
+            Number(r.castka_bez_dph), Number(r.dph_castka), Number(r.castka_celkem),
+            r.splatnost_do || "", VYPLATA_STAV_LABELS[r.stav] || r.stav,
+            (r.schvalil_id && celeJmeno(adminUsersById[r.schvalil_id])) || "",
+            r.schvaleno_kdy ? formatDateTime(r.schvaleno_kdy) : "",
+            r.vyplaceno_kdy ? formatDateTime(r.vyplaceno_kdy) : ""
+          ];
+        }
+      );
+    });
   }
 
   // ---------------- boot ----------------
