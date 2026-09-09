@@ -1167,9 +1167,16 @@
 
       <div class="card detail-card" style="margin-top:18px;">
         <h3 class="detail-section-title" style="margin-top:0;">Simulace výpočtu</h3>
-        <p class="dt-muted" style="margin-top:-6px;">Podle aktuálně platného schématu — kolik by při dané ceně nemovitosti dostal tipař, sponzor, Leader a kolik by zůstalo jako marže provozovateli.</p>
+        <!-- Milník 8 (Bug 1 oprava): základem provize NENÍ cena nemovitosti,
+             ale PROVIZE REALITNÍ KANCELÁŘE (nabídková cena × marže RK, nebo
+             pevná částka) - stejně jako v produkčním DB triggeru
+             tips_snapshot_a_vypocet_provize()/aktualizovat_rk_tip() a v
+             rozpisu na Detailu tipu (provizniRozpisHtml). -->
+        <p class="dt-muted" style="margin-top:-6px;">Podle aktuálně platného schématu — základem výpočtu je PROVIZE RK (nabídková cena nemovitosti × marže RK, nebo pevná částka marže), ne cena nemovitosti samotná (sekce 7.1, Milník 7). Z provize RK se dopočítá, kolik by dostal tipař, sponzor, Leader a kolik marže systému.</p>
         <div class="form-grid">
-          <div class="field"><label for="provizeSimCena">Cena nemovitosti (Kč)</label><input type="number" id="provizeSimCena" min="0" step="1" placeholder="např. 5000000"></div>
+          <div class="field"><label for="provizeSimCena">Nabídková cena nemovitosti (Kč)</label><input type="number" id="provizeSimCena" min="0" step="1" placeholder="např. 5000000"></div>
+          <div class="field"><label for="provizeSimMarzeTyp">Typ marže RK</label><select id="provizeSimMarzeTyp"><option value="procento" selected>Procento z ceny</option><option value="fix">Pevná částka (Kč)</option></select></div>
+          <div class="field"><label for="provizeSimMarzeHodnota">Hodnota marže RK</label><input type="number" id="provizeSimMarzeHodnota" min="0" step="0.01" placeholder="např. 3"></div>
         </div>
         <div id="provizeSimResult"></div>
       </div>
@@ -1429,6 +1436,23 @@
     else if (stav === "klient_nepristoupil_ke_koupi") cls = "pill pill-zamitnuto";
     else cls = "pill pill-probiha_overeni";
     return '<span class="' + cls + '">' + escapeHtml(rkStavLabel(stav)) + '</span>';
+  }
+
+  // Milník 8 (Bug 2 oprava, sekce 8.4/8.4.1 zadání): jakmile RK na tipu
+  // začne pracovat (rk_stav vyplněné), tenhle helper vrátí AKTUÁLNÍ
+  // rk_stav místo zamrzlého "Předáno RK" - z pohledu Leadera/Administrátora
+  // to má vypadat jako plynulé pokračování téhož "stavu", který teď akorát
+  // řídí RK ("jedná se stejný status jako zadává leader jen s jinými
+  // hodnotami" - viz nahlášený bug). `stav` v DB se tím nemění a zůstává
+  // "predano_rk" jako interní mezikrok/historie (vidět v audit logu i
+  // časové ose) - mění se jen to, co se ZOBRAZUJE ve sloupci/poli
+  // "Status ověření" Leaderovi/Administrátorovi. RK dál výhradně přes
+  // aktualizovat_rk_tip() mění pouze `rk_stav`, tady se nic neukládá.
+  function aktualniStavLabel(t) {
+    return (t && t.rk_stav) ? rkStavLabel(t.rk_stav) : stavLabel(t && t.stav);
+  }
+  function aktualniStavPillHtml(t) {
+    return (t && t.rk_stav) ? rkStavPillHtml(t.rk_stav) : stavPillHtml(t && t.stav);
   }
 
   function rkStavSelectOptionsHtml(selected) {
@@ -2109,10 +2133,34 @@
   // obecnou zprávu ("Invalid login credentials") z bezpečnostních
   // důvodů (aby útočník nemohl enumerovat existující e-maily) a stejně
   // to zachováváme i tady — nerozlišujeme.
+  // Milník 8 (Bug 3 oprava): rozšířené mapování chyb signUp()/
+  // signInWithPassword() na srozumitelnou češtinu. Nově rozlišené:
+  //  - HTTP 429 / kód obsahující "rate_limit" (Supabase bez vlastního
+  //    SMTP má velmi nízký vestavěný limit na odesílání potvrzovacích
+  //    e-mailů - typicky se to projeví jako "email rate limit exceeded"
+  //    nebo GoTrue kód "over_email_send_rate_limit"). Tohle NENÍ chyba
+  //    v appce ani chyba uživatele - je to nastavení Supabase Auth
+  //    projektu, řeší se vlastním SMTP (Authentication -> Emails ->
+  //    SMTP Settings), viz docs/milnik8_bugfix_registrace_a_rk_stav.md.
+  //  - HTTP 400 / kód "email_address_invalid" (Supabase odmítl konkrétní
+  //    doménu/adresu jako nedoručitelnou) - taky nastavení Auth, ne
+  //    chyba appky, ale uživatel potřebuje jasnou zprávu.
+  // error.code (GoTrue strojový kód) je k dispozici jen v novějších
+  // verzích supabase-js - proto se kontroluje i error.status a text
+  // zprávy, ať mapování funguje i bez něj.
   function authErrorMessage(error) {
     if (!error) return "Nastala neočekávaná chyba. Zkuste to prosím znovu.";
     var msg = (error.message || "").toLowerCase();
+    var code = (error.code || "").toLowerCase();
+    var status = error.status;
 
+    if (status === 429 || code.indexOf("rate_limit") !== -1 || msg.indexOf("rate limit") !== -1 || msg.indexOf("too many") !== -1) {
+      return "Bylo odesláno příliš mnoho žádostí o potvrzovací e-mail. Počkejte prosím několik minut a zkuste to znovu.";
+    }
+    if (code === "email_address_invalid" || msg.indexOf("email_address_invalid") !== -1 ||
+        (status === 400 && msg.indexOf("email") !== -1 && msg.indexOf("invalid") !== -1)) {
+      return "Tuto e-mailovou adresu se nepodařilo ověřit jako platnou — zkontrolujte prosím překlepy.";
+    }
     if (msg.indexOf("invalid login credentials") !== -1) {
       return "Nesprávný e-mail nebo heslo.";
     }
@@ -2124,9 +2172,6 @@
     }
     if (msg.indexOf("password") !== -1 && (msg.indexOf("6") !== -1 || msg.indexOf("short") !== -1 || msg.indexOf("weak") !== -1)) {
       return "Heslo musí mít alespoň 6 znaků.";
-    }
-    if (msg.indexOf("rate limit") !== -1 || msg.indexOf("too many") !== -1) {
-      return "Příliš mnoho pokusů. Zkuste to prosím za chvíli znovu.";
     }
     if (msg.indexOf("network") !== -1 || msg.indexOf("fetch") !== -1) {
       return "Nepodařilo se spojit se serverem. Zkontrolujte prosím připojení k internetu.";
@@ -2319,48 +2364,72 @@
   // jako dřív invite_code - handle_new_user() trigger je přečte a uloží
   // do profiles (jmeno/prijmeni/telefon zvlášť), e-mail si trigger vezme
   // rovnou z NEW.email (auth.users), ne odsud.
+  // Milník 8 (Bug 3 oprava, KRITICKÉ): pojistka proti vícenásobnému
+  // odeslání registrace. Diagnóza nahlášeného problému ("příliš mnoho
+  // pokusů" / "chybný e-mail") ukázala 4 pokusy o signUp() stejného
+  // e-mailu během 10 vteřin - formulář sice tlačítko během requestu i
+  // předtím vypínal (submitBtn.disabled), ale beze změny textu/vzhledu
+  // to nebylo na první pohled jasné, takže uživatel klikal znovu a
+  // znovu vyčerpal Supabase limit na odesílání potvrzovacích e-mailů.
+  // Teď se tlačítko OKAMŽITĚ (synchronně, před voláním signUp) znepřístupní
+  // A změní text na jasný loading stav, v try/finally se vrátí do
+  // původního stavu vždy (úspěch, chyba i neočekávaná výjimka).
   async function doRegister(jmeno, prijmeni, telefon, email, password, inviteCode, bannerEl, submitBtn) {
-    if (submitBtn) submitBtn.disabled = true;
+    var puvodniText = submitBtn ? submitBtn.textContent : "";
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Vytváříme účet…";
+    }
     showBanner(bannerEl, null, null);
 
-    var meta = { jmeno: jmeno }; // role se z klienta neposílá - server ji vždy nastaví na 'tipar'
-    if (prijmeni) meta.prijmeni = prijmeni;
-    if (telefon) meta.telefon = telefon;
-    if (inviteCode) meta.invite_code = inviteCode; // server dohledá sponzora podle kódu, neplatný kód se jen ignoruje
+    try {
+      var meta = { jmeno: jmeno }; // role se z klienta neposílá - server ji vždy nastaví na 'tipar'
+      if (prijmeni) meta.prijmeni = prijmeni;
+      if (telefon) meta.telefon = telefon;
+      if (inviteCode) meta.invite_code = inviteCode; // server dohledá sponzora podle kódu, neplatný kód se jen ignoruje
 
-    var result = await sb.auth.signUp({
-      email: email,
-      password: password,
-      options: {
-        data: meta,
-        // Žádáme Supabase Auth o návrat na aktuální doménu appky (ne na
-        // výchozí Site URL z dashboardu, což bylo typicky localhost) - viz
-        // docs/milnik2_strom_role.md, sekce "Oprava po zpětné vazbě
-        // uživatele". POZOR: samo o sobě to nestačí - GoTrue tuto URL
-        // navíc vyžaduje mít v allow-listu "Redirect URLs" v Supabase
-        // dashboardu (Authentication -> URL Configuration), jinak se i
-        // tak použije jen Site URL. To je ruční krok mimo tento soubor.
-        emailRedirectTo: window.location.origin + window.location.pathname
+      var result = await sb.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: meta,
+          // Žádáme Supabase Auth o návrat na aktuální doménu appky (ne na
+          // výchozí Site URL z dashboardu, což bylo typicky localhost) - viz
+          // docs/milnik2_strom_role.md, sekce "Oprava po zpětné vazbě
+          // uživatele". POZOR: samo o sobě to nestačí - GoTrue tuto URL
+          // navíc vyžaduje mít v allow-listu "Redirect URLs" v Supabase
+          // dashboardu (Authentication -> URL Configuration), jinak se i
+          // tak použije jen Site URL. To je ruční krok mimo tento soubor.
+          emailRedirectTo: window.location.origin + window.location.pathname
+        }
+      });
+
+      if (result.error) {
+        showBanner(bannerEl, "error", authErrorMessage(result.error));
+        return;
       }
-    });
 
-    if (submitBtn) submitBtn.disabled = false;
+      if (result.data && result.data.session) {
+        // Projekt nemá zapnuté potvrzování e-mailu - uživatel je rovnou
+        // přihlášený, o zbytek se postará onAuthStateChange.
+        return;
+      }
 
-    if (result.error) {
-      showBanner(bannerEl, "error", authErrorMessage(result.error));
-      return;
+      // Potvrzování e-mailu je zapnuté - session zatím není.
+      showBanner(bannerEl, "ok", "Registrace proběhla, zkontrolujte e-mail a potvrďte účet, pak se přihlaste.");
+      el("registerForm").reset();
+      showLoginView();
+    } catch (e) {
+      // Neočekávaná výjimka (např. výpadek sítě uprostřed requestu) -
+      // pojistka, ať tlačítko nezůstane navždy zamčené v "Vytváříme účet…".
+      console.error("Neočekávaná chyba při registraci:", e);
+      showBanner(bannerEl, "error", "Nastala neočekávaná chyba. Zkontrolujte prosím připojení k internetu a zkuste to znovu.");
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = puvodniText || "Vytvořit účet";
+      }
     }
-
-    if (result.data && result.data.session) {
-      // Projekt nemá zapnuté potvrzování e-mailu - uživatel je rovnou
-      // přihlášený, o zbytek se postará onAuthStateChange.
-      return;
-    }
-
-    // Potvrzování e-mailu je zapnuté - session zatím není.
-    showBanner(bannerEl, "ok", "Registrace proběhla, zkontrolujte e-mail a potvrďte účet, pak se přihlaste.");
-    el("registerForm").reset();
-    showLoginView();
   }
 
   async function doLogout() {
@@ -2752,7 +2821,10 @@
       { key: "typ_transakce", label: "Typ transakce", get: function (r) { return r.typ_transakce || ""; },
         render: function (r) { return escapeHtml(r.typ_transakce || "—"); } },
       { key: "autor", label: "Tipař", get: function (r) { return (r.autor_id && celeJmeno(adminUsersById[r.autor_id])) || ""; } },
-      { key: "stav", label: "Status ověření", get: function (r) { return stavLabel(r.stav); }, render: function (r) { return stavPillHtml(r.stav); } },
+      // Milník 8 (Bug 2 oprava): jakmile má tip vyplněné rk_stav (RK na
+      // něm už pracuje), zobrazí se tady její AKTUÁLNÍ rk_stav místo
+      // zamrzlého "Předáno RK" - viz aktualniStavLabel/aktualniStavPillHtml.
+      { key: "stav", label: "Status ověření", get: function (r) { return aktualniStavLabel(r); }, render: function (r) { return aktualniStavPillHtml(r); } },
       { key: "pozadovana_cena", label: "Požadovaná cena",
         get: function (r) { return r.pozadovana_cena != null ? Number(r.pozadovana_cena) : -1; },
         render: function (r) { return escapeHtml(formatCena(r.pozadovana_cena)); } },
@@ -2885,12 +2957,22 @@
       // opravit_stav_tipu v DB zůstává nedotčená, jen se odsud nevolá.
       // Požadovaná cena je teď i tady editovatelná (bod 5, šestý bod
       // zadání) - vždy, ne jen když ji tipař nevyplnil.
+      // Milník 8 (Bug 2 oprava): jakmile RK na tipu pracuje (rk_stav
+      // vyplněné), přidá se k poli "Status ověření" info, že aktuální
+      // živý stav obchodu teď dál posouvá RK v kartě "Stav u realitní
+      // kanceláře" níže - dropdown sám zůstává beze změny (mění se
+      // pořád `stav`, Leader/Administrátor ho může nastavit kdykoli,
+      // sekce 5.1), jen to má být jasně vidět na první pohled.
+      var rkPrevzalaInfo = t.rk_stav
+        ? '<p class="dt-muted" style="margin:6px 0 0;">Tip je u realitní kanceláře - aktuální živý stav obchodu („' + escapeHtml(rkStavLabel(t.rk_stav)) + '") je v kartě „Stav u realitní kanceláře" níže.</p>'
+        : '';
       editHtml = '' +
         '<div class="card detail-card">' +
           '<h3 class="detail-section-title" style="margin-top:0;">Ověření tipu</h3>' +
           '<form id="detailSaveForm" novalidate>' +
             '<div class="form-grid">' +
               '<div class="field"><label for="dtStavSelect">Status ověření *</label><select id="dtStavSelect">' + stavSelectOptionsHtml(t.stav) + '</select></div>' +
+              (rkPrevzalaInfo ? '<div class="col-span-2">' + rkPrevzalaInfo + '</div>' : '') +
               '<div class="field" id="dtDuvodField" hidden><label for="dtDuvodInput">Důvod (povinné pro „Zamítnuto“) *</label><input type="text" id="dtDuvodInput" placeholder="Povinné zdůvodnění"></div>' +
               '<div class="field" id="dtRkField" hidden><label for="dtRkSelect">Realitní kancelář (povinné pro „Předáno RK“) *</label><select id="dtRkSelect"><option value="">— vyberte RK —</option>' + rkSelectOptionsHtml() + '</select></div>' +
               '<div class="field"><label for="dtPozadovanaCena">Požadovaná cena (Kč)</label><input type="number" id="dtPozadovanaCena" min="0" step="1" value="' + (t.pozadovana_cena != null ? escapeHtml(String(t.pozadovana_cena)) : "") + '"></div>' +
@@ -2920,10 +3002,14 @@
       if (detailTipMaVyplatu) duvodNemuze = "Tento tip už byl k výplatě odeslán.";
       else if (t.rk_stav !== "prodano") duvodNemuze = 'Odeslat lze až po Statusu RK „Prodáno" s vyplněným datem prodeje a kupní cenou.';
 
+      // Milník 8 (Bug 2 oprava): karta přejmenována ze "Status RK" na
+      // "Stav u realitní kanceláře" - jasnější popisek pro Leadera/Admina,
+      // ať je zřejmé, že jde o aktuální živý stav obchodu u RK, needitovatelný
+      // odsud (jen RK ho mění, přes aktualizovat_rk_tip - beze změny).
       rkStatusHtml = '<div class="card detail-card">' +
-        '<h3 class="detail-section-title" style="margin-top:0;">Status RK</h3>' +
+        '<h3 class="detail-section-title" style="margin-top:0;">Stav u realitní kanceláře</h3>' +
         '<div class="detail-grid">' +
-          detailItem("Status RK", t.rk_stav ? rkStavLabel(t.rk_stav) : "Zatím neoceněno") +
+          detailItem("Aktuální stav", t.rk_stav ? rkStavLabel(t.rk_stav) : "Zatím neoceněno") +
           detailItem("Nabídková cena RK", formatCena(t.rk_nabidkova_cena)) +
           detailItem("Marže RK", t.rk_marze_typ ? (t.rk_marze_typ === "procento" ? t.rk_marze_hodnota + " %" : formatCena(t.rk_marze_hodnota)) : "—") +
           detailItem("Datum prodeje", t.datum_prodeje || "—") +
@@ -3644,27 +3730,52 @@
     await fetchProvizeScreen();
   }
 
+  // Milník 8 (Bug 1 oprava): simulace už NEPOČÍTÁ přímo z ceny nemovitosti
+  // (to byla zastaralá logika z Milníku 6, před zavedením RK portálu).
+  // Od Milníku 7 platí: RK zadává nabídkovou cenu + svoji marži (% nebo
+  // fix Kč), z toho vzniká PROVIZE RK, a teprve z provize RK se podle
+  // schématu (sazba_tipar/sazba_sponzor/sazba_leader/sazba_marze) počítá
+  // rozpis pro tipaře/sponzora/Leadera/systém. Výpočet níže je záměrně
+  // stejný jako v DB triggeru tips_snapshot_a_vypocet_provize() (a v
+  // rozpisu provizniRozpisHtml na Detailu tipu) - viz ověření v
+  // docs/milnik8_bugfix_registrace_a_rk_stav.md (testovací tip v
+  // transakci se stejnými vstupy dal identický výsledek).
   function renderProvizeSimulace() {
-    var cenaRaw = el("provizeSimCena").value;
     var wrap = el("provizeSimResult");
-    if (cenaRaw === "" || cenaRaw == null) { wrap.innerHTML = ""; return; }
+    var cenaRaw = el("provizeSimCena").value;
+    var marzeTyp = el("provizeSimMarzeTyp").value;
+    var marzeHodnotaRaw = el("provizeSimMarzeHodnota").value;
+
+    if (cenaRaw === "" && marzeHodnotaRaw === "") { wrap.innerHTML = ""; return; }
+    if (cenaRaw === "" || marzeHodnotaRaw === "") {
+      wrap.innerHTML = '<p class="dt-muted">Zadejte nabídkovou cenu nemovitosti i hodnotu marže RK.</p>';
+      return;
+    }
     var cena = Number(cenaRaw);
-    if (isNaN(cena) || cena < 0) { wrap.innerHTML = '<p class="dt-muted">Zadejte prosím platnou kladnou cenu.</p>'; return; }
+    var marzeHodnota = Number(marzeHodnotaRaw);
+    if (isNaN(cena) || cena < 0 || isNaN(marzeHodnota) || marzeHodnota < 0) {
+      wrap.innerHTML = '<p class="dt-muted">Zadejte prosím platná kladná čísla.</p>';
+      return;
+    }
     if (!provizeAktualni) { wrap.innerHTML = '<p class="dt-muted">Zatím není založené žádné provizní schéma.</p>'; return; }
 
+    // Provize RK = základ celého výpočtu (ne cena nemovitosti samotná).
+    var provizeRk = marzeTyp === "fix" ? marzeHodnota : (cena * marzeHodnota / 100);
+
     var s = provizeAktualni;
-    var tipar = cena * Number(s.sazba_tipar) / 100;
-    var sponzor = cena * Number(s.sazba_sponzor) / 100;
-    var leader = cena * Number(s.sazba_leader) / 100;
-    var marze = cena * Number(s.sazba_marze) / 100;
+    var tipar = provizeRk * Number(s.sazba_tipar) / 100;
+    var sponzor = provizeRk * Number(s.sazba_sponzor) / 100;
+    var leader = provizeRk * Number(s.sazba_leader) / 100;
+    var marzeSystem = provizeRk * Number(s.sazba_marze) / 100;
     var celkemSit = tipar + sponzor + leader;
 
     wrap.innerHTML = '<div class="detail-grid" style="margin-top:10px;">' +
+      detailItem("Provize RK (základ výpočtu)", formatCena(provizeRk)) +
       detailItem("Tipař (" + s.sazba_tipar + " %)", formatCena(tipar)) +
       detailItem("Sponzor (" + s.sazba_sponzor + " %)", formatCena(sponzor)) +
       detailItem("Leader (" + s.sazba_leader + " %)", formatCena(leader)) +
-      detailItem("Marže systému (" + s.sazba_marze + " %)", formatCena(marze)) +
-      detailItem("Provize sítě celkem", formatCena(celkemSit)) +
+      detailItem("Marže systému (" + s.sazba_marze + " %)", formatCena(marzeSystem)) +
+      detailItem("Provize sítě celkem (tipař+sponzor+Leader)", formatCena(celkemSit)) +
     '</div>';
   }
 
@@ -4098,7 +4209,11 @@
     // Milník 6 (Část D) — "+ Vytvořit novou verzi" nad historií schémat
     // a živý přepočet simulace při psaní ceny.
     el("provizeAddOpenBtn").addEventListener("click", openProvizeForm);
+    // Milník 8 (Bug 1 oprava) - simulace bere nabídkovou cenu + marži RK
+    // (typ i hodnotu), ne přímo cenu nemovitosti.
     el("provizeSimCena").addEventListener("input", renderProvizeSimulace);
+    el("provizeSimMarzeTyp").addEventListener("change", renderProvizeSimulace);
+    el("provizeSimMarzeHodnota").addEventListener("input", renderProvizeSimulace);
 
     // Milník 7 (Část H) — export do XLSX bere aktuálně vyfiltrovaná data
     // z initDataTable (getVisibleRows). Rozsah sloupců u Uživatelé je
