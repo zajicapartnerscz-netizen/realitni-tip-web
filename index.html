@@ -363,6 +363,61 @@
   .banner-error { background: var(--danger-soft); color: var(--danger); }
   .banner-ok { background: var(--ok-soft); color: var(--ok); }
 
+  /* ---------- check-email screen (Milník 9, bod 1) ---------- */
+  .check-email-icon { font-size: 40px; text-align: center; margin-bottom: 6px; }
+  .check-email-title { font-size: 22px; text-align: center; margin: 0 0 14px; }
+  .check-email-text { font-size: 14px; line-height: 1.6; color: var(--text); text-align: center; margin: 0 0 14px; }
+  .check-email-hint { color: var(--text-muted); font-size: 13px; }
+  #checkEmailView .btn-primary { margin-top: 6px; }
+
+  /* ---------- deadline / warning banners (Milník 9, bod 4) ---------- */
+  .top-alert {
+    padding: 10px 20px;
+    font-size: 13.5px;
+    font-weight: 500;
+    text-align: center;
+    background: var(--warn-soft);
+    color: var(--warn);
+  }
+  .top-alert a, .top-alert button.link-btn {
+    color: inherit;
+    text-decoration: underline;
+    font-weight: 700;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: inherit;
+    padding: 0;
+  }
+  .top-alert.top-alert-danger { background: var(--danger-soft); color: var(--danger); }
+
+  /* ---------- registrace/KYC pills a badge (Milník 9, bod 3/4/5) ---------- */
+  .pill-email_neoveren { background: var(--danger-soft); color: var(--danger); }
+  .pill-email_overen { background: var(--warn-soft); color: var(--warn); }
+  .pill-vyplneny_udaje { background: var(--info-soft); color: var(--info); }
+  .pill-autentizovano { background: var(--ok-soft); color: var(--ok); }
+  .po-terminu-flag { font-size: 11.5px; color: var(--danger); font-weight: 700; }
+  .kyc-card {
+    border: 2px solid var(--warn);
+    border-radius: var(--radius-l);
+    background: var(--warn-soft);
+    padding: 20px;
+    margin-top: 20px;
+  }
+  .kyc-card h3 { margin-top: 0; }
+  .kyc-doc-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .kyc-doc-row:first-of-type { border-top: none; }
+  .kyc-doc-label { font-size: 13.5px; font-weight: 600; }
+  .kyc-doc-status { font-size: 12.5px; color: var(--text-muted); }
+
   /* ---------- form screen ---------- */
 
   .section-head { margin-bottom: 20px; }
@@ -532,6 +587,10 @@
   }
   .stat-tile .stat-num { font-family: var(--font-display); font-size: 24px; font-weight: 600; color: var(--accent); }
   .stat-tile .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  /* Milník 9 (bod 7): klikací varianta stat-tile - odkazuje na příslušnou obrazovku */
+  button.stat-tile { text-align: left; cursor: pointer; font: inherit; color: inherit; }
+  button.stat-tile:hover { border-color: var(--accent); }
+  .stat-row-heading { font-size: 13px; font-weight: 600; color: var(--text-muted); margin: 4px 0 8px; }
 
   .net-list { display: flex; flex-direction: column; gap: 8px; }
   .net-item {
@@ -798,6 +857,15 @@
   .placeholder-box p { max-width: 380px; margin: 0 auto; font-size: 14px; }
   .placeholder-box strong { color: var(--text); }
 
+  /* ---------- modal overlay (Milník 9, bod 6) ---------- */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,0.45);
+    display: flex; align-items: flex-start; justify-content: center;
+    padding: 40px 16px; overflow-y: auto;
+  }
+  .modal-box { width: 100%; max-width: 480px; }
+
   [hidden] { display: none !important; }
 </style>
 </head>
@@ -810,11 +878,21 @@
     <div class="topbar-inner">
       <div class="brand">Realitní <em>tip</em></div>
       <div class="topbar-user">
+        <!-- Milník 9 (bod 6): "Přidat uživatele" - tipař/leader/administrator
+             (NE role rk, ta má svůj vlastní tok vytvorit_pristup_rk).
+             Viditelnost je jen pohodlí v UI - RPC vytvorit_uzivatele_rucne
+             si roli volajícího i cílovou roli ověřuje znovu na serveru. -->
+        <button class="btn-small" id="addUserTopBtn" type="button" hidden>+ Přidat uživatele</button>
         <span class="user-name" id="userNameLabel"></span>
         <button class="btn-ghost" id="logoutBtn" type="button">Odhlásit se</button>
       </div>
     </div>
   </header>
+
+  <!-- Milník 9 (bod 4): neblokující banner "vyplňte adresu do 30 dnů" /
+       "PO TERMÍNU" - jen pro vlastní profil přihlášeného uživatele,
+       odkazuje na "Můj profil". Nic nezakazuje, jen upozorňuje. -->
+  <div class="top-alert" id="addressDeadlineBanner" hidden></div>
 
   <div class="tabs-wrap" id="tabsWrap" hidden>
     <!-- Milník 4 (bod 9 zadání): "Administrace" jako sloučená záložka mizí -
@@ -834,6 +912,11 @@
       <button class="tab" id="tabVyplatyBtn" role="tab" type="button" aria-selected="false" hidden>Výplaty</button>
       <button class="tab" id="tabObsahBtn" role="tab" type="button" aria-selected="false" hidden>Obsah</button>
       <button class="tab" id="tabAuditBtn" role="tab" type="button" aria-selected="false" hidden>Audit log</button>
+      <!-- Milník 9 (bod 4/5): "Můj profil" - adresa + jednorázové ověření
+           totožnosti. Tipař/Leader/Administrator (ne RK, viz report). -->
+      <button class="tab" id="tabProfileBtn" role="tab" type="button" aria-selected="false" hidden>Můj profil</button>
+      <!-- Milník 9 (bod 5.6): "Ověření totožnosti" - jen Leader/Administrator. -->
+      <button class="tab" id="tabKycBtn" role="tab" type="button" aria-selected="false" hidden>Ověření totožnosti</button>
       <!-- Milník 7 (Část I): role RK má JEDINOU obrazovku - žádné jiné
            taby se jí nikdy nezobrazí (viz ROLE_TAB_ORDER.rk = ["rkportal"]). -->
       <button class="tab" id="tabRkPortalBtn" role="tab" type="button" aria-selected="false" hidden>Moje tipy</button>
@@ -922,7 +1005,59 @@
             <p class="switch-line">Už máte účet? <button type="button" id="goLoginBtn">Přihlaste se</button></p>
           </div>
 
-          <p class="auth-footnote">Přihlášení a registrace běží přes Supabase Auth, oprávnění k datům vynucuje Row Level Security v Postgresu na straně serveru — stejný princip jako u bezpečnostního testu Krok 0, jen jinou technologií.</p>
+          <!-- CHECK EMAIL VIEW (Milník 9, bod 1) — NÁHRADA za dřívější
+               drobný "ok" banner, který se navíc reálně vůbec nezobrazil
+               (viz níže + docs/milnik9_registrace_kyc_dashboard.md): po
+               úspěšném signUp() BEZ session (potvrzování e-mailu je
+               zapnuté) se místo přihlašovacího/registračního formuláře
+               zobrazí celá tahle obrazovka - nepřehlédnutelná, beze
+               scrollování, BEZ automatického zmizení/timeoutu. Zůstává
+               viditelná, dokud uživatel sám neklikne na "Zpět na
+               přihlášení". -->
+          <div id="checkEmailView" hidden>
+            <div class="check-email-icon" aria-hidden="true">✉️</div>
+            <h2 class="check-email-title">Zkontrolujte svůj e-mail</h2>
+            <p class="check-email-text">
+              Na adresu <strong id="checkEmailAddress"></strong> jsme odeslali potvrzovací e-mail.
+              Klikněte prosím na odkaz v e-mailu a dokončete tak registraci — teprve pak se budete
+              moct přihlásit.
+            </p>
+            <p class="check-email-text check-email-hint">
+              E-mail nedorazil ani po pár minutách? Zkontrolujte prosím složku Spam/Hromadné a že jste
+              zadali e-mail bez překlepu.
+            </p>
+            <button class="btn-primary" id="checkEmailBackBtn" type="button">Zpět na přihlášení</button>
+          </div>
+
+          <p class="auth-footnote" id="authFootnote">Přihlášení a registrace běží přes Supabase Auth, oprávnění k datům vynucuje Row Level Security v Postgresu na straně serveru — stejný princip jako u bezpečnostního testu Krok 0, jen jinou technologií.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== VYNUCENÁ ZMĚNA HESLA (Milník 9, bod 6.3) ==============
+         Zobrazí se MÍSTO celé appky, pokud má uživatel
+         profiles.vyzadovat_zmenu_hesla = true (účet založený "Přidat
+         uživatele" s vygenerovaným heslem) - dokud si heslo nezmění, nic
+         jiného neuvidí. Viz handleSignedIn(). -->
+    <section id="forcedPasswordScreen" hidden>
+      <div class="auth-wrap">
+        <div class="auth-card">
+          <div class="auth-brand"><span class="brand" style="font-size:26px;">Realitní <em>tip</em></span></div>
+          <p class="auth-sub">Váš účet byl založen s dočasným heslem — než budete pokračovat, nastavte si prosím vlastní.</p>
+          <div id="forcedPasswordBanner"></div>
+          <form id="forcedPasswordForm" novalidate>
+            <div class="field" id="fpNewField">
+              <label for="fpNew">Nové heslo</label>
+              <input type="password" id="fpNew" autocomplete="new-password" placeholder="Alespoň 6 znaků">
+              <span class="error-msg">Heslo musí mít alespoň 6 znaků.</span>
+            </div>
+            <div class="field" id="fpConfirmField">
+              <label for="fpConfirm">Nové heslo znovu</label>
+              <input type="password" id="fpConfirm" autocomplete="new-password" placeholder="Zopakujte heslo">
+              <span class="error-msg">Hesla se neshodují.</span>
+            </div>
+            <button class="btn-primary" id="fpSubmitBtn" type="submit">Nastavit heslo a pokračovat</button>
+          </form>
         </div>
       </div>
     </section>
@@ -1052,6 +1187,12 @@
       </div>
 
       <div class="stat-row" id="networkStats"></div>
+
+      <!-- Milník 9 (bod 7): rozšířené stat-cards "Přehled leadra" -
+           čekající ověření tipů, úspěšnost, rozpad fáze registrace sítě,
+           čekající KYC/výplaty a adresy po termínu. Jen pro roli Leader
+           (Administrator nemá tuto záložku vůbec, viz ROLE_TAB_ORDER). -->
+      <div id="leaderDashboardWrap"></div>
 
       <div id="networkListWrap"></div>
     </section>
@@ -1238,7 +1379,72 @@
 
       <div id="auditTableWrap"></div>
     </section>
+
+    <!-- ============== MŮJ PROFIL (Milník 9, bod 4/5) ==============
+         Tipař/Leader/Administrator. Adresa (neblokující, 30denní lhůta) +
+         samostatná zřetelně oddělená karta jednorázového ověření totožnosti
+         (KYC), nutná AŽ PŘED VÝPLATOU, ne před podáním tipu. -->
+    <section id="profileScreen" class="page" hidden>
+      <div class="section-head">
+        <h2>Můj profil</h2>
+        <p>Adresa (nebo sídlo firmy) a jednorázové ověření totožnosti nutné před výplatou provize.</p>
+      </div>
+
+      <div id="profileBanner"></div>
+      <div id="profileRegistraceStavWrap" style="margin-bottom:16px;"></div>
+
+      <div class="card detail-card">
+        <h3 class="detail-section-title" style="margin-top:0;">Adresa</h3>
+        <p class="dt-muted" style="margin-top:-6px;">Vyplňte prosím do 30 dnů od registrace. Nic vám to nezakazuje, jen to potřebujeme pro fakturační/daňové účely.</p>
+        <form id="addressForm" novalidate>
+          <div class="field-checkbox">
+            <input type="checkbox" id="pfJeFirma">
+            <label for="pfJeFirma">Jednám jako firma (adresa = sídlo firmy, vyžaduje IČO)</label>
+          </div>
+          <div class="form-grid" style="margin-top:10px;">
+            <div class="field col-span-2"><label for="pfUlice">Ulice a číslo popisné *</label><input type="text" id="pfUlice" placeholder="např. Hlavní 123"></div>
+            <div class="field"><label for="pfMesto">Město *</label><input type="text" id="pfMesto"></div>
+            <div class="field"><label for="pfPsc">PSČ *</label><input type="text" id="pfPsc" placeholder="např. 110 00"></div>
+            <div class="field"><label for="pfStat">Stát</label><input type="text" id="pfStat" value="Česká republika"></div>
+            <div class="field" id="pfIcoField"><label for="pfIco">IČO *</label><input type="text" id="pfIco"></div>
+            <div class="field" id="pfDicField"><label for="pfDic">DIČ (nepovinné)</label><input type="text" id="pfDic"></div>
+          </div>
+          <div class="form-actions">
+            <button class="btn-primary" type="submit" id="addressSaveBtn" style="width:auto;">Uložit adresu</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="kyc-card" id="kycCard">
+        <h3>Jednorázové ověření totožnosti (nutné pro výplatu provize)</h3>
+        <p class="dt-muted">Nahrajte prosím sken/foto obou stran dokladu totožnosti a vlastní fotografii. Bez schváleného ověření vám nelze vyplatit provizi — na podání tipu ani na cokoliv jiného to vliv nemá.</p>
+        <div id="kycStatusWrap"></div>
+        <div id="kycDocsWrap"></div>
+      </div>
+    </section>
+
+    <!-- ============== OVĚŘENÍ TOTOŽNOSTI (Milník 9, bod 5.6) ==============
+         Leader (jen uživatelé ve své síti) / Administrator (kdokoli) -
+         seznam čekajících KYC žádostí s náhledem dokumentů (signed URL,
+         platnost 5 minut) a tlačítky Schválit/Zamítnout. -->
+    <section id="kycScreen" class="page" hidden>
+      <div class="section-head">
+        <h2>Ověření totožnosti</h2>
+        <p>Uživatelé, kteří nahráli všechny 3 dokumenty a čekají na schválení (Leader vidí jen svoji síť).</p>
+      </div>
+
+      <div id="kycListBanner"></div>
+      <div id="kycListWrap"></div>
+    </section>
   </main>
+</div>
+
+<!-- ============== PŘIDAT UŽIVATELE (Milník 9, bod 6) ==============
+     Jednoduchý fixní overlay - v appce dosud žádný skutečný modal
+     komponent neexistoval, tohle je první (stejný vizuální jazyk jako
+     ostatní karty/formuláře - .card/.form-grid/.btn-primary). -->
+<div class="modal-overlay" id="addUserModalOverlay" hidden>
+  <div class="modal-box card" id="addUserModalBox"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.115.0/dist/umd/supabase.js"></script>
@@ -1285,7 +1491,9 @@
   var RK_STAV_LABELS = {
     oceneno_rk: "Oceněno RK",
     klient_nepristoupil_ke_koupi: "Klient nepřistoupil ke koupi",
-    podepsana_rezervacni_smlouva: "Podepsaná rezervační smlouva",
+    // Milník 9 (přejmenování labelu): jen zobrazovany text, DB slug
+    // "podepsana_rezervacni_smlouva" (CHECK constraint) beze zmeny.
+    podepsana_rezervacni_smlouva: "Podepsaná zprostředkovatelská smlouva",
     nemovitost_v_prodeji: "Nemovitost v prodeji",
     prodano: "Prodáno"
   };
@@ -2192,19 +2400,21 @@
   var ALL_SCREEN_IDS = [
     "newTipScreen", "listScreen", "networkScreen", "tipyScreen", "detailScreen",
     "usersScreen", "rkScreen", "provizeScreen", "vyplatyScreen", "obsahScreen", "auditScreen",
-    "rkPortalScreen"
+    "rkPortalScreen", "profileScreen", "kycScreen"
   ];
   var TAB_SCREEN = {
     "new": "newTipScreen", list: "listScreen", network: "networkScreen", tipy: "tipyScreen",
     users: "usersScreen", rk: "rkScreen", provize: "provizeScreen", vyplaty: "vyplatyScreen",
     obsah: "obsahScreen", audit: "auditScreen",
-    rkportal: "rkPortalScreen"
+    rkportal: "rkPortalScreen",
+    profile: "profileScreen", kyc: "kycScreen"
   };
   var TAB_BUTTON = {
     "new": "tabNewBtn", list: "tabListBtn", network: "tabNetworkBtn", tipy: "tabTipyBtn",
     users: "tabUsersBtn", rk: "tabRkBtn", provize: "tabProvizeBtn", vyplaty: "tabVyplatyBtn",
     obsah: "tabObsahBtn", audit: "tabAuditBtn",
-    rkportal: "tabRkPortalBtn"
+    rkportal: "tabRkPortalBtn",
+    profile: "tabProfileBtn", kyc: "tabKycBtn"
   };
 
   function hideAllScreens() {
@@ -2214,14 +2424,33 @@
   function showAuthScreen() {
     el("topbar").hidden = true;
     el("tabsWrap").hidden = true;
+    el("addressDeadlineBanner").hidden = true;
     el("authScreen").hidden = false;
+    el("forcedPasswordScreen").hidden = true;
     hideAllScreens();
+  }
+
+  // Milník 9 (bod 6.3): vynucená obrazovka změny hesla - schválně MIMO
+  // hideAllScreens()/ALL_SCREEN_IDS (stejný vzor jako authScreen), aby ji
+  // žádné přepnutí tabu omylem neschovalo dřív, než si uživatel heslo
+  // opravdu změní.
+  function showForcedPasswordScreen() {
+    el("topbar").hidden = true;
+    el("tabsWrap").hidden = true;
+    el("addressDeadlineBanner").hidden = true;
+    el("authScreen").hidden = true;
+    hideAllScreens();
+    el("forcedPasswordScreen").hidden = false;
+    showBanner(el("forcedPasswordBanner"), null, null);
+    el("fpNew").value = "";
+    el("fpConfirm").value = "";
   }
 
   function showAppScreen() {
     el("topbar").hidden = false;
     el("tabsWrap").hidden = false;
     el("authScreen").hidden = true;
+    el("forcedPasswordScreen").hidden = true;
     setActiveTab(activeTab);
   }
 
@@ -2244,6 +2473,8 @@
     if (tab === "vyplaty") fetchVyplatyTable();
     if (tab === "audit") fetchAuditTable();
     if (tab === "rkportal") fetchRkPortal();
+    if (tab === "profile") fetchProfileScreen();
+    if (tab === "kyc") fetchKycScreen();
   }
 
   // Milník 4 (bod 9 zadání) — "Administrace" jako sloučená záložka mizí,
@@ -2256,9 +2487,14 @@
   // přes CSS "order", ne přesouváním uzlů, aby žádná role nesdílela
   // stopy po pořadí předchozí role po odhlášení/přihlášení jiného účtu.
   var ROLE_TAB_ORDER = {
-    tipar: ["new", "list", "network"],
-    leader: ["network", "new", "tipy", "users", "rk", "provize", "vyplaty", "obsah", "audit"],
-    administrator: ["tipy", "users", "rk", "provize", "vyplaty", "obsah", "audit"],
+    // Milník 9 (bod 4/5): "profile" ("Můj profil") přidán tipaři/Leaderovi/
+    // Administrátorovi - RK vynechána záměrně, viz report Milníku 9 (RK
+    // není příjemcem výplat ani součástí stromu sponzorů, adresa/KYC pro ni
+    // nemá v rozsahu tohoto milníku obchodní smysl). "kyc" ("Ověření
+    // totožnosti", bod 5.6) jen Leader/Administrator.
+    tipar: ["new", "list", "network", "profile"],
+    leader: ["network", "new", "tipy", "users", "kyc", "rk", "provize", "vyplaty", "obsah", "audit", "profile"],
+    administrator: ["tipy", "users", "kyc", "rk", "provize", "vyplaty", "obsah", "audit", "profile"],
     // Milník 7 (Část I/1): role RK vidí VÝHRADNĚ jednu obrazovku - žádný
     // jiný tab se jí nikdy nezobrazí (applyNavForRole skryje vše, co
     // není v tomto poli).
@@ -2296,6 +2532,9 @@
   function showLoginView() {
     el("loginView").hidden = false;
     el("registerView").hidden = true;
+    el("checkEmailView").hidden = true;
+    el("authFootnote").hidden = false;
+    el("authSubtitle").hidden = false;
     el("authSubtitle").textContent = "Přihlaste se ke svému účtu tipaře";
     showBanner(el("authBanner"), null, null);
   }
@@ -2303,9 +2542,27 @@
   function showRegisterView() {
     el("loginView").hidden = true;
     el("registerView").hidden = false;
+    el("checkEmailView").hidden = true;
+    el("authFootnote").hidden = false;
+    el("authSubtitle").hidden = false;
     el("authSubtitle").textContent = "Založte si nový účet tipaře";
     showBanner(el("authBanner"), null, null);
     applyPendingInviteCodeToForm();
+  }
+
+  // Milník 9 (bod 1): plnohodnotná obrazovka místo dřívějšího malého
+  // "ok" banneru - viz doRegister níže a docs/milnik9_registrace_kyc_dashboard.md
+  // pro zjištěnou příčinu, proč se ten banner uživateli reálně nezobrazil.
+  // Skryje i podnadpis/patičku přihlašovací karty, ať nic nerozptyluje -
+  // zůstává viditelná, dokud uživatel sám neklikne na tlačítko zpět.
+  function showCheckEmailView(email) {
+    el("loginView").hidden = true;
+    el("registerView").hidden = true;
+    el("checkEmailView").hidden = false;
+    el("authSubtitle").hidden = true;
+    el("authFootnote").hidden = true;
+    el("checkEmailAddress").textContent = email || "";
+    showBanner(el("authBanner"), null, null);
   }
 
   // Pokud uživatel přišel přes odkaz s ?ref=KOD, kód předvyplníme a
@@ -2416,9 +2673,21 @@
       }
 
       // Potvrzování e-mailu je zapnuté - session zatím není.
-      showBanner(bannerEl, "ok", "Registrace proběhla, zkontrolujte e-mail a potvrďte účet, pak se přihlaste.");
+      //
+      // Milník 9 (bod 1, DIAGNÓZA): tady byl skutečný důvod, proč uživatel
+      // po registraci neviděl VŮBEC ŽÁDNOU zprávu, ani ten dřívější malý
+      // "ok" banner. showBanner() sice zprávu do #authBanner zapsala, ale
+      // hned další řádek volal showLoginView() - a ta sama interně dělá
+      // showBanner(el("authBanner"), null, null), tedy TENTÝŽ element
+      // OKAMŽITĚ ve stejném synchronním běhu zase vyprázdní, ještě než
+      // prohlížeč cokoliv vykreslí. Banner tedy fakticky nikdy nebyl
+      // vidět - ne že by byl jen málo nápadný/scrollnutý mimo obrazovku.
+      // Oprava: místo banneru + přepnutí na login rovnou zobrazíme
+      // dedikovanou celoobrazovkovou "Zkontrolujte e-mail" (checkEmailView),
+      // která žádný takový self-clear problém nemá a zůstává viditelná,
+      // dokud uživatel sám neklikne zpět - viz showCheckEmailView().
       el("registerForm").reset();
-      showLoginView();
+      showCheckEmailView(email);
     } catch (e) {
       // Neočekávaná výjimka (např. výpadek sítě uprostřed requestu) -
       // pojistka, ať tlačítko nezůstane navždy zamčené v "Vytváříme účet…".
@@ -2445,7 +2714,14 @@
     var user = session.user;
     currentUserId = user.id;
 
-    var profileResult = await sb.from("profiles").select("jmeno, prijmeni, role, invite_code").eq("id", user.id).single();
+    // Milník 9 (bod 3/4/6): rozšířený select o adresu, KYC stav a příznak
+    // vynucené změny hesla - vlastní řádek smí číst přímo (RLS "Uzivatel
+    // vidi svuj profil"), žádná RPC navíc netřeba. email_confirmed_at
+    // bereme ze session.user (Supabase Auth ho vrací pro vlastní účet), ne
+    // z profiles (tam vůbec není - je jen v auth.users).
+    var profileResult = await sb.from("profiles")
+      .select("jmeno, prijmeni, role, invite_code, vytvoreno_kdy, adresa_ulice, adresa_mesto, adresa_psc, adresa_stat, je_firma, ico, dic, adresa_vyplnena_kdy, autentizace_stav, autentizace_duvod_zamitnuti, vyzadovat_zmenu_hesla")
+      .eq("id", user.id).single();
     if (profileResult.error) {
       console.error("Nepodařilo se načíst profil uživatele:", profileResult.error);
     }
@@ -2453,11 +2729,29 @@
     var jmeno = profile.jmeno || user.email;
     var role = profile.role || "tipar";
 
-    currentUser = { id: user.id, email: user.email, jmeno: jmeno, prijmeni: profile.prijmeni || "", role: role, invite_code: profile.invite_code || "" };
+    currentUser = {
+      id: user.id, email: user.email, jmeno: jmeno, prijmeni: profile.prijmeni || "", role: role,
+      invite_code: profile.invite_code || "", vytvoreno_kdy: profile.vytvoreno_kdy,
+      email_confirmed_at: user.email_confirmed_at || null,
+      adresa_ulice: profile.adresa_ulice || "", adresa_mesto: profile.adresa_mesto || "",
+      adresa_psc: profile.adresa_psc || "", adresa_stat: profile.adresa_stat || "Česká republika",
+      je_firma: !!profile.je_firma, ico: profile.ico || "", dic: profile.dic || "",
+      adresa_vyplnena_kdy: profile.adresa_vyplnena_kdy || null,
+      autentizace_stav: profile.autentizace_stav || "nevyplneno",
+      autentizace_duvod_zamitnuti: profile.autentizace_duvod_zamitnuti || null,
+      vyzadovat_zmenu_hesla: !!profile.vyzadovat_zmenu_hesla
+    };
 
     var roleLabel = ROLE_LABELS[role] || role;
     el("userNameLabel").innerHTML =
       "Přihlášen(a) jako <strong>" + escapeHtml(celeJmeno(currentUser) || jmeno) + "</strong> · " + escapeHtml(roleLabel);
+
+    // Milník 9 (bod 6.3): dočasné heslo z "Přidat uživatele" MUSÍ být
+    // změněno dřív, než uživatel uvidí cokoliv jiného z appky.
+    if (currentUser.vyzadovat_zmenu_hesla) {
+      showForcedPasswordScreen();
+      return;
+    }
 
     // Milník 4 (bod 9 zadání) — "Administrace" jako sloučená záložka
     // zmizela, nahradily ji samostatné položky přímo v navigaci; jejich
@@ -2465,6 +2759,12 @@
     // vždy vynucují RLS politiky a RPC funkce na serveru.
     var isAdmin = role === "administrator";
     applyNavForRole(role);
+
+    // Milník 9 (bod 6): "+ Přidat uživatele" - tipař/leader/administrator,
+    // NE role rk (viditelnost jen pohodlí v UI, RPC si ověřuje roli znovu).
+    el("addUserTopBtn").hidden = (role === "rk");
+
+    renderAddressDeadlineBanner();
 
     // Milník 5 (bod 3 zadání) — Leader nemá "Moje tipy", landing page po
     // přihlášení je teď "Přehled leadra" ("network").
@@ -2481,6 +2781,34 @@
     if (!isAdmin && role !== "rk") {
       subscribeRealtime(user.id);
     }
+  }
+
+  // ---------------- Milník 9 (bod 4): banner "vyplňte adresu" ----------------
+
+  function adresaDeadlineInfo() {
+    if (!currentUser || !currentUser.vytvoreno_kdy) return null;
+    if (currentUser.adresa_vyplnena_kdy) return null; // už vyplněná - žádný banner
+    var vytvoren = new Date(currentUser.vytvoreno_kdy).getTime();
+    var termin = vytvoren + 30 * 24 * 60 * 60 * 1000;
+    var zbyvaDny = Math.ceil((termin - Date.now()) / (24 * 60 * 60 * 1000));
+    return { zbyvaDny: zbyvaDny, poTerminu: zbyvaDny < 0 };
+  }
+
+  function renderAddressDeadlineBanner() {
+    var el2 = el("addressDeadlineBanner");
+    if (!el2) return;
+    // RK role nemá "Můj profil" ani povinnost adresu vyplňovat (viz report).
+    if (currentUser && currentUser.role === "rk") { el2.hidden = true; return; }
+    var info = adresaDeadlineInfo();
+    if (!info) { el2.hidden = true; return; }
+    el2.hidden = false;
+    el2.className = "top-alert" + (info.poTerminu ? " top-alert-danger" : "");
+    var text = info.poTerminu
+      ? "Vyplňte prosím adresu — jste PO TERMÍNU (30 dní od registrace už uplynulo)."
+      : "Vyplňte prosím adresu (zbývá " + info.zbyvaDny + " " + (info.zbyvaDny === 1 ? "den" : (info.zbyvaDny < 5 ? "dny" : "dní")) + ").";
+    el2.innerHTML = escapeHtml(text) + ' <button type="button" class="link-btn" id="addressBannerLinkBtn">Vyplnit teď</button>';
+    var btn = el("addressBannerLinkBtn");
+    if (btn) btn.addEventListener("click", function () { setActiveTab("profile"); });
   }
 
   function handleSignedOut() {
@@ -2506,6 +2834,8 @@
     auditTable = null;
     unsubscribeRealtime();
     applyNavForRole("tipar");
+    el("addUserTopBtn").hidden = true;
+    closeAddUserModal();
 
     el("loginForm").reset();
     setFieldError(el("loginEmailField"), false);
@@ -2748,8 +3078,10 @@
       // ve stejné relaci po odhlášení) postaví znovu od nuly.
       el("networkListWrap").innerHTML = "";
       mojeSitTable = null;
+      await renderLeaderDashboardStats();
       return;
     }
+    el("leaderDashboardWrap").innerHTML = "";
 
     var columns = [
       { key: "jmeno", label: "Jméno", get: function (r) { return celeJmeno(r) || "(bez jména)"; } },
@@ -3266,6 +3598,14 @@
       { key: "role", label: "Role", get: function (r) { return ROLE_LABELS[r.role] || r.role; }, render: function (r) { return roleBadgeHtml(r.role); } },
       { key: "telefon", label: "Telefon", get: function (r) { return r.telefon || ""; }, render: function (r) { return escapeHtml(r.telefon || "—"); } },
       { key: "email", label: "E-mail", get: function (r) { return r.email || ""; }, render: function (r) { return escapeHtml(r.email || "—"); } },
+      // Milník 9 (bod 3/4): fáze registrace (pill, ze serveru přes
+      // moje_uzivatele()) + červený příznak "PO TERMÍNU", pokud uživateli
+      // chybí adresa a 30denních dní od registrace už uplynulo. Ani jedno
+      // nic nezakazuje - jen informuje Leadera/Administrátora.
+      { key: "registrace", label: "Registrace", get: function (r) { return REGISTRACE_STAV_LABELS[r.registrace_stav] || r.registrace_stav || ""; },
+        render: function (r) {
+          return registraceStavPillHtml(r.registrace_stav) + (r.adresa_po_terminu ? '<br><span class="po-terminu-flag">PO TERMÍNU</span>' : '');
+        } },
       { key: "primi", label: "Přímí podřízení", get: function (r) { return Number(r.primych_podrizenych || 0); } },
       { key: "tym", label: "Velikost týmu", get: function (r) { return Number(r.velikost_tymu || 0); } },
       { key: "dny", label: "Délka spolupráce (dny)", get: function (r) { return Number(r.dny_spoluprace || 0); } },
@@ -3328,9 +3668,22 @@
       return '<option value="' + escapeHtml(o.id) + '"' + (o.id === target.sponsor_id ? ' selected' : '') + '>' + escapeHtml(o.label) + '</option>';
     }).join("");
 
+    // Milník 9 (bod 3): stav registrace i na "detailu" uživatele (tady jde
+    // o formulář Upravit, nejbližší ekvivalent detailu - žádná samostatná
+    // obrazovka Detail uživatele dosud v appce neexistovala), ne jen v
+    // tabulce. Read-only, editace jde jen přes Adresu/KYC obrazovky
+    // samotného uživatele nebo Ověření totožnosti (schvalit_autentizaci).
+    var stavInfoHtml =
+      '<div class="detail-card" style="margin-bottom:14px;">' +
+        '<div style="margin-bottom:6px;">Fáze registrace: ' + registraceStavPillHtml(target.registrace_stav) +
+          (target.adresa_po_terminu ? ' <span class="po-terminu-flag">PO TERMÍNU</span>' : '') + '</div>' +
+        '<div>Ověření totožnosti (KYC): ' + autentizaceStavPillHtml(target.autentizace_stav || "nevyplneno") + '</div>' +
+      '</div>';
+
     el("usersFormWrap").innerHTML =
       '<div class="card detail-card">' +
         '<h3 class="detail-section-title" style="margin-top:0;">Upravit uživatele — ' + escapeHtml(celeJmeno(target) || targetId) + '</h3>' +
+        stavInfoHtml +
         '<form id="userFormPanel" novalidate>' +
           '<div class="form-grid">' +
             '<div class="field"><label for="ufJmeno">Jméno *</label><input type="text" id="ufJmeno" value="' + escapeHtml(target.jmeno || "") + '"></div>' +
@@ -3444,7 +3797,11 @@
     vytvoreni_pristupu_rk: "Vytvoření přístupu RK",
     odeslano_k_vyplate: "Odesláno k výplatě",
     schvaleni_vyplaty: "Schválení výplaty",
-    oznaceni_vyplaty_vyplacene: "Označení výplaty jako vyplacené"
+    oznaceni_vyplaty_vyplacene: "Označení výplaty jako vyplacené",
+    // Milník 9
+    rucni_zalozeni_uzivatele: "Ruční založení uživatele",
+    schvaleni_identifikace: "Schválení ověření totožnosti",
+    zamitnuti_identifikace: "Zamítnutí ověření totožnosti"
   };
 
   function auditActionLabel(action) {
@@ -3469,7 +3826,12 @@
     sponsor_id: "Sponzor", aktivni: "Aktivní stav",
     nazev: "Název", ico: "IČO", dic: "DIČ", adresa: "Adresa",
     kontaktni_osoba: "Kontaktní osoba",
-    role: "Role", plati_dph: "Plátce DPH", rk_id: "Realitní kancelář"
+    role: "Role", plati_dph: "Plátce DPH", rk_id: "Realitní kancelář",
+    autentizace_stav: "Stav ověření totožnosti"
+  };
+  var AUTENTIZACE_STAV_LABELS_PRO_AUDIT = {
+    nevyplneno: "Nevyplněno", ceka_na_overeni: "Čeká na ověření",
+    schvaleno: "Schváleno", zamitnuto: "Zamítnuto"
   };
   var AUDIT_FIELDS_SKIP = { id: true, vytvoreno_kdy: true };
   var AUDIT_RK_ACTIONS = { vytvoreni_rk: true, uprava_rk: true, smazani_rk: true };
@@ -3478,6 +3840,7 @@
     if (value === null || value === undefined) return "—";
     if (field === "sponsor_id") return jmenoUzivatele(value);
     if (field === "aktivni") return value ? "Aktivní" : (isRk ? "Neaktivní" : "Vymazán");
+    if (field === "autentizace_stav") return AUTENTIZACE_STAV_LABELS_PRO_AUDIT[value] || String(value);
     return String(value);
   }
 
@@ -3994,6 +4357,14 @@
     if (msg.indexOf('RK stav "Prodano"') !== -1 || msg.indexOf("Prodano") !== -1 && msg.indexOf("vcetne") !== -1) {
       return 'Tip musí mít Status RK „Prodáno" včetně data prodeje a kupní ceny.';
     }
+    // Milník 9 (bod 5.7): gate KYC v schvalit_vyplatu/oznacit_vyplaceno -
+    // chybová hláška ze serveru už je čitelná (obsahuje jméno příjemce),
+    // jen ji vrátíme beze změny místo obecné hlášky s uříznutou diakritikou.
+    if (msg.indexOf("nema overenou totoznost") !== -1) {
+      return msg.replace("Uzivatel", "Uživatel").replace("nema overenou totoznost", "nemá ověřenou totožnost")
+        .replace("vyplatu nelze schvalit", "výplatu nelze schválit")
+        .replace("vyplatu nelze oznacit jako vyplacenou", "výplatu nelze označit jako vyplacenou");
+    }
     if (msg.indexOf("uz byl k vyplate odeslan") !== -1) {
       return "Tento tip už byl k výplatě odeslán dříve.";
     }
@@ -4123,11 +4494,515 @@
     renderVyplatyTable(vyplatyRowsCache);
   }
 
+  // ==================== Milník 9 ====================
+
+  // ---------------- bod 6.3: vynucená změna hesla ----------------
+
+  async function submitForcedPasswordForm() {
+    var novy = el("fpNew").value;
+    var znovu = el("fpConfirm").value;
+    var ok = true;
+    var validPwd = novy.length >= 6;
+    setFieldError(el("fpNewField"), !validPwd);
+    if (!validPwd) ok = false;
+    var shoda = novy === znovu;
+    setFieldError(el("fpConfirmField"), !shoda);
+    if (!shoda) ok = false;
+    if (!ok) return;
+
+    var btn = el("fpSubmitBtn");
+    btn.disabled = true;
+    showBanner(el("forcedPasswordBanner"), null, null);
+
+    var updateResult = await sb.auth.updateUser({ password: novy });
+    if (updateResult.error) {
+      btn.disabled = false;
+      console.error("Chyba při změně hesla:", updateResult.error);
+      showBanner(el("forcedPasswordBanner"), "error", authErrorMessage(updateResult.error));
+      return;
+    }
+
+    var rpcResult = await sb.rpc("dokoncit_zmenu_hesla");
+    btn.disabled = false;
+    if (rpcResult.error) {
+      console.error("Chyba při dokončení změny hesla:", rpcResult.error);
+      showBanner(el("forcedPasswordBanner"), "error", "Heslo bylo změněno, ale nepodařilo se to dokončit. Zkuste to prosím znovu nebo se odhlaste a přihlaste znovu.");
+      return;
+    }
+
+    currentUser.vyzadovat_zmenu_hesla = false;
+    // Milník 9 (bod 6.3): stejný vzor jako zbytek appky (Pravidlo 6) -
+    // čerstvý re-fetch, ne jen lokální patch. handleSignedIn() zopakuje
+    // celý načtení profilu a tentokrát už projde dál na showAppScreen().
+    var sessionResult = await sb.auth.getSession();
+    if (sessionResult.data && sessionResult.data.session) {
+      await handleSignedIn(sessionResult.data.session);
+    }
+  }
+
+  // ---------------- bod 4/5: Můj profil (adresa + KYC) ----------------
+
+  var REGISTRACE_STAV_LABELS = {
+    email_neoveren: "E-mail neověřen", email_overen: "E-mail ověřen",
+    vyplneny_udaje: "Údaje vyplněné", autentizovano: "Autentizováno"
+  };
+
+  function registraceStavPillHtml(stav) {
+    var cls = "pill pill-" + (stav && REGISTRACE_STAV_LABELS[stav] ? stav : "email_neoveren");
+    return '<span class="' + cls + '">' + escapeHtml(REGISTRACE_STAV_LABELS[stav] || stav || "?") + '</span>';
+  }
+
+  // Vlastní fáze registrace (bod 3) spočítaná KLIENTSKY ze session.user
+  // (email_confirmed_at) + vlastního profilu - jen pro zobrazení na "Můj
+  // profil" (ne pro cizí profily - tam je zdroj pravdy vždy moje_uzivatele()
+  // na serveru, viz renderUsersTable).
+  function mujRegistraceStav() {
+    if (!currentUser) return "email_neoveren";
+    if (!currentUser.email_confirmed_at) return "email_neoveren";
+    if (!currentUser.adresa_vyplnena_kdy) return "email_overen";
+    if (currentUser.autentizace_stav !== "schvaleno") return "vyplneny_udaje";
+    return "autentizovano";
+  }
+
+  var AUTENTIZACE_STAV_LABELS = {
+    nevyplneno: "Nevyplněno", ceka_na_overeni: "Čeká na ověření",
+    schvaleno: "Schváleno", zamitnuto: "Zamítnuto"
+  };
+  var AUTENTIZACE_STAV_PILL_CLASS = {
+    nevyplneno: "pill-ceka_na_overeni", ceka_na_overeni: "pill-probiha_overeni",
+    schvaleno: "pill-tip_overen_hledame_rk", zamitnuto: "pill-zamitnuto"
+  };
+  function autentizaceStavPillHtml(stav) {
+    var cls = "pill " + (AUTENTIZACE_STAV_PILL_CLASS[stav] || "pill-ceka_na_overeni");
+    return '<span class="' + cls + '">' + escapeHtml(AUTENTIZACE_STAV_LABELS[stav] || stav || "?") + '</span>';
+  }
+
+  // Čerstvý re-fetch vlastního profilu (Pravidlo 6) - používá se po
+  // uložení adresy i po nahrání/změně KYC dokumentu, nikdy patch z
+  // odpovědi RPC.
+  async function refreshOwnProfile() {
+    if (!currentUser) return;
+    var r = await sb.from("profiles")
+      .select("adresa_ulice, adresa_mesto, adresa_psc, adresa_stat, je_firma, ico, dic, adresa_vyplnena_kdy, autentizace_stav, autentizace_duvod_zamitnuti")
+      .eq("id", currentUser.id).single();
+    if (!r.error && r.data) {
+      Object.assign(currentUser, r.data);
+    } else if (r.error) {
+      console.error("Nepodařilo se znovu načíst vlastní profil:", r.error);
+    }
+    renderAddressDeadlineBanner();
+  }
+
+  async function fetchProfileScreen() {
+    if (!currentUser) return;
+    showBanner(el("profileBanner"), null, null);
+    await refreshOwnProfile();
+
+    el("profileRegistraceStavWrap").innerHTML = "Fáze registrace: " + registraceStavPillHtml(mujRegistraceStav());
+
+    el("pfJeFirma").checked = currentUser.je_firma;
+    el("pfUlice").value = currentUser.adresa_ulice || "";
+    el("pfMesto").value = currentUser.adresa_mesto || "";
+    el("pfPsc").value = currentUser.adresa_psc || "";
+    el("pfStat").value = currentUser.adresa_stat || "Česká republika";
+    el("pfIco").value = currentUser.ico || "";
+    el("pfDic").value = currentUser.dic || "";
+
+    await renderKycSection();
+  }
+
+  async function renderKycSection() {
+    var stav = currentUser.autentizace_stav || "nevyplneno";
+    var statusHtml = '<div style="margin-bottom:12px;">' + autentizaceStavPillHtml(stav) + '</div>';
+    if (stav === "zamitnuto" && currentUser.autentizace_duvod_zamitnuti) {
+      statusHtml += '<div class="banner banner-error">Důvod zamítnutí: ' + escapeHtml(currentUser.autentizace_duvod_zamitnuti) + ' — po novém nahrání dokumentů půjde znovu ke schválení.</div>';
+    }
+    el("kycStatusWrap").innerHTML = statusHtml;
+
+    var listResult = await sb.storage.from("identifikace").list(currentUser.id, { limit: 100 });
+    var files = (!listResult.error && listResult.data) ? listResult.data : [];
+    if (listResult.error) console.error("Chyba při načítání seznamu dokumentů:", listResult.error);
+    var mam = { op_predni: false, op_zadni: false, foto: false };
+    files.forEach(function (f) {
+      if (!f || !f.name) return;
+      if (f.name.indexOf("op_predni.") === 0) mam.op_predni = true;
+      else if (f.name.indexOf("op_zadni.") === 0) mam.op_zadni = true;
+      else if (f.name.indexOf("foto.") === 0) mam.foto = true;
+    });
+
+    var docs = [
+      { typ: "op_predni", label: "Doklad totožnosti — přední strana" },
+      { typ: "op_zadni", label: "Doklad totožnosti — zadní strana" },
+      { typ: "foto", label: "Vlastní fotografie" }
+    ];
+    // Nahrávat (a tím přepisovat) lze jen dokud čeká vstup uživatele -
+    // "nevyplneno" (první nahrání) nebo "zamitnuto" (oprava po zamítnutí).
+    // Ve stavu "ceka_na_overeni"/"schvaleno" je nahrávání uzavřené v UI -
+    // server (nahrat_identifikacni_dokument) to stejně nijak neblokuje na
+    // úrovni oprávnění (vlastník smí přepsat kdykoli), jde jen o to, aby
+    // uživatel omylem nerozbil už podanou/schválenou žádost bez vědomí.
+    var editovatelne = (stav === "nevyplneno" || stav === "zamitnuto");
+    var html = "";
+    docs.forEach(function (d) {
+      html += '<div class="kyc-doc-row">' +
+        '<div><div class="kyc-doc-label">' + escapeHtml(d.label) + '</div>' +
+        '<div class="kyc-doc-status">' + (mam[d.typ] ? "Nahráno" : "Nenahráno") + '</div></div>' +
+        (editovatelne
+          ? '<input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" class="kyc-file-input" data-typ="' + d.typ + '">'
+          : '<span class="dt-muted">' + (stav === "ceka_na_overeni" ? "Čeká se na posouzení" : "Nahrávání uzavřeno") + '</span>') +
+        '</div>';
+    });
+    el("kycDocsWrap").innerHTML = html;
+
+    if (editovatelne) {
+      el("kycDocsWrap").querySelectorAll(".kyc-file-input").forEach(function (input) {
+        input.addEventListener("change", function () {
+          if (input.files && input.files[0]) uploadKycFile(input.getAttribute("data-typ"), input.files[0]);
+        });
+      });
+    }
+  }
+
+  async function uploadKycFile(typ, file) {
+    showBanner(el("profileBanner"), null, null);
+    var extMatch = /\.([a-zA-Z0-9]+)$/.exec(file.name || "");
+    var ext = extMatch ? extMatch[1].toLowerCase() : "bin";
+    var cesta = currentUser.id + "/" + typ + "." + ext;
+
+    var uploadResult = await sb.storage.from("identifikace").upload(cesta, file, {
+      upsert: true, contentType: file.type || undefined
+    });
+    if (uploadResult.error) {
+      console.error("Chyba při nahrávání dokumentu:", uploadResult.error);
+      showBanner(el("profileBanner"), "error", "Soubor se nepodařilo nahrát. Zkuste to prosím znovu.");
+      return;
+    }
+
+    var rpcResult = await sb.rpc("nahrat_identifikacni_dokument", { p_typ: typ, p_cesta: cesta });
+    if (rpcResult.error) {
+      console.error("Chyba při zaznamenání dokumentu:", rpcResult.error);
+      showBanner(el("profileBanner"), "error", "Soubor se nahrál, ale nepodařilo se to zaznamenat. Zkuste to prosím znovu.");
+      return;
+    }
+
+    showBanner(el("profileBanner"), "ok", "Dokument byl nahrán.");
+    await refreshOwnProfile();
+    el("profileRegistraceStavWrap").innerHTML = "Fáze registrace: " + registraceStavPillHtml(mujRegistraceStav());
+    await renderKycSection();
+  }
+
+  async function submitAddressForm() {
+    var jeFirma = el("pfJeFirma").checked;
+    var ulice = el("pfUlice").value.trim();
+    var mesto = el("pfMesto").value.trim();
+    var psc = el("pfPsc").value.trim();
+    var stat = el("pfStat").value.trim();
+    var ico = el("pfIco").value.trim();
+    var dic = el("pfDic").value.trim();
+
+    showBanner(el("profileBanner"), null, null);
+    if (!ulice || !mesto || !psc) {
+      showBanner(el("profileBanner"), "error", "Vyplňte prosím ulici, město a PSČ.");
+      return;
+    }
+    if (jeFirma && !ico) {
+      showBanner(el("profileBanner"), "error", "Pro firmu je vyplnění IČO povinné.");
+      return;
+    }
+
+    var btn = el("addressSaveBtn");
+    btn.disabled = true;
+    var result = await sb.rpc("upravit_moji_adresu", {
+      p_ulice: ulice, p_mesto: mesto, p_psc: psc, p_stat: stat || null,
+      p_je_firma: jeFirma, p_ico: ico || null, p_dic: dic || null
+    });
+    btn.disabled = false;
+
+    if (result.error) {
+      console.error("Chyba při ukládání adresy:", result.error);
+      showBanner(el("profileBanner"), "error", "Adresu se nepodařilo uložit. Zkuste to prosím znovu.");
+      return;
+    }
+
+    showBanner(el("profileBanner"), "ok", "Adresa byla uložena.");
+    await refreshOwnProfile();
+    el("profileRegistraceStavWrap").innerHTML = "Fáze registrace: " + registraceStavPillHtml(mujRegistraceStav());
+  }
+
+  // ---------------- bod 5.6: Ověření totožnosti (Leader/Administrator) ----------------
+
+  async function fetchKycScreen() {
+    if (!currentUser) return;
+    showBanner(el("kycListBanner"), null, null);
+    el("kycListWrap").innerHTML = '<div class="empty-state"><p>Načítám…</p></div>';
+
+    // Čerstvý re-fetch (Pravidlo 6) - stejná RPC jako Uživatelé, jen tady
+    // filtrujeme na autentizace_stav = 'ceka_na_overeni'.
+    var result = await sb.rpc("moje_uzivatele");
+    if (result.error) {
+      console.error("Chyba při načítání čekajících ověření:", result.error);
+      el("kycListWrap").innerHTML = '<div class="empty-state"><p>Nepodařilo se načíst seznam.</p></div>';
+      return;
+    }
+    var cekajici = (result.data || []).filter(function (u) { return u.autentizace_stav === "ceka_na_overeni"; });
+    await renderKycList(cekajici);
+  }
+
+  async function renderKycList(rows) {
+    if (!rows.length) {
+      el("kycListWrap").innerHTML = '<div class="empty-state"><p>Momentálně nikdo nečeká na ověření totožnosti.</p></div>';
+      return;
+    }
+    var html = "";
+    for (var i = 0; i < rows.length; i++) {
+      var u = rows[i];
+      html += '<div class="card detail-card" data-kyc-user="' + escapeHtml(u.id) + '">' +
+        '<h3 class="detail-section-title" style="margin-top:0;">' + escapeHtml(celeJmeno(u)) + '</h3>' +
+        '<p class="dt-muted" style="margin-top:-6px;">' + escapeHtml(u.email || "") + (u.telefon ? " · " + escapeHtml(u.telefon) : "") + '</p>' +
+        '<div class="kyc-preview-links" data-slot-links></div>' +
+        '<div class="form-actions" style="margin-top:14px;">' +
+          '<button class="btn-primary" type="button" style="width:auto;" data-kyc-schvalit="' + escapeHtml(u.id) + '">Schválit</button>' +
+          '<button class="btn-small btn-small-danger" type="button" data-kyc-zamitnout="' + escapeHtml(u.id) + '">Zamítnout</button>' +
+        '</div>' +
+      '</div>';
+    }
+    el("kycListWrap").innerHTML = html;
+
+    // Náhledy: signed URL s krátkou platností (5 minut), generované přímo z
+    // klienta - Storage RLS ("Leader a Admin vidi identifikacni dokumenty
+    // sve site") si ověří, že volající skutečně smí tenhle konkrétní
+    // soubor vidět, signed URL sama o sobě žádné oprávnění neobchází.
+    for (var j = 0; j < rows.length; j++) {
+      renderKycPreviewLinks(rows[j].id);
+    }
+
+    el("kycListWrap").querySelectorAll("[data-kyc-schvalit]").forEach(function (btn) {
+      btn.addEventListener("click", function () { submitSchvalitKyc(btn.getAttribute("data-kyc-schvalit"), true, null); });
+    });
+    el("kycListWrap").querySelectorAll("[data-kyc-zamitnout]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var duvod = window.prompt("Důvod zamítnutí (povinné, uvidí ho uživatel):");
+        if (duvod === null) return; // Zrušeno
+        if (!duvod.trim()) { window.alert("Důvod zamítnutí je povinný."); return; }
+        submitSchvalitKyc(btn.getAttribute("data-kyc-zamitnout"), false, duvod.trim());
+      });
+    });
+  }
+
+  async function renderKycPreviewLinks(userId) {
+    var wrap = document.querySelector('[data-kyc-user="' + userId.replace(/"/g, "") + '"] [data-slot-links]');
+    if (!wrap) return;
+    var docs = [
+      { typ: "op_predni", label: "OP — přední strana" },
+      { typ: "op_zadni", label: "OP — zadní strana" },
+      { typ: "foto", label: "Fotografie" }
+    ];
+    var listResult = await sb.storage.from("identifikace").list(userId, { limit: 100 });
+    var files = (!listResult.error && listResult.data) ? listResult.data : [];
+    var linksHtml = [];
+    for (var i = 0; i < docs.length; i++) {
+      var f = files.filter(function (x) { return x && x.name && x.name.indexOf(docs[i].typ + ".") === 0; })[0];
+      if (!f) { linksHtml.push('<span class="dt-muted">' + escapeHtml(docs[i].label) + ': chybí</span>'); continue; }
+      var signed = await sb.storage.from("identifikace").createSignedUrl(userId + "/" + f.name, 300);
+      if (signed.error || !signed.data) {
+        linksHtml.push('<span class="dt-muted">' + escapeHtml(docs[i].label) + ': náhled se nepodařilo vytvořit</span>');
+        continue;
+      }
+      linksHtml.push('<a href="' + escapeHtml(signed.data.signedUrl) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(docs[i].label) + '</a>');
+    }
+    if (wrap) wrap.innerHTML = linksHtml.join(' &nbsp;·&nbsp; ') + '<div class="dt-muted" style="margin-top:4px;">Odkazy platí 5 minut od načtení této stránky.</div>';
+  }
+
+  function kycRozhodnutiErrorMessage(error) {
+    if (!error) return "Nastala neočekávaná chyba. Zkuste to prosím znovu.";
+    var msg = error.message || "";
+    if (error.code === "42501" || msg.indexOf("Nemate opravneni") !== -1 || msg.indexOf("neni ve vasi siti") !== -1) {
+      return "Nemáte oprávnění o tomto uživateli rozhodnout.";
+    }
+    if (msg.indexOf("Duvod zamitnuti je povinny") !== -1) return "Důvod zamítnutí je povinný.";
+    if (msg.indexOf('"Ceka na overeni"') !== -1) return "Rozhodnout lze jen o uživateli, který čeká na ověření.";
+    return "Akci se nepodařilo provést (" + escapeHtml(msg || "neznámá chyba") + ").";
+  }
+
+  async function submitSchvalitKyc(userId, schvaleno, duvod) {
+    showBanner(el("kycListBanner"), null, null);
+    var result = await sb.rpc("schvalit_autentizaci", { p_user_id: userId, p_schvaleno: schvaleno, p_duvod_zamitnuti: duvod });
+    if (result.error) {
+      console.error("Chyba při rozhodování o ověření totožnosti:", result.error);
+      showBanner(el("kycListBanner"), "error", kycRozhodnutiErrorMessage(result.error));
+      return;
+    }
+    showBanner(el("kycListBanner"), "ok", schvaleno ? "Ověření totožnosti bylo schváleno." : "Ověření totožnosti bylo zamítnuto.");
+    setTimeout(function () { showBanner(el("kycListBanner"), null, null); }, 4000);
+    await fetchKycScreen();
+  }
+
+  // ---------------- bod 6: Přidat uživatele ----------------
+
+  function closeAddUserModal() {
+    el("addUserModalOverlay").hidden = true;
+    el("addUserModalBox").innerHTML = "";
+  }
+
+  function addUserRoleOptionsHtml() {
+    // Tipar smí založit jen dalšího tipaře, Leader tipaře i leadera,
+    // Administrator taky jen tipaře/leadera (role rk/administrator NELZE
+    // touhle formou založit vůbec - viz report Milníku 9 a komentář u
+    // RPC vytvorit_uzivatele_rucne).
+    var opts = '<option value="tipar">Tipař</option>';
+    if (currentUser.role === "leader" || currentUser.role === "administrator") {
+      opts += '<option value="leader">Leader</option>';
+    }
+    return opts;
+  }
+
+  function openAddUserModal() {
+    if (!currentUser) return;
+    el("addUserModalBox").innerHTML =
+      '<h3 class="detail-section-title" style="margin-top:0;">Přidat uživatele</h3>' +
+      '<p class="dt-muted" style="margin-top:-6px;">Nový uživatel bude zařazen do sítě pod vás jako sponzora. Heslo se vygeneruje automaticky a zobrazí se jen jednou zde.</p>' +
+      '<div id="addUserBanner"></div>' +
+      '<form id="addUserForm" novalidate>' +
+        '<div class="form-grid">' +
+          '<div class="field"><label for="auJmeno">Jméno *</label><input type="text" id="auJmeno"></div>' +
+          '<div class="field"><label for="auPrijmeni">Příjmení</label><input type="text" id="auPrijmeni"></div>' +
+          '<div class="field col-span-2"><label for="auEmail">E-mail *</label><input type="email" id="auEmail"></div>' +
+          '<div class="field"><label for="auTelefon">Telefon</label><input type="tel" id="auTelefon"></div>' +
+          '<div class="field"><label for="auRole">Role *</label><select id="auRole">' + addUserRoleOptionsHtml() + '</select></div>' +
+        '</div>' +
+        '<div class="form-actions">' +
+          '<button class="btn-primary" type="submit" id="addUserSaveBtn" style="width:auto;">Vytvořit účet</button>' +
+          '<button class="btn-ghost" type="button" id="addUserCancelBtn">Zrušit</button>' +
+        '</div>' +
+      '</form>';
+    el("addUserModalOverlay").hidden = false;
+    el("addUserCancelBtn").addEventListener("click", closeAddUserModal);
+    el("addUserForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      submitAddUserForm();
+    });
+  }
+
+  function addUserErrorMessage(error) {
+    if (!error) return "Nastala neočekávaná chyba. Zkuste to prosím znovu.";
+    var msg = error.message || "";
+    if (error.code === "42501" || msg.indexOf("Nemate opravneni") !== -1) return "Nemáte oprávnění založit uživatele.";
+    if (msg.indexOf("smi zalozit jen dalsiho tipare") !== -1) return "Tipař smí založit jen dalšího tipaře.";
+    if (msg.indexOf("jen roli tipar nebo leader") !== -1) return "Lze založit jen roli Tipař nebo Leader.";
+    if (msg.indexOf("uz je zaregistrovany") !== -1) return "Tento e-mail už je zaregistrovaný.";
+    if (msg.indexOf("Zadejte platny e-mail") !== -1) return "Zadejte prosím platný e-mail.";
+    if (msg.indexOf("Jmeno je povinne") !== -1) return "Jméno je povinné.";
+    return "Uživatele se nepodařilo založit (" + escapeHtml(msg || "neznámá chyba") + ").";
+  }
+
+  async function submitAddUserForm() {
+    var jmeno = el("auJmeno").value.trim();
+    var prijmeni = el("auPrijmeni").value.trim();
+    var email = el("auEmail").value.trim();
+    var telefon = el("auTelefon").value.trim();
+    var role = el("auRole").value;
+
+    if (!jmeno) { showBanner(el("addUserBanner"), "error", "Jméno je povinné."); return; }
+    if (!email || !isValidEmail(email)) { showBanner(el("addUserBanner"), "error", "Zadejte prosím platný e-mail."); return; }
+
+    var btn = el("addUserSaveBtn");
+    btn.disabled = true;
+    showBanner(el("addUserBanner"), null, null);
+
+    var result = await sb.rpc("vytvorit_uzivatele_rucne", {
+      p_jmeno: jmeno, p_prijmeni: prijmeni || null, p_telefon: telefon || null, p_email: email, p_role: role
+    });
+
+    btn.disabled = false;
+    if (result.error) {
+      console.error("Chyba při zakládání uživatele:", result.error);
+      showBanner(el("addUserBanner"), "error", addUserErrorMessage(result.error));
+      return;
+    }
+
+    var row = (result.data && result.data[0]) || {};
+    // Heslo se zobrazí JEN TADY, jednou - nikam jinam se v klientovi
+    // neukládá (žádný localStorage, žádná proměnná mimo tuhle funkci).
+    el("addUserModalBox").innerHTML =
+      '<h3 class="detail-section-title" style="margin-top:0;">Účet vytvořen</h3>' +
+      '<div class="banner banner-ok">Účet pro ' + escapeHtml(row.email || email) + ' byl vytvořen.</div>' +
+      '<p style="font-size:13.5px;">Toto heslo předejte novému uživateli mimo tento systém (telefonicky/osobně). Po prvním přihlášení si ho bude muset ihned změnit — tady se už znovu nezobrazí:</p>' +
+      '<div class="card" style="background:var(--bg-alt, var(--surface)); text-align:center; padding:14px; margin-bottom:16px;">' +
+        '<code style="font-size:16px; font-weight:700; user-select:all;">' + escapeHtml(row.heslo || "") + '</code>' +
+      '</div>' +
+      '<div class="form-actions"><button class="btn-primary" type="button" id="addUserDoneBtn" style="width:auto;">Hotovo</button></div>';
+    el("addUserDoneBtn").addEventListener("click", closeAddUserModal);
+
+    // Pravidlo 6: pokud je zrovna otevřená Uživatelé, ať se hned zobrazí
+    // nově založený uživatel bez nutnosti ručně přepínat tab.
+    if (activeTab === "users") fetchUsersTable();
+  }
+
+  // ---------------- bod 7: Přehled leadra - rozšířené stat-cards ----------------
+
+  async function renderLeaderDashboardStats() {
+    var wrap = el("leaderDashboardWrap");
+    if (!wrap) return;
+    var result = await sb.rpc("leader_dashboard_stats");
+    if (result.error) {
+      console.error("Chyba při načítání přehledu leadra:", result.error);
+      wrap.innerHTML = '<div class="banner banner-error">Rozšířený přehled se nepodařilo načíst.</div>';
+      return;
+    }
+    var s = (result.data && result.data[0]) || {};
+    function tile(num, label, clickTab) {
+      var inner = '<div class="stat-num">' + escapeHtml(String(num != null ? num : 0)) + '</div><div class="stat-label">' + escapeHtml(label) + '</div>';
+      return clickTab
+        ? '<button type="button" class="stat-tile" data-goto-tab="' + escapeHtml(clickTab) + '">' + inner + '</button>'
+        : '<div class="stat-tile">' + inner + '</div>';
+    }
+    wrap.innerHTML =
+      '<div class="stat-row-heading">Tipy</div>' +
+      '<div class="stat-row">' +
+        tile(s.tipy_ceka_na_overeni, "čeká na ověření", "tipy") +
+        tile(s.tipy_v_procesu_rk, "v procesu u RK", "tipy") +
+        tile(s.tipy_celkem, "celkem tipů", "tipy") +
+        tile(s.tipy_uspesne, "úspěšných (podepsaná smlouva a dál)", "tipy") +
+      '</div>' +
+      '<div class="stat-row-heading">Síť (' + escapeHtml(String(s.uzivatelu_v_siti || 0)) + ' uživatelů)</div>' +
+      '<div class="stat-row">' +
+        tile(s.stav_email_neoveren, "e-mail neověřen", "users") +
+        tile(s.stav_email_overen, "e-mail ověřen, chybí adresa", "users") +
+        tile(s.stav_vyplneny_udaje, "adresa vyplněná, čeká KYC", "users") +
+        tile(s.stav_autentizovano, "plně autentizováno", "users") +
+      '</div>' +
+      '<div class="stat-row-heading">Vyžaduje pozornost</div>' +
+      '<div class="stat-row">' +
+        tile(s.kyc_ceka_na_overeni, "čeká na ověření totožnosti", "kyc") +
+        tile(s.vyplaty_ceka_na_schvaleni, "výplat čeká na schválení", "vyplaty") +
+        tile(s.adresa_po_terminu, "uživatelů PO TERMÍNU (adresa)", "users") +
+      '</div>';
+
+    wrap.querySelectorAll("[data-goto-tab]").forEach(function (btn) {
+      btn.addEventListener("click", function () { setActiveTab(btn.getAttribute("data-goto-tab")); });
+    });
+  }
+
   // ---------------- wiring ----------------
 
   function wireEvents() {
     el("goRegisterBtn").addEventListener("click", showRegisterView);
     el("goLoginBtn").addEventListener("click", showLoginView);
+    el("checkEmailBackBtn").addEventListener("click", showLoginView);
+
+    // Milník 9
+    el("forcedPasswordForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      submitForcedPasswordForm();
+    });
+    el("addressForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      submitAddressForm();
+    });
+    el("addUserTopBtn").addEventListener("click", openAddUserModal);
+    el("addUserModalOverlay").addEventListener("click", function (e) {
+      if (e.target === el("addUserModalOverlay")) closeAddUserModal();
+    });
 
     el("demoABtn").addEventListener("click", function () { demoLogin("a"); });
     el("demoBBtn").addEventListener("click", function () { demoLogin("b"); });
