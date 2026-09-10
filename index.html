@@ -362,6 +362,9 @@
   }
   .banner-error { background: var(--danger-soft); color: var(--danger); }
   .banner-ok { background: var(--ok-soft); color: var(--ok); }
+  /* Milník 11 (bod 2): neutrální informační banner - stav "Čeká na
+     posouzení" není chyba ani úspěch, jen informace. */
+  .banner-info { background: var(--info-soft); color: var(--info); }
 
   /* ---------- check-email screen (Milník 9, bod 1) ---------- */
   .check-email-icon { font-size: 40px; text-align: center; margin-bottom: 6px; }
@@ -426,13 +429,45 @@
   .kyc-doc-preview { margin-top: 8px; }
   .kyc-preview-img { max-width: 120px; max-height: 120px; border-radius: var(--radius-s); border: 1px solid var(--border); display: block; object-fit: cover; }
   .kyc-preview-img-review { max-width: 260px; max-height: 260px; }
-  /* Milník 10 (bod 3): input[type=file] se při re-renderu vždy vytvoří
-     nový a "zapomene" vybraný soubor (nativní chování prohlížeče) - proto
-     je zabalený do vlastního popisku, aby nikdy nepůsobil jako jediný
-     zdroj pravdy o stavu; skutečný stav je vždy viditelný výš v
-     .kyc-doc-status/.kyc-doc-preview. */
-  .kyc-file-label { font-size: 12px; font-weight: 600; color: var(--accent); }
-  .kyc-file-input { font-size: 12.5px; max-width: 210px; }
+  /* Milník 10 (bod 3, ale nedostatečně) + Milník 11 (bod 3, definitivní
+     oprava): input[type=file] se při re-renderu vždy vytvoří nový a
+     "zapomene" vybraný soubor (nativní chování prohlížeče) - skutečný
+     stav je vždy viditelný výš v .kyc-doc-status/.kyc-doc-preview.
+     Milník 11: klient nahlásil PODRUHÉ, že vedle tlačítka pořád svítí
+     matoucí nativní text prohlížeče ("Soubor nevybrán") i když soubor
+     JE nahraný - protože samotný <input type=file> se předtím jen
+     zmenšil/schoval, ale zůstal vizuálně přítomný se svým nativním
+     textem. Teď je nativní vzhled/text úplně schovaný (ne display:none,
+     to by ho udělalo nefokusovatelným/needitovatelným) a nahrazuje ho
+     vlastní tlačítko `.kyc-file-btn` (viz <label> markup), na které se
+     kliká - klik na <label> aktivuje obalený <input>. */
+  .kyc-file-btn {
+    position: relative;
+    display: inline-block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: var(--radius-s);
+    cursor: pointer;
+    text-align: center;
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .kyc-file-btn:hover { background: var(--surface-2); }
+  .kyc-file-btn:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .kyc-file-input-hidden {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    /* Vědomě NE display:none / visibility:hidden - input musí zůstat
+       focusovatelný a klikatelný přes obalující <label>, jinak by
+       nešel ovládat klávesnicí ani by na něj nefungoval klik z labelu
+       ve všech prohlížečích konzistentně. */
+  }
 
   /* Milník 10 (bod 4): Leaderova obrazovka "Ověření totožnosti" - údaje z
      profilu vlevo, náhledy dokladů vpravo (dvousloupcové na širší
@@ -443,6 +478,22 @@
   .kyc-review-profile { display: flex; flex-direction: column; gap: 10px; }
   .kyc-review-docs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; align-content: start; }
   .kyc-review-doc { display: flex; flex-direction: column; gap: 6px; }
+
+  /* Milník 11 (bod 4): klik na náhled dokladu dřív otevíral nové okno
+     prohlížeče (target="_blank") - klient nahlásil, že po jeho zavření
+     zůstane appka na jiné záložce. Teď se obrázek otevře v lightboxu
+     PŘÍMO v appce, stejný vizuální vzorec jako `.modal-overlay`
+     (Milník 9, #addUserModalOverlay). */
+  .kyc-preview-img { cursor: zoom-in; }
+  .lightbox-overlay { align-items: center; padding: 30px 16px; cursor: zoom-out; }
+  .lightbox-img { max-width: 100%; max-height: 88vh; display: block; border-radius: var(--radius-s); box-shadow: 0 12px 48px rgba(0,0,0,.5); cursor: default; }
+  .lightbox-close {
+    position: fixed; top: 18px; right: 22px; z-index: 101;
+    width: 42px; height: 42px; border-radius: 50%; border: none;
+    background: rgba(255,255,255,.18); color: #fff; font-size: 20px;
+    line-height: 1; cursor: pointer;
+  }
+  .lightbox-close:hover { background: rgba(255,255,255,.32); }
 
   /* ---------- form screen ---------- */
 
@@ -600,7 +651,7 @@
   }
   .btn-small.btn-small-danger:hover { background: var(--danger-soft); }
 
-  .toolbar-row-end { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+  .toolbar-row-end { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
 
   .stat-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
   .stat-tile {
@@ -941,11 +992,14 @@
     <div class="topbar-inner">
       <div class="brand">Realitní <em>tip</em></div>
       <div class="topbar-user">
-        <!-- Milník 9 (bod 6): "Přidat uživatele" - tipař/leader/administrator
-             (NE role rk, ta má svůj vlastní tok vytvorit_pristup_rk).
-             Viditelnost je jen pohodlí v UI - RPC vytvorit_uzivatele_rucne
-             si roli volajícího i cílovou roli ověřuje znovu na serveru. -->
-        <button class="btn-small" id="addUserTopBtn" type="button" hidden>+ Přidat uživatele</button>
+        <!-- Milník 9 (bod 6) -> Milník 11 (bod 5): tlačítko "+ Přidat
+             uživatele" bylo tady v záhlaví (viditelné pro
+             tipař/leader/administrator) - klient chtěl přesunout do
+             záložky Uživatelé. Natrvalo ODSTRANĚNO odsud, nahrazeno dvěma
+             tlačítky blíž kontextu: #addUserUsersBtn (usersScreen, pro
+             leader/administrator) a #addUserNetworkBtn (networkScreen, pro
+             tipaře - ten záložku Uživatelé vůbec nemá, viz report Milníku
+             11 bod 5 pro zdůvodnění, proč tipař tlačítko NEZTRÁCÍ). -->
         <span class="user-name" id="userNameLabel"></span>
         <button class="btn-ghost" id="logoutBtn" type="button">Odhlásit se</button>
       </div>
@@ -1250,6 +1304,16 @@
 
       <div id="networkBanner"></div>
 
+      <!-- Milník 11 (bod 5): tipař nemá záložku "Uživatelé" (viz
+           ROLE_TAB_ORDER.tipar), takže tlačítko "+ Přidat uživatele" z
+           topbaru pro něj přistálo sem - nejbližší smysluplné místo, kde
+           tipař vidí svou síť/lidi pod sebou. Leader tenhle wrap nevidí
+           (má tlačítko v Uživatelé, #addUserUsersBtn) - viditelnost řídí
+           JS v handleSignedIn (jen role === "tipar"). -->
+      <div class="toolbar-row-end" id="networkAddUserBtnWrap" hidden>
+        <button class="btn-small" id="addUserNetworkBtn" type="button">+ Přidat uživatele</button>
+      </div>
+
       <div class="invite-box" id="inviteBoxWrap">
         <code id="inviteLinkText"></code>
         <button class="btn-small" id="copyInviteBtn" type="button">Zkopírovat odkaz</button>
@@ -1323,7 +1387,14 @@
 
       <div id="usersBanner"></div>
 
+      <!-- Milník 11 (bod 5): "+ Přidat uživatele" přesunuto sem z topbaru
+           (#addUserTopBtn odstraněn) - Leader/Administrator ho teď mají
+           přímo u tabulky uživatelů, stejný vzor jako "+ Přidat RK" v
+           Realitní kanceláře. Sdílí openAddUserModal() se sesterským
+           tlačítkem #addUserNetworkBtn (Moje síť, jen role tipar - ta tuhle
+           záložku vůbec nemá, viz report). -->
       <div class="toolbar-row-end">
+        <button class="btn-small" id="addUserUsersBtn" type="button">+ Přidat uživatele</button>
         <button class="btn-small" id="usersExportBtn" type="button">Export</button>
       </div>
 
@@ -1463,13 +1534,22 @@
       <div id="profileRegistraceStavWrap" style="margin-bottom:16px;"></div>
 
       <div class="card detail-card">
-        <h3 class="detail-section-title" style="margin-top:0;">Adresa</h3>
-        <p class="dt-muted" style="margin-top:-6px;">Vyplňte prosím do 30 dnů od registrace. Nic vám to nezakazuje, jen to potřebujeme pro fakturační/daňové účely.</p>
+        <!-- Milník 11 (bod 1): "Adresa" -> "Adresa a osobní údaje", protože
+             formulář teď nese i trvalou adresu, doručovací adresu (jen
+             pokud se liší) a datum narození (bod 2, podmínka pro odeslání
+             k ověření). -->
+        <h3 class="detail-section-title" style="margin-top:0;">Adresa a osobní údaje</h3>
+        <!-- Milník 11 (bod 1.6): klient výslovně žádal odstranit větu "Nic
+             vám to nezakazuje...", zůstává jen věcná informace o lhůtě.
+             Samotná logika (neblokující 30denní lhůta) se NEMĚNÍ. -->
+        <p class="dt-muted" style="margin-top:-6px;">Vyplňte prosím do 30 dnů od registrace.</p>
         <form id="addressForm" novalidate>
           <div class="field-checkbox">
             <input type="checkbox" id="pfJeFirma">
             <label for="pfJeFirma">Jednám jako firma (adresa = sídlo firmy, vyžaduje IČO)</label>
           </div>
+          <!-- Milník 11 (bod 1): sloupce adresa_* beze změny = TRVALÁ adresa
+               / sídlo firmy. -->
           <div class="form-grid" style="margin-top:10px;">
             <div class="field col-span-2"><label for="pfUlice">Ulice a číslo popisné *</label><input type="text" id="pfUlice" placeholder="např. Hlavní 123"></div>
             <div class="field"><label for="pfMesto">Město *</label><input type="text" id="pfMesto"></div>
@@ -1477,7 +1557,27 @@
             <div class="field"><label for="pfStat">Stát</label><input type="text" id="pfStat" value="Česká republika"></div>
             <div class="field" id="pfIcoField"><label for="pfIco">IČO *</label><input type="text" id="pfIco"></div>
             <div class="field" id="pfDicField"><label for="pfDic">DIČ (nepovinné)</label><input type="text" id="pfDic"></div>
+            <!-- Milník 11 (bod 2.1): datum narození - podmínka pro
+                 "Odeslat k ověření" (viz renderKycSection). Zvoleno stejné
+                 formulář jako adresa (jednodušší UX než samostatná
+                 sekce). -->
+            <div class="field"><label for="pfDatumNarozeni">Datum narození</label><input type="date" id="pfDatumNarozeni"></div>
           </div>
+
+          <!-- Milník 11 (bod 1): doručovací adresa - vyplňuje se JEN pokud
+               se liší od trvalé (výchozí = stejná, pole schovaná). -->
+          <h3 class="detail-section-title">Doručovací adresa</h3>
+          <div class="field-checkbox">
+            <input type="checkbox" id="pfDorucovaciStejna" checked>
+            <label for="pfDorucovaciStejna">Doručovací adresa je stejná jako trvalá</label>
+          </div>
+          <div class="form-grid" id="pfDorucovaciFields" style="margin-top:10px;" hidden>
+            <div class="field col-span-2"><label for="pfDorUlice">Ulice a číslo popisné *</label><input type="text" id="pfDorUlice" placeholder="např. Hlavní 123"></div>
+            <div class="field"><label for="pfDorMesto">Město *</label><input type="text" id="pfDorMesto"></div>
+            <div class="field"><label for="pfDorPsc">PSČ *</label><input type="text" id="pfDorPsc" placeholder="např. 110 00"></div>
+            <div class="field"><label for="pfDorStat">Stát</label><input type="text" id="pfDorStat" value="Česká republika"></div>
+          </div>
+
           <div class="form-actions">
             <button class="btn-primary" type="submit" id="addressSaveBtn" style="width:auto;">Uložit adresu</button>
           </div>
@@ -1486,9 +1586,17 @@
 
       <div class="kyc-card" id="kycCard">
         <h3>Jednorázové ověření totožnosti (nutné pro výplatu provize)</h3>
-        <p class="dt-muted">Nahrajte prosím sken/foto obou stran dokladu totožnosti a vlastní fotografii. Bez schváleného ověření vám nelze vyplatit provizi — na podání tipu ani na cokoliv jiného to vliv nemá.</p>
+        <!-- Milník 11 (bod 2): VĚDOMÁ ZMĚNA workflow oproti Milníku 9/10 -
+             nahrání 3/3 dokumentů už NEODESÍLÁ žádost automaticky, uživatel
+             musí kliknout na tlačítko "Odeslat k ověření" (viz
+             renderKycSection/#kycSubmitWrap níže) - to jde jen když má
+             navíc vyplněnou trvalou adresu a datum narození. -->
+        <p class="dt-muted">Nahrajte prosím sken/foto obou stran dokladu totožnosti a vlastní fotografii, poté klikněte na „Odeslat k ověření“. Bez schváleného ověření vám nelze vyplatit provizi — na podání tipu ani na cokoliv jiného to vliv nemá.</p>
         <div id="kycStatusWrap"></div>
         <div id="kycDocsWrap"></div>
+        <div class="form-actions" id="kycSubmitWrap" hidden>
+          <button class="btn-primary" type="button" id="kycSubmitBtn" style="width:auto;">Odeslat k ověření</button>
+        </div>
       </div>
     </section>
 
@@ -1514,6 +1622,19 @@
      ostatní karty/formuláře - .card/.form-grid/.btn-primary). -->
 <div class="modal-overlay" id="addUserModalOverlay" hidden>
   <div class="modal-box card" id="addUserModalBox"></div>
+</div>
+
+<!-- ============== LIGHTBOX NÁHLEDU DOKLADU (Milník 11, bod 4) ==============
+     Klik na náhled dokladu (Můj profil i Leaderova obrazovka Ověření
+     totožnosti) dřív otevíral nové okno prohlížeče (target="_blank") -
+     klient nahlásil, že po jeho zavření zůstane appka na jiné záložce.
+     Stejný vizuální vzorec jako #addUserModalOverlay (Milník 9) -
+     poloprůhledné tmavé pozadí přes celou obrazovku + velký obrázek
+     uprostřed + tlačítko zavřít, zavírá se i klikem mimo obrázek nebo
+     klávesou Escape (viz openKycLightbox/closeKycLightbox v JS). -->
+<div class="modal-overlay lightbox-overlay" id="kycLightboxOverlay" hidden>
+  <button type="button" class="lightbox-close" id="kycLightboxCloseBtn" aria-label="Zavřít náhled">✕</button>
+  <img id="kycLightboxImg" class="lightbox-img" src="" alt="Náhled dokumentu">
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.115.0/dist/umd/supabase.js"></script>
@@ -1645,6 +1766,49 @@
     } catch (e) {
       return "";
     }
+  }
+
+  // Milník 11 (bod 2/4): formátování čistého data (bez času) - datum
+  // narození. Parsujeme přímo string "YYYY-MM-DD" (formát, který vrací
+  // Postgres date přes PostgREST), NE přes `new Date(str)` - ten by u
+  // čistého data interpretoval půlnoc jako UTC a v záporných časových
+  // pásmech by zobrazil o den dřívější datum.
+  function formatDateOnly(dateStr) {
+    if (!dateStr) return "";
+    var parts = String(dateStr).split("-");
+    if (parts.length !== 3) return String(dateStr);
+    return parts[2] + ". " + parts[1] + ". " + parts[0];
+  }
+
+  // Milník 11 (bod 1/4): jednořádkové formátování adresy (trvalé i
+  // doručovací) - sdílený helper pro Detail uživatele (openUserForm) i
+  // Leaderovu obrazovku Ověření totožnosti (renderKycList).
+  function adresaRadekHtml(ulice, mesto, psc, stat) {
+    var parts = [];
+    if (ulice) parts.push(ulice);
+    var mp = [mesto, psc].filter(Boolean).join(", ");
+    if (mp) parts.push(mp);
+    if (stat) parts.push(stat);
+    return parts.length ? parts.join(", ") : "—";
+  }
+
+  // Milník 11 (bod 4): lightbox náhledu dokladu - nahrazuje dřívější
+  // target="_blank" odkazy (nové okno prohlížeče). Stejný vizuální vzorec
+  // jako #addUserModalOverlay (Milník 9). Otevírání je delegované (viz
+  // wireEvents) přes .kyc-lightbox-trigger, protože náhledy se dynamicky
+  // přegenerovávají při každém re-renderu KYC sekcí (Můj profil i
+  // Leaderova obrazovka Ověření totožnosti).
+  function openKycLightbox(url, label) {
+    if (!url) return;
+    el("kycLightboxImg").src = url;
+    el("kycLightboxImg").alt = label || "Náhled dokumentu";
+    el("kycLightboxOverlay").hidden = false;
+  }
+  function closeKycLightbox() {
+    var overlay = el("kycLightboxOverlay");
+    if (!overlay || overlay.hidden) return;
+    overlay.hidden = true;
+    el("kycLightboxImg").src = "";
   }
 
   function truncate(str, n) {
@@ -2900,9 +3064,15 @@
     var isAdmin = role === "administrator";
     applyNavForRole(role);
 
-    // Milník 9 (bod 6): "+ Přidat uživatele" - tipař/leader/administrator,
-    // NE role rk (viditelnost jen pohodlí v UI, RPC si ověřuje roli znovu).
-    el("addUserTopBtn").hidden = (role === "rk");
+    // Milník 9 (bod 6) -> Milník 11 (bod 5): "+ Přidat uživatele" bylo v
+    // topbaru pro tipař/leader/administrator (NE role rk) - teď žije u
+    // #addUserUsersBtn (Uživatelé, vždy viditelné, tab i tak vidí jen
+    // leader/administrator) a #addUserNetworkBtn (Moje síť, JEN tipar -
+    // ten záložku Uživatelé nemá). Viditelnost je jen pohodlí v UI, RPC
+    // vytvorit_uzivatele_rucne si roli volajícího i cílovou roli ověřuje
+    // znovu na serveru.
+    var addUserNetworkWrap = el("networkAddUserBtnWrap");
+    if (addUserNetworkWrap) addUserNetworkWrap.hidden = (role !== "tipar");
 
     renderAddressDeadlineBanner();
     renderKycRejectedBanner();
@@ -2996,8 +3166,10 @@
     auditTable = null;
     unsubscribeRealtime();
     applyNavForRole("tipar");
-    el("addUserTopBtn").hidden = true;
+    var networkAddUserBtnWrap = el("networkAddUserBtnWrap");
+    if (networkAddUserBtnWrap) networkAddUserBtnWrap.hidden = true;
     closeAddUserModal();
+    closeKycLightbox();
 
     el("loginForm").reset();
     setFieldError(el("loginEmailField"), false);
@@ -3866,13 +4038,32 @@
     // samotného uživatele nebo Ověření totožnosti (schvalit_autentizaci).
     // Milník 10 (bod 1+2): řádek KYC se zobrazuje jen u role tipar - Leader
     // ani Administrator se totožnost neověřují (viz renderKycSection).
+    // Milník 11 (bod 1): "Detail uživatele pro leadera/admina" (tenhle
+    // formulář) teď navíc zobrazuje trvalou adresu, doručovací adresu
+    // (jen pokud se liší) a datum narození - data přicházejí z
+    // moje_uzivatele() (viz m11_moje_uzivatele_dorucovaci_a_narozeni_drop_create).
+    var adresaInfoHtml =
+      '<div class="detail-item"><div class="detail-label">Trvalá adresa' + (target.je_firma ? ' (sídlo firmy)' : '') + '</div><div class="detail-value">' +
+        escapeHtml(adresaRadekHtml(target.adresa_ulice, target.adresa_mesto, target.adresa_psc, target.adresa_stat)) + '</div></div>' +
+      (target.dorucovaci_je_stejna === false
+        ? '<div class="detail-item"><div class="detail-label">Doručovací adresa (liší se)</div><div class="detail-value">' +
+            escapeHtml(adresaRadekHtml(target.dorucovaci_ulice, target.dorucovaci_mesto, target.dorucovaci_psc, target.dorucovaci_stat)) + '</div></div>'
+        : '') +
+      (target.je_firma
+        ? '<div class="detail-item"><div class="detail-label">IČO / DIČ</div><div class="detail-value">' +
+            escapeHtml(target.ico || "—") + (target.dic ? ' / ' + escapeHtml(target.dic) : '') + '</div></div>'
+        : '') +
+      '<div class="detail-item"><div class="detail-label">Datum narození</div><div class="detail-value">' +
+        escapeHtml(formatDateOnly(target.datum_narozeni) || "—") + '</div></div>';
+
     var stavInfoHtml =
       '<div class="detail-card" style="margin-bottom:14px;">' +
         '<div style="margin-bottom:6px;">Fáze registrace: ' + registraceStavPillHtml(target.registrace_stav) +
           (target.adresa_po_terminu ? ' <span class="po-terminu-flag">PO TERMÍNU</span>' : '') + '</div>' +
         (target.role === "tipar"
-          ? '<div>Ověření totožnosti (KYC): ' + autentizaceStavPillHtml(target.autentizace_stav || "nevyplneno") + '</div>'
+          ? '<div style="margin-bottom:10px;">Ověření totožnosti (KYC): ' + autentizaceStavPillHtml(target.autentizace_stav || "nevyplneno") + '</div>'
           : '') +
+        '<div class="detail-grid">' + adresaInfoHtml + '</div>' +
       '</div>';
 
     el("usersFormWrap").innerHTML =
@@ -4782,7 +4973,8 @@
   async function refreshOwnProfile() {
     if (!currentUser) return;
     var r = await sb.from("profiles")
-      .select("adresa_ulice, adresa_mesto, adresa_psc, adresa_stat, je_firma, ico, dic, adresa_vyplnena_kdy, autentizace_stav, autentizace_duvod_zamitnuti")
+      // Milník 11 (bod 1+2): + dorucovaci_* sloupce a datum_narozeni.
+      .select("adresa_ulice, adresa_mesto, adresa_psc, adresa_stat, je_firma, ico, dic, adresa_vyplnena_kdy, autentizace_stav, autentizace_duvod_zamitnuti, dorucovaci_je_stejna, dorucovaci_ulice, dorucovaci_mesto, dorucovaci_psc, dorucovaci_stat, datum_narozeni")
       .eq("id", currentUser.id).single();
     if (!r.error && r.data) {
       Object.assign(currentUser, r.data);
@@ -4807,6 +4999,20 @@
     el("pfStat").value = currentUser.adresa_stat || "Česká republika";
     el("pfIco").value = currentUser.ico || "";
     el("pfDic").value = currentUser.dic || "";
+    el("pfDatumNarozeni").value = currentUser.datum_narozeni || "";
+
+    // Milník 11 (bod 1): doručovací adresa - výchozí "stejná jako trvalá"
+    // (dorucovaci_je_stejna je DB sloupec s default true, takže i u
+    // nového profilu bez uložené adresy je currentUser.dorucovaci_je_stejna
+    // typicky true; `!== false` je jen obranná pojistka pro edge-case
+    // null/undefined před prvním uložením).
+    var dorStejna = currentUser.dorucovaci_je_stejna !== false;
+    el("pfDorucovaciStejna").checked = dorStejna;
+    el("pfDorucovaciFields").hidden = dorStejna;
+    el("pfDorUlice").value = currentUser.dorucovaci_ulice || "";
+    el("pfDorMesto").value = currentUser.dorucovaci_mesto || "";
+    el("pfDorPsc").value = currentUser.dorucovaci_psc || "";
+    el("pfDorStat").value = currentUser.dorucovaci_stat || "Česká republika";
 
     // Milník 10 (bod 1+2, korekce rozsahu KYC): ověření totožnosti se od
     // tohoto milníku týká VÝHRADNĚ role tipar - "admin je admin, ten se
@@ -4824,11 +5030,24 @@
 
   var KYC_IMAGE_EXT_RE = /\.(jpe?g|png|webp)$/i;
 
+  // Milník 11 (bod 2): VĚDOMÁ ZMĚNA workflow oproti Milníku 9/10 - nahrání
+  // 3/3 dokumentů už NEODESÍLÁ žádost automaticky (zrušeno v
+  // nahrat_identifikacni_dokument(), viz
+  // m11_nahrat_identifikacni_dokument_zrusit_autoprechod) a Milník 10 bod 3
+  // (editovatelnost VE VŠECH stavech) se RUŠÍ - editovatelné je zase jen
+  // "nevyplneno"/"zamitnuto", přesně jako v Milníku 9. Po odeslání
+  // (ceka_na_overeni) i po schválení (schvaleno) nejde nic měnit, dokud to
+  // Leader/Administrator nevrátí zamítnutím. Viz
+  // docs/milnik11_dve_adresy_a_kyc_odeslani.md pro plné zdůvodnění.
   async function renderKycSection() {
     var stav = currentUser.autentizace_stav || "nevyplneno";
+    var editovatelne = (stav === "nevyplneno" || stav === "zamitnuto");
     var statusHtml = '<div style="margin-bottom:12px;">' + autentizaceStavPillHtml(stav) + '</div>';
     if (stav === "zamitnuto" && currentUser.autentizace_duvod_zamitnuti) {
-      statusHtml += '<div class="banner banner-error">Důvod zamítnutí: ' + escapeHtml(currentUser.autentizace_duvod_zamitnuti) + ' — po novém nahrání dokumentů půjde znovu ke schválení.</div>';
+      statusHtml += '<div class="banner banner-error">Důvod zamítnutí: ' + escapeHtml(currentUser.autentizace_duvod_zamitnuti) + ' — opravte prosím dokumenty a znovu klikněte na „Odeslat k ověření“.</div>';
+    }
+    if (stav === "ceka_na_overeni") {
+      statusHtml += '<div class="banner banner-info">Vaše žádost o ověření totožnosti čeká na posouzení Leaderem/Administrátorem. Dokumenty teď nelze měnit.</div>';
     }
     // Milník 10 (bod 4d): pozitivní potvrzení po schválení - stejně
     // nepřehlédnutelné jako banner zamítnutí výše.
@@ -4854,14 +5073,6 @@
       });
     });
 
-    // Milník 10 (bod 3): nahrávat/přenahrávat lze VE VŠECH stavech, ne jen
-    // "nevyplneno"/"zamitnuto" - server (nahrat_identifikacni_dokument) to
-    // vlastníkovi stejně nijak neomezoval, jen UI dřív možnost schovávalo.
-    // Uživatel tak i po odeslání ke schválení (nebo po schválení) pořád
-    // vidí, co má nahrané, a může to zkontrolovat/opravit; přenahrání
-    // dokumentu ve stavu "schvaleno" server sám vrátí zpět na
-    // "ceka_na_overeni" a vymaže starý důvod zamítnutí (ověřeno testem
-    // v transakci, viz docs/milnik10_ux_a_kyc_scope.md).
     var html = "";
     docs.forEach(function (d) {
       var f = fileByTyp[d.typ];
@@ -4873,30 +5084,54 @@
           '</div>' +
           '<div class="kyc-doc-preview" data-own-preview="' + d.typ + '"></div>' +
         '</div>' +
-        '<div class="kyc-doc-action">' +
-          '<label class="kyc-file-label" for="kycFile_' + d.typ + '">' + (f ? "Nahrát jiný soubor" : "Nahrát soubor") + '</label>' +
-          '<input type="file" id="kycFile_' + d.typ + '" accept="image/jpeg,image/png,image/webp,application/pdf" class="kyc-file-input" data-typ="' + d.typ + '">' +
-        '</div>' +
+        // Milník 11 (bod 3, definitivní oprava "Soubor nevybrán"): nativní
+        // <input type=file> je schovaný přes .kyc-file-input-hidden (NE
+        // display:none - musí zůstat focusovatelný/klikatelný přes
+        // obalující <label>), takže nikde není vidět nativní text
+        // prohlížeče o (ne)vybraném souboru - stav ukazuje výhradně
+        // .kyc-doc-status/.kyc-doc-preview výše. Input se renderuje JEN
+        // v editovatelném stavu (bod 2) - po odeslání/schválení žádný
+        // input není, jen status + náhled.
+        (editovatelne
+          ? '<div class="kyc-doc-action">' +
+              '<label class="kyc-file-btn">' + (f ? "Vybrat jiný soubor" : "Vybrat soubor") +
+                '<input type="file" id="kycFile_' + d.typ + '" accept="image/jpeg,image/png,image/webp,application/pdf" class="kyc-file-input-hidden" data-typ="' + d.typ + '">' +
+              '</label>' +
+            '</div>'
+          : '') +
       '</div>';
     });
     el("kycDocsWrap").innerHTML = html;
 
-    el("kycDocsWrap").querySelectorAll(".kyc-file-input").forEach(function (input) {
-      input.addEventListener("change", function () {
-        if (input.files && input.files[0]) uploadKycFile(input.getAttribute("data-typ"), input.files[0]);
+    if (editovatelne) {
+      el("kycDocsWrap").querySelectorAll(".kyc-file-input-hidden").forEach(function (input) {
+        input.addEventListener("change", function () {
+          if (input.files && input.files[0]) uploadKycFile(input.getAttribute("data-typ"), input.files[0]);
+        });
       });
-    });
+    }
 
-    // Náhledy nahraných dokumentů (bod 3) - krátkodobý signed URL (5 minut),
-    // stejný princip jako u Leaderovy obrazovky Ověření totožnosti.
+    // Náhledy nahraných dokumentů (bod 3, Milník 10) - krátkodobý signed
+    // URL (5 minut), stejný princip jako u Leaderovy obrazovky Ověření
+    // totožnosti.
     docs.forEach(function (d) {
       var f = fileByTyp[d.typ];
       if (f) renderKycOwnPreview(d.typ, f.name);
     });
+
+    // Milník 11 (bod 2.4): tlačítko "Odeslat k ověření" se zobrazí JEN
+    // když jsou nahrané všechny 3 dokumenty A stav dovoluje odeslání
+    // (nevyplneno/zamitnuto) - přesná podmínka, kterou ověřuje i server
+    // (odeslat_k_overeni_totoznosti), tady je to jen UI pohodlí navíc.
+    var vsechnyNahrane = !!(fileByTyp.op_predni && fileByTyp.op_zadni && fileByTyp.foto);
+    el("kycSubmitWrap").hidden = !(editovatelne && vsechnyNahrane);
   }
 
-  // Milník 10 (bod 3): náhled vlastního nahraného dokumentu v "Můj profil" -
-  // obrázek (jpg/png/webp) přímo jako <img>, PDF jako klikací odkaz.
+  // Milník 10 (bod 3) + Milník 11 (bod 4): náhled vlastního nahraného
+  // dokumentu v "Můj profil" - obrázek (jpg/png/webp) jako klikací <img>
+  // (otevírá lightbox #kycLightboxOverlay, ne nové okno prohlížeče), PDF
+  // zůstává klikacím odkazem (nelze vyrenderovat jako <img> bez PDF
+  // knihovny, target="_blank" je tu jediná rozumná volba).
   async function renderKycOwnPreview(typ, fileName) {
     var slot = document.querySelector('#kycDocsWrap [data-own-preview="' + typ + '"]');
     if (!slot) return;
@@ -4910,7 +5145,7 @@
     }
     var url = signed.data.signedUrl;
     if (KYC_IMAGE_EXT_RE.test(fileName)) {
-      slot.innerHTML = '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer"><img src="' + escapeHtml(url) + '" class="kyc-preview-img" alt="Náhled dokumentu"></a>';
+      slot.innerHTML = '<img src="' + escapeHtml(url) + '" class="kyc-preview-img kyc-lightbox-trigger" alt="Náhled dokumentu" tabindex="0" role="button" aria-label="Zobrazit náhled ve větším okně" data-lightbox-url="' + escapeHtml(url) + '" data-lightbox-label="Náhled dokumentu">';
     } else {
       slot.innerHTML = '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">📄 Zobrazit PDF v novém okně</a>';
     }
@@ -4934,11 +5169,54 @@
     var rpcResult = await sb.rpc("nahrat_identifikacni_dokument", { p_typ: typ, p_cesta: cesta });
     if (rpcResult.error) {
       console.error("Chyba při zaznamenání dokumentu:", rpcResult.error);
-      showBanner(el("profileBanner"), "error", "Soubor se nahrál, ale nepodařilo se to zaznamenat. Zkuste to prosím znovu.");
+      // Milník 11 (bod 2): tenhle RPC teď navíc odmítne nahrání ve stavu
+      // ceka_na_overeni/schvaleno (server je zdroj pravdy - UI input v
+      // téhle situaci ani nezobrazuje, ale kdyby se re-render zpozdil
+      // oproti kliknutí, hláška ať je srozumitelná, ne jen generická).
+      var msg = (rpcResult.error.message || "").indexOf("nelze nahravat") !== -1
+        ? "Dokument teď nelze nahrát - žádost už byla odeslána k ověření nebo je schválená."
+        : "Soubor se nahrál, ale nepodařilo se to zaznamenat. Zkuste to prosím znovu.";
+      showBanner(el("profileBanner"), "error", msg);
+      await refreshOwnProfile();
+      await renderKycSection();
       return;
     }
 
     showBanner(el("profileBanner"), "ok", "Dokument byl nahrán.");
+    await refreshOwnProfile();
+    el("profileRegistraceStavWrap").innerHTML = "Fáze registrace: " + registraceStavPillHtml(mujRegistraceStav());
+    await renderKycSection();
+  }
+
+  // Milník 11 (bod 2.3-2.4): explicitní "Odeslat k ověření" - jediná cesta,
+  // jak KYC žádost přejde do stavu 'ceka_na_overeni' (nahrazuje automatický
+  // přechod z Milníku 9/10).
+  function odeslatKOvereniErrorMessage(error) {
+    if (!error) return "Nastala neočekávaná chyba. Zkuste to prosím znovu.";
+    var msg = error.message || "";
+    if (msg.indexOf("uz byla odeslana") !== -1) return "Žádost o ověření už byla odeslána.";
+    if (msg.indexOf("uz overena") !== -1) return "Totožnost je už ověřená.";
+    if (msg.indexOf("vyhradne role tipar") !== -1) return "Tato akce je dostupná jen pro roli tipař.";
+    if (msg.indexOf("Pred odeslanim") !== -1) {
+      return "Před odesláním k ověření musíte mít nahrané všechny 3 dokumenty, vyplněnou adresu trvalého bydliště a datum narození.";
+    }
+    return "Žádost se nepodařilo odeslat (" + (msg || "neznámá chyba") + ").";
+  }
+
+  async function submitOdeslatKOvereni() {
+    showBanner(el("profileBanner"), null, null);
+    var btn = el("kycSubmitBtn");
+    btn.disabled = true;
+    var result = await sb.rpc("odeslat_k_overeni_totoznosti");
+    btn.disabled = false;
+
+    if (result.error) {
+      console.error("Chyba při odesílání k ověření:", result.error);
+      showBanner(el("profileBanner"), "error", odeslatKOvereniErrorMessage(result.error));
+      return;
+    }
+
+    showBanner(el("profileBanner"), "ok", "Žádost o ověření totožnosti byla odeslána.");
     await refreshOwnProfile();
     el("profileRegistraceStavWrap").innerHTML = "Fáze registrace: " + registraceStavPillHtml(mujRegistraceStav());
     await renderKycSection();
@@ -4952,6 +5230,14 @@
     var stat = el("pfStat").value.trim();
     var ico = el("pfIco").value.trim();
     var dic = el("pfDic").value.trim();
+    var datumNarozeni = el("pfDatumNarozeni").value || "";
+
+    // Milník 11 (bod 1): doručovací adresa - vyplňuje se jen když se liší.
+    var dorStejna = el("pfDorucovaciStejna").checked;
+    var dorUlice = el("pfDorUlice").value.trim();
+    var dorMesto = el("pfDorMesto").value.trim();
+    var dorPsc = el("pfDorPsc").value.trim();
+    var dorStat = el("pfDorStat").value.trim();
 
     showBanner(el("profileBanner"), null, null);
     if (!ulice || !mesto || !psc) {
@@ -4962,24 +5248,41 @@
       showBanner(el("profileBanner"), "error", "Pro firmu je vyplnění IČO povinné.");
       return;
     }
+    if (!dorStejna && (!dorUlice || !dorMesto || !dorPsc)) {
+      showBanner(el("profileBanner"), "error", "Pro odlišnou doručovací adresu vyplňte prosím ulici, město a PSČ.");
+      return;
+    }
 
     var btn = el("addressSaveBtn");
     btn.disabled = true;
     var result = await sb.rpc("upravit_moji_adresu", {
       p_ulice: ulice, p_mesto: mesto, p_psc: psc, p_stat: stat || null,
-      p_je_firma: jeFirma, p_ico: ico || null, p_dic: dic || null
+      p_je_firma: jeFirma, p_ico: ico || null, p_dic: dic || null,
+      p_dorucovaci_je_stejna: dorStejna,
+      p_dorucovaci_ulice: dorStejna ? null : (dorUlice || null),
+      p_dorucovaci_mesto: dorStejna ? null : (dorMesto || null),
+      p_dorucovaci_psc: dorStejna ? null : (dorPsc || null),
+      p_dorucovaci_stat: dorStejna ? null : (dorStat || null),
+      p_datum_narozeni: datumNarozeni || null
     });
     btn.disabled = false;
 
     if (result.error) {
       console.error("Chyba při ukládání adresy:", result.error);
-      showBanner(el("profileBanner"), "error", "Adresu se nepodařilo uložit. Zkuste to prosím znovu.");
+      var msg = (result.error.message || "").indexOf("Datum narozeni neni platne") !== -1
+        ? "Zadané datum narození není platné."
+        : "Adresu se nepodařilo uložit. Zkuste to prosím znovu.";
+      showBanner(el("profileBanner"), "error", msg);
       return;
     }
 
     showBanner(el("profileBanner"), "ok", "Adresa byla uložena.");
     await refreshOwnProfile();
     el("profileRegistraceStavWrap").innerHTML = "Fáze registrace: " + registraceStavPillHtml(mujRegistraceStav());
+    // Milník 11 (bod 2): datum narození ovlivňuje, jestli je "Odeslat k
+    // ověření" vůbec splnitelné - re-render KYC sekce po uložení adresy,
+    // aby se to hned promítlo (jen role tipar má kartu KYC vůbec zobrazenou).
+    if (currentUser.role === "tipar") await renderKycSection();
   }
 
   // ---------------- bod 5.6: Ověření totožnosti (Leader/Administrator) ----------------
@@ -5001,20 +5304,27 @@
     await renderKycList(cekajici);
   }
 
-  // Milník 10 (bod 4): plná adresa/IČO-DIČ formátovaná pro zobrazení vedle
-  // náhledů dokladu, aby šlo reálně porovnat doklad s tím, co je v systému.
-  function kycAdresaText(u) {
-    var parts = [];
-    if (u.adresa_ulice) parts.push(u.adresa_ulice);
-    var mestoPsc = [u.adresa_mesto, u.adresa_psc].filter(Boolean).join(", ");
-    if (mestoPsc) parts.push(mestoPsc);
-    if (u.adresa_stat) parts.push(u.adresa_stat);
-    if (!parts.length) return "Adresa nevyplněná";
-    var text = parts.join(", ");
-    if (u.je_firma) {
-      text += " (firma" + (u.ico ? ", IČO " + u.ico : "") + (u.dic ? ", DIČ " + u.dic : "") + ")";
+  // Milník 11 (bod 4.2): VŠECHNY dostupné údaje o tipaři vedle náhledů
+  // dokladu, aby šlo reálně porovnat doklad s tím, co je v systému -
+  // rozšířeno o doručovací adresu (jen když se liší) a datum narození
+  // (Milník 11, bod 2). IČO/DIČ zvlášť čitelné, ne schované v jednom
+  // souvislém řádku textu jako dřív (kycAdresaText, Milník 10).
+  function kycProfilDetailyHtml(u) {
+    var html =
+      '<div class="detail-item"><div class="detail-label">Telefon</div><div class="detail-value">' + escapeHtml(u.telefon || "—") + '</div></div>' +
+      '<div class="detail-item"><div class="detail-label">E-mail</div><div class="detail-value">' + escapeHtml(u.email || "—") + '</div></div>' +
+      '<div class="detail-item"><div class="detail-label">Datum narození</div><div class="detail-value">' + escapeHtml(formatDateOnly(u.datum_narozeni) || "—") + '</div></div>' +
+      '<div class="detail-item"><div class="detail-label">Trvalá adresa' + (u.je_firma ? ' (sídlo firmy)' : '') + '</div><div class="detail-value">' +
+        escapeHtml(adresaRadekHtml(u.adresa_ulice, u.adresa_mesto, u.adresa_psc, u.adresa_stat)) + '</div></div>';
+    if (u.dorucovaci_je_stejna === false) {
+      html += '<div class="detail-item"><div class="detail-label">Doručovací adresa (liší se)</div><div class="detail-value">' +
+        escapeHtml(adresaRadekHtml(u.dorucovaci_ulice, u.dorucovaci_mesto, u.dorucovaci_psc, u.dorucovaci_stat)) + '</div></div>';
     }
-    return text;
+    if (u.je_firma) {
+      html += '<div class="detail-item"><div class="detail-label">IČO / DIČ</div><div class="detail-value">' +
+        escapeHtml(u.ico || "—") + (u.dic ? ' / ' + escapeHtml(u.dic) : '') + '</div></div>';
+    }
+    return html;
   }
 
   async function renderKycList(rows) {
@@ -5028,11 +5338,7 @@
       html += '<div class="card detail-card kyc-review-card" data-kyc-user="' + escapeHtml(u.id) + '">' +
         '<h3 class="detail-section-title" style="margin-top:0;">' + escapeHtml(celeJmeno(u)) + '</h3>' +
         '<div class="kyc-review-grid">' +
-          '<div class="kyc-review-profile">' +
-            '<div class="detail-item"><div class="detail-label">Telefon</div><div class="detail-value">' + escapeHtml(u.telefon || "—") + '</div></div>' +
-            '<div class="detail-item"><div class="detail-label">E-mail</div><div class="detail-value">' + escapeHtml(u.email || "—") + '</div></div>' +
-            '<div class="detail-item"><div class="detail-label">Adresa</div><div class="detail-value">' + escapeHtml(kycAdresaText(u)) + '</div></div>' +
-          '</div>' +
+          '<div class="kyc-review-profile">' + kycProfilDetailyHtml(u) + '</div>' +
           '<div class="kyc-review-docs" data-slot-links></div>' +
         '</div>' +
         '<div class="form-actions" style="margin-top:14px;">' +
@@ -5064,9 +5370,12 @@
     });
   }
 
-  // Milník 10 (bod 4): skutečné <img> náhledy (ne jen textové odkazy) vedle
-  // sebe - op_predni/op_zadni/foto, klikací na plnou velikost (otevře signed
-  // URL v novém okně).
+  // Milník 10 (bod 4) + Milník 11 (bod 4.1): skutečné <img> náhledy vedle
+  // sebe - op_predni/op_zadni/foto. Milník 11: klik dřív otevíral signed
+  // URL v NOVÉM OKNĚ prohlížeče (target="_blank") - klient nahlásil, že po
+  // jeho zavření zůstane appka na jiné záložce. Teď otevírá lightbox přímo
+  // v appce (#kycLightboxOverlay, viz openKycLightbox) - PDF zůstává
+  // klikacím odkazem do nového okna (nelze vyrenderovat jako <img>).
   async function renderKycPreviewLinks(userId) {
     var wrap = document.querySelector('[data-kyc-user="' + userId.replace(/"/g, "") + '"] [data-slot-links]');
     if (!wrap) return;
@@ -5091,7 +5400,7 @@
       }
       var url = signed.data.signedUrl;
       var body = KYC_IMAGE_EXT_RE.test(f.name)
-        ? '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer"><img src="' + escapeHtml(url) + '" class="kyc-preview-img kyc-preview-img-review" alt="' + escapeHtml(docs[i].label) + '"></a>'
+        ? '<img src="' + escapeHtml(url) + '" class="kyc-preview-img kyc-preview-img-review kyc-lightbox-trigger" alt="' + escapeHtml(docs[i].label) + '" tabindex="0" role="button" aria-label="Zobrazit náhled ve větším okně" data-lightbox-url="' + escapeHtml(url) + '" data-lightbox-label="' + escapeHtml(docs[i].label) + '">'
         : '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">📄 Zobrazit PDF v novém okně</a>';
       itemsHtml.push('<div class="kyc-review-doc"><div class="kyc-doc-label">' + escapeHtml(docs[i].label) + '</div>' + body + '</div>');
     }
@@ -5296,10 +5605,46 @@
       e.preventDefault();
       submitAddressForm();
     });
-    el("addUserTopBtn").addEventListener("click", openAddUserModal);
+    // Milník 11 (bod 1): checkbox "Doručovací adresa je stejná jako
+    // trvalá" - odškrtnutí zobrazí pole doručovací adresy, zaškrtnutí
+    // (výchozí) je skryje.
+    el("pfDorucovaciStejna").addEventListener("change", function () {
+      el("pfDorucovaciFields").hidden = el("pfDorucovaciStejna").checked;
+    });
+    // Milník 11 (bod 5): oba "+ Přidat uživatele" (Uživatelé i Moje síť)
+    // sdílejí stejnou openAddUserModal() logiku jako dřív jediné tlačítko
+    // v topbaru - jen jsou teď na dvou různých místech podle role.
+    el("addUserUsersBtn").addEventListener("click", openAddUserModal);
+    el("addUserNetworkBtn").addEventListener("click", openAddUserModal);
     el("addUserModalOverlay").addEventListener("click", function (e) {
       if (e.target === el("addUserModalOverlay")) closeAddUserModal();
     });
+    // Milník 11 (bod 4): lightbox náhledu dokladu - zavření klikem mimo
+    // obrázek, klikem na ✕, nebo klávesou Escape (viz keydown listener
+    // níže). Otevírání je řešené delegovaně (viz stejný keydown listener)
+    // přes [data-lightbox-url] na .kyc-lightbox-trigger prvcích, protože
+    // se dynamicky přegenerovávají při každém re-renderu KYC sekcí.
+    el("kycLightboxOverlay").addEventListener("click", function (e) {
+      if (e.target === el("kycLightboxOverlay")) closeKycLightbox();
+    });
+    el("kycLightboxCloseBtn").addEventListener("click", closeKycLightbox);
+    document.addEventListener("click", function (e) {
+      var trigger = e.target.closest ? e.target.closest(".kyc-lightbox-trigger") : null;
+      if (trigger) openKycLightbox(trigger.getAttribute("data-lightbox-url"), trigger.getAttribute("data-lightbox-label"));
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" || e.key === "Esc") {
+        if (!el("kycLightboxOverlay").hidden) closeKycLightbox();
+        return;
+      }
+      // Klávesnicová aktivace náhledu (Enter/mezerník), stejně jako klik -
+      // .kyc-lightbox-trigger má tabindex="0" role="button".
+      if ((e.key === "Enter" || e.key === " ") && e.target && e.target.classList && e.target.classList.contains("kyc-lightbox-trigger")) {
+        e.preventDefault();
+        openKycLightbox(e.target.getAttribute("data-lightbox-url"), e.target.getAttribute("data-lightbox-label"));
+      }
+    });
+    el("kycSubmitBtn").addEventListener("click", submitOdeslatKOvereni);
 
     el("demoABtn").addEventListener("click", function () { demoLogin("a"); });
     el("demoBBtn").addEventListener("click", function () { demoLogin("b"); });
