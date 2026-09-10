@@ -410,13 +410,39 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 10px 0;
+    padding: 12px 0;
     border-top: 1px solid var(--border);
     flex-wrap: wrap;
   }
   .kyc-doc-row:first-of-type { border-top: none; }
+  .kyc-doc-info { flex: 1 1 220px; min-width: 220px; }
+  .kyc-doc-action { flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
   .kyc-doc-label { font-size: 13.5px; font-weight: 600; }
-  .kyc-doc-status { font-size: 12.5px; color: var(--text-muted); }
+  /* Milník 10 (bod 3): stav vedle inputu na výběr souboru musí být na první
+     pohled jasný - "Nenahráno" je šedá, "Nahráno: soubor.jpg" je zelená a
+     tučná, ne jen text, který splývá se zbytkem. */
+  .kyc-doc-status { font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
+  .kyc-doc-status-ok { color: var(--ok); font-weight: 600; }
+  .kyc-doc-preview { margin-top: 8px; }
+  .kyc-preview-img { max-width: 120px; max-height: 120px; border-radius: var(--radius-s); border: 1px solid var(--border); display: block; object-fit: cover; }
+  .kyc-preview-img-review { max-width: 260px; max-height: 260px; }
+  /* Milník 10 (bod 3): input[type=file] se při re-renderu vždy vytvoří
+     nový a "zapomene" vybraný soubor (nativní chování prohlížeče) - proto
+     je zabalený do vlastního popisku, aby nikdy nepůsobil jako jediný
+     zdroj pravdy o stavu; skutečný stav je vždy viditelný výš v
+     .kyc-doc-status/.kyc-doc-preview. */
+  .kyc-file-label { font-size: 12px; font-weight: 600; color: var(--accent); }
+  .kyc-file-input { font-size: 12.5px; max-width: 210px; }
+
+  /* Milník 10 (bod 4): Leaderova obrazovka "Ověření totožnosti" - údaje z
+     profilu vlevo, náhledy dokladů vpravo (dvousloupcové na širší
+     obrazovce, pod sebou na mobilu), ať jde vizuálně porovnat. */
+  .kyc-review-card { border-left: 4px solid var(--warn); }
+  .kyc-review-grid { display: grid; grid-template-columns: minmax(180px, 260px) 1fr; gap: 18px; margin-top: 10px; }
+  @media (max-width: 720px) { .kyc-review-grid { grid-template-columns: 1fr; } }
+  .kyc-review-profile { display: flex; flex-direction: column; gap: 10px; }
+  .kyc-review-docs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; align-content: start; }
+  .kyc-review-doc { display: flex; flex-direction: column; gap: 6px; }
 
   /* ---------- form screen ---------- */
 
@@ -580,17 +606,54 @@
   .stat-tile {
     background: var(--surface);
     border: 1px solid var(--border);
+    border-left: 4px solid var(--border);
     border-radius: var(--radius-m);
     padding: 14px 16px;
     min-width: 130px;
     flex: 1 1 130px;
   }
-  .stat-tile .stat-num { font-family: var(--font-display); font-size: 24px; font-weight: 600; color: var(--accent); }
-  .stat-tile .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .stat-tile .stat-num { font-family: var(--font-display); font-size: 26px; font-weight: 700; color: var(--accent); line-height: 1.1; }
+  /* Milník 10 (bod 5): popisek pod číslem byl 12px šedá-na-šedé, těžko
+     čitelný - zesíleno na 13.5px, tučnější, plný textový kontrast (ne
+     muted), ne jen subtilní šedá. */
+  .stat-tile .stat-label { font-size: 13.5px; font-weight: 600; color: var(--text); margin-top: 4px; line-height: 1.3; }
   /* Milník 9 (bod 7): klikací varianta stat-tile - odkazuje na příslušnou obrazovku */
   button.stat-tile { text-align: left; cursor: pointer; font: inherit; color: inherit; }
-  button.stat-tile:hover { border-color: var(--accent); }
+  button.stat-tile:hover { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
   .stat-row-heading { font-size: 13px; font-weight: 600; color: var(--text-muted); margin: 4px 0 8px; }
+
+  /* Milník 10 (bod 5): barevné odlišení kategorií dlaždic - neutrální
+     (beze změny, --accent) / vyžaduje pozornost (jantarová) / úspěch
+     (zelená) - levý okraj + jemné pozadí + barva čísla, odvozeno ze
+     stávajících CSS proměnných --warn/--ok (stejná paleta jako pill-* a
+     top-alert-danger jinde v appce, žádné nové barvy). */
+  .stat-tile.stat-tile-warn { background: var(--warn-soft); border-left-color: var(--warn); }
+  .stat-tile.stat-tile-warn .stat-num { color: var(--warn); }
+  .stat-tile.stat-tile-ok { background: var(--ok-soft); border-left-color: var(--ok); }
+  .stat-tile.stat-tile-ok .stat-num { color: var(--ok); }
+  .stat-tile.stat-tile-info { background: var(--info-soft); border-left-color: var(--info); }
+  .stat-tile.stat-tile-info .stat-num { color: var(--info); }
+
+  /* Milník 10 (bod 5): silnější vizuální oddělení sekcí Tipy / Síť /
+     Vyžaduje pozornost - rámeček + jemné pozadí kolem každé sekce,
+     výraznější nadpis. */
+  .stat-section {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-l);
+    background: var(--surface-2);
+    padding: 16px 16px 6px;
+    margin-bottom: 16px;
+  }
+  .stat-section .stat-row-heading {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .stat-section-attention { border-color: var(--warn); }
+  .stat-section-attention .stat-row-heading { color: var(--warn); border-bottom-color: var(--warn); }
 
   .net-list { display: flex; flex-direction: column; gap: 8px; }
   .net-item {
@@ -893,6 +956,12 @@
        "PO TERMÍNU" - jen pro vlastní profil přihlášeného uživatele,
        odkazuje na "Můj profil". Nic nezakazuje, jen upozorňuje. -->
   <div class="top-alert" id="addressDeadlineBanner" hidden></div>
+
+  <!-- Milník 10 (bod 4, in-app náhrada za e-mail - SMTP není nakonfigurované):
+       nepřehlédnutelný banner na hlavní obrazovce, když Leader/Administrator
+       zamítne ověření totožnosti tipaře - ne jen tichý zápis v Můj profil.
+       Jen role tipar (viz renderKycRejectedBanner). -->
+  <div class="top-alert top-alert-danger" id="kycRejectedBanner" hidden></div>
 
   <div class="tabs-wrap" id="tabsWrap" hidden>
     <!-- Milník 4 (bod 9 zadání): "Administrace" jako sloučená záložka mizí -
@@ -2425,6 +2494,7 @@
     el("topbar").hidden = true;
     el("tabsWrap").hidden = true;
     el("addressDeadlineBanner").hidden = true;
+    el("kycRejectedBanner").hidden = true;
     el("authScreen").hidden = false;
     el("forcedPasswordScreen").hidden = true;
     hideAllScreens();
@@ -2438,6 +2508,7 @@
     el("topbar").hidden = true;
     el("tabsWrap").hidden = true;
     el("addressDeadlineBanner").hidden = true;
+    el("kycRejectedBanner").hidden = true;
     el("authScreen").hidden = true;
     hideAllScreens();
     el("forcedPasswordScreen").hidden = false;
@@ -2451,11 +2522,40 @@
     el("tabsWrap").hidden = false;
     el("authScreen").hidden = true;
     el("forcedPasswordScreen").hidden = true;
-    setActiveTab(activeTab);
+    // Milník 10 (bod 6): první záložka po přihlášení NAHRAZUJE (replaceState),
+    // nikdy nepushuje novou historii - fresh load/přihlášení se má chovat
+    // přesně jako dnes (žádná "umělá" položka navíc před první skutečnou
+    // navigací uživatele). Teprve DALŠÍ přepnutí záložky (klik na tab,
+    // stat-tile apod.) přes obyčejné setActiveTab(tab) už historii pushuje.
+    setActiveTab(activeTab, { replaceHistory: true });
   }
 
-  function setActiveTab(tab) {
+  // Milník 10 (bod 6): appka dřív vůbec nepoužívala URL/historii žádného
+  // druhu (žádný pushState/popstate/hash), takže tlačítko Zpět v
+  // prohlížeči šlo rovnou na to, co bylo v historii PŘED načtením appky -
+  // uživatele to z appky úplně vyhodilo. Teď každé přepnutí hlavní záložky
+  // přidá vlastní záznam do historie (hash "#" + tab); Zpět/Vpřed pak
+  // prochází TYHLE záznamy, ne appku opouští.
+  //
+  // Klíčová pojistka proti nekonečné smyčce: setActiveTab() volaná jako
+  // REAKCE na popstate (viz listener níže) vždy předá
+  // {skipHistory:true} - v tom případě se už žádný další pushState/
+  // replaceState nevolá, jen se přepne obsah. Bez týhle pojistky by každé
+  // přepnutí vyvolané tlačítkem Zpět samo pushlo novou položku a Zpět by
+  // v podstatě nikdy nikam neposunulo (typický bug hash routerů).
+  //
+  // Rozsah (vědomé zjednodušení, viz report Milníku 10): routuje se jen
+  // mezi HLAVNÍMI záložkami (tipy/uživatelé/síť/...), ne obrazovka Detail
+  // tipu (ta nemá vlastní tab/hash) - otevření detailu ale taky přidává
+  // jeden historický záznam (viz openTipDetail), aby Zpět z detailu
+  // zavřel detail a vrátil na předchozí záložku, místo aby appku opustil.
+  function setActiveTab(tab, opts) {
+    opts = opts || {};
     activeTab = tab;
+    // Přepnutí na jakoukoli záložku zavírá i případně otevřený Detail tipu
+    // (hideAllScreens() níže schová i #detailScreen) - vyčistíme i stav,
+    // ať se needitovaná data ze zavřeného detailu netahají dál.
+    detailTip = null;
     hideAllScreens();
     var screenId = TAB_SCREEN[tab] || "listScreen";
     el(screenId).hidden = false;
@@ -2463,6 +2563,17 @@
     Object.keys(TAB_BUTTON).forEach(function (key) {
       el(TAB_BUTTON[key]).setAttribute("aria-selected", String(key === tab));
     });
+
+    if (!opts.skipHistory) {
+      try {
+        if (opts.replaceHistory) history.replaceState({ tab: tab }, "", "#" + tab);
+        else history.pushState({ tab: tab }, "", "#" + tab);
+      } catch (e) {
+        // Sandboxované/file:// prostředí apod. - historie je tu jen vylepšení
+        // UX (bod 6), appka musí fungovat i bez ní.
+        console.error("history.pushState/replaceState selhalo:", e);
+      }
+    }
 
     if (tab === "list") fetchMyTips(currentUser.id);
     if (tab === "network") fetchMyNetworkTable();
@@ -2476,6 +2587,35 @@
     if (tab === "profile") fetchProfileScreen();
     if (tab === "kyc") fetchKycScreen();
   }
+
+  // Milník 10 (bod 6): reakce na tlačítko Zpět/Vpřed prohlížeče. Ignoruje
+  // se, pokud appka zrovna nezobrazuje hlavní obsah (přihlašovací
+  // obrazovky, vynucená změna hesla - tabsWrap je tam schovaný) - tam
+  // žádné tab-routování neprobíhá a necháváme prohlížeč chovat se
+  // přirozeně. Cílová záložka se ověřuje i proti ROLE_TAB_ORDER aktuální
+  // role - kdyby popstate nesl neplatný/cizí tab (např. z historie před
+  // přepnutím účtu), radši se nic nestane, než aby appka spadla na
+  // chybějící DOM element.
+  window.addEventListener("popstate", function (e) {
+    if (el("tabsWrap").hidden) return;
+    if (!currentUser) return;
+    var state = e.state;
+    var tab = state && state.tab;
+    if (!tab && window.location.hash) tab = window.location.hash.slice(1);
+    if (!tab || !TAB_SCREEN[tab]) return;
+    var order = ROLE_TAB_ORDER[currentUser.role] || ROLE_TAB_ORDER.tipar;
+    if (order.indexOf(tab) === -1) return;
+    if (tab === activeTab && !el("detailScreen").hidden) {
+      // Zpět z Detailu tipu (viz openTipDetail) na tu samou záložku, ze
+      // které byl detail otevřený - jen zavřít detail, přepnutí na
+      // nezměněnou záložku by jinak zbytečně znovu fetchlo data.
+      detailTip = null;
+      hideAllScreens();
+      el(TAB_SCREEN[tab] || "listScreen").hidden = false;
+      return;
+    }
+    setActiveTab(tab, { skipHistory: true });
+  });
 
   // Milník 4 (bod 9 zadání) — "Administrace" jako sloučená záložka mizí,
   // nahrazují ji samostatné položky.
@@ -2765,6 +2905,7 @@
     el("addUserTopBtn").hidden = (role === "rk");
 
     renderAddressDeadlineBanner();
+    renderKycRejectedBanner();
 
     // Milník 5 (bod 3 zadání) — Leader nemá "Moje tipy", landing page po
     // přihlášení je teď "Přehled leadra" ("network").
@@ -2808,6 +2949,27 @@
       : "Vyplňte prosím adresu (zbývá " + info.zbyvaDny + " " + (info.zbyvaDny === 1 ? "den" : (info.zbyvaDny < 5 ? "dny" : "dní")) + ").";
     el2.innerHTML = escapeHtml(text) + ' <button type="button" class="link-btn" id="addressBannerLinkBtn">Vyplnit teď</button>';
     var btn = el("addressBannerLinkBtn");
+    if (btn) btn.addEventListener("click", function () { setActiveTab("profile"); });
+  }
+
+  // Milník 10 (bod 4c): reálné odeslání e-mailu při zamítnutí KYC teď není
+  // možné (SMTP není nakonfigurované, viz předchozí milníky) - tohle je
+  // plnohodnotná in-app náhrada, dokud SMTP nebude nastavené. Banner je
+  // vidět na hlavní obrazovce hned po přihlášení (ne jen schovaný v Můj
+  // profil), dokud uživatel nenahraje dokumenty znovu. Jen role tipar -
+  // Leader/Administrator KYC neřeší (viz mujRegistraceStav).
+  function renderKycRejectedBanner() {
+    var el2 = el("kycRejectedBanner");
+    if (!el2) return;
+    if (!currentUser || currentUser.role !== "tipar" || currentUser.autentizace_stav !== "zamitnuto") {
+      el2.hidden = true;
+      return;
+    }
+    el2.hidden = false;
+    var text = "Vaše ověření totožnosti bylo zamítnuto" +
+      (currentUser.autentizace_duvod_zamitnuti ? (" — důvod: " + currentUser.autentizace_duvod_zamitnuti) : "") + ".";
+    el2.innerHTML = escapeHtml(text) + ' <button type="button" class="link-btn" id="kycRejectedBannerLinkBtn">Přejít na Můj profil</button>';
+    var btn = el("kycRejectedBannerLinkBtn");
     if (btn) btn.addEventListener("click", function () { setActiveTab("profile"); });
   }
 
@@ -3205,6 +3367,14 @@
 
   async function openTipDetail(tipId, returnTab) {
     detailReturnTab = returnTab || activeTab;
+    // Milník 10 (bod 6): otevření detailu nemá vlastní tab/hash, ale
+    // přidává vlastní záznam do historie (se stejným hashem jako aktuální
+    // záložka) - díky tomu první stisk Zpět z detailu jen zavře detail a
+    // vrátí na detailReturnTab (viz popstate listener u setActiveTab),
+    // místo aby appku opustil úplně. Cílevědomě NEPODPORUJEME znovuotevření
+    // detailu tlačítkem Vpřed (viz report) - jde o vědomé zjednodušení, ne
+    // dokonalý router pro detailové obrazovky.
+    try { history.pushState({ tab: detailReturnTab, detailTipId: tipId }, "", "#" + detailReturnTab); } catch (e) { console.error("history.pushState selhalo:", e); }
     showBanner(el("detailBanner"), null, null);
     el("detailSubtitle").textContent = "";
     el("detailContentWrap").innerHTML = '<p class="dt-muted">Načítám…</p>';
@@ -3246,8 +3416,29 @@
   }
 
   function closeTipDetail() {
+    // Milník 10 (oprava po nezávislé kontrole): NEVOLAT setActiveTab()
+    // přímo tady - to by pushlo NOVOU položku historie navrch té, kterou
+    // už přidal openTipDetail() při otevření detailu, a vzniknul by
+    // duplicitní záznam téhož tabu. Fyzické Zpět v prohlížeči by pak
+    // muselo být stisknuto dvakrát, než by se něco viditelně stalo -
+    // přesně ten bug, který se tímhle milníkem opravuje.
+    //
+    // Místo ručního přepnutí tabu proto zavoláme history.back(), který
+    // zkonzumuje přesně ten jeden záznam, co openTipDetail přidal - stejně,
+    // jako by uživatel místo tlačítka v appce použil fyzické Zpět. Náš
+    // popstate listener pak sám (bez dalšího pushnutí) rozpozná návrat na
+    // nezměněný tab s otevřeným detailem a detail zavře (viz speciální
+    // větev v listeneru u setActiveTab) - jediný zdroj pravdy o historii
+    // tak zůstává prohlížeč, ne dvě nezávislá místa v kódu.
+    //
+    // Fallback (bez historie k odskočení -teoreticky jen když by detail
+    // byl otevřený úplně mimo openTipDetail): zavřít detail rovnou, beze
+    // změny historie.
+    if (window.history.length > 1) {
+      try { history.back(); return; } catch (e) { /* spadni na fallback níže */ }
+    }
     detailTip = null;
-    setActiveTab(detailReturnTab || "list");
+    setActiveTab(detailReturnTab || "list", { skipHistory: true });
   }
 
   function renderTipDetail() {
@@ -3673,11 +3864,15 @@
     // obrazovka Detail uživatele dosud v appce neexistovala), ne jen v
     // tabulce. Read-only, editace jde jen přes Adresu/KYC obrazovky
     // samotného uživatele nebo Ověření totožnosti (schvalit_autentizaci).
+    // Milník 10 (bod 1+2): řádek KYC se zobrazuje jen u role tipar - Leader
+    // ani Administrator se totožnost neověřují (viz renderKycSection).
     var stavInfoHtml =
       '<div class="detail-card" style="margin-bottom:14px;">' +
         '<div style="margin-bottom:6px;">Fáze registrace: ' + registraceStavPillHtml(target.registrace_stav) +
           (target.adresa_po_terminu ? ' <span class="po-terminu-flag">PO TERMÍNU</span>' : '') + '</div>' +
-        '<div>Ověření totožnosti (KYC): ' + autentizaceStavPillHtml(target.autentizace_stav || "nevyplneno") + '</div>' +
+        (target.role === "tipar"
+          ? '<div>Ověření totožnosti (KYC): ' + autentizaceStavPillHtml(target.autentizace_stav || "nevyplneno") + '</div>'
+          : '') +
       '</div>';
 
     el("usersFormWrap").innerHTML =
@@ -4560,7 +4755,11 @@
     if (!currentUser) return "email_neoveren";
     if (!currentUser.email_confirmed_at) return "email_neoveren";
     if (!currentUser.adresa_vyplnena_kdy) return "email_overen";
-    if (currentUser.autentizace_stav !== "schvaleno") return "vyplneny_udaje";
+    // Milník 10 (bod 1+2, korekce rozsahu KYC): ověření totožnosti se týká
+    // VÝHRADNĚ role tipar - Leader/Administrator jsou po vyplnění adresy
+    // "autentizovaní" automaticky, stejná podmínka jako v DB
+    // (moje_uzivatele()/leader_dashboard_stats(), viz m10_registrace_stav_kyc_jen_tipar).
+    if (currentUser.role === "tipar" && currentUser.autentizace_stav !== "schvaleno") return "vyplneny_udaje";
     return "autentizovano";
   }
 
@@ -4591,6 +4790,7 @@
       console.error("Nepodařilo se znovu načíst vlastní profil:", r.error);
     }
     renderAddressDeadlineBanner();
+    renderKycRejectedBanner();
   }
 
   async function fetchProfileScreen() {
@@ -4608,8 +4808,21 @@
     el("pfIco").value = currentUser.ico || "";
     el("pfDic").value = currentUser.dic || "";
 
-    await renderKycSection();
+    // Milník 10 (bod 1+2, korekce rozsahu KYC): ověření totožnosti se od
+    // tohoto milníku týká VÝHRADNĚ role tipar - "admin je admin, ten se
+    // neověřuje" a "leader je jednatel společnosti, u něj to nebude" (přímá
+    // zpětná vazba klienta). Leader/Administrator kartu KYC v Můj profil
+    // vůbec nevidí, žádná náhradní kontrola se pro ně nezavádí.
+    var kycCard = el("kycCard");
+    if (currentUser.role === "tipar") {
+      kycCard.hidden = false;
+      await renderKycSection();
+    } else {
+      kycCard.hidden = true;
+    }
   }
+
+  var KYC_IMAGE_EXT_RE = /\.(jpe?g|png|webp)$/i;
 
   async function renderKycSection() {
     var stav = currentUser.autentizace_stav || "nevyplneno";
@@ -4617,49 +4830,89 @@
     if (stav === "zamitnuto" && currentUser.autentizace_duvod_zamitnuti) {
       statusHtml += '<div class="banner banner-error">Důvod zamítnutí: ' + escapeHtml(currentUser.autentizace_duvod_zamitnuti) + ' — po novém nahrání dokumentů půjde znovu ke schválení.</div>';
     }
+    // Milník 10 (bod 4d): pozitivní potvrzení po schválení - stejně
+    // nepřehlédnutelné jako banner zamítnutí výše.
+    if (stav === "schvaleno") {
+      statusHtml += '<div class="banner banner-ok">✓ Vaše totožnost byla ověřena.</div>';
+    }
     el("kycStatusWrap").innerHTML = statusHtml;
 
     var listResult = await sb.storage.from("identifikace").list(currentUser.id, { limit: 100 });
     var files = (!listResult.error && listResult.data) ? listResult.data : [];
     if (listResult.error) console.error("Chyba při načítání seznamu dokumentů:", listResult.error);
-    var mam = { op_predni: false, op_zadni: false, foto: false };
-    files.forEach(function (f) {
-      if (!f || !f.name) return;
-      if (f.name.indexOf("op_predni.") === 0) mam.op_predni = true;
-      else if (f.name.indexOf("op_zadni.") === 0) mam.op_zadni = true;
-      else if (f.name.indexOf("foto.") === 0) mam.foto = true;
-    });
 
     var docs = [
       { typ: "op_predni", label: "Doklad totožnosti — přední strana" },
       { typ: "op_zadni", label: "Doklad totožnosti — zadní strana" },
       { typ: "foto", label: "Vlastní fotografie" }
     ];
-    // Nahrávat (a tím přepisovat) lze jen dokud čeká vstup uživatele -
-    // "nevyplneno" (první nahrání) nebo "zamitnuto" (oprava po zamítnutí).
-    // Ve stavu "ceka_na_overeni"/"schvaleno" je nahrávání uzavřené v UI -
-    // server (nahrat_identifikacni_dokument) to stejně nijak neblokuje na
-    // úrovni oprávnění (vlastník smí přepsat kdykoli), jde jen o to, aby
-    // uživatel omylem nerozbil už podanou/schválenou žádost bez vědomí.
-    var editovatelne = (stav === "nevyplneno" || stav === "zamitnuto");
+    var fileByTyp = {};
+    files.forEach(function (f) {
+      if (!f || !f.name) return;
+      docs.forEach(function (d) {
+        if (f.name.indexOf(d.typ + ".") === 0) fileByTyp[d.typ] = f;
+      });
+    });
+
+    // Milník 10 (bod 3): nahrávat/přenahrávat lze VE VŠECH stavech, ne jen
+    // "nevyplneno"/"zamitnuto" - server (nahrat_identifikacni_dokument) to
+    // vlastníkovi stejně nijak neomezoval, jen UI dřív možnost schovávalo.
+    // Uživatel tak i po odeslání ke schválení (nebo po schválení) pořád
+    // vidí, co má nahrané, a může to zkontrolovat/opravit; přenahrání
+    // dokumentu ve stavu "schvaleno" server sám vrátí zpět na
+    // "ceka_na_overeni" a vymaže starý důvod zamítnutí (ověřeno testem
+    // v transakci, viz docs/milnik10_ux_a_kyc_scope.md).
     var html = "";
     docs.forEach(function (d) {
+      var f = fileByTyp[d.typ];
       html += '<div class="kyc-doc-row">' +
-        '<div><div class="kyc-doc-label">' + escapeHtml(d.label) + '</div>' +
-        '<div class="kyc-doc-status">' + (mam[d.typ] ? "Nahráno" : "Nenahráno") + '</div></div>' +
-        (editovatelne
-          ? '<input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" class="kyc-file-input" data-typ="' + d.typ + '">'
-          : '<span class="dt-muted">' + (stav === "ceka_na_overeni" ? "Čeká se na posouzení" : "Nahrávání uzavřeno") + '</span>') +
-        '</div>';
+        '<div class="kyc-doc-info">' +
+          '<div class="kyc-doc-label">' + escapeHtml(d.label) + '</div>' +
+          '<div class="kyc-doc-status' + (f ? ' kyc-doc-status-ok' : '') + '">' +
+            (f ? ("✓ Nahráno: " + escapeHtml(f.name.split("/").pop())) : "Nenahráno") +
+          '</div>' +
+          '<div class="kyc-doc-preview" data-own-preview="' + d.typ + '"></div>' +
+        '</div>' +
+        '<div class="kyc-doc-action">' +
+          '<label class="kyc-file-label" for="kycFile_' + d.typ + '">' + (f ? "Nahrát jiný soubor" : "Nahrát soubor") + '</label>' +
+          '<input type="file" id="kycFile_' + d.typ + '" accept="image/jpeg,image/png,image/webp,application/pdf" class="kyc-file-input" data-typ="' + d.typ + '">' +
+        '</div>' +
+      '</div>';
     });
     el("kycDocsWrap").innerHTML = html;
 
-    if (editovatelne) {
-      el("kycDocsWrap").querySelectorAll(".kyc-file-input").forEach(function (input) {
-        input.addEventListener("change", function () {
-          if (input.files && input.files[0]) uploadKycFile(input.getAttribute("data-typ"), input.files[0]);
-        });
+    el("kycDocsWrap").querySelectorAll(".kyc-file-input").forEach(function (input) {
+      input.addEventListener("change", function () {
+        if (input.files && input.files[0]) uploadKycFile(input.getAttribute("data-typ"), input.files[0]);
       });
+    });
+
+    // Náhledy nahraných dokumentů (bod 3) - krátkodobý signed URL (5 minut),
+    // stejný princip jako u Leaderovy obrazovky Ověření totožnosti.
+    docs.forEach(function (d) {
+      var f = fileByTyp[d.typ];
+      if (f) renderKycOwnPreview(d.typ, f.name);
+    });
+  }
+
+  // Milník 10 (bod 3): náhled vlastního nahraného dokumentu v "Můj profil" -
+  // obrázek (jpg/png/webp) přímo jako <img>, PDF jako klikací odkaz.
+  async function renderKycOwnPreview(typ, fileName) {
+    var slot = document.querySelector('#kycDocsWrap [data-own-preview="' + typ + '"]');
+    if (!slot) return;
+    var signed = await sb.storage.from("identifikace").createSignedUrl(currentUser.id + "/" + fileName, 300);
+    // Znovu dohledat slot - mezitím mohl proběhnout další re-render (rychlé po sobě jdoucí nahrávání).
+    slot = document.querySelector('#kycDocsWrap [data-own-preview="' + typ + '"]');
+    if (!slot) return;
+    if (signed.error || !signed.data) {
+      slot.innerHTML = '<span class="dt-muted">Náhled se nepodařilo vytvořit.</span>';
+      return;
+    }
+    var url = signed.data.signedUrl;
+    if (KYC_IMAGE_EXT_RE.test(fileName)) {
+      slot.innerHTML = '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer"><img src="' + escapeHtml(url) + '" class="kyc-preview-img" alt="Náhled dokumentu"></a>';
+    } else {
+      slot.innerHTML = '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">📄 Zobrazit PDF v novém okně</a>';
     }
   }
 
@@ -4748,6 +5001,22 @@
     await renderKycList(cekajici);
   }
 
+  // Milník 10 (bod 4): plná adresa/IČO-DIČ formátovaná pro zobrazení vedle
+  // náhledů dokladu, aby šlo reálně porovnat doklad s tím, co je v systému.
+  function kycAdresaText(u) {
+    var parts = [];
+    if (u.adresa_ulice) parts.push(u.adresa_ulice);
+    var mestoPsc = [u.adresa_mesto, u.adresa_psc].filter(Boolean).join(", ");
+    if (mestoPsc) parts.push(mestoPsc);
+    if (u.adresa_stat) parts.push(u.adresa_stat);
+    if (!parts.length) return "Adresa nevyplněná";
+    var text = parts.join(", ");
+    if (u.je_firma) {
+      text += " (firma" + (u.ico ? ", IČO " + u.ico : "") + (u.dic ? ", DIČ " + u.dic : "") + ")";
+    }
+    return text;
+  }
+
   async function renderKycList(rows) {
     if (!rows.length) {
       el("kycListWrap").innerHTML = '<div class="empty-state"><p>Momentálně nikdo nečeká na ověření totožnosti.</p></div>';
@@ -4756,10 +5025,16 @@
     var html = "";
     for (var i = 0; i < rows.length; i++) {
       var u = rows[i];
-      html += '<div class="card detail-card" data-kyc-user="' + escapeHtml(u.id) + '">' +
+      html += '<div class="card detail-card kyc-review-card" data-kyc-user="' + escapeHtml(u.id) + '">' +
         '<h3 class="detail-section-title" style="margin-top:0;">' + escapeHtml(celeJmeno(u)) + '</h3>' +
-        '<p class="dt-muted" style="margin-top:-6px;">' + escapeHtml(u.email || "") + (u.telefon ? " · " + escapeHtml(u.telefon) : "") + '</p>' +
-        '<div class="kyc-preview-links" data-slot-links></div>' +
+        '<div class="kyc-review-grid">' +
+          '<div class="kyc-review-profile">' +
+            '<div class="detail-item"><div class="detail-label">Telefon</div><div class="detail-value">' + escapeHtml(u.telefon || "—") + '</div></div>' +
+            '<div class="detail-item"><div class="detail-label">E-mail</div><div class="detail-value">' + escapeHtml(u.email || "—") + '</div></div>' +
+            '<div class="detail-item"><div class="detail-label">Adresa</div><div class="detail-value">' + escapeHtml(kycAdresaText(u)) + '</div></div>' +
+          '</div>' +
+          '<div class="kyc-review-docs" data-slot-links></div>' +
+        '</div>' +
         '<div class="form-actions" style="margin-top:14px;">' +
           '<button class="btn-primary" type="button" style="width:auto;" data-kyc-schvalit="' + escapeHtml(u.id) + '">Schválit</button>' +
           '<button class="btn-small btn-small-danger" type="button" data-kyc-zamitnout="' + escapeHtml(u.id) + '">Zamítnout</button>' +
@@ -4789,6 +5064,9 @@
     });
   }
 
+  // Milník 10 (bod 4): skutečné <img> náhledy (ne jen textové odkazy) vedle
+  // sebe - op_predni/op_zadni/foto, klikací na plnou velikost (otevře signed
+  // URL v novém okně).
   async function renderKycPreviewLinks(userId) {
     var wrap = document.querySelector('[data-kyc-user="' + userId.replace(/"/g, "") + '"] [data-slot-links]');
     if (!wrap) return;
@@ -4799,18 +5077,26 @@
     ];
     var listResult = await sb.storage.from("identifikace").list(userId, { limit: 100 });
     var files = (!listResult.error && listResult.data) ? listResult.data : [];
-    var linksHtml = [];
+    var itemsHtml = [];
     for (var i = 0; i < docs.length; i++) {
       var f = files.filter(function (x) { return x && x.name && x.name.indexOf(docs[i].typ + ".") === 0; })[0];
-      if (!f) { linksHtml.push('<span class="dt-muted">' + escapeHtml(docs[i].label) + ': chybí</span>'); continue; }
-      var signed = await sb.storage.from("identifikace").createSignedUrl(userId + "/" + f.name, 300);
-      if (signed.error || !signed.data) {
-        linksHtml.push('<span class="dt-muted">' + escapeHtml(docs[i].label) + ': náhled se nepodařilo vytvořit</span>');
+      if (!f) {
+        itemsHtml.push('<div class="kyc-review-doc"><div class="kyc-doc-label">' + escapeHtml(docs[i].label) + '</div><span class="dt-muted">chybí</span></div>');
         continue;
       }
-      linksHtml.push('<a href="' + escapeHtml(signed.data.signedUrl) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(docs[i].label) + '</a>');
+      var signed = await sb.storage.from("identifikace").createSignedUrl(userId + "/" + f.name, 300);
+      if (signed.error || !signed.data) {
+        itemsHtml.push('<div class="kyc-review-doc"><div class="kyc-doc-label">' + escapeHtml(docs[i].label) + '</div><span class="dt-muted">náhled se nepodařilo vytvořit</span></div>');
+        continue;
+      }
+      var url = signed.data.signedUrl;
+      var body = KYC_IMAGE_EXT_RE.test(f.name)
+        ? '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer"><img src="' + escapeHtml(url) + '" class="kyc-preview-img kyc-preview-img-review" alt="' + escapeHtml(docs[i].label) + '"></a>'
+        : '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">📄 Zobrazit PDF v novém okně</a>';
+      itemsHtml.push('<div class="kyc-review-doc"><div class="kyc-doc-label">' + escapeHtml(docs[i].label) + '</div>' + body + '</div>');
     }
-    if (wrap) wrap.innerHTML = linksHtml.join(' &nbsp;·&nbsp; ') + '<div class="dt-muted" style="margin-top:4px;">Odkazy platí 5 minut od načtení této stránky.</div>';
+    wrap = document.querySelector('[data-kyc-user="' + userId.replace(/"/g, "") + '"] [data-slot-links]');
+    if (wrap) wrap.innerHTML = itemsHtml.join("") + '<div class="dt-muted" style="grid-column:1/-1;margin-top:2px;">Náhledy platí 5 minut od načtení této stránky.</div>';
   }
 
   function kycRozhodnutiErrorMessage(error) {
@@ -4950,32 +5236,43 @@
       return;
     }
     var s = (result.data && result.data[0]) || {};
-    function tile(num, label, clickTab) {
+    // Milník 10 (bod 5): každá dlaždice dostává navíc volitelnou "kategorii"
+    // (warn/ok/info) - barevné odlišení podle významu čísla (viz CSS
+    // .stat-tile-warn/-ok/-info), beze změny klikacího chování
+    // (data-goto-tab) a beze změny struktury sekcí.
+    function tile(num, label, clickTab, category) {
+      var catClass = category ? (" stat-tile-" + category) : "";
       var inner = '<div class="stat-num">' + escapeHtml(String(num != null ? num : 0)) + '</div><div class="stat-label">' + escapeHtml(label) + '</div>';
       return clickTab
-        ? '<button type="button" class="stat-tile" data-goto-tab="' + escapeHtml(clickTab) + '">' + inner + '</button>'
-        : '<div class="stat-tile">' + inner + '</div>';
+        ? '<button type="button" class="stat-tile' + catClass + '" data-goto-tab="' + escapeHtml(clickTab) + '">' + inner + '</button>'
+        : '<div class="stat-tile' + catClass + '">' + inner + '</div>';
     }
     wrap.innerHTML =
-      '<div class="stat-row-heading">Tipy</div>' +
-      '<div class="stat-row">' +
-        tile(s.tipy_ceka_na_overeni, "čeká na ověření", "tipy") +
-        tile(s.tipy_v_procesu_rk, "v procesu u RK", "tipy") +
-        tile(s.tipy_celkem, "celkem tipů", "tipy") +
-        tile(s.tipy_uspesne, "úspěšných (podepsaná smlouva a dál)", "tipy") +
+      '<div class="stat-section">' +
+        '<div class="stat-row-heading">Tipy</div>' +
+        '<div class="stat-row">' +
+          tile(s.tipy_ceka_na_overeni, "čeká na ověření", "tipy", "warn") +
+          tile(s.tipy_v_procesu_rk, "v procesu u RK", "tipy", "info") +
+          tile(s.tipy_celkem, "celkem tipů", "tipy") +
+          tile(s.tipy_uspesne, "úspěšných (podepsaná smlouva a dál)", "tipy", "ok") +
+        '</div>' +
       '</div>' +
-      '<div class="stat-row-heading">Síť (' + escapeHtml(String(s.uzivatelu_v_siti || 0)) + ' uživatelů)</div>' +
-      '<div class="stat-row">' +
-        tile(s.stav_email_neoveren, "e-mail neověřen", "users") +
-        tile(s.stav_email_overen, "e-mail ověřen, chybí adresa", "users") +
-        tile(s.stav_vyplneny_udaje, "adresa vyplněná, čeká KYC", "users") +
-        tile(s.stav_autentizovano, "plně autentizováno", "users") +
+      '<div class="stat-section">' +
+        '<div class="stat-row-heading">Síť (' + escapeHtml(String(s.uzivatelu_v_siti || 0)) + ' uživatelů)</div>' +
+        '<div class="stat-row">' +
+          tile(s.stav_email_neoveren, "e-mail neověřen", "users", "warn") +
+          tile(s.stav_email_overen, "e-mail ověřen, chybí adresa", "users", "warn") +
+          tile(s.stav_vyplneny_udaje, "adresa vyplněná, čeká KYC", "users", "info") +
+          tile(s.stav_autentizovano, "plně autentizováno", "users", "ok") +
+        '</div>' +
       '</div>' +
-      '<div class="stat-row-heading">Vyžaduje pozornost</div>' +
-      '<div class="stat-row">' +
-        tile(s.kyc_ceka_na_overeni, "čeká na ověření totožnosti", "kyc") +
-        tile(s.vyplaty_ceka_na_schvaleni, "výplat čeká na schválení", "vyplaty") +
-        tile(s.adresa_po_terminu, "uživatelů PO TERMÍNU (adresa)", "users") +
+      '<div class="stat-section stat-section-attention">' +
+        '<div class="stat-row-heading">Vyžaduje pozornost</div>' +
+        '<div class="stat-row">' +
+          tile(s.kyc_ceka_na_overeni, "čeká na ověření totožnosti", "kyc", "warn") +
+          tile(s.vyplaty_ceka_na_schvaleni, "výplat čeká na schválení", "vyplaty", "warn") +
+          tile(s.adresa_po_terminu, "uživatelů PO TERMÍNU (adresa)", "users", "warn") +
+        '</div>' +
       '</div>';
 
     wrap.querySelectorAll("[data-goto-tab]").forEach(function (btn) {
