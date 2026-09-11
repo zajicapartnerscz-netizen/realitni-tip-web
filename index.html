@@ -208,24 +208,12 @@
     padding: 40px 16px;
   }
 
-  /* Milník 12 (bod 14): uvítací text vedle přihlašovací karty (nad ní na
-     úzké obrazovce, kde .auth-wrap přirozeně zalomí přes flex-wrap výše -
-     žádná extra media query navíc potřeba pro stackování samo o sobě). */
-  .auth-welcome { max-width: 380px; padding: 4px; }
-  .auth-welcome-title {
-    font-family: var(--font-display);
-    font-size: 34px;
-    font-weight: 600;
-    line-height: 1.18;
-    margin: 0 0 14px;
-    color: var(--text);
-    text-wrap: balance;
-  }
-  .auth-welcome-title em { font-style: italic; color: var(--accent); }
-  .auth-welcome-sub { font-size: 15.5px; color: var(--text-muted); line-height: 1.6; margin: 0; }
-  @media (max-width: 760px) {
-    .auth-welcome { text-align: center; }
-  }
+  /* Milník 13 (bod 4): uvítací marketingový text vedle přihlašovací karty
+     (zavedený Milníkem 12, bod 14) byl na výslovnou žádost klienta ZCELA
+     ODSTRANĚN - nedával smysl a nevystihoval činnost systému, žádná
+     náhrada. .auth-wrap (níže) je flex/center/flex-wrap - s jediným dítětem
+     (.auth-card) se prostě vycentruje samo, žádný prázdný sloupec/rozbitý
+     layout nezbývá. */
 
   .auth-card {
     width: 100%;
@@ -449,14 +437,23 @@
   .pill-vyplneny_udaje { background: var(--info-soft); color: var(--info); }
   .pill-autentizovano { background: var(--ok-soft); color: var(--ok); }
   .po-terminu-flag { font-size: 11.5px; color: var(--danger); font-weight: 700; }
-  .kyc-card {
-    border: 2px solid var(--warn);
-    border-radius: var(--radius-l);
-    background: var(--warn-soft);
-    padding: 20px;
-    margin-top: 20px;
-  }
+  /* Milník 13 (bod 1): karta ověření totožnosti dřív měla NAPEVNO nastavenou
+     warning barvu (border+background) bez ohledu na stav - klient to
+     nahlásil jako "nesystémový" bug (svítila žlutě i po schválení). Teď je
+     to normální .card/.detail-card (viz HTML - třídy "card detail-card
+     kyc-card" spolu) a barva je jen jemný LEVÝ accent pruh podle
+     AKTUÁLNÍHO stavu (nastavuje renderKycSection() jako
+     kyc-card-<stav>), nikdy defaultně warning. */
+  .kyc-card { border-left: 4px solid var(--border); }
+  .kyc-card-nevyplneno { border-left-color: var(--border); }
+  .kyc-card-ceka_na_overeni { border-left-color: var(--info); }
+  .kyc-card-schvaleno { border-left-color: var(--ok); }
+  .kyc-card-zamitnuto { border-left-color: var(--danger); }
   .kyc-card h3 { margin-top: 0; }
+  /* Milník 13 (bod 1): jediný čistý řádek textu pro stav "schváleno" -
+     žádné fotky/náhledy, žádný zdvojený pill+banner. */
+  .kyc-verified-note { font-size: 14.5px; color: var(--text); margin: 0; }
+  .kyc-verified-note::before { content: "✓ "; color: var(--ok); font-weight: 700; }
   .kyc-doc-row {
     display: flex;
     align-items: center;
@@ -702,36 +699,47 @@
 
   .toolbar-row-end { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
 
-  /* ---------- Milník 12 (bod 6): stat-tile dlaždicový kontrakt ----------
-     label (věta bez dvojtečky, menší ale NE drobný/šedý-na-šedém) + value
-     (velké tučné PROPORCIONÁLNÍ číslice - žádné tabular-nums, to je jen
-     pro sloupce tabulek) + volitelná malá ikona/status barva. Barvy stavu
-     jsou REZERVOVANÉ a nikdy nenesou význam samy o sobě - vždy ikona/tvar
-     (levý pruh + jemný nádech pozadí + barevná tečka u labelu) SPOLU s
-     textem, barva nikdy není barvou samotného čísla ani popisku (ty vždy
-     zůstávají v "ink" barvě var(--text) - tmavá i v tmavém režimu díky
-     existujícím --text tokenům appky, viz :root/dark blok nahoře, a
-     --lt-* proměnné jsou definované tamtéž). */
+  /* ---------- Milník 12 (bod 6) → Milník 13 (bod 5, PŘEPSÁNO) ----------
+     stat-tile dlaždicový kontrakt.
 
-  .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 4px; align-items: stretch; }
+     Milník 13 - DRUHÉ, explicitní opravení stejného požadavku klienta
+     ("chtěl jsem 2x menší čísla, větší popisy, udělal jsi už podruhé
+     opravdu opak"): hierarchie je teď ZÁMĚRNĚ OBRÁCENÁ oproti obvyklé
+     "hero number" dataviz konvenci (kterou appka používala v M10 i M12 a
+     klient ji pokaždé explicitně odmítl PRO TENTO KONKRÉTNÍ dashboard) -
+     popisek (.stat-label) je vizuálně DOMINANTNÍ (velký, tučný, primární
+     "ink" barva), číslo (.stat-num) je vizuálně PODŘÍZENÉ (malé, lehčí
+     váhy, sekundární/muted barva). DOM pořadí je teď label→num (ne
+     num→label jako dřív), aby popisek byl skutečně PRVNÍ věc, kterou oko
+     zachytí (viz statTileHtml() v JS) - jen prohození font-size by bez
+     prohození pořadí v DOM/layoutu vizuálně nestačilo.
+     Barvy stavu zůstávají REZERVOVANÉ (levý pruh + jemný nádech pozadí +
+     tečka u labelu), nikdy nejsou barvou textu čísla/popisku - beze změny
+     oproti M12. */
+
+  .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-bottom: 4px; align-items: stretch; }
   .stat-tile {
     background: var(--surface);
     border: 1px solid var(--border);
     border-left: 4px solid var(--border);
     border-radius: var(--radius-m);
     box-shadow: var(--shadow-card);
-    padding: 14px 16px;
+    padding: 16px 18px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 5px;
-    min-height: 78px;
+    gap: 4px;
+    min-height: 84px;
   }
-  /* value: velké, tučné, proporcionální - vždy "ink" barva textu, nikdy
-     barva kategorie (viz pravidlo výše). */
-  .stat-tile .stat-num { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--text); line-height: 1; font-variant-numeric: proportional-nums; }
-  .stat-tile .stat-label { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.3; }
-  .stat-tile .stat-label-dot { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; background: var(--border); }
+  /* Milník 13 (bod 5): label je teď VĚTŠÍ a TUČNĚJŠÍ než num (kontrolor
+     ověřuje číselně: font-size .stat-label > font-size .stat-num,
+     font-weight .stat-label >= font-weight .stat-num) - popisek nese
+     hlavní sdělení dlaždice, číslo je podpůrný detail pod ním. */
+  .stat-tile .stat-label { display: flex; align-items: center; gap: 7px; font-family: var(--font-display); font-size: 21px; font-weight: 700; color: var(--text); line-height: 1.2; }
+  .stat-tile .stat-label-dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; background: var(--border); }
+  /* num: malé, lehčí váhy, sekundární (muted) barva - vizuálně ustupuje
+     labelu, ale zůstává čitelné (ne barva kategorie, viz pravidlo výše). */
+  .stat-tile .stat-num { font-size: 15px; font-weight: 500; color: var(--text-muted); line-height: 1.3; font-variant-numeric: proportional-nums; }
   button.stat-tile { text-align: left; cursor: pointer; font: inherit; }
   button.stat-tile:hover { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); transform: translateY(-1px); }
   button.stat-tile:active { transform: translateY(0); }
@@ -1018,18 +1026,44 @@
   .dt-empty-row td { text-align: center; color: var(--text-muted); padding: 32px 16px; white-space: normal; }
   .dt-muted { color: var(--text-muted); }
 
-  /* Milník 12 (bod 9): krátké/jednociferné číselné sloupce (Uživatelé:
-     Přímí podřízení, Velikost týmu, Délka spolupráce, Počet tipů) byly
-     zbytečně široké kvůli dlouhé hlavičce - omezena šířka na ~80px,
-     hlavička smí zalomit na 2 řádky (na rozdíl od ostatních sloupců),
-     obsah zarovnaný doprava jako u čísel. Ostatní (textové) sloupce typu
-     Jméno/E-mail zůstávají pružné/nowrap beze změny. */
+  /* Milník 12 (bod 9) → Milník 13 (bod 3, SKUTEČNÉ zúžení): M12 jen omezilo
+     šířku 4 číselných sloupců na ~80px, ale tabulka Uživatelé pořád měla 13
+     sloupců vč. Role/odděleného Přímí+Tým a textových pillů - klient
+     potvrdil, že akční tlačítko zůstalo mimo viditelnou oblast. Milník 13
+     SNIŽUJE POČET sloupců (13 → 11, viz renderUsersTable): "Role" úplně
+     pryč (dostupná v detailu/Upravit), "Přímí podřízení"+"Velikost týmu"
+     sloučené do jednoho "Podřízení" (formát "1/2"), "Registrace" nahrazená
+     3 tečkami, "Plátce DPH"→"Plátce" a "Stav" nahrazený barevným
+     čtverečkem - obojí bez textového pillu. Dvě šířkové třídy:
+     .dt-col-narrow (čistě číselné sloupce Dny/Tipy, nejužší) a
+     .dt-col-mini (Registrace/Podřízení/Plátce/Stav - o trochu širší kvůli
+     obsahu jako "12/34" nebo 3 tečkám). */
   .dt-table th.dt-col-narrow, .dt-table td.dt-col-narrow {
-    width: 80px; max-width: 90px;
-    padding-left: 8px; padding-right: 8px;
+    width: 46px; max-width: 52px;
+    padding-left: 6px; padding-right: 6px;
     text-align: right;
   }
-  .dt-table th.dt-col-narrow { white-space: normal; line-height: 1.25; }
+  .dt-table th.dt-col-mini, .dt-table td.dt-col-mini {
+    width: 64px; max-width: 72px;
+    padding-left: 6px; padding-right: 6px;
+    text-align: right;
+  }
+  .dt-table th.dt-col-narrow, .dt-table th.dt-col-mini { white-space: normal; line-height: 1.25; }
+
+  /* Milník 13 (bod 3): 3 tečky fáze registrace (nahrazují textový pill). */
+  .dt-dots { display: inline-flex; gap: 3px; align-items: center; justify-content: flex-end; }
+  .dt-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); display: inline-block; }
+  .dt-dot-warn { background: var(--lt-warn); }
+  .dt-dot-neutral { background: var(--lt-neutral); }
+  .dt-dot-ok { background: var(--lt-ok); }
+
+  /* Milník 13 (bod 3): sloupec "Stav" - barevný čtvereček místo pillu. */
+  .dt-status-dot { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
+  .dt-status-dot-ok { background: var(--ok); }
+  .dt-status-dot-danger { background: var(--danger); }
+
+  /* Milník 13 (bod 3): sloupec "Plátce" - krátký text místo širokého pillu. */
+  .dt-tag-ok { color: var(--ok); font-weight: 600; font-size: 12.5px; }
 
   /* ---------- Milník 4: obrazovka Detail a ověření tipu ---------- */
 
@@ -1143,6 +1177,11 @@
       <button class="tab" id="tabProfileBtn" role="tab" type="button" aria-selected="false" hidden>Můj profil</button>
       <!-- Milník 9 (bod 5.6): "Ověření totožnosti" - jen Leader/Administrator. -->
       <button class="tab" id="tabKycBtn" role="tab" type="button" aria-selected="false" hidden>Ověření totožnosti</button>
+      <!-- Milník 13 (bod 1): "Ověření totožnosti" - VLASTNÍ tipařovo, dřív
+           součást "Můj profil" (viz #myKycScreen). Jen role tipar - vzájemně
+           se vylučuje s tabKycBtn výše (ten mají jen Leader/Administrator),
+           takže stejný název tlačítka nikdy nekoliduje u jednoho uživatele. -->
+      <button class="tab" id="tabMyKycBtn" role="tab" type="button" aria-selected="false" hidden>Ověření totožnosti</button>
       <!-- Milník 7 (Část I): role RK má JEDINOU obrazovku - žádné jiné
            taby se jí nikdy nezobrazí (viz ROLE_TAB_ORDER.rk = ["rkportal"]). -->
       <button class="tab" id="tabRkPortalBtn" role="tab" type="button" aria-selected="false" hidden>Moje tipy</button>
@@ -1153,12 +1192,9 @@
     <!-- ============== AUTH SCREEN ============== -->
     <section id="authScreen">
       <div class="auth-wrap">
-        <!-- Milník 12 (bod 14): uvítací text, vizuálně sladěný se zbytkem
-             appky (stejný --font-display/--accent jako logo v topbaru). -->
-        <div class="auth-welcome">
-          <h1 class="auth-welcome-title">Vítejte v <em>Realitním tipu</em></h1>
-          <p class="auth-welcome-sub">Přiveďte klienta k jeho vysněné nemovitosti — my se postaráme, aby se váš tip proměnil ve skutečný obchod a vaše odměna nezůstala jen na papíře.</p>
-        </div>
+        <!-- Milník 13 (bod 4): uvítací marketingový text (Milník 12, bod 14)
+             byl odsud ZCELA odstraněn na výslovnou žádost klienta - žádná
+             náhrada, appka se vrací k prostému přihlašovacímu formuláři. -->
         <div class="auth-card">
           <div class="auth-brand"><span class="brand" style="font-size:26px;">Realitní <em>tip</em></span></div>
           <p class="auth-sub" id="authSubtitle">Přihlaste se ke svému účtu tipaře</p>
@@ -1671,13 +1707,15 @@
     </section>
 
     <!-- ============== MŮJ PROFIL (Milník 9, bod 4/5) ==============
-         Tipař/Leader/Administrator. Adresa (neblokující, 30denní lhůta) +
-         samostatná zřetelně oddělená karta jednorázového ověření totožnosti
-         (KYC), nutná AŽ PŘED VÝPLATOU, ne před podáním tipu. -->
+         Tipař/Leader/Administrator - adresa (neblokující, 30denní lhůta).
+         Milník 13 (bod 1): jednorázové ověření totožnosti (KYC) bylo odsud
+         PŘESUNUTO do vlastní samostatné záložky #myKycScreen (jen role
+         tipar, viz níže) - klient nahlásil, že karta uvnitř Můj profil
+         byla "schovaná" a nesystémově napevno žlutá bez ohledu na stav. -->
     <section id="profileScreen" class="page" hidden>
       <div class="section-head">
         <h2>Můj profil</h2>
-        <p>Adresa (nebo sídlo firmy) a jednorázové ověření totožnosti nutné před výplatou provize.</p>
+        <p>Adresa (nebo sídlo firmy) potřebná pro evidenci a výplatu provize.</p>
       </div>
 
       <div id="profileBanner"></div>
@@ -1744,25 +1782,6 @@
         </form>
       </div>
 
-      <div class="kyc-card" id="kycCard">
-        <h3>Jednorázové ověření totožnosti (nutné pro výplatu provize)</h3>
-        <!-- Milník 11 (bod 2): VĚDOMÁ ZMĚNA workflow oproti Milníku 9/10 -
-             nahrání 3/3 dokumentů už NEODESÍLÁ žádost automaticky, uživatel
-             musí kliknout na tlačítko "Odeslat k ověření" (viz
-             renderKycSection/#kycSubmitWrap níže) - to jde jen když má
-             navíc vyplněnou trvalou adresu a datum narození. -->
-        <p class="dt-muted">Nahrajte prosím sken/foto obou stran dokladu totožnosti a vlastní fotografii, poté klikněte na „Odeslat k ověření“. Bez schváleného ověření vám nelze vyplatit provizi — na podání tipu ani na cokoliv jiného to vliv nemá.</p>
-        <div id="kycStatusWrap"></div>
-        <div id="kycDocsWrap"></div>
-        <!-- Milník 12 (bod 3): preventivní hláška PŘED klikem, ne až po
-             chybě ze serveru - viz renderKycSection(). -->
-        <div id="kycMissingWrap"></div>
-        <div class="form-actions" id="kycSubmitWrap" hidden>
-          <button class="btn-primary" type="button" id="kycSubmitBtn" style="width:auto;">Odeslat k ověření</button>
-        </div>
-      </div>
-    </section>
-
     <!-- ============== OVĚŘENÍ TOTOŽNOSTI (Milník 9, bod 5.6) ==============
          Leader (jen uživatelé ve své síti) / Administrator (kdokoli) -
          seznam čekajících KYC žádostí s náhledem dokumentů (signed URL,
@@ -1775,6 +1794,48 @@
 
       <div id="kycListBanner"></div>
       <div id="kycListWrap"></div>
+    </section>
+
+    <!-- ============== MOJE OVĚŘENÍ TOTOŽNOSTI (Milník 13, bod 1) ==============
+         Vlastní samostatná záložka JEN pro roli tipar (viz ROLE_TAB_ORDER,
+         tabMyKycBtn) - dřív to byla karta #kycCard vložená přímo do "Můj
+         profil", napevno žlutá (.kyc-card border/background) bez ohledu na
+         stav a se zdvojeným zobrazením stavu (pill + banner) při schválení
+         - obojí klient výslovně nahlásil jako bug. Leader/Administrator
+         nikdy totožnost neověřují (beze změny od Milníku 10), proto tuhle
+         záložku vůbec nemají (viz applyNavForRole/ROLE_TAB_ORDER). -->
+    <section id="myKycScreen" class="page" hidden>
+      <div class="section-head">
+        <h2>Ověření totožnosti</h2>
+        <p>Jednorázové ověření totožnosti nutné před výplatou provize - na podání tipu ani na cokoliv jiného to vliv nemá.</p>
+      </div>
+
+      <div id="myKycBanner"></div>
+
+      <!-- Milník 13 (bod 1): CSS třída kyc-card-<stav> se nastavuje v
+           renderKycSection() - jen jemný levý accent pruh podle stavu
+           (nevyplneno/ceka_na_overeni/schvaleno/zamitnuto), NIKDY napevno
+           warning barva (viz CSS .kyc-card pravidla). -->
+      <div class="card detail-card kyc-card" id="kycCard">
+        <!-- Milník 11 (bod 2): VĚDOMÁ ZMĚNA workflow oproti Milníku 9/10 -
+             nahrání 3/3 dokumentů už NEODESÍLÁ žádost automaticky, uživatel
+             musí kliknout na tlačítko "Odeslat k ověření" (viz
+             renderKycSection/#kycSubmitWrap níže) - to jde jen když má
+             navíc vyplněnou trvalou adresu a datum narození. -->
+        <!-- Milník 13 (bod 1, oprava po review): tenhle instrukční text dává
+             smysl jen v editovatelných/čekajících stavech - ve stavu
+             "schváleno" ho renderKycSection() schovává (hidden=true), ať
+             nezůstává matoucí zbytek nad čistým potvrzovacím textem. -->
+        <p class="dt-muted" style="margin-top:0;" id="kycInstructionsWrap">Nahrajte prosím sken/foto obou stran dokladu totožnosti a vlastní fotografii, poté klikněte na „Odeslat k ověření“. Bez schváleného ověření vám nelze vyplatit provizi.</p>
+        <div id="kycStatusWrap"></div>
+        <div id="kycDocsWrap"></div>
+        <!-- Milník 12 (bod 3): preventivní hláška PŘED klikem, ne až po
+             chybě ze serveru - viz renderKycSection(). -->
+        <div id="kycMissingWrap"></div>
+        <div class="form-actions" id="kycSubmitWrap" hidden>
+          <button class="btn-primary" type="button" id="kycSubmitBtn" style="width:auto;">Odeslat k ověření</button>
+        </div>
+      </div>
     </section>
   </main>
 </div>
@@ -1826,6 +1887,11 @@
 <!-- Milník 7 (Část H): SheetJS pro generování skutečných .xlsx souborů na
      klientovi - "Export" tlačítka u Uživatelé/Tipy/Výplaty. -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- Milník 13 (bod 2): jsPDF pro generování PDF exportu KYC dokladů (fotky
+     + jméno + číslo dokladu + datum) PŘED schválením ověření totožnosti -
+     viz submitSchvalitKyc/generateKycApprovalPdf. Globál `window.jspdf.jsPDF`
+     (UMD build). -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 (function () {
   "use strict";
@@ -1978,6 +2044,25 @@
     var parts = String(dateStr).split("-");
     if (parts.length !== 3) return String(dateStr);
     return parts[2] + ". " + parts[1] + ". " + parts[0];
+  }
+
+  // Milník 13 (bod 1): jen datum (bez času) z timestamptz sloupce
+  // autentizace_overeno_kdy - stejné dd. mm. yyyy formátování jako
+  // formatDateTime(), jen bez hodin/minut na konci.
+  function formatKycDatumOnly(iso) {
+    var full = formatDateTime(iso);
+    return full ? full.replace(/\s+\d{2}:\d{2}$/, "") : "";
+  }
+
+  // Milník 13 (bod 1): "vidět jen posledních cca 4 znaky, zbytek nahradit
+  // tečkami" (např. "••••1234") - přesně dle zadání, pevné 4 tečky bez
+  // ohledu na skutečnou délku čísla dokladu.
+  function maskCisloDokladu(cislo) {
+    if (!cislo) return "—";
+    var s = String(cislo).trim();
+    if (!s) return "—";
+    var posledni = s.slice(-4);
+    return "••••" + posledni;
   }
 
   // Milník 11 (bod 1/4): jednořádkové formátování adresy (trvalé i
@@ -2838,14 +2923,16 @@
   var ALL_SCREEN_IDS = [
     "newTipScreen", "listScreen", "networkScreen", "tipyScreen", "detailScreen",
     "usersScreen", "rkScreen", "provizeScreen", "vyplatyScreen", "obsahScreen", "auditScreen",
-    "rkPortalScreen", "profileScreen", "kycScreen", "dashboardScreen"
+    "rkPortalScreen", "profileScreen", "kycScreen", "myKycScreen", "dashboardScreen"
   ];
   var TAB_SCREEN = {
     "new": "newTipScreen", list: "listScreen", network: "networkScreen", tipy: "tipyScreen",
     users: "usersScreen", rk: "rkScreen", provize: "provizeScreen", vyplaty: "vyplatyScreen",
     obsah: "obsahScreen", audit: "auditScreen",
     rkportal: "rkPortalScreen",
-    profile: "profileScreen", kyc: "kycScreen",
+    // Milník 13 (bod 1): "mykyc" - vlastní záložka tipařova ověření
+    // totožnosti (dřív součást "profile"/#profileScreen), viz #myKycScreen.
+    profile: "profileScreen", kyc: "kycScreen", mykyc: "myKycScreen",
     // Milník 12 (bod 11): "dashboard" - dosažitelná JEN klikem na logo
     // (viz logoNavigateHome), záměrně bez vlastního tlačítka v TAB_BUTTON/
     // tabsWrap.
@@ -2856,7 +2943,7 @@
     users: "tabUsersBtn", rk: "tabRkBtn", provize: "tabProvizeBtn", vyplaty: "tabVyplatyBtn",
     obsah: "tabObsahBtn", audit: "tabAuditBtn",
     rkportal: "tabRkPortalBtn",
-    profile: "tabProfileBtn", kyc: "tabKycBtn"
+    profile: "tabProfileBtn", kyc: "tabKycBtn", mykyc: "tabMyKycBtn"
   };
 
   function hideAllScreens() {
@@ -2959,6 +3046,7 @@
     if (tab === "rkportal") fetchRkPortal();
     if (tab === "profile") fetchProfileScreen();
     if (tab === "kyc") fetchKycScreen();
+    if (tab === "mykyc") fetchMyKycScreen();
   }
 
   // Milník 10 (bod 6): reakce na tlačítko Zpět/Vpřed prohlížeče. Ignoruje
@@ -3004,11 +3092,15 @@
     // Administrátorovi - RK vynechána záměrně, viz report Milníku 9 (RK
     // není příjemcem výplat ani součástí stromu sponzorů, adresa/KYC pro ni
     // nemá v rozsahu tohoto milníku obchodní smysl). "kyc" ("Ověření
-    // totožnosti", bod 5.6) jen Leader/Administrator.
+    // totožnosti", bod 5.6) jen Leader/Administrator - schvalovací fronta.
+    // Milník 13 (bod 1): "mykyc" (VLASTNÍ ověření totožnosti tipaře, dřív
+    // součást "profile") je naopak VÝHRADNĚ pro tipare - Leader/Administrator
+    // se totožnost nikdy neověřují (beze změny od Milníku 10), takže tuhle
+    // záložku nemají vůbec.
     // "dashboard" na konci obou polí (bod 11) - jen kvůli whitelistu pro
     // Zpět/Vpřed v prohlížeči (popstate), žádné tlačítko v TAB_BUTTON pro
     // něj neexistuje, takže se v nav baru nikdy nezobrazí.
-    tipar: ["new", "list", "network", "profile", "dashboard"],
+    tipar: ["new", "list", "network", "profile", "mykyc", "dashboard"],
     leader: ["network", "new", "tipy", "users", "kyc", "rk", "provize", "vyplaty", "obsah", "audit", "profile"],
     administrator: ["tipy", "users", "kyc", "rk", "provize", "vyplaty", "obsah", "audit", "profile", "dashboard"],
     // Milník 7 (Část I/1): role RK vidí VÝHRADNĚ jednu obrazovku - žádný
@@ -3272,8 +3364,12 @@
     // vidi svuj profil"), žádná RPC navíc netřeba. email_confirmed_at
     // bereme ze session.user (Supabase Auth ho vrací pro vlastní účet), ne
     // z profiles (tam vůbec není - je jen v auth.users).
+    // Milník 13 (bod 1, oprava po review): + autentizace_overeno_kdy a
+    // cislo_dokladu_totoznosti - renderKycSection() je čte ve stavu
+    // "schvaleno" (datum ověření + maskované číslo dokladu), bez nich se
+    // ten text nikdy nevykreslí.
     var profileResult = await sb.from("profiles")
-      .select("jmeno, prijmeni, role, telefon, invite_code, vytvoreno_kdy, adresa_ulice, adresa_mesto, adresa_psc, adresa_stat, je_firma, ico, dic, adresa_vyplnena_kdy, autentizace_stav, autentizace_duvod_zamitnuti, vyzadovat_zmenu_hesla")
+      .select("jmeno, prijmeni, role, telefon, invite_code, vytvoreno_kdy, adresa_ulice, adresa_mesto, adresa_psc, adresa_stat, je_firma, ico, dic, adresa_vyplnena_kdy, autentizace_stav, autentizace_duvod_zamitnuti, autentizace_overeno_kdy, cislo_dokladu_totoznosti, vyzadovat_zmenu_hesla")
       .eq("id", user.id).single();
     if (profileResult.error) {
       console.error("Nepodařilo se načíst profil uživatele:", profileResult.error);
@@ -3293,6 +3389,8 @@
       adresa_vyplnena_kdy: profile.adresa_vyplnena_kdy || null,
       autentizace_stav: profile.autentizace_stav || "nevyplneno",
       autentizace_duvod_zamitnuti: profile.autentizace_duvod_zamitnuti || null,
+      autentizace_overeno_kdy: profile.autentizace_overeno_kdy || null,
+      cislo_dokladu_totoznosti: profile.cislo_dokladu_totoznosti || null,
       vyzadovat_zmenu_hesla: !!profile.vyzadovat_zmenu_hesla
     };
 
@@ -3390,9 +3488,11 @@
     el2.hidden = false;
     var text = "Vaše ověření totožnosti bylo zamítnuto" +
       (currentUser.autentizace_duvod_zamitnuti ? (" — důvod: " + currentUser.autentizace_duvod_zamitnuti) : "") + ".";
-    el2.innerHTML = escapeHtml(text) + ' <button type="button" class="link-btn" id="kycRejectedBannerLinkBtn">Přejít na Můj profil</button>';
+    // Milník 13 (bod 1): odkaz teď míří na vlastní záložku "Ověření
+    // totožnosti" (#myKycScreen), ne na "Můj profil" - KYC už tam není.
+    el2.innerHTML = escapeHtml(text) + ' <button type="button" class="link-btn" id="kycRejectedBannerLinkBtn">Přejít na Ověření totožnosti</button>';
     var btn = el("kycRejectedBannerLinkBtn");
-    if (btn) btn.addEventListener("click", function () { setActiveTab("profile"); });
+    if (btn) btn.addEventListener("click", function () { setActiveTab("mykyc"); });
   }
 
   function handleSignedOut() {
@@ -3653,10 +3753,12 @@
       if (r && r.uroven === 1) direct++;
       celkemTipu += (r && r.pocet_tipu != null) ? Number(r.pocet_tipu) : 0;
     });
+    // Milník 13 (bod 5): stejné obrácené pořadí label→num jako statTileHtml()
+    // níže - popisek nahoře velký/tučný, číslo pod ním menší/muted.
     el("networkStats").innerHTML =
-      '<div class="stat-tile"><div class="stat-num">' + direct + '</div><div class="stat-label">přímo pozvaní</div></div>' +
-      '<div class="stat-tile"><div class="stat-num">' + rows.length + '</div><div class="stat-label">celkem v mé síti</div></div>' +
-      (isLeader ? '<div class="stat-tile"><div class="stat-num">' + celkemTipu + '</div><div class="stat-label">tipů v celé síti</div></div>' : '');
+      '<div class="stat-tile"><div class="stat-label">přímo pozvaní</div><div class="stat-num">' + direct + '</div></div>' +
+      '<div class="stat-tile"><div class="stat-label">celkem v mé síti</div><div class="stat-num">' + rows.length + '</div></div>' +
+      (isLeader ? '<div class="stat-tile"><div class="stat-label">tipů v celé síti</div><div class="stat-num">' + celkemTipu + '</div></div>' : '');
 
     if (isLeader) {
       // Bod 3 zadání: žádný plochý seznam pro Leadera - jen dashboard
@@ -4197,11 +4299,13 @@
   var usersById = {}; // lokální mapa jen pro tenhle formulář (NEpřepisuje sdílenou adminUsersById)
   var userFormTargetId = null;
 
-  // Milník 4 (bod 1, sekce 8.6.1 zadání v2.1) + Milník 5 (bod 6 zadání):
-  // tabulka s hledáním a řazením, nové sloupce (Příjmení, Telefon,
-  // E-mail, Přímí podřízení, Velikost týmu, Délka spolupráce, Počet
-  // tipů, Stav), jeden sdílený panel pro formulář Upravit (ne 6
-  // skrytých formulářů v řádcích).
+  // Milník 4 (bod 1, sekce 8.6.1 zadání v2.1) + Milník 5 (bod 6 zadání) →
+  // Milník 13 (bod 3, SKUTEČNÉ zúžení, viz CSS .dt-col-narrow/.dt-col-mini
+  // výše): 13 → 11 sloupců. "Role" odstraněna (dostupná v Upravit, viz
+  // openUserForm), "Přímí podřízení"+"Velikost týmu" sloučené do
+  // "Podřízení" (1/2), "Registrace" jako 3 tečky (registraceDotsHtml),
+  // "Plátce DPH"→"Plátce" bez pillu, "Stav" jako barevný čtvereček
+  // (statusDotHtml) - žádný z těchto čtyř sloupců už není textový pill.
   function renderUsersTable(rows) {
     usersById = {};
     (rows || []).forEach(function (u) { if (u && u.id) usersById[u.id] = u; });
@@ -4210,27 +4314,25 @@
     var columns = [
       { key: "jmeno", label: "Jméno", get: function (r) { return r.jmeno || ""; } },
       { key: "prijmeni", label: "Příjmení", get: function (r) { return r.prijmeni || ""; } },
-      { key: "role", label: "Role", get: function (r) { return ROLE_LABELS[r.role] || r.role; }, render: function (r) { return roleBadgeHtml(r.role); } },
       { key: "telefon", label: "Telefon", get: function (r) { return r.telefon || ""; }, render: function (r) { return escapeHtml(r.telefon || "—"); } },
       { key: "email", label: "E-mail", get: function (r) { return r.email || ""; }, render: function (r) { return escapeHtml(r.email || "—"); } },
-      // Milník 9 (bod 3/4): fáze registrace (pill, ze serveru přes
-      // moje_uzivatele()) + červený příznak "PO TERMÍNU", pokud uživateli
-      // chybí adresa a 30denních dní od registrace už uplynulo. Ani jedno
-      // nic nezakazuje - jen informuje Leadera/Administrátora.
-      { key: "registrace", label: "Registrace", get: function (r) { return REGISTRACE_STAV_LABELS[r.registrace_stav] || r.registrace_stav || ""; },
-        render: function (r) {
-          return registraceStavPillHtml(r.registrace_stav) + (r.adresa_po_terminu ? '<br><span class="po-terminu-flag">PO TERMÍNU</span>' : '');
-        } },
-      // Milník 12 (bod 9): className "dt-col-narrow" - krátký číselný
-      // obsah nemá důvod zabírat tolik místa jako Jméno/E-mail, viz CSS.
-      { key: "primi", label: "Přímí podřízení", className: "dt-col-narrow", get: function (r) { return Number(r.primych_podrizenych || 0); } },
-      { key: "tym", label: "Velikost týmu", className: "dt-col-narrow", get: function (r) { return Number(r.velikost_tymu || 0); } },
-      { key: "dny", label: "Délka spolupráce (dny)", className: "dt-col-narrow", get: function (r) { return Number(r.dny_spoluprace || 0); } },
-      { key: "tipy", label: "Počet tipů", className: "dt-col-narrow", get: function (r) { return Number(r.pocet_tipu || 0); } },
-      { key: "plati_dph", label: "Plátce DPH", get: function (r) { return r.plati_dph ? "Ano" : "Ne"; },
-        render: function (r) { return r.plati_dph ? '<span class="pill pill-tip_overen_hledame_rk">Plátce DPH</span>' : '<span class="dt-muted">—</span>'; } },
-      { key: "stav", label: "Stav", get: function (r) { return r.aktivni ? "Aktivní" : "Vymazán"; },
-        render: function (r) { return r.aktivni ? '<span class="pill pill-tip_overen_hledame_rk">Aktivní</span>' : '<span class="pill pill-zamitnuto">Vymazán</span>'; } },
+      // Milník 9 (bod 3/4) → Milník 13 (bod 3): fáze registrace teď jako 3
+      // tečky (registraceDotsHtml) místo širokého textového pillu - plný
+      // popis fáze (vč. PO TERMÍNU) je v title/aria-label pro přístupnost.
+      { key: "registrace", label: "Registrace", className: "dt-col-mini",
+        get: function (r) { return REGISTRACE_DOT_COUNT.hasOwnProperty(r.registrace_stav) ? REGISTRACE_DOT_COUNT[r.registrace_stav] : 0; },
+        render: function (r) { return registraceDotsHtml(r); } },
+      // Milník 13 (bod 3): sloučené "Přímí podřízení" + "Velikost týmu" do
+      // jednoho sloupce, formát "přímí/celkem" (např. "3/12").
+      { key: "podrizeni", label: "Podřízení", className: "dt-col-mini",
+        get: function (r) { return Number(r.velikost_tymu || 0); },
+        render: function (r) { return escapeHtml(String(Number(r.primych_podrizenych || 0)) + "/" + String(Number(r.velikost_tymu || 0))); } },
+      { key: "dny", label: "Dny", className: "dt-col-narrow", get: function (r) { return Number(r.dny_spoluprace || 0); } },
+      { key: "tipy", label: "Tipy", className: "dt-col-narrow", get: function (r) { return Number(r.pocet_tipu || 0); } },
+      { key: "plati_dph", label: "Plátce", className: "dt-col-mini", get: function (r) { return r.plati_dph ? "Ano" : ""; },
+        render: function (r) { return r.plati_dph ? '<span class="dt-tag-ok">Plátce</span>' : '<span class="dt-muted">—</span>'; } },
+      { key: "stav", label: "Stav", className: "dt-col-mini", get: function (r) { return r.aktivni ? "Aktivní" : "Vymazán"; },
+        render: function (r) { return statusDotHtml(r.aktivni); } },
       { key: "akce", label: "Akce", sortable: false, get: function () { return ""; },
         render: function (r) {
           return '<button type="button" class="btn-small btn-small-ghost users-edit-btn" data-user-id="' + escapeHtml(r.id) + '">Upravit</button>';
@@ -4310,8 +4412,12 @@
       '<div class="detail-item"><div class="detail-label">Datum narození</div><div class="detail-value">' +
         escapeHtml(formatDateOnly(target.datum_narozeni) || "—") + '</div></div>';
 
+    // Milník 13 (bod 3): sloupec "Role" byl z tabulky Uživatelé odstraněn
+    // (viz renderUsersTable) - informace se neztrácí, jen se přesunula sem
+    // (Administrátor ji navíc rovnou může editovat přes #ufRole níže).
     var stavInfoHtml =
       '<div class="detail-card" style="margin-bottom:14px;">' +
+        '<div style="margin-bottom:6px;">Role: ' + roleBadgeHtml(target.role) + '</div>' +
         '<div style="margin-bottom:6px;">Fáze registrace: ' + registraceStavPillHtml(target.registrace_stav) +
           (target.adresa_po_terminu ? ' <span class="po-terminu-flag">PO TERMÍNU</span>' : '') + '</div>' +
         (target.role === "tipar"
@@ -5192,6 +5298,41 @@
     return '<span class="' + cls + '">' + escapeHtml(REGISTRACE_STAV_LABELS[stav] || stav || "?") + '</span>';
   }
 
+  // Milník 13 (bod 3): tabulka Uživatelé - kompaktní vizuální ukazatel fáze
+  // registrace místo textového pillu (ten byl moc široký). 0 vyplněných =
+  // e-mail neověřen, 1 = e-mail ověřen, 2 = adresa vyplněná, 3 = identita
+  // ověřena - přesně stejné pořadí fází jako REGISTRACE_STAV_LABELS/
+  // mujRegistraceStav()/moje_uzivatele() na serveru, jen jiné zobrazení.
+  var REGISTRACE_DOT_COUNT = { email_neoveren: 0, email_overen: 1, vyplneny_udaje: 2, autentizovano: 3 };
+  // Barva zaplněných teček odpovídá TOMU, jak daleko je uživatel - stejné
+  // stavové tokeny jako zbytek appky (Milník 12): 1/3 warn (teprve začíná),
+  // 2/3 info (napůl), 3/3 ok (hotovo). Nezaplněné tečky jen muted/border -
+  // beze změny podle stavu.
+  var REGISTRACE_DOT_COLOR_CLASS = { 1: "dt-dot-warn", 2: "dt-dot-neutral", 3: "dt-dot-ok" };
+  function registraceDotsHtml(r) {
+    var stav = r.registrace_stav || "email_neoveren";
+    var filled = REGISTRACE_DOT_COUNT.hasOwnProperty(stav) ? REGISTRACE_DOT_COUNT[stav] : 0;
+    var colorClass = REGISTRACE_DOT_COLOR_CLASS[filled] || "";
+    var popis = (REGISTRACE_STAV_LABELS[stav] || stav || "?") + (r.adresa_po_terminu ? " — PO TERMÍNU" : "");
+    var dots = "";
+    for (var i = 0; i < 3; i++) {
+      dots += '<span class="dt-dot' + (i < filled ? (" " + colorClass) : "") + '"></span>';
+    }
+    // Milník 13 (bod 3): title = plný textový popis fáze, aby to nebylo
+    // "jen barva/tvar" (nedostupné čtečkám i pro hover u myši bez barvy).
+    return '<span class="dt-dots" title="' + escapeHtml(popis) + '" aria-label="' + escapeHtml(popis) + '">' + dots + '</span>' +
+      (r.adresa_po_terminu ? '<span class="po-terminu-flag" style="display:block;">!</span>' : '');
+  }
+
+  // Milník 13 (bod 3): sloupec "Stav" (aktivní/vymazán) nahrazen prostým
+  // barevným čtverečkem místo textového pillu - title atribut nese plný
+  // text pro přístupnost (hover i čtečky obrazovky).
+  function statusDotHtml(aktivni) {
+    var popis = aktivni ? "Aktivní" : "Vymazán";
+    var cls = aktivni ? "dt-status-dot-ok" : "dt-status-dot-danger";
+    return '<span class="dt-status-dot ' + cls + '" title="' + escapeHtml(popis) + '" aria-label="' + escapeHtml(popis) + '"></span>';
+  }
+
   // Vlastní fáze registrace (bod 3) spočítaná KLIENTSKY ze session.user
   // (email_confirmed_at) + vlastního profilu - jen pro zobrazení na "Můj
   // profil" (ne pro cizí profily - tam je zdroj pravdy vždy moje_uzivatele()
@@ -5233,7 +5374,9 @@
     if (!currentUser) return;
     var r = await sb.from("profiles")
       // Milník 11 (bod 1+2): + dorucovaci_* sloupce a datum_narozeni.
-      .select("adresa_ulice, adresa_mesto, adresa_psc, adresa_stat, je_firma, ico, dic, adresa_vyplnena_kdy, autentizace_stav, autentizace_duvod_zamitnuti, dorucovaci_je_stejna, dorucovaci_ulice, dorucovaci_mesto, dorucovaci_psc, dorucovaci_stat, datum_narozeni")
+      // Milník 13 (bod 1, oprava po review): + autentizace_overeno_kdy a
+      // cislo_dokladu_totoznosti - viz stejná poznámka u handleSignedIn().
+      .select("adresa_ulice, adresa_mesto, adresa_psc, adresa_stat, je_firma, ico, dic, adresa_vyplnena_kdy, autentizace_stav, autentizace_duvod_zamitnuti, autentizace_overeno_kdy, cislo_dokladu_totoznosti, dorucovaci_je_stejna, dorucovaci_ulice, dorucovaci_mesto, dorucovaci_psc, dorucovaci_stat, datum_narozeni")
       .eq("id", currentUser.id).single();
     if (!r.error && r.data) {
       Object.assign(currentUser, r.data);
@@ -5286,18 +5429,19 @@
     el("pfDorPsc").value = currentUser.dorucovaci_psc || "";
     el("pfDorStat").value = currentUser.dorucovaci_stat || "Česká republika";
 
-    // Milník 10 (bod 1+2, korekce rozsahu KYC): ověření totožnosti se od
-    // tohoto milníku týká VÝHRADNĚ role tipar - "admin je admin, ten se
-    // neověřuje" a "leader je jednatel společnosti, u něj to nebude" (přímá
-    // zpětná vazba klienta). Leader/Administrator kartu KYC v Můj profil
-    // vůbec nevidí, žádná náhradní kontrola se pro ně nezavádí.
-    var kycCard = el("kycCard");
-    if (currentUser.role === "tipar") {
-      kycCard.hidden = false;
-      await renderKycSection();
-    } else {
-      kycCard.hidden = true;
-    }
+  }
+
+  // Milník 13 (bod 1): KYC karta má vlastní záložku #myKycScreen (dřív byla
+  // součástí fetchProfileScreen/#profileScreen) - viditelná jen roli tipar
+  // (viz ROLE_TAB_ORDER.tipar), volaná ze setActiveTab("mykyc"). Leader ani
+  // Administrator tuhle záložku vůbec nemají v navigaci, takže se tahle
+  // funkce pro ně nikdy nezavolá - žádná náhradní kontrola tu proto není
+  // potřeba (stejná logika jako dřív u kycCard.hidden).
+  async function fetchMyKycScreen() {
+    if (!currentUser || currentUser.role !== "tipar") return;
+    showBanner(el("myKycBanner"), null, null);
+    await refreshOwnProfile();
+    await renderKycSection();
   }
 
   var KYC_IMAGE_EXT_RE = /\.(jpe?g|png|webp)$/i;
@@ -5351,17 +5495,49 @@
   async function renderKycSection() {
     var stav = currentUser.autentizace_stav || "nevyplneno";
     var editovatelne = (stav === "nevyplneno" || stav === "zamitnuto");
+
+    // Milník 13 (bod 1): karta uz neni napevno zluta - jen jemny levy
+    // accent pruh podle aktualniho stavu (viz CSS .kyc-card-<stav>).
+    var kycCardEl = el("kycCard");
+    if (kycCardEl) kycCardEl.className = "card detail-card kyc-card kyc-card-" + stav;
+
+    // Milník 13 (bod 1): stav "schváleno" má úplně jiné, ZJEDNODUŠENÉ
+    // zobrazení - žádné fotky/náhledy dokladu (appka je navíc po schválení
+    // fyzicky smazala ze Storage, viz schvalit_autentizaci), žádný
+    // zdvojený pill+banner (nahlášený bug) - jen jeden čistý řádek textu s
+    // datem a maskovaným číslem dokladu (to se zapisuje do
+    // profiles.cislo_dokladu_totoznosti až při schválení Leaderem, Milník
+    // 13, bod 2).
+    if (stav === "schvaleno") {
+      var overenoDatum = formatKycDatumOnly(currentUser.autentizace_overeno_kdy) || "—";
+      // Milník 13 (bod 1, oprava po review): schválení PŘED tímto milníkem
+      // (kdy cislo_dokladu_totoznosti ještě neexistovalo) nemají číslo
+      // dokladu vyplněné - věta se v tom případě zjednoduší, ať to
+      // nevypadá jako chyba ("číslo: —"), jen se o čísle nezmiňuje.
+      var cisloRaw = currentUser.cislo_dokladu_totoznosti;
+      el("kycStatusWrap").innerHTML = cisloRaw
+        ? ('<p class="kyc-verified-note">Totožnost byla ověřena dne <strong>' +
+            escapeHtml(overenoDatum) +
+            '</strong> z dokladu totožnosti číslo: <strong>' +
+            escapeHtml(maskCisloDokladu(cisloRaw)) +
+            '</strong>.</p>')
+        : ('<p class="kyc-verified-note">Totožnost byla ověřena dne <strong>' +
+            escapeHtml(overenoDatum) +
+            '</strong>.</p>');
+      el("kycDocsWrap").innerHTML = "";
+      el("kycMissingWrap").innerHTML = "";
+      el("kycSubmitWrap").hidden = true;
+      if (el("kycInstructionsWrap")) el("kycInstructionsWrap").hidden = true;
+      return;
+    }
+    if (el("kycInstructionsWrap")) el("kycInstructionsWrap").hidden = false;
+
     var statusHtml = '<div style="margin-bottom:12px;">' + autentizaceStavPillHtml(stav) + '</div>';
     if (stav === "zamitnuto" && currentUser.autentizace_duvod_zamitnuti) {
       statusHtml += '<div class="banner banner-error">Důvod zamítnutí: ' + escapeHtml(currentUser.autentizace_duvod_zamitnuti) + ' — opravte prosím dokumenty a znovu klikněte na „Odeslat k ověření“.</div>';
     }
     if (stav === "ceka_na_overeni") {
       statusHtml += '<div class="banner banner-info">Vaše žádost o ověření totožnosti čeká na posouzení Leaderem/Administrátorem. Dokumenty teď nelze měnit.</div>';
-    }
-    // Milník 10 (bod 4d): pozitivní potvrzení po schválení - stejně
-    // nepřehlédnutelné jako banner zamítnutí výše.
-    if (stav === "schvaleno") {
-      statusHtml += '<div class="banner banner-ok">✓ Vaše totožnost byla ověřena.</div>';
     }
     el("kycStatusWrap").innerHTML = statusHtml;
 
@@ -5477,7 +5653,10 @@
   }
 
   async function uploadKycFile(typ, file) {
-    showBanner(el("profileBanner"), null, null);
+    // Milník 13 (bod 1): KYC karta žije teď na vlastní záložce
+    // #myKycScreen, ne v "Můj profil" - banner cílí na #myKycBanner, ne
+    // na #profileBanner.
+    showBanner(el("myKycBanner"), null, null);
     var extMatch = /\.([a-zA-Z0-9]+)$/.exec(file.name || "");
     var ext = extMatch ? extMatch[1].toLowerCase() : "bin";
     var cesta = currentUser.id + "/" + typ + "." + ext;
@@ -5487,7 +5666,7 @@
     });
     if (uploadResult.error) {
       console.error("Chyba při nahrávání dokumentu:", uploadResult.error);
-      showBanner(el("profileBanner"), "error", "Soubor se nepodařilo nahrát. Zkuste to prosím znovu.");
+      showBanner(el("myKycBanner"), "error", "Soubor se nepodařilo nahrát. Zkuste to prosím znovu.");
       return;
     }
 
@@ -5520,15 +5699,14 @@
       var msg = (rpcResult.error.message || "").indexOf("nelze nahravat") !== -1
         ? "Dokument teď nelze nahrát - žádost už byla odeslána k ověření nebo je schválená."
         : "Soubor se nahrál, ale nepodařilo se to zaznamenat. Zkuste to prosím znovu.";
-      showBanner(el("profileBanner"), "error", msg);
+      showBanner(el("myKycBanner"), "error", msg);
       await refreshOwnProfile();
       await renderKycSection();
       return;
     }
 
-    showBanner(el("profileBanner"), "ok", "Dokument byl nahrán.");
+    showBanner(el("myKycBanner"), "ok", "Dokument byl nahrán.");
     await refreshOwnProfile();
-    el("profileRegistraceStavWrap").innerHTML = "Fáze registrace: " + registraceStavPillHtml(mujRegistraceStav());
     await renderKycSection();
   }
 
@@ -5548,7 +5726,11 @@
   }
 
   async function submitOdeslatKOvereni() {
-    showBanner(el("profileBanner"), null, null);
+    // Milník 13 (bod 1): KYC karta žije na vlastní záložce #myKycScreen -
+    // banner cílí na #myKycBanner (na téhle krátké obrazovce je banner i
+    // tlačítko prakticky vždy v jednom pohledu, ale scrollIntoView z
+    // Milníku 12 bodu 3 zůstává jako obranná pojistka pro nižší obrazovky).
+    showBanner(el("myKycBanner"), null, null);
     var btn = el("kycSubmitBtn");
     btn.disabled = true;
     var result = await sb.rpc("odeslat_k_overeni_totoznosti");
@@ -5556,21 +5738,14 @@
 
     if (result.error) {
       console.error("Chyba při odesílání k ověření:", result.error);
-      showBanner(el("profileBanner"), "error", odeslatKOvereniErrorMessage(result.error));
-      // Milník 12 (bod 3): reprodukováno na demo účtu Tipař B - #profileBanner
-      // je nahoře obrazovky "Můj profil", ale tlačítko "Odeslat k ověření"
-      // je až dole v KYC kartě (pod celým formulářem adresy) - po kliku se
-      // banner sice vykreslil, ale zůstal mimo aktuální scroll pozici
-      // uživatele, takže chybovou hlášku reálně neviděl. Banner teď po
-      // chybě vždy doscrolluje do viditelné oblasti.
-      el("profileBanner").scrollIntoView({ behavior: "smooth", block: "center" });
+      showBanner(el("myKycBanner"), "error", odeslatKOvereniErrorMessage(result.error));
+      el("myKycBanner").scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
 
-    showBanner(el("profileBanner"), "ok", "Žádost o ověření totožnosti byla odeslána.");
-    el("profileBanner").scrollIntoView({ behavior: "smooth", block: "center" });
+    showBanner(el("myKycBanner"), "ok", "Žádost o ověření totožnosti byla odeslána.");
+    el("myKycBanner").scrollIntoView({ behavior: "smooth", block: "center" });
     await refreshOwnProfile();
-    el("profileRegistraceStavWrap").innerHTML = "Fáze registrace: " + registraceStavPillHtml(mujRegistraceStav());
     await renderKycSection();
   }
 
@@ -5693,6 +5868,14 @@
           '<div class="kyc-review-profile">' + kycProfilDetailyHtml(u) + '</div>' +
           '<div class="kyc-review-docs" data-slot-links></div>' +
         '</div>' +
+        // Milník 13 (bod 2): leader ručně opíše číslo dokladu z fotky PŘED
+        // schválením - povinné pole, bez vyplnění nejde schválit (klientská
+        // validace níže + stejná validace na serveru v schvalit_autentizaci).
+        '<div class="field kyc-review-cislo-field" id="kycCisloField_' + escapeHtml(u.id) + '" style="max-width:280px;margin-top:12px;margin-bottom:0;">' +
+          '<label for="kycCislo_' + escapeHtml(u.id) + '">Číslo dokladu totožnosti (opište z fotky) *</label>' +
+          '<input type="text" id="kycCislo_' + escapeHtml(u.id) + '" data-kyc-cislo-input="' + escapeHtml(u.id) + '" placeholder="např. 123456789" autocomplete="off">' +
+          '<span class="error-msg">Před schválením opište číslo dokladu z fotky.</span>' +
+        '</div>' +
         '<div class="form-actions" style="margin-top:14px;">' +
           '<button class="btn-primary" type="button" style="width:auto;" data-kyc-schvalit="' + escapeHtml(u.id) + '">Schválit</button>' +
           '<button class="btn-small btn-small-danger" type="button" data-kyc-zamitnout="' + escapeHtml(u.id) + '">Zamítnout</button>' +
@@ -5709,8 +5892,14 @@
       renderKycPreviewLinks(rows[j].id);
     }
 
+    var rowsById = {};
+    rows.forEach(function (r) { rowsById[r.id] = r; });
+
     el("kycListWrap").querySelectorAll("[data-kyc-schvalit]").forEach(function (btn) {
-      btn.addEventListener("click", function () { submitSchvalitKyc(btn.getAttribute("data-kyc-schvalit"), true, null); });
+      btn.addEventListener("click", function () {
+        var userId = btn.getAttribute("data-kyc-schvalit");
+        submitSchvalitKycSPdf(userId, rowsById[userId], btn);
+      });
     });
     el("kycListWrap").querySelectorAll("[data-kyc-zamitnout]").forEach(function (btn) {
       btn.addEventListener("click", function () { openKycRejectModal(btn.getAttribute("data-kyc-zamitnout")); });
@@ -5801,13 +5990,23 @@
       return "Nemáte oprávnění o tomto uživateli rozhodnout.";
     }
     if (msg.indexOf("Duvod zamitnuti je povinny") !== -1) return "Důvod zamítnutí je povinný.";
+    // Milník 13 (bod 2): server-side pojistka stejné validace, kterou UI
+    // vynucuje před generováním PDF (viz submitSchvalitKycSPdf) - kdyby se
+    // to přesto dostalo až sem (např. zpožděný re-render), srozumitelná
+    // hláška místo syrové chyby.
+    if (msg.indexOf("Cislo dokladu totoznosti je pri schvaleni povinne") !== -1) return "Číslo dokladu totožnosti je povinné.";
     if (msg.indexOf('"Ceka na overeni"') !== -1) return "Rozhodnout lze jen o uživateli, který čeká na ověření.";
     return "Akci se nepodařilo provést (" + escapeHtml(msg || "neznámá chyba") + ").";
   }
 
-  async function submitSchvalitKyc(userId, schvaleno, duvod) {
+  // p_cislo_dokladu (Milník 13, bod 2): povinné jen při schválení (RPC to
+  // vynucuje i na serveru) - zamítnutí (schvaleno=false) ho ignoruje.
+  async function submitSchvalitKyc(userId, schvaleno, duvod, cisloDokladu) {
     showBanner(el("kycListBanner"), null, null);
-    var result = await sb.rpc("schvalit_autentizaci", { p_user_id: userId, p_schvaleno: schvaleno, p_duvod_zamitnuti: duvod });
+    var result = await sb.rpc("schvalit_autentizaci", {
+      p_user_id: userId, p_schvaleno: schvaleno, p_duvod_zamitnuti: duvod,
+      p_cislo_dokladu: schvaleno ? cisloDokladu : null
+    });
     if (result.error) {
       console.error("Chyba při rozhodování o ověření totožnosti:", result.error);
       showBanner(el("kycListBanner"), "error", kycRozhodnutiErrorMessage(result.error));
@@ -5816,6 +6015,160 @@
     showBanner(el("kycListBanner"), "ok", schvaleno ? "Ověření totožnosti bylo schváleno." : "Ověření totožnosti bylo zamítnuto.");
     setTimeout(function () { showBanner(el("kycListBanner"), null, null); }, 4000);
     await fetchKycScreen();
+  }
+
+  // ---------------- Milník 13 (bod 2): PDF export dokladů PŘED schválením ----------------
+  //
+  // Architektura: leader PŘED kliknutím na "Schválit" musí ručně opsat
+  // číslo dokladu z fotky (viz #kycCisloField_<id> v renderKycList). Klik
+  // na "Schválit" pak:
+  //   1) ověří klientsky, že je číslo dokladu vyplněné (server to vynucuje
+  //      taky - viz schvalit_autentizaci/p_cislo_dokladu - tohle je jen UX
+  //      pojistka navíc, ne jediná ochrana),
+  //   2) vygeneruje a STÁHNE PDF se všemi 3 fotkami dokladů + jménem +
+  //      číslem dokladu + datem (viz generateKycApprovalPdf),
+  //   3) TEPRVE PO úspěšném vygenerování/stažení PDF zavolá RPC
+  //      schvalit_autentizaci, která teprve uvnitř (SECURITY DEFINER) fyzicky
+  //      smaže všechny 3 doklady ze Storage bucketu "identifikace".
+  // Pokud selže krok 2 (např. chyba při stahování obrázku ze signed URL),
+  // NESMÍ se pokračovat na krok 3 - jinak by appka smazala jediné dostupné
+  // kopie dokladů bez toho, aby si je leader stihl uložit mimo systém.
+  async function fetchBlobFromUrl(url) {
+    var resp = await fetch(url);
+    if (!resp.ok) throw new Error("HTTP " + resp.status + " při stahování obrázku");
+    return await resp.blob();
+  }
+
+  function blobToDataUrl(blob) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () { resolve(reader.result); };
+      reader.onerror = function () { reject(new Error("Nepodařilo se zpracovat stažený obrázek.")); };
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  // jsPDF potřebuje explicitní formát obrázku ("JPEG"/"PNG"/"WEBP") - JPEG
+  // funguje spolehlivě i pro png/webp vstupy u většiny verzí jsPDF, ale
+  // radši dáváme přesný formát podle přípony, ať se nic nezkreslí.
+  function jsPdfImageFormat(fileName) {
+    var ext = (/\.([a-zA-Z0-9]+)$/.exec(fileName || "") || [])[1] || "";
+    ext = ext.toLowerCase();
+    if (ext === "png") return "PNG";
+    if (ext === "webp") return "WEBP";
+    return "JPEG";
+  }
+
+  // Vrací true při úspěchu (PDF bylo vygenerováno a staženo), vyhazuje
+  // Error při jakémkoliv selhání (chybějící knihovna, chyba stahování
+  // obrázku ze signed URL, chyba čtení blobu) - volající (viz
+  // submitSchvalitKycSPdf) na základě toho rozhodne, jestli vůbec smí
+  // pokračovat na RPC schvalit_autentizaci.
+  async function generateKycApprovalPdf(user, cisloDokladu) {
+    if (typeof window.jspdf === "undefined" || !window.jspdf.jsPDF) {
+      throw new Error("Knihovna pro generování PDF se nenačetla. Zkontrolujte prosím připojení k internetu a načtěte stránku znovu.");
+    }
+    var docs = [
+      { typ: "op_predni", label: "Doklad totožnosti - přední strana" },
+      { typ: "op_zadni", label: "Doklad totožnosti - zadní strana" },
+      { typ: "foto", label: "Vlastní fotografie" }
+    ];
+    var listResult = await sb.storage.from("identifikace").list(user.id, { limit: 100 });
+    if (listResult.error) throw new Error("Nepodařilo se načíst seznam dokumentů: " + listResult.error.message);
+    var fileByTyp = pickLatestFileByTyp(listResult.data || [], docs);
+
+    var jsPDF = window.jspdf.jsPDF;
+    var pdf = new jsPDF({ unit: "pt", format: "a4" });
+    var pageWidth = pdf.internal.pageSize.getWidth();
+    var margin = 40;
+
+    pdf.setFontSize(16);
+    pdf.text("Ověření totožnosti - podklad ke schválení", margin, 50);
+    pdf.setFontSize(11);
+    var infoY = 76;
+    pdf.text("Tipař: " + (celeJmeno(user) || "—"), margin, infoY);
+    pdf.text("Číslo dokladu totožnosti: " + (cisloDokladu || "—"), margin, infoY + 16);
+    pdf.text("Datum: " + formatDateTime(new Date().toISOString()), margin, infoY + 32);
+
+    var y = infoY + 56;
+    for (var i = 0; i < docs.length; i++) {
+      var d = docs[i];
+      var f = fileByTyp[d.typ];
+      if (y > 700) { pdf.addPage(); y = 50; }
+      pdf.setFontSize(12);
+      pdf.text(d.label, margin, y);
+      y += 12;
+      if (!f) {
+        pdf.setFontSize(10);
+        pdf.text("(dokument chybí)", margin, y);
+        y += 20;
+        continue;
+      }
+      var signed = await sb.storage.from("identifikace").createSignedUrl(user.id + "/" + f.name, 300);
+      if (signed.error || !signed.data) {
+        throw new Error("Nepodařilo se vytvořit odkaz na dokument " + d.label + ".");
+      }
+      if (!KYC_IMAGE_EXT_RE.test(f.name)) {
+        // Doklad byl nahrán jako PDF, ne obrázek - appka umí do exportu
+        // vložit jen rastrové obrázky (bez PDF knihovny na čtení stránek
+        // by vyžadovalo další závislost nad rámec tohoto milníku), takže
+        // se do exportu vloží aspoň poznámka + odkaz zůstává funkční, dokud
+        // RPC dokumenty nesmaže. Stažení samotného PDF souboru (fetch) se
+        // ale POŘÁD ověřuje níže přes fetchBlobFromUrl, ať selže stejně
+        // tvrdě jako u obrázku, pokud je signed URL nedostupná.
+        await fetchBlobFromUrl(signed.data.signedUrl);
+        pdf.setFontSize(10);
+        pdf.text("(dokument byl nahrán jako PDF soubor, není vložen jako obrázek - viz " + f.name + ")", margin, y);
+        y += 20;
+        continue;
+      }
+      var blob = await fetchBlobFromUrl(signed.data.signedUrl);
+      var dataUrl = await blobToDataUrl(blob);
+      var imgW = 220, imgH = 150;
+      if (y + imgH > 780) { pdf.addPage(); y = 50; }
+      pdf.addImage(dataUrl, jsPdfImageFormat(f.name), margin, y, imgW, imgH);
+      y += imgH + 20;
+    }
+
+    var fileNameSafe = (celeJmeno(user) || user.id).replace(/[^a-zA-Z0-9_\- ]/g, "").trim().replace(/\s+/g, "_") || user.id;
+    pdf.save("kyc_" + fileNameSafe + ".pdf");
+    return true;
+  }
+
+  // Klik na "Schválit" v Leaderově obrazovce Ověření totožnosti - viz
+  // architektura popsaná výše u generateKycApprovalPdf().
+  async function submitSchvalitKycSPdf(userId, userRow, btn) {
+    showBanner(el("kycListBanner"), null, null);
+    var fieldEl = el("kycCisloField_" + userId);
+    var inputEl = document.querySelector('[data-kyc-cislo-input="' + userId + '"]');
+    var cisloDokladu = inputEl ? inputEl.value.trim() : "";
+    if (!cisloDokladu) {
+      setFieldError(fieldEl, true, "Před schválením opište číslo dokladu z fotky.");
+      if (inputEl) inputEl.focus();
+      return;
+    }
+    setFieldError(fieldEl, false);
+
+    if (!userRow) {
+      showBanner(el("kycListBanner"), "error", "Data uživatele se nepodařilo najít, zkuste prosím obnovit stránku.");
+      return;
+    }
+
+    var puvodniText = btn ? btn.textContent : "";
+    if (btn) { btn.disabled = true; btn.textContent = "Generuji PDF…"; }
+    try {
+      await generateKycApprovalPdf(userRow, cisloDokladu);
+    } catch (e) {
+      console.error("Chyba při generování PDF podkladu ke schválení:", e);
+      if (btn) { btn.disabled = false; btn.textContent = puvodniText; }
+      showBanner(el("kycListBanner"), "error", "Nepodařilo se vygenerovat/stáhnout PDF podklad (" + (e && e.message ? e.message : "neznámá chyba") + "). Ověření NEBYLO schváleno, zkuste to prosím znovu.");
+      return;
+    }
+    if (btn) btn.textContent = puvodniText;
+    // PDF bylo úspěšně vygenerováno a staženo - teprve teď je bezpečné
+    // zavolat RPC, která uvnitř fyzicky smaže doklady ze Storage.
+    await submitSchvalitKyc(userId, true, null, cisloDokladu);
+    if (btn) btn.disabled = false;
   }
 
   // ---------------- bod 6: Přidat uživatele ----------------
@@ -5919,21 +6272,24 @@
     if (activeTab === "users") fetchUsersTable();
   }
 
-  // ---------------- Milník 12 (bod 6): Přehled leadra - redesign dlaždic ----------------
+  // ---------------- Milník 12 (bod 6) → Milník 13 (bod 5, PŘEPSÁNO): Přehled leadra ----------------
   //
-  // Kontrakt dlaždice: label (věta bez dvojtečky) + value (velké tučné
-  // PROPORCIONÁLNÍ číslo, ne tabular-nums) + volitelná barevná tečka u
-  // labelu. Barva je REZERVOVANÁ a nikdy nenese význam sama o sobě - jde
-  // jen na levý pruh/nádech pozadí/tečku, .stat-num i .stat-label vždy
-  // zůstávají v "ink" barvě var(--text) (viz CSS .stat-tile pravidla).
+  // Milník 13: DRUHÁ oprava stejného klientova požadavku ("2x menší čísla,
+  // větší popisy") - hierarchie je teď OBRÁCENÁ oproti M12/M10: label je
+  // vizuálně dominantní (velký/tučný/nahoře), num podřízený (malý/lehčí/
+  // muted/pod labelem). DOM pořadí je záměrně label→num (ne num→label jako
+  // dřív) - bez prohození pořadí by prohození jen font-size nestačilo,
+  // protože flex-direction:column řadí vizuálně přesně podle pořadí v DOM.
+  // Barva zůstává REZERVOVANÁ (levý pruh/nádech pozadí/tečka), nikdy není
+  // barvou textu čísla/popisku - beze změny oproti M12.
   // Kategorie: "neutral" (čistý počet, tenký modrý akcent, žádný nádech
   // pozadí) / "info" (modrý nádech, "právě se to děje") / "ok" (zelená) /
   // "warn" (jantarová) / "serious" (korálová, závažnější než warn) /
   // "critical" (červená, nejzávažnější - PO TERMÍNU).
   function statTileHtml(num, label, clickTab, category) {
     var catClass = category ? (" stat-tile-" + category) : "";
-    var inner = '<div class="stat-num">' + escapeHtml(String(num != null ? num : 0)) + '</div>' +
-      '<div class="stat-label">' + (category ? '<span class="stat-label-dot"></span>' : '') + escapeHtml(label) + '</div>';
+    var inner = '<div class="stat-label">' + (category ? '<span class="stat-label-dot"></span>' : '') + escapeHtml(label) + '</div>' +
+      '<div class="stat-num">' + escapeHtml(String(num != null ? num : 0)) + '</div>';
     return clickTab
       ? '<button type="button" class="stat-tile' + catClass + '" data-goto-tab="' + escapeHtml(clickTab) + '">' + inner + '</button>'
       : '<div class="stat-tile' + catClass + '">' + inner + '</div>';
