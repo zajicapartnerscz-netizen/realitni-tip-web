@@ -390,6 +390,100 @@
     text-align: center;
   }
 
+  /* ---------- Milník 14: číslo verze, nápověda a historie verzí na
+     přihlašovací obrazovce ----------
+     .auth-wrap (výše) zůstává beze změny (sdílí ji i #forcedPasswordScreen,
+     ten musí zůstat netknutý) - #authScreen má uvnitř ní jako jediné dítě
+     nový lokální obal .auth-page, ve kterém je vlastní dvousloupcové
+     rozložení (bod 3 zadání).
+     Breakpoint @media níže (800px) NENÍ převzatý natvrdo z .kyc-review-grid
+     (720px) - ten by tu byl jen kosmetický/nefunkční, protože přirozený
+     bod zalomení .auth-columns (flex-wrap:wrap, bez media query) nastává
+     dřív, podle součtu flex-basis obou sloupců + gap + vnějšího paddingu
+     .auth-wrap: 420 (.auth-card-col) + 300 (.auth-help) + 44 (gap) + 32
+     (2× 16px padding .auth-wrap) = 796px šířky okna. Hodnota 800px je
+     tenhle skutečný přirozený bod (s malou rezervou), ne libovolně
+     vymyšlené číslo - media query tak dělá přesně to, co popisuje. */
+  .auth-page { width: 100%; max-width: 824px; }
+
+  .auth-columns {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 44px;
+  }
+  .auth-card-col { flex: 0 1 420px; width: 100%; max-width: 420px; }
+  .auth-card-col .auth-card { margin: 0; }
+
+  .auth-version {
+    text-align: center;
+    font-size: 12px;
+    margin: 0 0 14px;
+  }
+
+  /* Bod 2 zadání: tichá nápověda, NE výstražný box - žádné barevné pozadí,
+     žádné ikony, jen tlumené písmo v souladu s .auth-footnote výše. */
+  .auth-help { flex: 1 1 300px; width: 100%; max-width: 360px; padding-top: 8px; }
+  .auth-help-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin: 0 0 10px;
+  }
+  .auth-help-list {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+  .auth-help-list li { margin-bottom: 6px; }
+  .auth-help-list li:last-child { margin-bottom: 0; }
+
+  @media (max-width: 800px) {
+    /* Mobil/menší obrazovky: nápověda POD přihlašovací kartou (pořadí v
+       HTML - viz #authScreen), ne vedle - viz bod 3 zadání. 800px = reálný
+       bod zalomení .auth-columns, viz komentář u .auth-page výše. */
+    .auth-columns { flex-direction: column; align-items: stretch; }
+    .auth-card-col, .auth-help { max-width: none; }
+  }
+
+  /* Bod 4 zadání: panel "Historie verzí" - celá šířka, POD dvousloupcovým
+     blokem výše, viditelný vždy (nesbalitelný), jasně druhotný vůči
+     .auth-card (menší písmo, tenké linky mezi položkami, žádné barevné
+     bloky). Obsah vykresluje renderAuthVersionAndChangelog() z pole APP_CHANGELOG
+     (viz JS) - jedna šablona, ne ručně opakované HTML. */
+  .auth-changelog {
+    width: 100%;
+    margin-top: 36px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+  }
+  .auth-changelog-title {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin: 0 0 14px;
+  }
+  .auth-changelog-list { display: flex; flex-direction: column; gap: 12px; }
+  .auth-changelog-entry {
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--text-muted);
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .auth-changelog-entry:last-child { border-bottom: none; padding-bottom: 0; }
+  .auth-changelog-entry-head {
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+  .auth-changelog-entry ul { margin: 0; padding-left: 16px; }
+  .auth-changelog-entry li { margin-bottom: 2px; }
+
   .banner {
     border-radius: var(--radius-s);
     padding: 11px 14px;
@@ -1194,7 +1288,20 @@
       <div class="auth-wrap">
         <!-- Milník 13 (bod 4): uvítací marketingový text (Milník 12, bod 14)
              byl odsud ZCELA odstraněn na výslovnou žádost klienta - žádná
-             náhrada, appka se vrací k prostému přihlašovacímu formuláři. -->
+             náhrada, appka se vrací k prostému přihlašovacímu formuláři.
+             Milník 14: .auth-wrap má tu teď jediné dítě .auth-page (místo
+             dřívějšího přímého .auth-card) - uvnitř něj je vlastní
+             dvousloupcové rozložení (verze + karta + nápověda) a pod ním
+             panel Historie verzí. #forcedPasswordScreen níže dál sdílí
+             .auth-wrap se svým vlastním jediným dítětem .auth-card, beze
+             změny. -->
+        <div class="auth-page">
+        <div class="auth-columns">
+        <div class="auth-card-col">
+        <!-- Bod 1 zadání: nenápadné číslo verze nad kartou, hodnotu doplní
+             JS z APP_VERSION (viz <script> níže) - žádný natvrdo zapsaný
+             řetězec, ať se to nerozejde s APP_CHANGELOG. -->
+        <p class="auth-version dt-muted" id="authVersionLabel"></p>
         <div class="auth-card">
           <div class="auth-brand"><span class="brand" style="font-size:26px;">Realitní <em>tip</em></span></div>
           <p class="auth-sub" id="authSubtitle">Přihlaste se ke svému účtu tipaře</p>
@@ -1317,6 +1424,30 @@
           </div>
 
           <p class="auth-footnote" id="authFootnote">Přihlášení a registrace běží přes Supabase Auth, oprávnění k datům vynucuje Row Level Security v Postgresu na straně serveru — stejný princip jako u bezpečnostního testu Krok 0, jen jinou technologií.</p>
+        </div>
+        </div>
+
+        <!-- Bod 2 zadání: tichá nápověda k demo přihlašování - přesné znění
+             podle zadání klienta, žádné ikony/emoji ani výstražný box. Na
+             mobilu (viz @media výše) se zobrazí POD .auth-card-col díky
+             pořadí v HTML. -->
+        <aside class="auth-help" id="authHelp">
+          <p class="auth-help-title">Jak přihlášení funguje</p>
+          <ul class="auth-help-list">
+            <li>Není potřeba zadávat e-mail ani heslo.</li>
+            <li>Tlačítka slouží k rychlému testovacímu přihlášení do jednotlivých rolí.</li>
+            <li>Pro otestování jiné role je nutné se nejprve odhlásit.</li>
+          </ul>
+        </aside>
+        </div>
+
+        <!-- Bod 4 zadání: Historie verzí - celá šířka, pod dvousloupcovým
+             blokem výše, obsah vykresluje renderAuthVersionAndChangelog() z pole
+             APP_CHANGELOG (viz <script>). -->
+        <div class="auth-changelog" id="authChangelog">
+          <p class="auth-changelog-title">Historie verzí</p>
+          <div class="auth-changelog-list" id="authChangelogList"></div>
+        </div>
         </div>
       </div>
     </section>
@@ -1781,6 +1912,7 @@
           </div>
         </form>
       </div>
+    </section>
 
     <!-- ============== OVĚŘENÍ TOTOŽNOSTI (Milník 9, bod 5.6) ==============
          Leader (jen uživatelé ve své síti) / Administrator (kdokoli) -
@@ -1908,6 +2040,88 @@
   // serveru triggerem při registraci a klient na ni nemá zápisové právo.
   // -------------------------------------------------------------------
 
+  // Milník 14: číslo aktuální verze aplikace - MUSÍ odpovídat nejnovější položce
+  // pole APP_CHANGELOG níže (položka na indexu 0). Při každém příštím milníku
+  // se zvyšuje ROVNOU TADY i v APP_CHANGELOG - jsou to dvě navzájem závislá místa.
+  var APP_VERSION = "13.0";
+
+  // Milník 14 (bod 4): obsah panelu "Historie verzí" na přihlašovací
+  // obrazovce - zrekonstruováno z reálné historie projektu (STAV.md,
+  // docs/milnik*.md, časy nasazení na Renderu). Nejnovější položka je na
+  // indexu 0 a její "verze" MUSÍ odpovídat APP_VERSION výše (viz kontrola
+  // pod tímto polem). Vykresluje se generickou šablonou renderAuthVersionAndChangelog()
+  // - při dalším milníku se sem jen přidá nová položka na začátek pole.
+  var APP_CHANGELOG = [
+    { verze: "13.0", datum: "11. 9. 2026", body: [
+      "Ověření totožnosti přesunuto do samostatné záložky",
+      "Leader při schválení zapisuje číslo dokladu a exportuje doklady do PDF",
+      "Zúžená a přehlednější tabulka uživatelů",
+      "Odstraněna úvodní hláška na přihlašovací stránce",
+      "Upravený přehled (dashboard) leadera"
+    ] },
+    { verze: "12.0", datum: "10. 9. 2026", body: [
+      "Vlastní okno pro zamítnutí ověření totožnosti",
+      "Opraveno zobrazování nahraných dokladů",
+      "Nová karta s registračními údaji v profilu",
+      "Redesign přehledu leadera, přehled sítě po úrovních",
+      "Přidány demo přihlašovací účty"
+    ] },
+    { verze: "11.0", datum: "10. 9. 2026", body: [
+      "Přidána doručovací adresa",
+      "Odeslání dokladů k ověření jako samostatný krok",
+      "Opraveny chybové hlášky a nahrávání dokumentů",
+      "Zvětšený náhled dokladů u leadera"
+    ] },
+    { verze: "10.0", datum: "10. 9. 2026", body: [
+      "Ověření totožnosti zúženo jen na roli tipaře",
+      "Opraveno nahrávání dokumentů",
+      "Nová obrazovka Ověření totožnosti",
+      "Nový přehled (dashboard) leadera",
+      "Funkční tlačítko Zpět v prohlížeči"
+    ] },
+    { verze: "9.0", datum: "9. 9. 2026", body: [
+      "Registrace a fáze ověření uživatele",
+      "Vyplnění adresy a nahrání dokladů totožnosti",
+      "Podmínka ověření pro výplatu provize",
+      "Ruční založení uživatele"
+    ] },
+    { verze: "8.0", datum: "9. 9. 2026", body: [
+      "Opraven výpočet v simulaci provize",
+      "Leader vidí aktuální stav ověření realitní kanceláře",
+      "Opraven bug v registraci"
+    ] },
+    { verze: "7.0", datum: "8. 9. 2026", body: [
+      "Realitní kancelář jako přihlašovaná role",
+      "Opraven výpočet provize",
+      "Nový modul Výplaty",
+      "Export do XLSX/CSV"
+    ] },
+    { verze: "6.0", datum: "7. 9. 2026", body: [
+      "Opraveny nahlášené chyby",
+      "Nový modul Provizní schéma"
+    ] },
+    { verze: "5.0", datum: "7. 9. 2026", body: [
+      "Rozšířené tabulky a přejmenované obrazovky",
+      "Nová pole u realitních kanceláří",
+      "Rozdělení jména a příjmení uživatele"
+    ] },
+    { verze: "4.0", datum: "7. 9. 2026", body: [
+      "Nový stavový model tipu",
+      "Samostatná navigace",
+      "Tabulky s hledáním a řazením",
+      "Nová obrazovka Detail a ověření tipu"
+    ] }
+  ];
+
+  // Milník 14 (bod 5): běhová kontrola konzistence APP_VERSION <->
+  // APP_CHANGELOG[0] - jen upozorní v konzoli, appku nesmí shodit (proto
+  // obyčejná podmínka, ne throw). Slouží jako pojistka proti tomu, že se
+  // při příštím milníku zvýší jen jedno z těch dvou navzájem závislých míst.
+  if (!APP_CHANGELOG.length || APP_CHANGELOG[0].verze !== APP_VERSION) {
+    console.assert(false, "Milník 14: APP_VERSION (" + APP_VERSION + ") neodpovídá APP_CHANGELOG[0].verze (" +
+      (APP_CHANGELOG[0] && APP_CHANGELOG[0].verze) + ") - oprav obě místa současně.");
+  }
+
   var SUPABASE_URL = "https://swvzpzkiojysivwdjtuz.supabase.co";
   var SUPABASE_PUBLISHABLE_KEY = "sb_publishable_imMFjANNsQyqMb1j4rstKA_5XcHHNTp";
   var DEMO_PASSWORD = "Demo1234!";
@@ -1998,6 +2212,29 @@
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
+  }
+
+  // Milník 14 (body 1 a 4): vykreslení čísla verze a panelu "Historie
+  // verzí" na přihlašovací obrazovce - statický obsah (APP_VERSION /
+  // APP_CHANGELOG výše), vykreslí se jednou při startu appky (viz boot()).
+  // #forcedPasswordScreen tyhle prvky nemá, tak se ho tahle funkce netýká.
+  function renderAuthVersionAndChangelog() {
+    var versionLabel = el("authVersionLabel");
+    if (versionLabel) versionLabel.textContent = "Verze " + APP_VERSION;
+
+    var listWrap = el("authChangelogList");
+    if (!listWrap) return;
+    listWrap.innerHTML = APP_CHANGELOG.map(function (entry) {
+      var items = entry.body.map(function (b) {
+        return "<li>" + escapeHtml(b) + "</li>";
+      }).join("");
+      return (
+        '<div class="auth-changelog-entry">' +
+          '<div class="auth-changelog-entry-head">Verze ' + escapeHtml(entry.verze) + ' – ' + escapeHtml(entry.datum) + '</div>' +
+          '<ul>' + items + '</ul>' +
+        '</div>'
+      );
+    }).join("");
   }
 
   // Milník 5 (bod 6 zadání) — od tohoto milníku "jmeno" v profiles
@@ -6631,6 +6868,7 @@
   function boot() {
     readInviteCodeFromUrl();
     wireEvents();
+    renderAuthVersionAndChangelog();
     showAuthScreen();
     applyPendingInviteCodeToForm();
     if (pendingInviteCode) {
