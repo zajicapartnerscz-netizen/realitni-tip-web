@@ -416,20 +416,44 @@
   .auth-card-col { flex: 0 1 420px; width: 100%; max-width: 420px; }
   .auth-card-col .auth-card { margin: 0; }
 
+  /* Milník 15 (bod 5.1): číslo verze VÝRAZNĚ - tučně a 2× větším písmem
+     (12px -> 24px), už ne tlumenou barvou (proto v HTML zmizela třída
+     dt-muted a barva se nastavuje tady). Pořád je ale menší než hlavní
+     nadpis appky (.auth-brand .brand = 26px), aby nepůsobilo křiklavě a
+     zůstalo jasné, co je nadpis a co doplňková informace. Hodnotu dál
+     doplňuje JS z APP_VERSION - nikde není napsaná natvrdo. */
   .auth-version {
     text-align: center;
-    font-size: 12px;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
     margin: 0 0 14px;
   }
 
-  /* Bod 2 zadání: tichá nápověda, NE výstražný box - žádné barevné pozadí,
-     žádné ikony, jen tlumené písmo v souladu s .auth-footnote výše. */
-  .auth-help { flex: 1 1 300px; width: 100%; max-width: 360px; padding-top: 8px; }
+  /* Bod 2 zadání (Milník 14): tichá nápověda, NE výstražný box.
+     Milník 15 (bod 5.2): obsah zůstává beze změny, mění se jen OBAL -
+     nápověda teď žije ve vlastní bílé kartě ve stejném vizuálním jazyce
+     jako .auth-card (stejné surface/border/radius/shadow).
+     Milník 15 (oprava po nezávislé kontrole): padding byl 24px 24px 20px,
+     zatímco .auth-card má 32px 28px 24px - panely tak vizuálně JEDNOTNÉ
+     nebyly (menší vnitřní okraj, jiná optická výška nadpisu). Zadání znělo
+     "Panel vizuálně sjednoť s přihlašovacím panelem", takže se padding
+     přebírá z .auth-card doslova. */
+  .auth-help {
+    flex: 1 1 300px;
+    width: 100%;
+    max-width: 360px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-l);
+    box-shadow: var(--shadow-card);
+    padding: 32px 28px 24px;
+  }
   .auth-help-title {
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 600;
-    color: var(--text-muted);
-    margin: 0 0 10px;
+    color: var(--text);
+    margin: 0 0 12px;
   }
   .auth-help-list {
     margin: 0;
@@ -449,25 +473,73 @@
     .auth-card-col, .auth-help { max-width: none; }
   }
 
-  /* Bod 4 zadání: panel "Historie verzí" - celá šířka, POD dvousloupcovým
-     blokem výše, viditelný vždy (nesbalitelný), jasně druhotný vůči
-     .auth-card (menší písmo, tenké linky mezi položkami, žádné barevné
-     bloky). Obsah vykresluje renderAuthVersionAndChangelog() z pole APP_CHANGELOG
-     (viz JS) - jedna šablona, ne ručně opakované HTML. */
+  /* Bod 4 zadání (Milník 14): panel "Historie verzí" - POD dvousloupcovým
+     blokem výše, viditelný vždy (nesbalitelný). Obsah vykresluje
+     renderAuthVersionAndChangelog() z pole APP_CHANGELOG (viz JS) - jedna
+     šablona, ne ručně opakované HTML.
+
+     Milník 15 (bod 5.3): panel je teď SAMOSTATNÁ BÍLÁ KARTA se stejným
+     vzhledem jako .auth-card (surface/border/radius-l/shadow-card i stejný
+     padding 32px 28px 24px) a se STEJNOU ŠÍŘKOU (max-width 420px, na střed)
+     i STEJNOU VÝŠKOU jako přihlašovací panel.
+
+     K té výšce: .auth-card ŽÁDNOU pevnou ani max výšku nemá, přizpůsobuje
+     se obsahu (a ten se navíc liší mezi přihlášením/registrací/potvrzením
+     e-mailu). Hodnota 760px níž proto není vymyšlená - je spočítaná z
+     box modelu .auth-card v jejím TYPICKÉM stavu, tedy přihlašovacím
+     formuláři (vnitřní šířka 420 - 2×28 = 364px, box-sizing: border-box,
+     line-height 1.5):
+       32   padding-top
+       43   .auth-brand (26px × 1.5 + 4 margin)
+       46   .auth-sub (20 + 4 + 22 margin)
+      107   .demo-row (5 tlačítek, 3 sloupce -> 2 řádky à 44 + 10 gap + 8)
+       70   .demo-row-letters (11 koleček à 28, 10/řádek -> 2 řádky + 6 + 8)
+       31   .demo-note (17 + 14 margin)
+       54   .divider (18 + 18 + 18)
+      161   2× .field (19,5 label + 5 gap + 40 input + 16 margin)
+       48   .btn-primary (12 + 12 padding + 2 border + 22 text)
+       36   .switch-line (16 margin + 20)
+      105   .auth-footnote (22 margin + 16 padding + 1 border + 4 řádky à 16,5)
+       24   padding-bottom
+      ----
+      757  -> zaokrouhleno na 760px
+     Použitá je `height` (ne `max-height`), aby ta výška platila spolehlivě
+     oběma směry - panel se tedy NEZVĚTŠÍ, ani když je v historii 10+ verzí.
+     Přebývající obsah se scrolluje uvnitř, viz .auth-changelog-list. */
   .auth-changelog {
     width: 100%;
-    margin-top: 36px;
-    padding-top: 18px;
-    border-top: 1px solid var(--border);
+    max-width: 420px;
+    height: 760px;
+    margin: 36px auto 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-l);
+    box-shadow: var(--shadow-card);
+    padding: 32px 28px 24px;
+    /* Sloupcový flex: nadpis má pevnou výšku, scrolluje se JEN seznam pod
+       ním (bod 5.3 - "Historie verzí" musí zůstat vidět). */
+    display: flex;
+    flex-direction: column;
   }
   .auth-changelog-title {
+    flex: 0 0 auto;
     text-align: center;
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 600;
-    color: var(--text-muted);
+    color: var(--text);
     margin: 0 0 14px;
   }
-  .auth-changelog-list { display: flex; flex-direction: column; gap: 12px; }
+  /* Scrolluje se VNITŘNÍ seznam, ne celý panel - nadpis zůstává na místě.
+     min-height:0 je nutné, jinak flex položka odmítne zmenšit se pod
+     velikost svého obsahu a overflow-y by se nikdy neuplatnil. */
+  .auth-changelog-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
   .auth-changelog-entry {
     font-size: 12px;
     line-height: 1.55;
@@ -1298,10 +1370,13 @@
         <div class="auth-page">
         <div class="auth-columns">
         <div class="auth-card-col">
-        <!-- Bod 1 zadání: nenápadné číslo verze nad kartou, hodnotu doplní
+        <!-- Bod 1 zadání (Milník 14): číslo verze nad kartou, hodnotu doplní
              JS z APP_VERSION (viz <script> níže) - žádný natvrdo zapsaný
-             řetězec, ať se to nerozejde s APP_CHANGELOG. -->
-        <p class="auth-version dt-muted" id="authVersionLabel"></p>
+             řetězec, ať se to nerozejde s APP_CHANGELOG.
+             Milník 15 (bod 5.1): zobrazuje se VÝRAZNĚ (tučně, 24px místo
+             12px) - třída dt-muted proto zmizela, barvu i řez řeší .auth-version
+             v CSS. Zdrojem hodnoty zůstává výhradně APP_VERSION. -->
+        <p class="auth-version" id="authVersionLabel"></p>
         <div class="auth-card">
           <div class="auth-brand"><span class="brand" style="font-size:26px;">Realitní <em>tip</em></span></div>
           <p class="auth-sub" id="authSubtitle">Přihlaste se ke svému účtu tipaře</p>
@@ -1431,8 +1506,13 @@
              podle zadání klienta, žádné ikony/emoji ani výstražný box. Na
              mobilu (viz @media výše) se zobrazí POD .auth-card-col díky
              pořadí v HTML. -->
+        <!-- Milník 15 (bod 5.2): nápověda přesunuta do SAMOSTATNÉHO panelu -
+             bílá karta ve stejném vizuálním stylu jako .auth-card (viz CSS
+             .auth-help) a s vlastním nadpisem "Nápověda k testovací verzi"
+             (<h3>, konzistentně s nadpisy karet jinde v appce). Znění všech
+             3 odrážek se NEMĚNÍ, mění se jen obal a nadpis. -->
         <aside class="auth-help" id="authHelp">
-          <p class="auth-help-title">Jak přihlášení funguje</p>
+          <h3 class="auth-help-title">Nápověda k testovací verzi</h3>
           <ul class="auth-help-list">
             <li>Není potřeba zadávat e-mail ani heslo.</li>
             <li>Tlačítka slouží k rychlému testovacímu přihlášení do jednotlivých rolí.</li>
@@ -1441,11 +1521,15 @@
         </aside>
         </div>
 
-        <!-- Bod 4 zadání: Historie verzí - celá šířka, pod dvousloupcovým
+        <!-- Bod 4 zadání (Milník 14): Historie verzí pod dvousloupcovým
              blokem výše, obsah vykresluje renderAuthVersionAndChangelog() z pole
-             APP_CHANGELOG (viz <script>). -->
+             APP_CHANGELOG (viz <script>).
+             Milník 15 (bod 5.3): taky SAMOSTATNÝ bílý panel ve stejném stylu
+             i se stejnou šířkou a výškou jako přihlašovací karta (viz CSS
+             .auth-changelog). Nadpis je <h3> a zůstává vždy vidět - scrolluje
+             se jen seznam verzí pod ním (#authChangelogList). -->
         <div class="auth-changelog" id="authChangelog">
-          <p class="auth-changelog-title">Historie verzí</p>
+          <h3 class="auth-changelog-title">Historie verzí</h3>
           <div class="auth-changelog-list" id="authChangelogList"></div>
         </div>
         </div>
@@ -1609,12 +1693,34 @@
         <button class="btn-small" id="addUserNetworkBtn" type="button">+ Přidat uživatele</button>
       </div>
 
+      <!-- Milník 15 (bod 3): dobře viditelné tlačítko "Přidat nový tip"
+           přímo na Přehledu lídra (landing page Leadera) - vede na
+           setActiveTab("new"). Viditelné VÝHRADNĚ roli leader: záložku
+           "Nový tip" má v ROLE_TAB_ORDER jen tipař a leader, administrátor
+           ji nemá vůbec, takže by u něj tlačítko vedlo na obrazovku bez
+           tlačítka v navigaci. Tipař tuhle obrazovku ("Moje síť") sdílí,
+           ale má "Nový tip" jako první položku navigace, takže tady
+           tlačítko nepotřebuje. Viditelnost řídí handleSignedIn/
+           handleSignedOut, ne CSS. -->
+      <div class="toolbar-row-end" id="networkAddTipBtnWrap" hidden>
+        <button class="btn-primary" id="addTipNetworkBtn" type="button" style="width:auto;">+ Přidat nový tip</button>
+      </div>
+
       <div class="invite-box" id="inviteBoxWrap">
         <code id="inviteLinkText"></code>
         <button class="btn-small" id="copyInviteBtn" type="button">Zkopírovat odkaz</button>
       </div>
 
       <div class="stat-row" id="networkStats"></div>
+
+      <!-- Milník 15 (bod 4): NEUTRÁLNÍ (rolí nepodmíněný) placeholder, který
+           se zobrazí v okamžiku vstupu na obrazovku a zmizí teprve až
+           fetchMyNetworkTable() dokončí svůj await a vykreslí obsah SPRÁVNÉ
+           role. Dřív tu žádný takový stav nebyl - obrazovka se zviditelnila
+           okamžitě, ale #leaderDashboardWrap/#networkListWrap se čistily až
+           PO dokončení async RPC, takže v mezidobí zůstal viset obsah
+           předchozí (i cizí) role. -->
+      <p class="dt-muted" id="networkLoadingWrap" hidden>Načítání…</p>
 
       <!-- Milník 9 (bod 7): rozšířené stat-cards "Přehled leadra" -
            čekající ověření tipů, úspěšnost, rozpad fáze registrace sítě,
@@ -2043,7 +2149,7 @@
   // Milník 14: číslo aktuální verze aplikace - MUSÍ odpovídat nejnovější položce
   // pole APP_CHANGELOG níže (položka na indexu 0). Při každém příštím milníku
   // se zvyšuje ROVNOU TADY i v APP_CHANGELOG - jsou to dvě navzájem závislá místa.
-  var APP_VERSION = "13.0";
+  var APP_VERSION = "14.0";
 
   // Milník 14 (bod 4): obsah panelu "Historie verzí" na přihlašovací
   // obrazovce - zrekonstruováno z reálné historie projektu (STAV.md,
@@ -2052,6 +2158,13 @@
   // pod tímto polem). Vykresluje se generickou šablonou renderAuthVersionAndChangelog()
   // - při dalším milníku se sem jen přidá nová položka na začátek pole.
   var APP_CHANGELOG = [
+    { verze: "14.0", datum: "11. 9. 2026", body: [
+      "Opraven zmizelý obsah záložky Ověření totožnosti",
+      "Opraveno krátké probliknutí přehledu lídra běžnému uživateli",
+      "Provizní schéma může spravovat i lídr",
+      "Nové pořadí záložek lídra a tlačítko Přidat nový tip v jeho přehledu",
+      "Přehlednější přihlašovací stránka s nápovědou a historií verzí"
+    ] },
     { verze: "13.0", datum: "11. 9. 2026", body: [
       "Ověření totožnosti přesunuto do samostatné záložky",
       "Leader při schválení zapisuje číslo dokladu a exportuje doklady do PDF",
@@ -2195,6 +2308,52 @@
   var sb = null;
   var currentUser = null; // { id, email, jmeno, role, invite_code }
   var currentUserId = null; // pro rozpoznání skutečné změny přihlášeného uživatele
+
+  // ---------------- Milník 15 (bod 4.5): generační pojistka identity ----------------
+  //
+  // DRUHÁ, nezávislá vrstva ochrany proti úniku dat mezi rolemi - a jediná,
+  // která řeší tzv. "in-flight" zápis. Nezávislá kontrola Milníku 15
+  // reprodukovala (3× ze 3, tiše, bez jediné výjimky) tenhle scénář:
+  //
+  //   1. Leader je přihlášený, landing page "Moje síť" spustí
+  //      fetchMyNetworkTable() -> `await sb.rpc("moje_sit")`, které kvůli
+  //      síťové latenci trvá třeba 3 sekundy.
+  //   2. UPROSTŘED toho čekání se tatáž osoba odhlásí a přihlásí jako TIPAŘ
+  //      (demo tlačítka to umožňují bez reloadu stránky).
+  //   3. Tipař klikne na "Moje síť" a korektně uvidí SVOJI síť.
+  //   4. Teprve TEĎ doběhne PŮVODNÍ, leaderovo `moje_sit()`. Řádek
+  //      `var isLeader = currentUser.role === "leader"` se vyhodnocuje AŽ PO
+  //      `await`u, takže čte UŽ TIPAŘŮV currentUser - leaderova data se tím
+  //      vydají za tipařova vlastní a přepíšou (mojeSitTable.setRows) obsah
+  //      tabulky. Stav je TRVALÝ, ne jen probliknutí: drží se, dokud
+  //      uživatel neodnaviguje jinam.
+  //
+  // preclearScreenForTab()/clearRoleSpecificContainers() (bod 4.1-4.4) tohle
+  // NEŘEŠÍ a řešit nemůžou - ty uklízejí DOM v okamžiku přepnutí, ale
+  // nedokážou zastavit už rozběhnutý `await`, který po svém doběhnutí zapíše
+  // do DOM znovu.
+  //
+  // authGen je globální čítač "kolikátá identita je právě platná".
+  // Inkrementuje se při KAŽDÉ změně identity - na začátku handleSignedIn()
+  // I na začátku handleSignedOut() (přepnutí mezi dvěma účty tedy posune
+  // čítač dvakrát, což je v pořádku; podstatné je, že se posune vždy).
+  //
+  // Použití (vzor, který dodržuje každá async funkce níž, jejíž zbytek po
+  // `await`u čte currentUser nebo zapisuje do DOM):
+  //
+  //   async function fetchNeco() {
+  //     var g = authGen;                     // zapamatuj si identitu na vstupu
+  //     var r = await sb.rpc("neco");
+  //     if (g !== authGen) return;           // mezitím se změnila -> tiše konec
+  //     ... teprve teď čti currentUser / zapisuj do DOM ...
+  //   }
+  //
+  // Kontrola je HNED PO KAŽDÉM `await`u (ne jen po posledním) - tím se
+  // zároveň odstraňují neodchycené výjimky typu
+  // "Cannot read properties of null (reading 'id')", které vznikaly, když
+  // funkce po odhlášení pokračovala nad `currentUser === null`.
+  var authGen = 0;
+
   var realtimeChannel = null;
   var activeTab = "list"; // "new" | "list" | "network" | "admin" — výchozí obrazovka po přihlášení
   var pendingInviteCode = ""; // z URL ?ref=KOD, přečteno jednou při startu
@@ -2688,8 +2847,10 @@
   }
 
   async function fetchAndRenderTimeline(tipId, containerEl) {
+    var g = authGen; // Milník 15 (bod 4.5)
     containerEl.innerHTML = '<div class="timeline-loading">Načítám historii…</div>';
     var result = await sb.from("tip_status_history").select("*").eq("tip_id", tipId).order("vytvoreno_kdy");
+    if (g !== authGen) return; // historie CIZÍHO tipu se nové identitě zobrazit nesmí
     if (result.error) {
       console.error("Chyba při načítání historie tipu:", result.error);
       containerEl.innerHTML = '<div class="timeline-empty">Historii se nepodařilo načíst.</div>';
@@ -2723,7 +2884,11 @@
   // ---------------- realitní kanceláře ----------------
 
   async function fetchRkAktivniList() {
+    var g = authGen; // Milník 15 (bod 4.5)
     var result = await sb.from("realitni_kancelare").select("id, nazev, aktivni").eq("aktivni", true).order("nazev");
+    // Plní globální cache rkAktivniList, ze které se staví <select> na
+    // Detailu tipu - po změně identity se do ní nic zapisovat nesmí.
+    if (g !== authGen) return rkAktivniList;
     if (result.error) {
       console.error("Chyba při načítání realitních kanceláří:", result.error);
       rkAktivniList = [];
@@ -2752,7 +2917,9 @@
   // existující boolean `aktivni` jako badge - žádný duplicitní sloupec
   // "stav" v DB (bod 5 zadání výslovně žádal tohle řešení).
   async function renderRkTable() {
+    var g = authGen; // Milník 15 (bod 4.5)
     var result = await sb.from("realitni_kancelare").select("*").order("nazev");
+    if (g !== authGen) return;
     if (result.error) {
       console.error("Chyba při načítání realitních kanceláří:", result.error);
       showBanner(el("rkBanner"), "error", "Nepodařilo se načíst seznam realitních kanceláří.");
@@ -2767,6 +2934,7 @@
     // jako první obrazovku po přihlášení).
     var pocty = {};
     var tipsRkResult = await sb.from("tips").select("rk_id").not("rk_id", "is", null);
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
     if (!tipsRkResult.error) {
       (tipsRkResult.data || []).forEach(function (t) { if (t && t.rk_id) pocty[t.rk_id] = (pocty[t.rk_id] || 0) + 1; });
     }
@@ -2775,6 +2943,7 @@
     // "Vytvořit přístup" se zobrazí jen u RK, které v tomto seznamu nejsou.
     rkAccessSet = {};
     var rkProfilesResult = await sb.from("profiles").select("rk_id").eq("role", "rk");
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
     if (!rkProfilesResult.error) {
       (rkProfilesResult.data || []).forEach(function (p) { if (p && p.rk_id) rkAccessSet[p.rk_id] = true; });
     }
@@ -2833,7 +3002,9 @@
   }
 
   async function refreshRkSection() {
+    var g = authGen; // Milník 15 (bod 4.5)
     await fetchRkAktivniList();
+    if (g !== authGen) return;
     await renderRkTable();
   }
 
@@ -3044,6 +3215,11 @@
   }
 
   async function submitRkAccessForm(rkId) {
+    // Milník 15 (bod 4.6): za awaitem se do #rkBanner vypisuje e-mail a
+    // jednorázové HESLO nově vytvořeného přístupu RK - po změně identity
+    // (odhlášení + přihlášení kohokoliv jiného, i jiného leadera/admina) se
+    // tam nesmí objevit vůbec nic. Stejný vzor jako submitAddUserForm().
+    var g = authGen;
     var jmeno = el("rafJmeno").value.trim();
     var prijmeni = el("rafPrijmeni").value.trim();
     var email = el("rafEmail").value.trim();
@@ -3060,6 +3236,7 @@
     var result = await sb.rpc("vytvorit_pristup_rk", {
       p_rk_id: rkId, p_email: email, p_heslo: heslo, p_jmeno: jmeno, p_prijmeni: prijmeni || null
     });
+    if (g !== authGen) return; // Milník 15 (bod 4.6) - heslo se nové identitě zobrazit nesmí
 
     if (btn) btn.disabled = false;
 
@@ -3187,11 +3364,380 @@
     ALL_SCREEN_IDS.forEach(function (id) { el(id).hidden = true; });
   }
 
+  // ---------------- Milník 15 (bod 4): ochrana proti "stale DOM" ----------------
+  //
+  // BEZPEČNOSTNÍ OPRAVA. Nahlášeno klientem: běžný uživatel (tipař) otevřel
+  // "Moje síť" a na okamžik uviděl DASHBOARD LÍDRA, než se to přepnulo na
+  // jeho vlastní obsah. Příčina (reprodukováno v jsdom, viz
+  // docs/milnik15_*.md): #networkScreen je JEDNA sdílená sekce pro obě role -
+  // #leaderDashboardWrap i #networkListWrap jsou v HTML přítomné SOUČASNĚ a
+  // jen jeden z nich se podle role naplní. fetchMyNetworkTable() ale nejdřív
+  // `await`uje RPC moje_sit() a teprve POTOM větví podle role a ten druhý
+  // kontejner vyprazdňuje. Sekce se přitom zviditelní (setActiveTab ->
+  // hideAllScreens) OKAMŽITĚ. Když se tedy ve stejné prohlížečové relaci
+  // (bez reloadu stránky - demo tlačítka to dělají triviálně snadným)
+  // předtím přihlásil leader a jeho dashboard v DOM zůstal, tipař ho po
+  // přepnutí uvidí po celou dobu běhu toho awaitu.
+  //
+  // Obrana je trojí a záměrně redundantní:
+  //  1) TAB_PRECLEAR - při vstupu na záložku se SYNCHRONNĚ, tedy ještě před
+  //     jakýmkoli async voláním, vyprázdní všechny kontejnery, které se
+  //     plní dynamicky (viz setActiveTab).
+  //  2) clearRoleSpecificContainers() - kompletní úklid při odhlášení a
+  //     znovu na začátku přihlášení, než je potvrzená role nového uživatele.
+  //  3) neutrální "Načítání…" placeholder (#networkLoadingWrap) místo
+  //     obsahu specifického pro roli, dokud data nedorazí.
+  //
+  // Pozn.: tohle je oprava DOM/UI vrstvy. Skutečná autorizace dat je a
+  // zůstává na RLS/RPC (leaderova data si tipař žádným přímým voláním
+  // nestáhne - viz regresní bezpečnostní testy v docs/milnik15_*.md);
+  // problikávání byl zbytek CIZÍCH dat vykreslených v PŘEDCHOZÍ relaci
+  // téhož prohlížeče, ne nové neoprávněné čtení.
+
+  // Kontejnery plněné dynamicky z JS (innerHTML / initDataTable). Pořadí
+  // nehraje roli. Pokud přibude nová obrazovka s dynamickým obsahem, patří
+  // její kontejner SEM (a do TAB_PRECLEAR níž).
+  //
+  // Milník 15 (bod 4.6): SEM patří i VŠECHNY notifikační bannery (#*Banner).
+  // Dřív tu byl jen #networkBanner a #rkBanner chyběl - přitom právě do něj
+  // píše submitRkAccessForm() e-mail a HESLO nově vytvořeného přístupu RK.
+  // Banner tak po odhlášení zůstal viset v DOM a další přihlášený
+  // leader/administrátor ho po otevření "Realitní kanceláře" uviděl v
+  // otevřeném textu. Ostatní bannery jsou doplněné preventivně (dnes v nich
+  // jsou jen generické hlášky), aby se stejná třída chyby nemohla vrátit
+  // jiným textem u jiného banneru. Výjimky (schválně NEjsou v seznamu):
+  // #authBanner a #forcedPasswordBanner (obrazovky před přihlášením, čistí
+  // se adresně v handleSignedOut/showForcedPasswordScreen), #addUserBanner
+  // (staví se znovu při každém openAddUserModal) a #dbBanner (statický text
+  // přímo v HTML, JS do něj nikdy nepíše).
+  // Milník 15 (bod 4.7): #addressDeadlineBanner a #kycRejectedBanner tu
+  // schválně NEJSOU, protože se řídí `hidden` - patří do TŘETÍ kategorie
+  // úklidu (HIDDEN_STATE_BANNER_IDS / hideStateBanner), která na rozdíl od
+  // tohohle seznamu řeší i to, že se banner jen skryje.
+  var ROLE_SPECIFIC_CONTAINER_IDS = [
+    // network (sdílí tipař + leader - právě tady vznikl nahlášený bug)
+    "leaderDashboardWrap", "networkListWrap", "networkStats", "networkBanner",
+    // moje tipy (tipař)
+    "tipListWrap",
+    // tipy / uživatelé / RK / provize / výplaty / audit / KYC fronta
+    // (sdílí leader + administrátor)
+    "tipyTableWrap", "usersTableWrap", "usersFormWrap", "rkTableWrap", "rkFormWrap",
+    "provizeTableWrap", "provizeFormWrap", "provizeSimResult",
+    "vyplatyTableWrap", "auditTableWrap", "kycListWrap",
+    // RK portál
+    "rkPortalTableWrap", "rkPortalFormWrap",
+    // detail tipu (sdílí všechny role, které detail otevřou)
+    "detailContentWrap",
+    // Můj profil (sdílí tipař + leader + administrátor)
+    "profileRegistraceStavWrap", "profileRegSummaryWrap",
+    // Ověření totožnosti - vlastní (tipař); mezi dvěma RŮZNÝMI tipaři by
+    // jinak zůstaly viset názvy souborů dokladů toho předchozího
+    "kycStatusWrap", "kycDocsWrap", "kycMissingWrap",
+    // pozvánkový odkaz (obsahuje invite_code předchozího uživatele)
+    "inviteLinkText",
+    // Milník 15 (bod 4.6): notifikační bannery jednotlivých obrazovek.
+    // #rkBanner je ten nahlášený (e-mail + heslo přístupu RK), zbytek
+    // preventivně - viz komentář nad seznamem.
+    "tipFormBanner", "listBanner", "tipyBanner", "detailBanner", "usersBanner",
+    "rkBanner", "provizeBanner", "vyplatyBanner", "rkPortalBanner",
+    "profileBanner", "kycListBanner", "myKycBanner", "kycRejectBanner"
+  ];
+
+  // Které kontejnery vyprázdnit SYNCHRONNĚ hned při vstupu na danou
+  // záložku - tedy dřív, než se rozběhne fetch, který je naplní znovu.
+  //
+  // Milník 15 (bod 4.6): každá záložka si tu uklízí i SVŮJ notifikační
+  // banner (#*Banner) - stejně, jako to od bodu 4.1 dělal "network" s
+  // #networkBanner. Nejde jen o race condition: #rkBanner s heslem přístupu
+  // RK zůstával viset i po úplně normálním doběhnutí RPC. Pozor na pořadí -
+  // preclear běží UVNITŘ setActiveTab(), takže showBanner() volaný AŽ PO
+  // setActiveTab() (viz submitTipForm -> setActiveTab("list") -> #listBanner)
+  // se nevymaže.
+  var TAB_PRECLEAR = {
+    network: ["leaderDashboardWrap", "networkListWrap", "networkStats", "networkBanner", "inviteLinkText"],
+    "new": ["tipFormBanner"],
+    list: ["tipListWrap", "listBanner"],
+    tipy: ["tipyTableWrap", "tipyBanner"],
+    users: ["usersTableWrap", "usersFormWrap", "usersBanner"],
+    kyc: ["kycListWrap", "kycListBanner", "kycRejectBanner"],
+    rk: ["rkTableWrap", "rkFormWrap", "rkBanner"],
+    provize: ["provizeTableWrap", "provizeFormWrap", "provizeSimResult", "provizeBanner"],
+    vyplaty: ["vyplatyTableWrap", "vyplatyBanner"],
+    audit: ["auditTableWrap"],
+    rkportal: ["rkPortalTableWrap", "rkPortalFormWrap", "rkPortalBanner"],
+    profile: ["profileRegistraceStavWrap", "profileRegSummaryWrap", "profileBanner"],
+    mykyc: ["kycStatusWrap", "kycDocsWrap", "kycMissingWrap", "myKycBanner"]
+  };
+
+  // Instance initDataTable drží vlastní config.rows z PŘEDCHOZÍHO
+  // přihlášení, dokud nepřijde první setRows - po vyprázdnění jejich
+  // kontejneru musí jít pryč taky, jinak by setRows psal do uzlu, který už
+  // v DOM není.
+  function resetDataTableInstances() {
+    mojeTipyTable = null;
+    mojeSitTable = null;
+    tipyTable = null;
+    usersTable = null;
+    rkTable = null;
+    auditTable = null;
+    provizeTable = null;
+    rkPortalTable = null;
+    vyplatyTable = null;
+  }
+
+  // Kompletní úklid všeho, co se plní podle role. Volá se při odhlášení i
+  // na začátku přihlášení (viz handleSignedIn/handleSignedOut).
+  function clearRoleSpecificContainers() {
+    ROLE_SPECIFIC_CONTAINER_IDS.forEach(function (id) {
+      var e = el(id);
+      if (e) e.innerHTML = "";
+    });
+    resetDataTableInstances();
+    // Prvky, které se neřídí innerHTML, ale viditelností podle role.
+    ["kycSubmitWrap", "networkAddUserBtnWrap", "networkAddTipBtnWrap",
+     "profileRegSummaryCard", "networkLoadingWrap"].forEach(function (id) {
+      var e = el(id);
+      if (e) e.hidden = true;
+    });
+    // Milník 15 (bod 4.7): TŘETÍ kategorie úklidu - viz komentář níž.
+    clearIdentityInputsAndModals();
+  }
+
+  // ===================================================================
+  // Milník 15 (bod 4.7): TŘETÍ KATEGORIE ÚKLIDU
+  // ===================================================================
+  // Body 4.1-4.6 řešily jen prvky, jejichž obsah ŽIJE V `innerHTML`
+  // (dynamické kontejnery + notifikační bannery). Čtvrté kolo kontroly
+  // ukázalo, že stejná třída chyby (CIZÍ DATA PŘEŽIJÍ ZMĚNU IDENTITY) se
+  // schovává ještě ve třech dalších typech prvků, na které `innerHTML = ""`
+  // vůbec nesáhne:
+  //
+  //   3a) FORMULÁŘOVÁ POLE řízená `.value` / `.checked`. Nejvážnější byl
+  //       #addressForm ("Můj profil"): preclear vyprázdnil jen okolní
+  //       innerHTML kontejnery, ale ulice/město/PSČ/IČO/DIČ/datum narození
+  //       PŘEDCHOZÍHO uživatele zůstaly v `input.value`, dokud je
+  //       fetchProfileScreen() po svém `await refreshOwnProfile()`
+  //       nepřepsal. Nový uživatel tak po dobu běhu toho dotazu viděl v
+  //       otevřeném formuláři adresu a datum narození někoho jiného.
+  //       Stejně na tom byl #tipForm (rozepsané jméno/telefon/e-mail
+  //       KLIENTA mezi dvěma tipaři - resetTipForm() se volal jen po
+  //       ÚSPĚŠNÉM odeslání) a #registerForm (ten se neresetoval NIKDY,
+  //       na rozdíl od #loginForm).
+  //
+  //   3b) MODALY řízené `hidden`, které si navíc nesou VLASTNÍ JS STAV.
+  //       #kycRejectModalOverlay drží v `kycRejectTargetId` id cizího
+  //       uživatele, kterému se zamítá ověření totožnosti. handleSignedOut()
+  //       volal closeAddUserModal() i closeKycLightbox(), ale ne
+  //       closeKycRejectModal() - otevřený modal tedy přežil odhlášení i
+  //       přihlášení jiného leadera VČETNĚ targetId a rozepsaného důvodu.
+  //       Reprodukováno v jsdom (viz docs/milnik15_*.md, sekce 4.7): druhý
+  //       leader dopsal do zděděného okna svůj text, odeslal ho a appka
+  //       zavolala `schvalit_autentizaci` s p_user_id PŮVODNÍ oběti -
+  //       tedy zamítnutí PRO CIZÍHO uživatele, ne jen kosmetický zbytek.
+  //
+  //   3c) PRVKY ŘÍZENÉ `hidden`, které si nechávají starý `innerHTML`.
+  //       #kycRejectedBanner (obsahuje DŮVOD ZAMÍTNUTÍ KYC) a
+  //       #addressDeadlineBanner se jen skryly - text zůstal v DOM pod
+  //       novou identitou. Proto hideStateBanner() níž (innerHTML = ""
+  //       VŽDY před hidden = true) a proto jsou tyhle dva elementy nově
+  //       i v HIDDEN_STATE_BANNER_IDS.
+  //
+  //   3d) OSAMOCENÉ `textContent` prvky s osobními údaji, které neleží
+  //       uvnitř žádného úklidového kontejneru (#detailSubtitle = "Klient:
+  //       <jméno klienta>", #checkEmailAddress = e-mail registrujícího se).
+  //
+  // Vstupní bod je JEDEN - clearIdentityInputsAndModals() volaná z
+  // clearRoleSpecificContainers(), tedy automaticky při odhlášení
+  // (handleSignedOut) i na začátku přihlášení (handleSignedIn). Záložkové
+  // (synchronní) protějšky jsou v preclearScreenForTab().
+  //
+  // Pravidlo pro příští milníky: přibude-li formulářové pole nebo modal se
+  // stavem, patří sem (ne do ROLE_SPECIFIC_CONTAINER_IDS - tam `innerHTML`
+  // nic neřeší).
+
+  // 3a) Formuláře, které smí vidět jen ta identita, která je vyplnila.
+  // `form.reset()` vrací pole na VÝCHOZÍ hodnoty z HTML, ne nutně na
+  // prázdno - u #pfStat/#pfDorStat tedy na "Česká republika" a u
+  // #pfDorucovaciStejna zpátky na `checked`. To je přesně žádaný neutrální
+  // výchozí stav formuláře, ne zbytek po předchozím uživateli.
+  var IDENTITY_FORM_IDS = [
+    "loginForm", "registerForm", "forcedPasswordForm",
+    "tipForm", "addressForm", "kycRejectForm"
+  ];
+
+  // 3a-bis) Pole MIMO jakýkoli <form> - `form.reset()` se jich netýká.
+  // Simulátor provizí není osobní údaj, ale je to přesně ten typ
+  // `.value`-řízeného prvku, kvůli kterému tohle kolo vzniklo; patří sem
+  // preventivně, ať se stejná třída chyby nevrátí jiným polem.
+  var IDENTITY_VALUE_IDS = ["provizeSimCena", "provizeSimMarzeTyp", "provizeSimMarzeHodnota"];
+
+  // 3c) Bannery řízené `hidden`, které si nesou vlastní text.
+  var HIDDEN_STATE_BANNER_IDS = ["addressDeadlineBanner", "kycRejectedBanner"];
+
+  // 3d) Osamocené textContent prvky s osobními údaji.
+  var IDENTITY_TEXT_IDS = ["detailSubtitle", "checkEmailAddress"];
+
+  // Milník 15 (bod 4.7, nález 5): skrytí banneru MUSÍ jít ruku v ruce s
+  // vyprázdněním jeho obsahu - `hidden = true` sám o sobě nechává citlivý
+  // text (důvod zamítnutí KYC) viset v DOM pod novou identitou.
+  function hideStateBanner(bannerEl) {
+    if (!bannerEl) return;
+    bannerEl.innerHTML = "";
+    bannerEl.hidden = true;
+  }
+
+  // Milník 15 (bod 4.7, nález 2): analogie resetTipForm() pro formulář
+  // adresy. Vedle samotného form.reset() musí vrátit do výchozího stavu i
+  // podmíněnou sekci "Doručovací adresa" (řídí ji checkbox, ne reset).
+  function resetAddressForm() {
+    var form = el("addressForm");
+    if (!form) return;
+    form.reset();
+    var dorFields = el("pfDorucovaciFields");
+    var dorStejna = el("pfDorucovaciStejna");
+    if (dorFields && dorStejna) dorFields.hidden = dorStejna.checked;
+    showBanner(el("profileBanner"), null, null);
+  }
+
+  // #kycCard si v CSS třídě (kyc-card-<stav>) nese stav ověření totožnosti
+  // PŘEDCHOZÍHO tipaře a #kycInstructionsWrap jeho (ne)viditelnost -
+  // renderKycSection() obojí přepíše až po svém `await refreshOwnProfile()`.
+  function resetKycCardState() {
+    var card = el("kycCard");
+    if (card) card.className = "card detail-card kyc-card";
+    var instr = el("kycInstructionsWrap");
+    if (instr) instr.hidden = false;
+  }
+
+  // Jediný vstupní bod třetí kategorie (viz komentář výš).
+  function clearIdentityInputsAndModals() {
+    // 3b) modaly se stavem. closeKycRejectModal() nuluje i kycRejectTargetId.
+    closeAddUserModal();
+    closeKycLightbox();
+    closeKycRejectModal();
+    // closeKycLightbox() má early-return, když je overlay už schovaný -
+    // signed URL na doklad totožnosti by tak mohla v `img.src` přežít.
+    var lightboxImg = el("kycLightboxImg");
+    if (lightboxImg) lightboxImg.src = "";
+
+    // 3a) formuláře + jejich doprovodný stav (chybové třídy, bannery,
+    // podmíněné sekce), který samotný form.reset() neuklidí.
+    IDENTITY_FORM_IDS.forEach(function (id) {
+      var f = el(id);
+      if (f && typeof f.reset === "function") f.reset();
+    });
+    resetTipForm();
+    resetAddressForm();
+    setFieldError(el("loginEmailField"), false);
+    setFieldError(el("loginPasswordField"), false);
+    setFieldError(el("kycRejectReasonField"), false);
+
+    // 3a-bis) pole mimo formuláře
+    IDENTITY_VALUE_IDS.forEach(function (id) {
+      var e = el(id);
+      if (!e) return;
+      if (e.tagName === "SELECT") e.selectedIndex = 0;
+      else e.value = "";
+    });
+
+    // 3c) bannery řízené `hidden`
+    HIDDEN_STATE_BANNER_IDS.forEach(function (id) { hideStateBanner(el(id)); });
+
+    // 3d) osamocené textContent prvky
+    IDENTITY_TEXT_IDS.forEach(function (id) {
+      var e = el(id);
+      if (e) e.textContent = "";
+    });
+
+    resetKycCardState();
+
+    // #regInviteCode NENÍ zbytek po předchozí identitě - pochází z URL
+    // (?ref=KOD). form.reset() ho ale taky vymaže (a nechá pole v
+    // readOnly), takže ho hned vrátíme zpátky do správného stavu.
+    applyPendingInviteCodeToForm();
+  }
+
+  // Synchronní úklid PŘED fetchem konkrétní záložky (bod 4.1).
+  function preclearScreenForTab(tab) {
+    var ids = TAB_PRECLEAR[tab];
+    if (ids) {
+      ids.forEach(function (id) {
+        var e = el(id);
+        if (e) e.innerHTML = "";
+      });
+    }
+    // Sdílené obrazovky navíc: instance tabulky i prvky řízené viditelností.
+    if (tab === "network") {
+      mojeSitTable = null;
+      var loading = el("networkLoadingWrap");
+      if (loading) loading.hidden = false;
+    }
+    if (tab === "list") mojeTipyTable = null;
+    if (tab === "tipy") tipyTable = null;
+    if (tab === "users") usersTable = null;
+    if (tab === "rk") rkTable = null;
+    // Milník 15 (bod 4.8): "Nový tip" drží v `.value` rozepsané OSOBNÍ
+    // ÚDAJE KLIENTA (jméno, telefon, e-mail, popis situace). O to, aby je
+    // nikdy neuviděla JINÁ identita, se stará clearIdentityInputsAndModals()
+    // -> resetTipForm(), a to SYNCHRONNĚ a před jakýmkoli awaitem na OBOU
+    // cestách změny identity (handleSignedOut i handleSignedIn). Tady proto
+    // formulář ZÁMĚRNĚ NERESETUJEME - pouhé přepnutí záložky sem a zpět
+    // není změna identity a stejný přihlášený uživatel nesmí kvůli němu
+    // přijít o rozepsanou práci. Čistíme jen vizuální zbytek po neúspěšné
+    // validaci z minulé návštěvy (červené orámování polí a hláška u
+    // souhlasu), ne hodnoty.
+    if (tab === "new") {
+      ["f_JmenoKlienta", "f_Telefon", "f_Email", "f_Lokalita"].forEach(function (id) {
+        setFieldError(el(id), false);
+      });
+      var souhlasField = el("f_Souhlas");
+      if (souhlasField) souhlasField.classList.remove("has-error");
+      var souhlasErr = el("souhlasError");
+      if (souhlasErr) souhlasErr.style.display = "none";
+    }
+    if (tab === "provize") {
+      provizeTable = null;
+      // Vstupy simulátoru leží MIMO <form>, clearIdentityInputsAndModals()
+      // je při odhlášení uklidí, tady jde o synchronní protějšek.
+      IDENTITY_VALUE_IDS.forEach(function (id) {
+        var e = el(id);
+        if (!e) return;
+        if (e.tagName === "SELECT") e.selectedIndex = 0;
+        else e.value = "";
+      });
+    }
+    if (tab === "vyplaty") vyplatyTable = null;
+    if (tab === "audit") auditTable = null;
+    if (tab === "rkportal") rkPortalTable = null;
+    if (tab === "profile") {
+      // #profileRegSummaryCard se dřív (ne)skrýval až PO awaitu v
+      // fetchProfileScreen() - u leadera/administrátora tak mohla na
+      // okamžik problikout registrační karta předchozího tipaře i s jeho
+      // jménem, e-mailem a telefonem.
+      var regCard = el("profileRegSummaryCard");
+      if (regCard) regCard.hidden = true;
+      // Milník 15 (bod 4.7, nález 2): formulář adresy se plní až PO
+      // `await refreshOwnProfile()` ve fetchProfileScreen(). Bez tohohle
+      // SYNCHRONNÍHO resetu vidí nový uživatel po celou dobu toho dotazu
+      // ulici, město, PSČ, IČO, DIČ a datum narození toho předchozího.
+      resetAddressForm();
+    }
+    if (tab === "mykyc") {
+      var submitWrap = el("kycSubmitWrap");
+      if (submitWrap) submitWrap.hidden = true;
+      // Stejný důvod: renderKycSection() běží až po awaitu, do té doby by
+      // karta nesla barevný accent podle KYC stavu předchozího tipaře.
+      resetKycCardState();
+    }
+  }
+
   function showAuthScreen() {
     el("topbar").hidden = true;
     el("tabsWrap").hidden = true;
-    el("addressDeadlineBanner").hidden = true;
-    el("kycRejectedBanner").hidden = true;
+    // Milník 15 (bod 4.7, nález 5): hideStateBanner() = innerHTML = "" PŘED
+    // hidden = true (starý důvod zamítnutí KYC nesmí zůstat viset v DOM).
+    hideStateBanner(el("addressDeadlineBanner"));
+    hideStateBanner(el("kycRejectedBanner"));
     el("authScreen").hidden = false;
     el("forcedPasswordScreen").hidden = true;
     hideAllScreens();
@@ -3204,8 +3750,10 @@
   function showForcedPasswordScreen() {
     el("topbar").hidden = true;
     el("tabsWrap").hidden = true;
-    el("addressDeadlineBanner").hidden = true;
-    el("kycRejectedBanner").hidden = true;
+    // Milník 15 (bod 4.7, nález 5): hideStateBanner() = innerHTML = "" PŘED
+    // hidden = true (starý důvod zamítnutí KYC nesmí zůstat viset v DOM).
+    hideStateBanner(el("addressDeadlineBanner"));
+    hideStateBanner(el("kycRejectedBanner"));
     el("authScreen").hidden = true;
     hideAllScreens();
     el("forcedPasswordScreen").hidden = false;
@@ -3271,6 +3819,13 @@
         console.error("history.pushState/replaceState selhalo:", e);
       }
     }
+
+    // Milník 15 (bod 4): SYNCHRONNÍ vyprázdnění všeho, co se na téhle
+    // záložce plní dynamicky - MUSÍ proběhnout tady, tedy po zviditelnění
+    // sekce, ale ještě PŘED prvním async voláním níž. Kdyby se to dělalo až
+    // uvnitř fetch* funkcí po jejich `await`, uživatel by po celou dobu
+    // čekání viděl obsah vykreslený předchozí rolí/identitou.
+    preclearScreenForTab(tab);
 
     if (tab === "list") fetchMyTips(currentUser.id);
     if (tab === "network") fetchMyNetworkTable();
@@ -3338,7 +3893,14 @@
     // Zpět/Vpřed v prohlížeči (popstate), žádné tlačítko v TAB_BUTTON pro
     // něj neexistuje, takže se v nav baru nikdy nezobrazí.
     tipar: ["new", "list", "network", "profile", "mykyc", "dashboard"],
-    leader: ["network", "new", "tipy", "users", "kyc", "rk", "provize", "vyplaty", "obsah", "audit", "profile"],
+    // Milník 15 (bod 3): pořadí záložek Leadera přesně podle výčtu klienta -
+    // Přehled lídra, Tipy, Uživatelé, Obsah, Výplaty, Provizní schéma,
+    // Realitní kanceláře, Historie akcí, Můj profil. Dvě položky, které
+    // klient ve výčtu NEZMÍNIL ("new" = Nový tip, "kyc" = Ověření
+    // totožnosti / schvalovací fronta), se podle jeho výslovného pokynu
+    // NEODSTRAŇUJÍ, jen se přesouvají na KONEC - žádná dosavadní funkčnost
+    // leaderovi nemizí. Landing page zůstává "network" (viz handleSignedIn).
+    leader: ["network", "tipy", "users", "obsah", "vyplaty", "provize", "rk", "audit", "profile", "new", "kyc"],
     administrator: ["tipy", "users", "kyc", "rk", "provize", "vyplaty", "obsah", "audit", "profile", "dashboard"],
     // Milník 7 (Část I/1): role RK vidí VÝHRADNĚ jednu obrazovku - žádný
     // jiný tab se jí nikdy nezobrazí (applyNavForRole skryje vše, co
@@ -3593,8 +4155,27 @@
   // ---------------- session handling ----------------
 
   async function handleSignedIn(session) {
+    // Milník 15 (bod 4.5): PRVNÍ řádek funkce, ještě před čímkoliv jiným -
+    // od téhle chvíle je jakýkoli rozběhnutý async render předchozí
+    // identity neplatný a sám se po svém `await`u tiše ukončí.
+    authGen++;
+    var g = authGen;
+
     var user = session.user;
     currentUserId = user.id;
+
+    // Milník 15 (bod 4.3/4.4, defenzivní vrstva): PŘED jakýmkoli fetchem
+    // profilu - tedy dokud vůbec nevíme, kdo a s jakou rolí se přihlašuje -
+    // zahodíme VŠECHNO, co v DOM zbylo po předchozí relaci. Ve stejné
+    // prohlížečové relaci se dá díky demo tlačítkům přepnout role bez
+    // reloadu stránky, takže "nová session = čistý DOM" tu neplatí samo od
+    // sebe. Kdyby tahle vrstva chyběla, stačilo by jedno místo, které
+    // zapomene uklidit, a obsah předchozí identity by se zobrazil nové.
+    // Zároveň tím vzniká neutrální (rolí nepodmíněný) stav "nic zatím
+    // nevykresleno", který trvá až do chvíle, kdy je currentUser i jeho
+    // role potvrzená a správný obsah vykreslený (showAppScreen níž).
+    clearRoleSpecificContainers();
+    el("userNameLabel").innerHTML = "";
 
     // Milník 9 (bod 3/4/6): rozšířený select o adresu, KYC stav a příznak
     // vynucené změny hesla - vlastní řádek smí číst přímo (RLS "Uzivatel
@@ -3608,6 +4189,11 @@
     var profileResult = await sb.from("profiles")
       .select("jmeno, prijmeni, role, telefon, invite_code, vytvoreno_kdy, adresa_ulice, adresa_mesto, adresa_psc, adresa_stat, je_firma, ico, dic, adresa_vyplnena_kdy, autentizace_stav, autentizace_duvod_zamitnuti, autentizace_overeno_kdy, cislo_dokladu_totoznosti, vyzadovat_zmenu_hesla")
       .eq("id", user.id).single();
+    // Milník 15 (bod 4.5): i samotné přihlášení má svůj `await` - kdyby se
+    // během něj identita znovu změnila (rychlé přepnutí demo účtů, dvě
+    // SIGNED_IN události za sebou), tohle starší přihlášení by jinak dole
+    // přepsalo currentUser i celé UI novější identity.
+    if (g !== authGen) return;
     if (profileResult.error) {
       console.error("Nepodařilo se načíst profil uživatele:", profileResult.error);
     }
@@ -3659,6 +4245,11 @@
     var addUserNetworkWrap = el("networkAddUserBtnWrap");
     if (addUserNetworkWrap) addUserNetworkWrap.hidden = (role !== "tipar");
 
+    // Milník 15 (bod 3): "+ Přidat nový tip" na Přehledu lídra - jen leader
+    // (jediná role, která má tuhle obrazovku A zároveň záložku "new").
+    var addTipNetworkWrap = el("networkAddTipBtnWrap");
+    if (addTipNetworkWrap) addTipNetworkWrap.hidden = (role !== "leader");
+
     renderAddressDeadlineBanner();
     renderKycRejectedBanner();
 
@@ -3696,9 +4287,11 @@
     // RK role nemá "Můj profil" ani povinnost adresu vyplňovat (viz report).
     // Milník 12 (bod 5): administrátor taky nemá povinnost se ověřovat ani
     // mít vyplněnou adresu - stejná logika jako u KYC od Milníku 10.
-    if (currentUser && (currentUser.role === "rk" || currentUser.role === "administrator")) { el2.hidden = true; return; }
+    // Milník 15 (bod 4.7, nález 5): hideStateBanner() místo holého
+    // `hidden = true` - jinak starý text banneru zůstane v DOM.
+    if (currentUser && (currentUser.role === "rk" || currentUser.role === "administrator")) { hideStateBanner(el2); return; }
     var info = adresaDeadlineInfo();
-    if (!info) { el2.hidden = true; return; }
+    if (!info) { hideStateBanner(el2); return; }
     el2.hidden = false;
     el2.className = "top-alert" + (info.poTerminu ? " top-alert-danger" : "");
     var text = info.poTerminu
@@ -3719,7 +4312,10 @@
     var el2 = el("kycRejectedBanner");
     if (!el2) return;
     if (!currentUser || currentUser.role !== "tipar" || currentUser.autentizace_stav !== "zamitnuto") {
-      el2.hidden = true;
+      // Milník 15 (bod 4.7, nález 5): tohle je ta nejcitlivější větev -
+      // právě sem spadne nový (nezamítnutý) uživatel a bez vyprázdnění by
+      // mu v DOM zůstal DŮVOD ZAMÍTNUTÍ KYC toho předchozího.
+      hideStateBanner(el2);
       return;
     }
     el2.hidden = false;
@@ -3733,6 +4329,13 @@
   }
 
   function handleSignedOut() {
+    // Milník 15 (bod 4.5): PRVNÍ řádek funkce - viz komentář u `var authGen`.
+    // Inkrementuje se i tady (nejen v handleSignedIn), aby byl rozběhnutý
+    // render neplatný okamžitě při odhlášení, ne až při dalším přihlášení -
+    // jinak by mezi odhlášením a přihlášením stihl zapsat do DOM (a spadnout
+    // nad `currentUser === null`).
+    authGen++;
+
     currentUser = null;
     currentUserId = null;
     adminUsersById = {};
@@ -3755,12 +4358,44 @@
     auditTable = null;
     unsubscribeRealtime();
     applyNavForRole("tipar");
-    var networkAddUserBtnWrap = el("networkAddUserBtnWrap");
-    if (networkAddUserBtnWrap) networkAddUserBtnWrap.hidden = true;
+
+    // Milník 15 (bod 4.3): při odhlášení se z DOM musí ztratit i VYKRESLENÝ
+    // obsah, ne jen JS proměnné výše. Dřív se nulovaly jen instance tabulek
+    // (mojeSitTable = null apod.), ale samotné HTML zůstalo viset v
+    // #leaderDashboardWrap/#networkListWrap a dalších - a další přihlášený
+    // uživatel ho po přepnutí na sdílenou obrazovku uviděl, dokud nedoběhl
+    // jeho vlastní fetch. clearRoleSpecificContainers() dělá obojí
+    // (resetDataTableInstances() je jeho součástí), takže výčet nulování
+    // výš a tenhle úklid nemůžou rozejít.
+    clearRoleSpecificContainers();
+    el("userNameLabel").innerHTML = "";
+
+    // Milník 15 (bod 4.7, nález 1): closeKycRejectModal() tu DŘÍV CHYBĚL -
+    // otevřené okno "Zamítnout ověření" tedy přežilo odhlášení i s
+    // `kycRejectTargetId` (id cizího uživatele) a rozepsaným důvodem.
+    // Redundantní vůči clearRoleSpecificContainers() výš (ta volá
+    // clearIdentityInputsAndModals()) - stejně vědomě jako u ostatních
+    // vrstev bodu 4, ať se to nedá rozbít odstraněním jednoho místa.
     closeAddUserModal();
     closeKycLightbox();
+    closeKycRejectModal();
 
     el("loginForm").reset();
+    // Milník 15 (bod 4.7, nález 4): #registerForm se do teď neresetoval
+    // NIKDY (na rozdíl od #loginForm) - jméno, e-mail, telefon i heslo
+    // zůstaly v DOM pro dalšího člověka u stejného prohlížeče.
+    el("registerForm").reset();
+    // Milník 15 (bod 4.8, D1): #regInviteCode NENÍ zbytek po předchozí
+    // identitě - je to kód z URL (?ref=KOD) návštěvníka, který teprve
+    // přijde. clearIdentityInputsAndModals() výš ho po svém resetu
+    // registerFormu správně obnovila, redundantní reset o řádek výš ho ale
+    // hned zase smazal. Platí proto stejné pravidlo jako tam: po KAŽDÉM
+    // resetu #registerForm musí následovat applyPendingInviteCodeToForm().
+    applyPendingInviteCodeToForm();
+    // Milník 15 (bod 4.7, nález 3): rozepsaný tip s osobními údaji klienta.
+    resetTipForm();
+    // Milník 15 (bod 4.7, nález 2): adresa / IČO / DIČ / datum narození.
+    resetAddressForm();
     setFieldError(el("loginEmailField"), false);
     setFieldError(el("loginPasswordField"), false);
     showBanner(el("authBanner"), null, null);
@@ -3812,6 +4447,7 @@
 
   async function submitTipForm() {
     if (!currentUser) return;
+    var g = authGen; // Milník 15 (bod 4.5) - `currentUser.id` se čte i po awaitu níž
     if (!validateTipForm()) return;
 
     var submitBtn = el("tipSubmitBtn");
@@ -3835,6 +4471,7 @@
     };
 
     var result = await sb.from("tips").insert(payload);
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
     submitBtn.disabled = false;
 
     if (result.error) {
@@ -3861,7 +4498,9 @@
   // docs/milnik4_navigace_a_stavy.md pro zdůvodnění, proč vedle
   // moje_sit_tipy() z Milníku 3 a ne místo ní).
   async function fetchMyTips(userId) {
+    var g = authGen; // Milník 15 (bod 4.5)
     var ownResult = await sb.from("tips").select("*").eq("autor_id", userId).order("vlozeno_kdy", { ascending: false });
+    if (g !== authGen) return; // identita se během dotazu změnila
     if (ownResult.error) {
       console.error("Chyba při načítání vlastních tipů:", ownResult.error);
       showBanner(el("listBanner"), "error", "Nepodařilo se načíst vaše tipy. Zkuste to prosím znovu.");
@@ -3869,6 +4508,9 @@
     }
 
     var subResult = await sb.rpc("moje_prime_tipy");
+    // Milník 15 (bod 4.5): zbytek funkce staví `rows` z dat OBOU dotazů a
+    // předává je renderMojeTipyTable() -> zápis do #tipListWrap.
+    if (g !== authGen) return;
     if (subResult.error) {
       console.error("Chyba při načítání tipů přímo podřízených tipařů:", subResult.error);
     }
@@ -3973,16 +4615,39 @@
   // výslovně jen o Leaderovi ("Leader — Moje síť → …").
   async function fetchMyNetworkTable() {
     if (!currentUser) return;
+    // Milník 15 (bod 4.5): generační pojistka - přesně tahle funkce byla
+    // místem, kde nezávislá kontrola reprodukovala TRVALÝ únik leaderových
+    // síťových dat do relace tipaře (viz komentář u `var authGen`).
+    var g = authGen;
+
+    // Milník 15 (bod 4.1): DRUHÁ pojistka k preclearScreenForTab("network")
+    // v setActiveTab(). Tuhle funkci volá i uploadKycFile/refresh apod. a
+    // hlavně: kdyby se kdykoli v budoucnu zavolala mimo setActiveTab, obsah
+    // předchozí role by tu bez tohohle řádku znovu přežil celý await níž.
+    // Obě role-specifické oblasti se proto vyprazdňují SYNCHRONNĚ hned tady,
+    // před prvním `await`, ne až po větvení podle role (tak to bylo dřív).
+    el("leaderDashboardWrap").innerHTML = "";
+    el("networkListWrap").innerHTML = "";
+    mojeSitTable = null;
+    var networkLoading = el("networkLoadingWrap");
+    if (networkLoading) networkLoading.hidden = false;
+
     el("inviteLinkText").textContent = location.origin + location.pathname + "?ref=" + (currentUser.invite_code || "");
 
     var result = await sb.rpc("moje_sit");
+    // Milník 15 (bod 4.5): KLÍČOVÝ řádek celé opravy. Bez něj se níž
+    // vyhodnotí `currentUser.role` UŽ NAD NOVOU identitou a leaderova
+    // `rows` se zapíšou do tabulky jako "moje síť" tipaře.
+    if (g !== authGen) return;
     if (result.error) {
       console.error("Chyba při načítání sítě:", result.error);
+      if (networkLoading) networkLoading.hidden = true;
       showBanner(el("networkBanner"), "error", "Nepodařilo se načíst přehled sítě. Zkuste to prosím znovu.");
       return;
     }
     var rows = result.data || [];
     var isLeader = currentUser.role === "leader";
+    if (networkLoading) networkLoading.hidden = true;
 
     var direct = 0;
     var celkemTipu = 0;
@@ -4035,13 +4700,18 @@
   var tipyTable = null;
 
   async function fetchTipyTable() {
+    var g = authGen; // Milník 15 (bod 4.5)
     var tipsResult = await sb.from("tips").select("*").order("vlozeno_kdy", { ascending: false });
+    if (g !== authGen) return;
     if (tipsResult.error) {
       console.error("Chyba při načítání tipů:", tipsResult.error);
       showBanner(el("tipyBanner"), "error", "Nepodařilo se načíst seznam tipů. Zkuste to prosím znovu.");
       return;
     }
     var profilesResult = await sb.from("profiles").select("id, jmeno, prijmeni, role, sponsor_id, invite_code").order("jmeno");
+    // Zbytek plní adminUsersById/allTipsById (globální cache) a kreslí
+    // tabulku - u cizí identity by šlo o únik jmen celé sítě.
+    if (g !== authGen) return;
     if (profilesResult.error) {
       console.error("Chyba při načítání uživatelů pro jména tipařů:", profilesResult.error);
     } else {
@@ -4129,6 +4799,11 @@
   }
 
   async function openTipDetail(tipId, returnTab) {
+    // Milník 15 (bod 4.5): Detail tipu je dosažitelný klikem na řádek v
+    // "Moje tipy"/"Tipy" - tedy z obrazovky, ze které se dá stejně dobře
+    // odhlásit jako z kterékoli jiné. renderTipDetail() na konci čte
+    // `currentUser.role` (canEdit) a plní #detailContentWrap cizím tipem.
+    var g = authGen;
     detailReturnTab = returnTab || activeTab;
     // Milník 10 (bod 6): otevření detailu nemá vlastní tab/hash, ale
     // přidává vlastní záznam do historie (se stejným hashem jako aktuální
@@ -4145,6 +4820,7 @@
     el("detailScreen").hidden = false;
 
     var result = await sb.from("tips").select("*").eq("id", tipId).single();
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
     if (result.error || !result.data) {
       console.error("Chyba při načítání detailu tipu:", result.error);
       el("detailContentWrap").innerHTML = '<div class="empty-state"><p>Tip se nepodařilo načíst nebo k němu nemáte přístup.</p></div>';
@@ -4153,7 +4829,10 @@
     detailTip = result.data;
 
     var canEdit = currentUser && (currentUser.role === "leader" || currentUser.role === "administrator");
-    if (canEdit) await fetchRkAktivniList();
+    if (canEdit) {
+      await fetchRkAktivniList();
+      if (g !== authGen) return; // Milník 15 (bod 4.5)
+    }
 
     // Milník 6 (Část D) - dohledání snapshotovaného schématu pro rozpis
     // odhadované provize (jen pro canEdit pohled, viz renderTipDetail).
@@ -4162,6 +4841,7 @@
     detailTipSchema = null;
     if (canEdit && detailTip.provizni_schema_id) {
       var schemaResult = await sb.from("provizni_schema").select("*").eq("id", detailTip.provizni_schema_id).single();
+      if (g !== authGen) return; // Milník 15 (bod 4.5)
       if (!schemaResult.error) detailTipSchema = schemaResult.data;
     }
 
@@ -4172,9 +4852,11 @@
     detailTipMaVyplatu = false;
     if (canEdit) {
       var vyplataResult = await sb.from("vyplaty").select("id").eq("tip_id", tipId).limit(1);
+      if (g !== authGen) return; // Milník 15 (bod 4.5)
       if (!vyplataResult.error) detailTipMaVyplatu = (vyplataResult.data || []).length > 0;
     }
 
+    if (g !== authGen) return; // Milník 15 (bod 4.5) - poslední pojistka před vykreslením
     renderTipDetail();
   }
 
@@ -4321,11 +5003,13 @@
   }
 
   async function submitPoslatKVyplate(tipId) {
+    var g = authGen; // Milník 15 (bod 4.5) - renderTipDetail() níž čte detailTip/currentUser
     var btn = el("dtPoslatKVyplateBtn");
     if (btn) btn.disabled = true;
     showBanner(el("detailBanner"), null, null);
 
     var result = await sb.rpc("poslat_tip_k_vyplate", { p_tip_id: tipId });
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
 
     if (result.error) {
       console.error("Chyba při odesílání tipu k výplatě:", result.error);
@@ -4338,6 +5022,7 @@
     setTimeout(function () { showBanner(el("detailBanner"), null, null); }, 6000);
 
     var refreshed = await sb.from("tips").select("*").eq("id", tipId).single();
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
     if (!refreshed.error && refreshed.data) detailTip = refreshed.data;
     detailTipMaVyplatu = true;
     renderTipDetail();
@@ -4427,6 +5112,8 @@
   // uložit i BEZE ZMĚNY stavu (RPC vynechá zápis do tip_status_history,
   // pokud se stav skutečně nemění, viz m4_rpc_posunout_stav_tipu).
   async function submitDetailSave() {
+    if (!detailTip) return;
+    var g = authGen; // Milník 15 (bod 4.5) - detailTip i renderTipDetail() žijí až za awaity
     var stavVal = el("dtStavSelect").value;
     var duvodVal = !el("dtDuvodField").hidden ? el("dtDuvodInput").value.trim() : "";
     var rkVal = !el("dtRkField").hidden ? (el("dtRkSelect").value || null) : null;
@@ -4458,6 +5145,7 @@
       // přepíše aktuální hodnotou formuláře.
       p_pozadovana_cena: pozadovanaCena === "" ? null : Number(pozadovanaCena)
     });
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
 
     btn.disabled = false;
 
@@ -4471,6 +5159,7 @@
     setTimeout(function () { showBanner(el("detailBanner"), null, null); }, 4000);
 
     var refreshed = await sb.from("tips").select("*").eq("id", detailTip.id).single();
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
     if (!refreshed.error && refreshed.data) detailTip = refreshed.data;
     renderTipDetail();
   }
@@ -4750,8 +5439,10 @@
 
   async function fetchUsersTable() {
     if (!currentUser) return;
+    var g = authGen; // Milník 15 (bod 4.5)
     closeUserForm();
     var result = await sb.rpc("moje_uzivatele");
+    if (g !== authGen) return; // identita se během dotazu změnila
     if (result.error) {
       console.error("Chyba při načítání uživatelů:", result.error);
       showBanner(el("usersBanner"), "error", "Nepodařilo se načíst seznam uživatelů.");
@@ -4891,6 +5582,7 @@
 
   async function fetchAuditTable() {
     if (!currentUser) return;
+    var g = authGen; // Milník 15 (bod 4.5)
     // jmenoUzivatele() potřebuje adminUsersById naplněné jmény - dřív se
     // to spoléhalo na to, že Leader/Admin už předtím navštívil "Tipy"
     // nebo "Uživatelé" (obojí ho mezitím plnilo). Milník 5 (bod 6
@@ -4901,12 +5593,14 @@
     // `profiles` (stejná RLS politika "Leader a Admin vidi vsechny
     // profily" jako dřív používala "Tipy").
     var profilesResult = await sb.from("profiles").select("id, jmeno, prijmeni, role, sponsor_id, invite_code").order("jmeno");
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
     if (!profilesResult.error) {
       adminUsersById = {};
       (profilesResult.data || []).forEach(function (u) { if (u && u.id) adminUsersById[u.id] = u; });
     }
 
     var result = await sb.from("audit_log").select("*").order("created_at", { ascending: false });
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
     if (result.error) {
       console.error("Chyba při načítání auditního logu:", result.error);
       el("auditTableWrap").innerHTML = '<div class="empty-state"><p>Auditní log se nepodařilo načíst.</p></div>';
@@ -5127,22 +5821,30 @@
 
   async function fetchProvizeScreen() {
     if (!currentUser) return;
+    var g = authGen; // Milník 15 (bod 4.5)
     closeProvizeForm();
 
-    // Milník 7 (Část E): vytvářet nové schéma smí VÝHRADNĚ Administrátor
-    // (RPC to server-side vynucuje - tohle je jen kosmetika navrch, ať
-    // Leader nevidí tlačítko, které by mu server stejně odmítl).
-    el("provizeAddOpenBtn").hidden = currentUser.role !== "administrator";
+    // Milník 7 (Část E) -> Milník 15 (bod 2): nové schéma smí zakládat
+    // Leader I Administrátor (dřív výhradně Administrátor). Server to
+    // vynucuje v RPC vytvorit_provizni_schema (migrace
+    // m15_provizni_schema_i_pro_leadera, kontrola je_leader_nebo_admin()) -
+    // tohle je jen kosmetika navrch, ať uživatel nevidí tlačítko, které by
+    // mu server stejně odmítl. Cíl bodu 2: leader a administrátor mají na
+    // téhle obrazovce ÚPLNĚ STEJNÉ možnosti, tipař/RK sem nemají přístup
+    // vůbec (ROLE_TAB_ORDER) a server jim navíc vrátí 42501.
+    el("provizeAddOpenBtn").hidden = !(currentUser.role === "leader" || currentUser.role === "administrator");
 
     // Jména tvůrců schémat - stejný vzor jako Audit log/Tipy (Leader a
     // Admin vidí všechny profily přes existující RLS politiku).
     var profilesResult = await sb.from("profiles").select("id, jmeno, prijmeni, role, sponsor_id, invite_code").order("jmeno");
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
     if (!profilesResult.error) {
       adminUsersById = {};
       (profilesResult.data || []).forEach(function (u) { if (u && u.id) adminUsersById[u.id] = u; });
     }
 
     var result = await sb.from("provizni_schema").select("*").order("platne_od", { ascending: false });
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
     if (result.error) {
       console.error("Chyba při načítání provizních schémat:", result.error);
       el("provizeTableWrap").innerHTML = '<div class="empty-state"><p>Provizní schémata se nepodařilo načíst.</p></div>';
@@ -5231,8 +5933,10 @@
 
   async function fetchRkPortal() {
     if (!currentUser) return;
+    var g = authGen; // Milník 15 (bod 4.5)
     closeRkPortalForm();
     var result = await sb.rpc("moje_rk_tipy");
+    if (g !== authGen) return; // identita se během dotazu změnila
     if (result.error) {
       console.error("Chyba při načítání tipů RK:", result.error);
       showBanner(el("rkPortalBanner"), "error", "Nepodařilo se načíst přiřazené tipy.");
@@ -5456,18 +6160,22 @@
 
   async function fetchVyplatyTable() {
     if (!currentUser) return;
+    var g = authGen; // Milník 15 (bod 4.5)
     // Jména příjemců + klienti tipů - stejný vzor jako Audit log/Tipy.
     var profilesResult = await sb.from("profiles").select("id, jmeno, prijmeni, role, sponsor_id, invite_code").order("jmeno");
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
     if (!profilesResult.error) {
       adminUsersById = {};
       (profilesResult.data || []).forEach(function (u) { if (u && u.id) adminUsersById[u.id] = u; });
     }
     var tipsResult = await sb.from("tips").select("id, jmeno_klienta");
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
     if (!tipsResult.error) {
       (tipsResult.data || []).forEach(function (t) { if (t && t.id) allTipsById[t.id] = Object.assign(allTipsById[t.id] || {}, t); });
     }
 
     var result = await sb.from("vyplaty").select("*").order("splatnost_do");
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
     if (result.error) {
       console.error("Chyba při načítání výplat:", result.error);
       el("vyplatyTableWrap").innerHTML = '<div class="empty-state"><p>Výplaty se nepodařilo načíst.</p></div>';
@@ -5482,6 +6190,8 @@
   // ---------------- bod 6.3: vynucená změna hesla ----------------
 
   async function submitForcedPasswordForm() {
+    if (!currentUser) return;
+    var g = authGen; // Milník 15 (bod 4.5) - `currentUser` se zapisuje až po awaitech níž
     var novy = el("fpNew").value;
     var znovu = el("fpConfirm").value;
     var ok = true;
@@ -5498,6 +6208,7 @@
     showBanner(el("forcedPasswordBanner"), null, null);
 
     var updateResult = await sb.auth.updateUser({ password: novy });
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
     if (updateResult.error) {
       btn.disabled = false;
       console.error("Chyba při změně hesla:", updateResult.error);
@@ -5506,6 +6217,7 @@
     }
 
     var rpcResult = await sb.rpc("dokoncit_zmenu_hesla");
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
     btn.disabled = false;
     if (rpcResult.error) {
       console.error("Chyba při dokončení změny hesla:", rpcResult.error);
@@ -5518,6 +6230,7 @@
     // čerstvý re-fetch, ne jen lokální patch. handleSignedIn() zopakuje
     // celý načtení profilu a tentokrát už projde dál na showAppScreen().
     var sessionResult = await sb.auth.getSession();
+    if (g !== authGen) return; // Milník 15 (bod 4.5) - handleSignedIn() níž čítač posune sám
     if (sessionResult.data && sessionResult.data.session) {
       await handleSignedIn(sessionResult.data.session);
     }
@@ -5609,12 +6322,18 @@
   // odpovědi RPC.
   async function refreshOwnProfile() {
     if (!currentUser) return;
+    var g = authGen; // Milník 15 (bod 4.5)
     var r = await sb.from("profiles")
       // Milník 11 (bod 1+2): + dorucovaci_* sloupce a datum_narozeni.
       // Milník 13 (bod 1, oprava po review): + autentizace_overeno_kdy a
       // cislo_dokladu_totoznosti - viz stejná poznámka u handleSignedIn().
       .select("adresa_ulice, adresa_mesto, adresa_psc, adresa_stat, je_firma, ico, dic, adresa_vyplnena_kdy, autentizace_stav, autentizace_duvod_zamitnuti, autentizace_overeno_kdy, cislo_dokladu_totoznosti, dorucovaci_je_stejna, dorucovaci_ulice, dorucovaci_mesto, dorucovaci_psc, dorucovaci_stat, datum_narozeni")
       .eq("id", currentUser.id).single();
+    // Milník 15 (bod 4.5): bez tohohle řádku by se profil STARÉ identity
+    // (dotaz odeslaný ještě za ní) nalil do `currentUser` NOVÉ identity -
+    // tedy přesně ten typ úniku, jaký řeší bod 4 - a `currentUser.id` níž
+    // by po odhlášení navíc spadlo nad `null`.
+    if (g !== authGen) return;
     if (!r.error && r.data) {
       Object.assign(currentUser, r.data);
     } else if (r.error) {
@@ -5626,8 +6345,13 @@
 
   async function fetchProfileScreen() {
     if (!currentUser) return;
+    var g = authGen; // Milník 15 (bod 4.5)
     showBanner(el("profileBanner"), null, null);
     await refreshOwnProfile();
+    // Celý zbytek funkce čte `currentUser` (jméno, e-mail, telefon, adresa) a
+    // zapisuje ho do DOM - po změně identity by tedy do formuláře NOVÉHO
+    // uživatele vypsal osobní údaje toho PŘEDCHOZÍHO.
+    if (g !== authGen) return;
 
     el("profileRegistraceStavWrap").innerHTML = "Fáze registrace: " + registraceStavPillHtml(mujRegistraceStav());
 
@@ -5676,8 +6400,14 @@
   // potřeba (stejná logika jako dřív u kycCard.hidden).
   async function fetchMyKycScreen() {
     if (!currentUser || currentUser.role !== "tipar") return;
+    var g = authGen; // Milník 15 (bod 4.5)
     showBanner(el("myKycBanner"), null, null);
     await refreshOwnProfile();
+    // Bez téhle kontroly se po odhlášení uprostřed refreshOwnProfile()
+    // zavolal renderKycSection() nad `currentUser === null` - odtud
+    // "TypeError: Cannot read properties of null (reading 'autentizace_stav'
+    // / 'adresa_vyplnena_kdy')" z nálezu kontroly.
+    if (g !== authGen) return;
     await renderKycSection();
   }
 
@@ -5730,6 +6460,14 @@
   // Leader/Administrator nevrátí zamítnutím. Viz
   // docs/milnik11_dve_adresy_a_kyc_odeslani.md pro plné zdůvodnění.
   async function renderKycSection() {
+    // Milník 15 (bod 4.5): funkci volá i uploadKycFile()/submitAddressForm()/
+    // submitOdeslatKOvereni() - a ty se dřív o platnost identity nestaraly
+    // vůbec. Odtud pochází nález kontroly: po odhlášení uprostřed běhu
+    // funkce spadla na `currentUser === null`, a to AŽ POTÉ, co za `await`em
+    // ještě jednou zapsala do `#kycDocsWrap`.
+    if (!currentUser) return;
+    var g = authGen;
+
     var stav = currentUser.autentizace_stav || "nevyplneno";
     var editovatelne = (stav === "nevyplneno" || stav === "zamitnuto");
 
@@ -5745,6 +6483,22 @@
     // datem a maskovaným číslem dokladu (to se zapisuje do
     // profiles.cislo_dokladu_totoznosti až při schválení Leaderem, Milník
     // 13, bod 2).
+    // Milník 15 (bod 1, KRITICKÁ OPRAVA REGRESE): tenhle blok DŘÍV končil
+    // `return` (řádek za `kycInstructionsWrap.hidden = true`) a předtím
+    // vyprázdnil `#kycDocsWrap` i `#kycMissingWrap`. Důsledek nahlášený
+    // klientem: tipař ve stavu "schvaleno" (což je stav DEMO účtu "Tipař A",
+    // tedy prvního demo tlačítka na přihlašovací obrazovce) otevřel záložku
+    // "Ověření totožnosti" a viděl JEN jednu větu - žádné 3 řádky dokumentů,
+    // žádná tlačítka pro nahrání. Reprodukováno dynamicky v jsdom (viz
+    // docs/milnik15_*.md): ve stavech nevyplneno/ceka_na_overeni/zamitnuto
+    // se vykreslí 3 řádky, ve stavu schvaleno 0 řádků - BEZ jakékoli JS
+    // výjimky, proto to statická kontrola (node --check, html5lib) ani
+    // nemohla najít.
+    // Oprava: `return` se ruší. Věta o ověření zůstává (zjednodušené
+    // zobrazení z Milníku 13 klient nerozporoval), ale funkce POKRAČUJE na
+    // společné vykreslení 3 řádků dokumentů níž - obrazovka tak není
+    // prázdná v ŽÁDNÉM ze 4 stavů a původní proces se 3 doklady zůstává
+    // zachovaný přesně tak, jak klient žádá.
     if (stav === "schvaleno") {
       var overenoDatum = formatKycDatumOnly(currentUser.autentizace_overeno_kdy) || "—";
       // Milník 13 (bod 1, oprava po review): schválení PŘED tímto milníkem
@@ -5761,26 +6515,49 @@
         : ('<p class="kyc-verified-note">Totožnost byla ověřena dne <strong>' +
             escapeHtml(overenoDatum) +
             '</strong>.</p>');
-      el("kycDocsWrap").innerHTML = "";
-      el("kycMissingWrap").innerHTML = "";
-      el("kycSubmitWrap").hidden = true;
+      // Instrukční text ("Nahrajte prosím sken/foto...") ve schváleném stavu
+      // dál nedává smysl - zůstává schovaný (Milník 13). Řádky dokumentů se
+      // ale od Milníku 15 vykreslují dál, viz komentář nad tímhle blokem.
       if (el("kycInstructionsWrap")) el("kycInstructionsWrap").hidden = true;
-      return;
-    }
-    if (el("kycInstructionsWrap")) el("kycInstructionsWrap").hidden = false;
+    } else {
+      if (el("kycInstructionsWrap")) el("kycInstructionsWrap").hidden = false;
 
-    var statusHtml = '<div style="margin-bottom:12px;">' + autentizaceStavPillHtml(stav) + '</div>';
-    if (stav === "zamitnuto" && currentUser.autentizace_duvod_zamitnuti) {
-      statusHtml += '<div class="banner banner-error">Důvod zamítnutí: ' + escapeHtml(currentUser.autentizace_duvod_zamitnuti) + ' — opravte prosím dokumenty a znovu klikněte na „Odeslat k ověření“.</div>';
+      var statusHtml = '<div style="margin-bottom:12px;">' + autentizaceStavPillHtml(stav) + '</div>';
+      if (stav === "zamitnuto" && currentUser.autentizace_duvod_zamitnuti) {
+        statusHtml += '<div class="banner banner-error">Důvod zamítnutí: ' + escapeHtml(currentUser.autentizace_duvod_zamitnuti) + ' — opravte prosím dokumenty a znovu klikněte na „Odeslat k ověření“.</div>';
+      }
+      if (stav === "ceka_na_overeni") {
+        statusHtml += '<div class="banner banner-info">Vaše žádost o ověření totožnosti čeká na posouzení Leaderem/Administrátorem. Dokumenty teď nelze měnit.</div>';
+      }
+      el("kycStatusWrap").innerHTML = statusHtml;
     }
-    if (stav === "ceka_na_overeni") {
-      statusHtml += '<div class="banner banner-info">Vaše žádost o ověření totožnosti čeká na posouzení Leaderem/Administrátorem. Dokumenty teď nelze měnit.</div>';
-    }
-    el("kycStatusWrap").innerHTML = statusHtml;
 
-    var listResult = await sb.storage.from("identifikace").list(currentUser.id, { limit: 100 });
-    var files = (!listResult.error && listResult.data) ? listResult.data : [];
-    if (listResult.error) console.error("Chyba při načítání seznamu dokumentů:", listResult.error);
+    // Milník 15 (bod 1, obranná pojistka): supabase-storage-js vrací
+    // `{data, error}` jen u chyb, které samo rozpozná jako StorageError -
+    // jakoukoliv JINOU výjimku (typicky selhání síťového fetche, offline
+    // prohlížeč, zablokovaný request) PŘEHAZUJE dál `throw`em. Bez tohohle
+    // try/catch by taková výjimka přerušila `renderKycSection()` PŘESNĚ
+    // TADY, tedy dřív, než se `#kycDocsWrap` vůbec naplní - a obrazovka by
+    // znovu skončila prázdná (stejný symptom, jaký klient nahlásil, jen z
+    // jiné příčiny). Teď se v takovém případě vykreslí 3 řádky se stavem
+    // "Nenahráno" a chyba se zaloguje, render pokračuje.
+    var files = [];
+    try {
+      var listResult = await sb.storage.from("identifikace").list(currentUser.id, { limit: 100 });
+      if (listResult && listResult.error) {
+        console.error("Chyba při načítání seznamu dokumentů:", listResult.error);
+      } else if (listResult && listResult.data) {
+        files = listResult.data;
+      }
+    } catch (e) {
+      console.error("Seznam dokumentů se nepodařilo načíst (výjimka):", e);
+    }
+    // Milník 15 (bod 4.5): jediný `await` v téhle funkci je ten výše
+    // (storage.list). Všechno pod tímhle řádkem - včetně zápisu
+    // `el("kycDocsWrap").innerHTML = html` a čtení
+    // `currentUser.adresa_vyplnena_kdy` / `currentUser.datum_narozeni` níž -
+    // se proto smí provést jen tehdy, když je identita pořád tatáž.
+    if (g !== authGen) return;
 
     var docs = [
       { typ: "op_predni", label: "Doklad totožnosti — přední strana" },
@@ -5795,8 +6572,16 @@
       html += '<div class="kyc-doc-row">' +
         '<div class="kyc-doc-info">' +
           '<div class="kyc-doc-label">' + escapeHtml(d.label) + '</div>' +
+          // Milník 15 (bod 1): ve stavu "schvaleno" už soubory ve Storage
+          // fyzicky nejsou - schvalit_autentizaci() je po schválení maže
+          // (Milník 13, bod 2). Prosté "Nenahráno" by tam působilo jako
+          // chyba ("vždyť jsem je nahrál"), proto vlastní vysvětlující text.
           '<div class="kyc-doc-status' + (f ? ' kyc-doc-status-ok' : '') + '">' +
-            (f ? ("✓ Nahráno: " + escapeHtml(f.name.split("/").pop())) : "Nenahráno") +
+            (f
+              ? ("✓ Nahráno: " + escapeHtml(f.name.split("/").pop()))
+              : (stav === "schvaleno"
+                  ? "Ověřeno — dokument byl po schválení smazán"
+                  : "Nenahráno")) +
           '</div>' +
           '<div class="kyc-doc-preview" data-own-preview="' + d.typ + '"></div>' +
         '</div>' +
@@ -5871,9 +6656,18 @@
   // zůstává klikacím odkazem (nelze vyrenderovat jako <img> bez PDF
   // knihovny, target="_blank" je tu jediná rozumná volba).
   async function renderKycOwnPreview(typ, fileName) {
+    // Milník 15 (bod 4.5): `currentUser.id` se čte hned na dalším řádku -
+    // po odhlášení tady vznikaly ty 3 nahlášené výjimky
+    // "Cannot read properties of null (reading 'id')" (volá se 3× v cyklu
+    // přes docs). renderKycSection() sice tuhle funkci po opravě po
+    // odhlášení už vůbec nezavolá, ale jde o samostatně volatelnou async
+    // funkci - pojistka patří i sem.
+    if (!currentUser) return;
+    var g = authGen;
     var slot = document.querySelector('#kycDocsWrap [data-own-preview="' + typ + '"]');
     if (!slot) return;
     var signed = await sb.storage.from("identifikace").createSignedUrl(currentUser.id + "/" + fileName, 300);
+    if (g !== authGen) return; // po změně identity už nikam nezapisovat
     // Znovu dohledat slot - mezitím mohl proběhnout další re-render (rychlé po sobě jdoucí nahrávání).
     slot = document.querySelector('#kycDocsWrap [data-own-preview="' + typ + '"]');
     if (!slot) return;
@@ -5890,6 +6684,12 @@
   }
 
   async function uploadKycFile(typ, file) {
+    // Milník 15 (bod 4.5): nahrávání souboru je nejdelší `await` v celé
+    // appce (reálný upload skenu dokladu trvá sekundy) - odhlášení během něj
+    // je naprosto reálné. `currentUser.id` se přitom čte i PO awaitu (viz
+    // listAfterUpload níž), což by nad `null` skončilo výjimkou.
+    if (!currentUser) return;
+    var g = authGen;
     // Milník 13 (bod 1): KYC karta žije teď na vlastní záložce
     // #myKycScreen, ne v "Můj profil" - banner cílí na #myKycBanner, ne
     // na #profileBanner.
@@ -5901,6 +6701,7 @@
     var uploadResult = await sb.storage.from("identifikace").upload(cesta, file, {
       upsert: true, contentType: file.type || undefined
     });
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
     if (uploadResult.error) {
       console.error("Chyba při nahrávání dokumentu:", uploadResult.error);
       showBanner(el("myKycBanner"), "error", "Soubor se nepodařilo nahrát. Zkuste to prosím znovu.");
@@ -5916,6 +6717,7 @@
     // ostatní objekty se stejným "typ" prefixem, ať pro daný typ existuje
     // v Storage nejvýš 1 aktuální soubor.
     var listAfterUpload = await sb.storage.from("identifikace").list(currentUser.id, { limit: 100 });
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
     if (!listAfterUpload.error && listAfterUpload.data) {
       var staleCesty = listAfterUpload.data
         .filter(function (f) { return f && f.name && f.name.indexOf(typ + ".") === 0 && f.name !== (typ + "." + ext); })
@@ -5927,6 +6729,7 @@
     }
 
     var rpcResult = await sb.rpc("nahrat_identifikacni_dokument", { p_typ: typ, p_cesta: cesta });
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
     if (rpcResult.error) {
       console.error("Chyba při zaznamenání dokumentu:", rpcResult.error);
       // Milník 11 (bod 2): tenhle RPC teď navíc odmítne nahrání ve stavu
@@ -5963,6 +6766,8 @@
   }
 
   async function submitOdeslatKOvereni() {
+    if (!currentUser) return;
+    var g = authGen; // Milník 15 (bod 4.5)
     // Milník 13 (bod 1): KYC karta žije na vlastní záložce #myKycScreen -
     // banner cílí na #myKycBanner (na téhle krátké obrazovce je banner i
     // tlačítko prakticky vždy v jednom pohledu, ale scrollIntoView z
@@ -5971,6 +6776,7 @@
     var btn = el("kycSubmitBtn");
     btn.disabled = true;
     var result = await sb.rpc("odeslat_k_overeni_totoznosti");
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
     btn.disabled = false;
 
     if (result.error) {
@@ -5987,6 +6793,8 @@
   }
 
   async function submitAddressForm() {
+    if (!currentUser) return;
+    var g = authGen; // Milník 15 (bod 4.5) - `currentUser.role` se čte až po awaitu níž
     var jeFirma = el("pfJeFirma").checked;
     var ulice = el("pfUlice").value.trim();
     var mesto = el("pfMesto").value.trim();
@@ -6029,6 +6837,7 @@
       p_dorucovaci_stat: dorStejna ? null : (dorStat || null),
       p_datum_narozeni: datumNarozeni || null
     });
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
     btn.disabled = false;
 
     if (result.error) {
@@ -6042,6 +6851,7 @@
 
     showBanner(el("profileBanner"), "ok", "Adresa byla uložena.");
     await refreshOwnProfile();
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
     el("profileRegistraceStavWrap").innerHTML = "Fáze registrace: " + registraceStavPillHtml(mujRegistraceStav());
     // Milník 11 (bod 2): datum narození ovlivňuje, jestli je "Odeslat k
     // ověření" vůbec splnitelné - re-render KYC sekce po uložení adresy,
@@ -6053,12 +6863,17 @@
 
   async function fetchKycScreen() {
     if (!currentUser) return;
+    var g = authGen; // Milník 15 (bod 4.5)
     showBanner(el("kycListBanner"), null, null);
     el("kycListWrap").innerHTML = '<div class="empty-state"><p>Načítám…</p></div>';
 
     // Čerstvý re-fetch (Pravidlo 6) - stejná RPC jako Uživatelé, jen tady
     // filtrujeme na autentizace_stav = 'ceka_na_overeni'.
     var result = await sb.rpc("moje_uzivatele");
+    // Milník 15 (bod 4.5): tohle je seznam CIZÍCH profilů čekajících na
+    // ověření totožnosti (jména, adresy, data narození) - po změně identity
+    // by šlo o obzvlášť citlivý únik.
+    if (g !== authGen) return;
     if (result.error) {
       console.error("Chyba při načítání čekajících ověření:", result.error);
       el("kycListWrap").innerHTML = '<div class="empty-state"><p>Nepodařilo se načíst seznam.</p></div>';
@@ -6091,6 +6906,11 @@
     return html;
   }
 
+  // Milník 15 (bod 4.5): tahle funkce sama žádný `await` neobsahuje (je
+  // `async` jen historicky) - volá se synchronně hned po generační kontrole
+  // ve fetchKycScreen(), takže vlastní pojistku nepotřebuje. Náhledy
+  // dokladů, které spouští níž (renderKycPreviewLinks), ale `await`
+  // obsahují a pojistku mají.
   async function renderKycList(rows) {
     if (!rows.length) {
       el("kycListWrap").innerHTML = '<div class="empty-state"><p>Momentálně nikdo nečeká na ověření totožnosti.</p></div>';
@@ -6160,6 +6980,12 @@
   function closeKycRejectModal() {
     kycRejectTargetId = null;
     el("kycRejectModalOverlay").hidden = true;
+    // Milník 15 (bod 4.7, nález 1): modal je `hidden`-řízený, takže po
+    // zavření zůstával rozepsaný DŮVOD ZAMÍTNUTÍ v `.value` textarey
+    // (openKycRejectModal ho sice při otevření přemazal, ale mezitím ho
+    // ve stejné prohlížečové relaci mohla přečíst jiná identita).
+    el("kycRejectReason").value = "";
+    setFieldError(el("kycRejectReasonField"), false);
   }
 
   async function submitKycRejectForm() {
@@ -6185,6 +7011,7 @@
   // v appce (#kycLightboxOverlay, viz openKycLightbox) - PDF zůstává
   // klikacím odkazem do nového okna (nelze vyrenderovat jako <img>).
   async function renderKycPreviewLinks(userId) {
+    var g = authGen; // Milník 15 (bod 4.5)
     var wrap = document.querySelector('[data-kyc-user="' + userId.replace(/"/g, "") + '"] [data-slot-links]');
     if (!wrap) return;
     var docs = [
@@ -6193,6 +7020,7 @@
       { typ: "foto", label: "Fotografie" }
     ];
     var listResult = await sb.storage.from("identifikace").list(userId, { limit: 100 });
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
     var files = (!listResult.error && listResult.data) ? listResult.data : [];
     // Milník 12 (bod 2): stejná oprava jako u vlastního náhledu (Můj profil)
     // - při víc objektech na stejný "typ" (stará duplicita s jinou
@@ -6206,6 +7034,7 @@
         continue;
       }
       var signed = await sb.storage.from("identifikace").createSignedUrl(userId + "/" + f.name, 300);
+      if (g !== authGen) return; // Milník 15 (bod 4.5) - v cyklu, po KAŽDÉM awaitu
       if (signed.error || !signed.data) {
         itemsHtml.push('<div class="kyc-review-doc"><div class="kyc-doc-label">' + escapeHtml(docs[i].label) + '</div><span class="dt-muted">náhled se nepodařilo vytvořit</span></div>');
         continue;
@@ -6467,6 +7296,10 @@
   }
 
   async function submitAddUserForm() {
+    // Milník 15 (bod 4.5): za awaitem se do #addUserModalBox vypisuje
+    // jednorázové HESLO nově založeného účtu - po odhlášení (modal mezitím
+    // zavírá handleSignedOut) se tam nesmí objevit vůbec nic.
+    var g = authGen;
     var jmeno = el("auJmeno").value.trim();
     var prijmeni = el("auPrijmeni").value.trim();
     var email = el("auEmail").value.trim();
@@ -6483,6 +7316,7 @@
     var result = await sb.rpc("vytvorit_uzivatele_rucne", {
       p_jmeno: jmeno, p_prijmeni: prijmeni || null, p_telefon: telefon || null, p_email: email, p_role: role
     });
+    if (g !== authGen) return; // Milník 15 (bod 4.5)
 
     btn.disabled = false;
     if (result.error) {
@@ -6535,7 +7369,9 @@
   async function renderLeaderDashboardStats() {
     var wrap = el("leaderDashboardWrap");
     if (!wrap) return;
+    var g = authGen; // Milník 15 (bod 4.5)
     var result = await sb.rpc("leader_dashboard_stats");
+    if (g !== authGen) return; // identita se během dotazu změnila - nic nevykreslovat
     if (result.error) {
       console.error("Chyba při načítání přehledu leadra:", result.error);
       wrap.innerHTML = '<div class="banner banner-error">Rozšířený přehled se nepodařilo načíst.</div>';
@@ -6591,7 +7427,9 @@
   async function renderLeaderSitPoUrovnich() {
     var wrap = el("leaderLevelsWrap");
     if (!wrap) return;
+    var g = authGen; // Milník 15 (bod 4.5)
     var result = await sb.rpc("leader_sit_po_urovnich");
+    if (g !== authGen) return; // identita se během dotazu změnila - nic nevykreslovat
     if (result.error) {
       console.error("Chyba při načítání sítě po úrovních:", result.error);
       wrap.innerHTML = '<div class="banner banner-error">Přehled sítě po úrovních se nepodařilo načíst.</div>';
@@ -6646,6 +7484,11 @@
     // v topbaru - jen jsou teď na dvou různých místech podle role.
     el("addUserUsersBtn").addEventListener("click", openAddUserModal);
     el("addUserNetworkBtn").addEventListener("click", openAddUserModal);
+
+    // Milník 15 (bod 3): "+ Přidat nový tip" na Přehledu lídra -> záložka
+    // "Nový tip". Používá standardní setActiveTab, takže se korektně
+    // zapíše i do historie prohlížeče (Zpět se vrátí na Přehled lídra).
+    el("addTipNetworkBtn").addEventListener("click", function () { setActiveTab("new"); });
     el("addUserModalOverlay").addEventListener("click", function (e) {
       if (e.target === el("addUserModalOverlay")) closeAddUserModal();
     });
