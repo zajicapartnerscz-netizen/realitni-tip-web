@@ -268,13 +268,32 @@
   /* Milník 12 (bod 13): 11 dalších demo tlačítek (C-M) - kompaktní kulatá
      tlačítka s jedním písmenem, jedna řada i na malé obrazovce
      (flex-wrap jen jako pojistka, 11× ~28px se vejde i na ~360px šířku). */
+  /* Milník 16 (bod 2): drobný nadpis "Tipaři" nad řadou písmenkových
+     tlačítek. Záměrně se nevymýšlí nový vzhled - přebírá se typografie
+     .divider (12px, --text-muted), jediného drobného "rozdělovníku" uvnitř
+     přihlašovací karty, jen bez jeho vodorovných linek: ty by tady mezi
+     dvěma řadami tlačítek působily jako oddělovač sekcí, přitom jde pořád o
+     jeden a týž blok demo přihlašování. */
+  .demo-letters-title {
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin: 12px 0 6px;
+  }
   .demo-row-letters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  /* Milník 16 (bod 2): klidový stav písmenkových tlačítek je nově STEJNĚ
+     zelenkavý jako u velkých .btn-demo (accent-soft pozadí i okraj, accent
+     text) - do Milníku 15 byla kolečka trvale šedá a zezelenala až na
+     hover, takže nevypadala jako součást téhož demo bloku. Tvar (kulatá,
+     28×28) i chování na hover (zesílení na plný --accent, viz níž) zůstávají
+     beze změny. */
   .btn-demo-letter {
     width: 28px; height: 28px; flex: 0 0 auto;
     border-radius: 50%;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    color: var(--text-muted);
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-soft);
+    color: var(--accent);
     font-weight: 700;
     font-size: 12px;
     cursor: pointer;
@@ -406,15 +425,57 @@
      vymyšlené číslo - media query tak dělá přesně to, co popisuje. */
   .auth-page { width: 100%; max-width: 824px; }
 
+  /* Milník 16 (bod 1): align-items PŘEPNUTO z flex-start na stretch.
+     DŮVOD: zadání chce, aby pravý sloupec (nápověda + pod ní Historie
+     verzí) měl PŘESNĚ stejnou horní i dolní hranu jako přihlašovací karta.
+     Dokud byly sloupce zarovnané na flex-start, každý si držel vlastní
+     (obsahovou) výšku a Historie verzí si tu shodu musela kupovat pevnou
+     výškou 760px spočítanou "od stolu" z box modelu .auth-card (viz starý
+     komentář u .auth-changelog, Milník 15). To bylo křehké: jakákoli změna
+     obsahu přihlašovací karty (jiný počet demo tlačítek, delší patička,
+     jiný stav formuláře - registrace/potvrzení e-mailu) tu ručně spočítanou
+     hodnotu okamžitě rozešla.
+     `stretch` dělá totéž, ale nechá to spočítat prohlížeč za běhu: oba
+     sloupce dostanou výšku vyššího z nich (v praxi levého), Historie verzí
+     uvnitř pravého sloupce vyplní `flex:1 1 auto` zbytek. Žádné magické
+     číslo tedy v souboru nezůstává. */
   .auth-columns {
     display: flex;
-    align-items: flex-start;
+    align-items: stretch;
     justify-content: center;
     flex-wrap: wrap;
     gap: 44px;
   }
   .auth-card-col { flex: 0 1 420px; width: 100%; max-width: 420px; }
   .auth-card-col .auth-card { margin: 0; }
+
+  /* Milník 16 (bod 1): obal pravého sloupce (nápověda + Historie verzí pod
+     ní). Přebírá flex-basis i max-width, které do Milníku 15 nesla přímo
+     .auth-help - ta je teď jen prvním dítětem tohoto obalu.
+     Záměrně BEZ `gap`: mezeru mezi oběma kartami dělá margin-top na
+     .auth-changelog (20px). Je to podstatné - `gap` by se totiž započítal i
+     ZA distanční .auth-version-spacer níž a posunul horní hranu nápovědy o
+     těch 20px pod horní hranu přihlašovací karty, tedy přesně to, co bod 1
+     zadání odstraňuje. */
+  .auth-right-col {
+    flex: 1 1 300px;
+    width: 100%;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Milník 16 (bod 1): neviditelný distanční prvek. Levý sloupec má NAD
+     přihlašovací kartou ještě číslo verze (.auth-version, Milník 15), takže
+     `align-items: stretch` sám o sobě srovná horní hranu pravého sloupce s
+     horní hranou ČÍSLA VERZE, ne s horní hranou karty. Rozdíl je přesně
+     výška jednoho .auth-version bloku - a právě proto ho tady zrcadlíme
+     stejnou třídou místo dopočítané konstanty: změní-li se někdy velikost
+     nebo margin čísla verze, posune se s ním i tenhle odstup sám.
+     `visibility: hidden` (ne `display:none`) - prvek musí zabírat místo;
+     zároveň tím mizí i z čteček obrazovky. Na mobilu se vypíná úplně (viz
+     @media níž), tam sloupce jedou pod sebou a žádné zarovnání neřeší. */
+  .auth-version-spacer { visibility: hidden; }
 
   /* Milník 15 (bod 5.1): číslo verze VÝRAZNĚ - tučně a 2× větším písmem
      (12px -> 24px), už ne tlumenou barvou (proto v HTML zmizela třída
@@ -439,10 +500,14 @@
      nebyly (menší vnitřní okraj, jiná optická výška nadpisu). Zadání znělo
      "Panel vizuálně sjednoť s přihlašovacím panelem", takže se padding
      přebírá z .auth-card doslova. */
+  /* Milník 16 (bod 1): flex-basis (1 1 300px) i max-width (360px) se
+     přesunuly na nový obal .auth-right-col - .auth-help je teď jeho dítě a
+     má mít PŘIROZENOU výšku podle obsahu (`flex: 0 0 auto`), aby zbylý
+     prostor sloupce mohla vyplnit Historie verzí pod ní. Vzhled samotné
+     karty (surface/border/radius/shadow/padding) se NEMĚNÍ. */
   .auth-help {
-    flex: 1 1 300px;
+    flex: 0 0 auto;
     width: 100%;
-    max-width: 360px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-l);
@@ -468,49 +533,66 @@
   @media (max-width: 800px) {
     /* Mobil/menší obrazovky: nápověda POD přihlašovací kartou (pořadí v
        HTML - viz #authScreen), ne vedle - viz bod 3 zadání. 800px = reálný
-       bod zalomení .auth-columns, viz komentář u .auth-page výše. */
+       bod zalomení .auth-columns, viz komentář u .auth-page výše.
+       Milník 16 (bod 1): `align-items: stretch` je tu beze změny (byl tu už
+       od Milníku 14) - ve sloupcovém směru znamená "roztáhni na plnou
+       ŠÍŘKU", ne výšku, takže přepnutí hlavního pravidla výš nemá na mobilu
+       žádný vedlejší efekt. Pořadí (login → nápověda → historie) drží
+       pořadí v HTML, obě karty jsou teď v jednom obalu .auth-right-col. */
     .auth-columns { flex-direction: column; align-items: stretch; }
-    .auth-card-col, .auth-help { max-width: none; }
+    .auth-card-col, .auth-right-col, .auth-changelog { max-width: none; }
+    /* Zarovnávací distanc pod sebou nedává smysl - byla by to jen prázdná
+       mezera nad nápovědou (viz komentář u .auth-version-spacer). */
+    .auth-version-spacer { display: none; }
   }
 
-  /* Bod 4 zadání (Milník 14): panel "Historie verzí" - POD dvousloupcovým
-     blokem výše, viditelný vždy (nesbalitelný). Obsah vykresluje
+  /* Bod 4 zadání (Milník 14): panel "Historie verzí". Obsah vykresluje
      renderAuthVersionAndChangelog() z pole APP_CHANGELOG (viz JS) - jedna
      šablona, ne ručně opakované HTML.
 
-     Milník 15 (bod 5.3): panel je teď SAMOSTATNÁ BÍLÁ KARTA se stejným
-     vzhledem jako .auth-card (surface/border/radius-l/shadow-card i stejný
-     padding 32px 28px 24px) a se STEJNOU ŠÍŘKOU (max-width 420px, na střed)
-     i STEJNOU VÝŠKOU jako přihlašovací panel.
+     Milník 15 (bod 5.3): panel je SAMOSTATNÁ BÍLÁ KARTA se stejným vzhledem
+     jako .auth-card (surface/border/radius-l/shadow-card i stejný padding
+     32px 28px 24px). To zůstává beze změny.
 
-     K té výšce: .auth-card ŽÁDNOU pevnou ani max výšku nemá, přizpůsobuje
-     se obsahu (a ten se navíc liší mezi přihlášením/registrací/potvrzením
-     e-mailu). Hodnota 760px níž proto není vymyšlená - je spočítaná z
-     box modelu .auth-card v jejím TYPICKÉM stavu, tedy přihlašovacím
-     formuláři (vnitřní šířka 420 - 2×28 = 364px, box-sizing: border-box,
-     line-height 1.5):
-       32   padding-top
-       43   .auth-brand (26px × 1.5 + 4 margin)
-       46   .auth-sub (20 + 4 + 22 margin)
-      107   .demo-row (5 tlačítek, 3 sloupce -> 2 řádky à 44 + 10 gap + 8)
-       70   .demo-row-letters (11 koleček à 28, 10/řádek -> 2 řádky + 6 + 8)
-       31   .demo-note (17 + 14 margin)
-       54   .divider (18 + 18 + 18)
-      161   2× .field (19,5 label + 5 gap + 40 input + 16 margin)
-       48   .btn-primary (12 + 12 padding + 2 border + 22 text)
-       36   .switch-line (16 margin + 20)
-      105   .auth-footnote (22 margin + 16 padding + 1 border + 4 řádky à 16,5)
-       24   padding-bottom
-      ----
-      757  -> zaokrouhleno na 760px
-     Použitá je `height` (ne `max-height`), aby ta výška platila spolehlivě
-     oběma směry - panel se tedy NEZVĚTŠÍ, ani když je v historii 10+ verzí.
-     Přebývající obsah se scrolluje uvnitř, viz .auth-changelog-list. */
+     Milník 16 (bod 1): panel se PŘESTĚHOVAL - z pozice "celá šířka pod
+     dvousloupcovým blokem" do PRAVÉHO SLOUPCE, jako druhé dítě
+     .auth-right-col hned pod nápovědu. Tím padly tři věci z Milníku 15:
+
+       1) `height: 760px`. Ta hodnota byla ručně dopočítaná z box modelu
+          .auth-card v jejím TYPICKÉM (přihlašovacím) stavu - tedy odhad,
+          který přestal platit pokaždé, když se obsah karty změnil
+          (registrační formulář, obrazovka "Zkontrolujte e-mail", přibylé
+          demo tlačítko). Nahrazuje ji `flex: 1 1 auto; min-height: 0;`:
+          pravý sloupec je díky `align-items: stretch` (viz .auth-columns)
+          přesně tak vysoký jako levý, nápověda nad tímhle panelem si bere
+          svou přirozenou výšku a Historie verzí dostane VŠECHNO, co zbyde.
+          Dolní hrana tedy sedí na dolní hranu přihlašovací karty bez
+          jediné konstanty - a sedí i po libovolné budoucí změně obsahu.
+          `min-height: 0` je u flex položky nutnost, jinak by odmítla
+          zmenšit se pod velikost svého obsahu a vnitřní scroll
+          (.auth-changelog-list) by se nikdy neuplatnil.
+       2) `margin: 36px auto 0` (centrování na celou šířku). Teď stačí
+          `margin: 20px 0 0` = mezera mezi nápovědou a historií uvnitř
+          sloupce; vodorovné zarovnání řeší sám sloupec.
+       3) `max-width: 420px` (šířka PŘIHLAŠOVACÍ karty). Panel teď sdílí
+          šířku s nápovědou, takže i max-width je shodná s .auth-help, tedy
+          360px - stejnou hodnotu drží i obal .auth-right-col, tohle je jen
+          explicitní pojistka, aby se panel nikdy nerozjel jinam než
+          nápověda nad ním. */
   .auth-changelog {
     width: 100%;
-    max-width: 420px;
-    height: 760px;
-    margin: 36px auto 0;
+    max-width: 360px;
+    /* `flex: 1 1 0` (ne `1 1 auto`) je tu KLÍČOVÉ a ověřené měřením v
+       reálném prohlížeči, ne odhadem. S `auto` je výchozí velikost položky
+       její OBSAH, takže by se výška pravého sloupce počítala i z celé
+       Historie verzí (~1900px u 12 položek) - sloupec by tím byl vyšší než
+       přihlašovací karta a `align-items: stretch` na .auth-columns by pak
+       naopak roztáhl LEVÝ sloupec. Výsledek by byl přesný opak zadání.
+       S `0` je výchozí velikost nula: výšku řádku určí jen levý sloupec a
+       Historie verzí dostane zbytek, kolik ho je. */
+    flex: 1 1 0;
+    min-height: 0;
+    margin: 20px 0 0;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-l);
@@ -555,6 +637,23 @@
   }
   .auth-changelog-entry ul { margin: 0; padding-left: 16px; }
   .auth-changelog-entry li { margin-bottom: 2px; }
+
+  /* Milník 16 (bod 1): mobilní korekce pravého sloupce. MUSÍ stát AŽ ZA
+     pravidly .auth-changelog výš - obě mají stejnou specificitu, takže by
+     je dřívější @media blok (u .auth-help) neapřebil.
+     Dvě věci, které na mobilu platit nesmí:
+       1) `max-width: 360px` - ve sloupcovém rozvržení se karty roztahují na
+          plnou šířku, jinak by Historie verzí byla o 8px užší než nápověda
+          nad ní (ověřeno měřením v prohlížeči na 400px).
+       2) `flex: 1 1 0` - ten dává smysl jen tam, kde výšku sloupce diktuje
+          přihlašovací karta vedle. Pod sebou žádná taková výška neexistuje,
+          takže by se panel s nulovou výchozí velikostí smrskl na samotný
+          nadpis (opět ověřeno měřením: 76px, seznam verzí vůbec nevidět).
+          Na mobilu má mít přirozenou výšku podle obsahu a scrolluje se celá
+          stránka, ne vnitřek panelu. */
+  @media (max-width: 800px) {
+    .auth-changelog { max-width: none; flex: 0 0 auto; }
+  }
 
   .banner {
     border-radius: var(--radius-s);
@@ -864,6 +963,26 @@
   .btn-small.btn-small-danger:hover { background: var(--danger-soft); }
 
   .toolbar-row-end { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+
+  /* Milník 16 (bod 5): pruh pro DESTRUKTIVNÍ dočasnou testovací akci.
+     Vědomě se odlišuje od zbytku appky - varovné (danger) pozadí i okraj,
+     takže tlačítko nejde splést s běžnými akcemi v liště nad ním. Barva
+     ale nenese význam sama o sobě: je doprovozená ikonou ⚠️ i textem, co
+     akce udělá (stejné pravidlo jako u stat-tile v Milníku 12). */
+  .danger-zone {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    background: var(--danger-soft);
+    border: 1px solid var(--danger);
+    border-radius: var(--radius-m);
+    padding: 12px 16px;
+    margin-bottom: 16px;
+  }
+  .danger-zone-text { display: flex; flex-direction: column; gap: 2px; font-size: 12.5px; color: var(--text); max-width: 640px; }
+  .danger-zone-text strong { color: var(--danger); }
 
   /* ---------- Milník 12 (bod 6) → Milník 13 (bod 5, PŘEPSÁNO) ----------
      stat-tile dlaždicový kontrakt.
@@ -1216,6 +1335,35 @@
   }
   .dt-table th.dt-col-narrow, .dt-table th.dt-col-mini { white-space: normal; line-height: 1.25; }
 
+  /* Milník 16 (bod 4): dvě další šířkové třídy pro tabulku Uživatelé -
+     stejný vzor jako .dt-col-narrow/.dt-col-mini výš, jen pro TEXTOVÉ
+     sloupce, takže zůstávají zarovnané doleva (ne doprava jako číselné).
+     Důvod je stejný jako u Milníku 13: uvolnit vodorovné místo, aby se
+     akční sloupec vešel bez scrollování - telefon i e-mail si u
+     table-layout:auto braly šířku podle nejdelší hodnoty v celém sloupci.
+     Telefon má pevný formát (9 číslic / "+420 777 123 456"), takže se do
+     115px vejde celý. E-mail se ale zkrátit dá - proto navíc
+     overflow:hidden + text-overflow:ellipsis (funguje díky `white-space:
+     nowrap`, které .dt-table td má globálně). Aby se tím informace
+     NEZTRATILA, nese render() u e-mailu `title` s plnou hodnotou (stejný
+     vzor přístupnosti jako registraceDotsHtml/statusDotHtml) a v Detailu
+     uživatele (bod 3) se e-mail i telefon pořád zobrazují celé. */
+  .dt-table th.dt-col-phone, .dt-table td.dt-col-phone {
+    width: 115px; max-width: 115px;
+  }
+  .dt-table th.dt-col-email, .dt-table td.dt-col-email {
+    width: 170px; max-width: 170px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Milník 16 (bod 4): jméno a příjmení v tabulce Uživatelé tučně - klient
+     chtěl, aby šlo řádek očima najít podle jména, ne podle pozice sloupce.
+     Vlastní třída (ne holé <strong>) proto, aby se řez dal kdykoli změnit
+     na jednom místě a aby zvýraznění zůstalo součástí vizuálního jazyka
+     .dt-table, ne ad-hoc značkou v jednom render(). */
+  .dt-table td .dt-strong { font-weight: 700; color: var(--text); }
+
   /* Milník 13 (bod 3): 3 tečky fáze registrace (nahrazují textový pill). */
   .dt-dots { display: inline-flex; gap: 3px; align-items: center; justify-content: flex-end; }
   .dt-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); display: inline-block; }
@@ -1276,6 +1424,126 @@
     padding: 40px 16px; overflow-y: auto;
   }
   .modal-box { width: 100%; max-width: 480px; }
+
+  /* =====================================================================
+     Milník 16, bod 6 — STATICKÝ vizuální redesign dashboardu TIPAŘE
+     =====================================================================
+     Pozor: celá tahle sekce je POUZE VZHLED. Všechna čísla, tipy, lekce,
+     kvíz i příspěvky komunity jsou napevno v HTML (žádná data z databáze),
+     nic v ní není klikací a nic nikam nenaviguje - viz #dashboardTiparWrap.
+     Týká se výhradně role `tipar`; administrátorova větev dashboardu
+     zůstává beze změny (#dashboardAdminWrap).
+
+     Vizuální záměr podle zadání: vzdušné, moderní, lidské, profesionální.
+     V praxi to znamená hodně bílého prostoru, čitelnou typografii a
+     MINIMUM rámečků - karta (.tdash-panel) se používá jen tam, kde blok
+     opravdu drží pohromadě jako celek, ne kolem každého údaje. Barvy,
+     poloměry a stíny se berou z proměnných appky (--surface/--border/
+     --radius-l/--accent…), aby dashboard nevypadal jako cizí těleso.
+     Na mobilu se všechno sloupcuje pod sebe, žádná navigace navíc. */
+
+  .tdash { display: flex; flex-direction: column; gap: 40px; }
+
+  /* --- 6.1 hero --- */
+  .tdash-hero { padding: 8px 0 0; }
+  .tdash-hero h2 { font-size: 30px; line-height: 1.2; margin: 0; }
+  .tdash-hero p { color: var(--text-muted); font-size: 15.5px; margin: 8px 0 20px; }
+
+  /* --- 6.2 "Vaše cesta právě začíná" --- */
+  .tdash-section-title { font-family: var(--font-display); font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+  .tdash-section-sub { color: var(--text-muted); font-size: 13px; margin: 0 0 18px; }
+
+  /* Statistiky bez rámečků - jen typografie a tenká linka vlevo, ať to
+     nepůsobí jako čtyři krabice vedle sebe. */
+  .tdash-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 20px 28px; margin-bottom: 30px; }
+  .tdash-stat { border-left: 2px solid var(--accent-soft); padding-left: 14px; }
+  .tdash-stat-num { font-family: var(--font-display); font-size: 26px; font-weight: 600; line-height: 1.15; }
+  .tdash-stat-label { color: var(--text-muted); font-size: 13px; margin-top: 2px; }
+  /* Hvězdička u "možných odměn" - klient výslovně chtěl, aby částka
+     nepůsobila jako příslib ani garance. */
+  .tdash-stat-note { display: block; color: var(--text-muted); font-size: 11.5px; font-style: italic; margin-top: 4px; }
+
+  /* 6-kroková cesta tipaře místo prázdného grafu. Vodorovně na šířku,
+     pod sebou na úzké obrazovce. */
+  .tdash-pipeline { display: flex; gap: 6px; align-items: flex-start; flex-wrap: wrap; }
+  .tdash-step { flex: 1 1 120px; min-width: 110px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; position: relative; }
+  .tdash-step-dot {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+    background: var(--surface-2); border: 1px solid var(--border); color: var(--text-muted);
+  }
+  .tdash-step-label { font-size: 12.5px; color: var(--text-muted); line-height: 1.35; }
+  .tdash-step-done .tdash-step-dot { background: var(--accent-soft); border-color: var(--accent-soft); color: var(--accent); }
+  .tdash-step-done .tdash-step-label { color: var(--text); }
+  /* Aktuální krok - zvýrazněný i tvarem (plná výplň) a slovem "Jste tady",
+     ne jen barvou. */
+  .tdash-step-current .tdash-step-dot { background: var(--accent); border-color: var(--accent); color: var(--accent-contrast); }
+  .tdash-step-current .tdash-step-label { color: var(--text); font-weight: 600; }
+  .tdash-step-here { font-size: 11px; color: var(--accent); font-weight: 600; }
+
+  /* --- 6.9 dvousloupcové pásmo (tipy vlevo, akademie + kvíz vpravo) --- */
+  .tdash-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+  @media (max-width: 860px) { .tdash-cols { grid-template-columns: 1fr; gap: 32px; } }
+  .tdash-col { display: flex; flex-direction: column; gap: 28px; }
+
+  /* --- 6.3 tipy jako PROSTÉ ŘÁDKY, ne karty (výslovný požadavek) --- */
+  .tdash-tip-row {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .tdash-tip-row:last-of-type { border-bottom: none; }
+  .tdash-tip-name { font-weight: 600; }
+  .tdash-tip-stav { color: var(--text-muted); font-size: 13px; white-space: nowrap; }
+
+  /* --- 6.4 akademie / úrovně --- */
+  .tdash-progress { height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; margin: 4px 0 6px; }
+  .tdash-progress-fill { height: 100%; background: var(--accent); border-radius: 3px; }
+  .tdash-progress-note { font-size: 12px; color: var(--text-muted); margin: 0 0 18px; }
+  .tdash-level { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .tdash-level:last-of-type { border-bottom: none; }
+  .tdash-level-icon { flex: 0 0 auto; width: 22px; text-align: center; font-size: 13px; }
+  .tdash-level-name { font-weight: 600; font-size: 14px; }
+  .tdash-level-sub { font-size: 12px; color: var(--text-muted); }
+  /* Zamčené úrovně: ztlumené A s ikonou zámku - význam nikdy jen barvou. */
+  .tdash-level-locked .tdash-level-name, .tdash-level-locked .tdash-level-sub { color: var(--text-muted); opacity: .65; }
+
+  /* --- 6.5 kvízový teaser / 6.7 články / 6.8 komunita: lehká karta --- */
+  .tdash-panel {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-l); padding: 20px 22px;
+  }
+  .tdash-panel h4 { font-family: var(--font-display); font-size: 16px; font-weight: 600; margin: 0 0 10px; }
+  .tdash-quiz-q { font-size: 14.5px; margin: 0 0 12px; }
+  .tdash-quiz-options { display: flex; flex-direction: column; gap: 8px; }
+  /* Vypadá jako volba, ale nic nedělá - `type="button"` bez posluchače. */
+  .tdash-quiz-option {
+    text-align: left; background: transparent; border: 1px solid var(--border);
+    border-radius: var(--radius-s); padding: 9px 12px; font-size: 13.5px; color: var(--text);
+    cursor: default;
+  }
+
+  /* --- 6.6 osobní příběh zakladatelky --- */
+  .tdash-story { max-width: 720px; }
+  .tdash-story p { font-size: 15.5px; line-height: 1.7; margin: 0 0 14px; }
+  .tdash-story-sign { font-family: var(--font-display); font-size: 15px; color: var(--text); margin: 0; }
+  .tdash-story-sign span { display: block; font-family: var(--font-ui); font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
+
+  /* --- 6.7 tři teasery budoucích článků --- */
+  .tdash-articles { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+  .tdash-article-title { font-weight: 600; font-size: 14.5px; margin: 0 0 4px; }
+  .tdash-article-text { color: var(--text-muted); font-size: 13px; margin: 0 0 6px; }
+  .tdash-soon { font-size: 11.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; }
+
+  /* --- 6.8 komunita --- */
+  .tdash-topic { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .tdash-topic:last-of-type { border-bottom: none; }
+  .tdash-topic-name { font-size: 14px; }
+  .tdash-topic-count { font-size: 12.5px; color: var(--text-muted); white-space: nowrap; }
+
+  /* Tlačítko "Mám nový tip" v hero sekci - vypadá jako primární akce, ale
+     je to jen vzhled (bez posluchače, viz HTML). */
+  .tdash-cta { width: auto; padding: 12px 26px; }
 
   [hidden] { display: none !important; }
 </style>
@@ -1397,8 +1665,19 @@
                  chtěl "malá tlačítka s konkrétním písmenem v jedné řadě",
                  ne velké popisné jako výše) - viz DEMO_ACCOUNTS pro
                  vysvětlení scénáře každého písmene (title atribut = krátký
-                 popis při najetí myší). -->
+                 popis při najetí myší).
+                 Milník 16 (bod 2): řada je nově uvozená nadpisem "Tipaři" a
+                 začíná písmeny A a B. Velká tlačítka "Tipař A"/"Tipař B" v
+                 řádku výš ZŮSTÁVAJÍ beze změny - klient výslovně chtěl
+                 obojí, tedy DVĚ různá tlačítka vedoucí ke stejnému demo
+                 účtu. Aby z toho nevznikla druhá, ručně udržovaná kopie
+                 přihlašovací logiky, mají nová tlačítka vlastní `id`, ale
+                 vážou se na TÝŽ klíč DEMO_ACCOUNTS ('a' / 'b') přes
+                 DEMO_EXTRA_BUTTON_IDS - viz demoButtonIdsForKey() v JS. -->
+            <h4 class="demo-letters-title">Tipaři</h4>
             <div class="demo-row-letters" id="demoLettersRow">
+              <button class="btn-demo-letter" id="demoALetterBtn" type="button" title="Tipař A — stejný účet jako velké tlačítko „Tipař A“">A</button>
+              <button class="btn-demo-letter" id="demoBLetterBtn" type="button" title="Tipař B — stejný účet jako velké tlačítko „Tipař B“">B</button>
               <button class="btn-demo-letter" id="demoCBtn" type="button" title="Tipař C — email ověřen, adresa nevyplněná">C</button>
               <button class="btn-demo-letter" id="demoDBtn" type="button" title="Tipař D — adresa vyplněná, KYC nenahráno">D</button>
               <button class="btn-demo-letter" id="demoEBtn" type="button" title="Tipař E — KYC čeká na ověření">E</button>
@@ -1502,35 +1781,52 @@
         </div>
         </div>
 
-        <!-- Bod 2 zadání: tichá nápověda k demo přihlašování - přesné znění
-             podle zadání klienta, žádné ikony/emoji ani výstražný box. Na
-             mobilu (viz @media výše) se zobrazí POD .auth-card-col díky
-             pořadí v HTML. -->
-        <!-- Milník 15 (bod 5.2): nápověda přesunuta do SAMOSTATNÉHO panelu -
-             bílá karta ve stejném vizuálním stylu jako .auth-card (viz CSS
-             .auth-help) a s vlastním nadpisem "Nápověda k testovací verzi"
-             (<h3>, konzistentně s nadpisy karet jinde v appce). Znění všech
-             3 odrážek se NEMĚNÍ, mění se jen obal a nadpis. -->
-        <aside class="auth-help" id="authHelp">
-          <h3 class="auth-help-title">Nápověda k testovací verzi</h3>
-          <ul class="auth-help-list">
-            <li>Není potřeba zadávat e-mail ani heslo.</li>
-            <li>Tlačítka slouží k rychlému testovacímu přihlášení do jednotlivých rolí.</li>
-            <li>Pro otestování jiné role je nutné se nejprve odhlásit.</li>
-          </ul>
-        </aside>
-        </div>
+        <!-- Milník 16 (bod 1): PRAVÝ SLOUPEC. Nápověda a Historie verzí byly
+             do Milníku 15 dva nezávislé bloky - nápověda vedle přihlašovací
+             karty, Historie verzí až POD celým dvousloupcovým blokem přes
+             celou šířku. Klient chtěl obojí pod sebou v jednom sloupci
+             vpravo, zarovnané na horní i dolní hranu přihlašovací karty,
+             takže je tu nový společný obal .auth-right-col a Historie verzí
+             se přestěhovala dovnitř (viz CSS - právě díky tomu z ní mohla
+             zmizet natvrdo spočítaná výška 760px). -->
+        <div class="auth-right-col">
+          <!-- Neviditelný distanc odpovídající výšce čísla verze v levém
+               sloupci - bez něj by nápověda začínala o tuhle výšku VÝŠ než
+               přihlašovací karta. Zrcadlí .auth-version schválně toutéž
+               třídou, ne dopočítanou konstantou (viz CSS). -->
+          <p class="auth-version auth-version-spacer" aria-hidden="true">&nbsp;</p>
 
-        <!-- Bod 4 zadání (Milník 14): Historie verzí pod dvousloupcovým
-             blokem výše, obsah vykresluje renderAuthVersionAndChangelog() z pole
-             APP_CHANGELOG (viz <script>).
-             Milník 15 (bod 5.3): taky SAMOSTATNÝ bílý panel ve stejném stylu
-             i se stejnou šířkou a výškou jako přihlašovací karta (viz CSS
-             .auth-changelog). Nadpis je <h3> a zůstává vždy vidět - scrolluje
-             se jen seznam verzí pod ním (#authChangelogList). -->
-        <div class="auth-changelog" id="authChangelog">
-          <h3 class="auth-changelog-title">Historie verzí</h3>
-          <div class="auth-changelog-list" id="authChangelogList"></div>
+          <!-- Bod 2 zadání: tichá nápověda k demo přihlašování - přesné znění
+               podle zadání klienta, žádné ikony/emoji ani výstražný box. Na
+               mobilu (viz @media výše) se zobrazí POD .auth-card-col díky
+               pořadí v HTML. -->
+          <!-- Milník 15 (bod 5.2): nápověda přesunuta do SAMOSTATNÉHO panelu -
+               bílá karta ve stejném vizuálním stylu jako .auth-card (viz CSS
+               .auth-help) a s vlastním nadpisem "Nápověda k testovací verzi"
+               (<h3>, konzistentně s nadpisy karet jinde v appce). Znění všech
+               3 odrážek se NEMĚNÍ, mění se jen obal a nadpis. -->
+          <aside class="auth-help" id="authHelp">
+            <h3 class="auth-help-title">Nápověda k testovací verzi</h3>
+            <ul class="auth-help-list">
+              <li>Není potřeba zadávat e-mail ani heslo.</li>
+              <li>Tlačítka slouží k rychlému testovacímu přihlášení do jednotlivých rolí.</li>
+              <li>Pro otestování jiné role je nutné se nejprve odhlásit.</li>
+            </ul>
+          </aside>
+
+          <!-- Bod 4 zadání (Milník 14): Historie verzí, obsah vykresluje
+               renderAuthVersionAndChangelog() z pole APP_CHANGELOG (viz <script>).
+               Milník 15 (bod 5.3): SAMOSTATNÝ bílý panel ve stejném stylu jako
+               přihlašovací karta (viz CSS .auth-changelog). Nadpis je <h3> a
+               zůstává vždy vidět - scrolluje se jen seznam verzí pod ním
+               (#authChangelogList).
+               Milník 16 (bod 1): druhé (a poslední) dítě pravého sloupce, hned
+               pod nápovědou - vyplní zbytek jeho výšky. -->
+          <div class="auth-changelog" id="authChangelog">
+            <h3 class="auth-changelog-title">Historie verzí</h3>
+            <div class="auth-changelog-list" id="authChangelogList"></div>
+          </div>
+        </div>
         </div>
         </div>
       </div>
@@ -1799,6 +2095,24 @@
         <button class="btn-small" id="usersExportBtn" type="button">Export</button>
       </div>
 
+      <!-- ===== Milník 16 (bod 5): DOČASNÉ testovací tlačítko =====
+           Umístěno sem, do záložky Uživatelé, protože akce se týká výhradně
+           uživatelských PROFILŮ (tipy, doklady, adresa, auditní stopa tří
+           demo účtů) a administrátor je vidí přímo v tabulce pod tlačítkem -
+           po resetu tak hned uvidí výsledek. Vlastní řádek pod běžnou lištou
+           akcí (ne mezi "Přidat uživatele"/"Export"), aby destruktivní akce
+           nebyla vizuálně zaměnitelná s běžnými.
+           Viditelnost jen pro administrátora řeší handleSignedIn(); skutečné
+           oprávnění vynucuje RPC resetovat_demo_ucty_abc() na serveru
+           (je_administrator()), ne tohle schování. -->
+      <div class="danger-zone" id="usersDemoResetWrap" hidden>
+        <div class="danger-zone-text">
+          <strong>⚠️ Dočasná testovací funkce</strong>
+          <span>Smaže tipy, nahrané doklady totožnosti, adresu a auditní stopu demo účtů <strong>A, B a C</strong> a vrátí je do počátečního stavu. Účty samotné (ani jejich sponzory) nemaže. Určeno jen k testování — před ostrým provozem bude odstraněno.</span>
+        </div>
+        <button class="btn-small btn-small-danger" id="usersDemoResetBtn" type="button">⚠️ Resetovat testovací účty A–C</button>
+      </div>
+
       <div id="usersFormWrap"></div>
 
       <div id="usersTableWrap"></div>
@@ -1918,12 +2232,232 @@
          placeholder, žádné tlačítko v hlavním tab-baru (viz TAB_SCREEN a
          logoNavigateHome() v JS - dosažitelné jen klikem na logo). -->
     <section id="dashboardScreen" class="page" hidden>
-      <div class="section-head">
-        <h2 id="dashboardScreenTitle">Dashboard</h2>
+      <!-- Milník 16 (bod 6): obrazovku si nově dělí DVĚ větve podle role.
+           Administrátorská (#dashboardAdminWrap) je doslova to, co tu bylo
+           od Milníku 12 - zástupný box "připravujeme", beze změny textu i
+           struktury. Tipařská (#dashboardTiparWrap) je nová a je to POUZE
+           statický vizuální návrh (viz komentář u ní). Přepíná mezi nimi
+           logoNavigateHome(), viditelnost nuluje clearRoleSpecificContainers()
+           při změně identity, aby jedné roli neproblikla obrazovka druhé. -->
+      <div id="dashboardAdminWrap" hidden>
+        <div class="section-head">
+          <h2 id="dashboardScreenTitle">Dashboard</h2>
+        </div>
+        <div class="placeholder-box">
+          <div class="placeholder-icon">🚧</div>
+          <p id="dashboardScreenText"><strong>Dashboard – připravujeme.</strong></p>
+        </div>
       </div>
-      <div class="placeholder-box">
-        <div class="placeholder-icon">🚧</div>
-        <p id="dashboardScreenText"><strong>Dashboard – připravujeme.</strong></p>
+
+      <!-- ============================================================
+           Milník 16, bod 6 — DASHBOARD TIPAŘE (statický vizuální návrh)
+           ============================================================
+           KRITICKÉ OMEZENÍ (klient ho zdůraznil opakovaně): tohle je čistě
+           VZHLED, žádná funkčnost.
+             * Všechna čísla, tipy, lekce, kvíz a příspěvky komunity jsou
+               UKÁZKOVÁ DATA napevno v tomhle HTML - nic se nenačítá z
+               databáze a nic se do ní nezapisuje.
+             * Nic tady nemá posluchače události: tlačítka jsou
+               `type="button"` bez `addEventListener`, odkazy tu nejsou
+               vůbec (žádné href), takže klik nikam nevede a nic neotevře.
+             * Nepřibyla žádná záložka, položka navigace, routing, role ani
+               oprávnění - obrazovka #dashboardScreen existovala od Milníku
+               12 a je dosažitelná jen klikem na logo (viz logoNavigateHome).
+           Rozvržení podle bodu 6.9: hero + "cesta" na celou šířku nahoře,
+           pak dva sloupce (tipy vlevo, akademie+kvíz vpravo), pak zase celá
+           šířka dole (příběh, články, komunita). -->
+      <div class="tdash" id="dashboardTiparWrap" hidden>
+
+        <!-- 6.1 hero -->
+        <div class="tdash-hero">
+          <h2>Vítejte v Realitním tipu</h2>
+          <p>Místo naděje, vzdělávání a přátelství</p>
+          <!-- Vizuálně primární akce, funkčně nic - bez posluchače. -->
+          <button class="btn-primary tdash-cta" type="button">Mám nový tip</button>
+        </div>
+
+        <!-- 6.2 "Vaše cesta právě začíná" (celá šířka) -->
+        <div>
+          <h3 class="tdash-section-title">Vaše cesta právě začíná</h3>
+          <p class="tdash-section-sub">Ukázkový přehled — takhle bude vypadat, až začnete.</p>
+
+          <div class="tdash-stats">
+            <div class="tdash-stat">
+              <div class="tdash-stat-num">3</div>
+              <div class="tdash-stat-label">odeslané tipy</div>
+            </div>
+            <div class="tdash-stat">
+              <div class="tdash-stat-num">1</div>
+              <div class="tdash-stat-label">tip v jednání s realitní kanceláří</div>
+            </div>
+            <!-- Částka MUSÍ být viditelně označená jako nezaručená -
+                 výslovný požadavek klienta, ať nepůsobí jako příslib. -->
+            <div class="tdash-stat">
+              <div class="tdash-stat-num">42 500 Kč<span aria-hidden="true">*</span></div>
+              <div class="tdash-stat-label">v možných odměnách</div>
+              <span class="tdash-stat-note">*možná odměna, nikoli záruka — skutečná částka závisí na tom, zda a za kolik se obchod uzavře</span>
+            </div>
+            <div class="tdash-stat">
+              <div class="tdash-stat-num">12</div>
+              <div class="tdash-stat-label">dní s Realitním tipem</div>
+            </div>
+          </div>
+
+          <!-- Místo prázdného grafu: 6 kroků cesty tipaře. Zvýrazněný krok
+               je jen ukázka, nepočítá se z ničeho. -->
+          <div class="tdash-pipeline">
+            <div class="tdash-step tdash-step-done">
+              <div class="tdash-step-dot" aria-hidden="true">✓</div>
+              <div class="tdash-step-label">Registrace</div>
+            </div>
+            <div class="tdash-step tdash-step-done">
+              <div class="tdash-step-dot" aria-hidden="true">✓</div>
+              <div class="tdash-step-label">Ověření totožnosti</div>
+            </div>
+            <div class="tdash-step tdash-step-current">
+              <div class="tdash-step-dot" aria-hidden="true">3</div>
+              <div class="tdash-step-label">První tip</div>
+              <div class="tdash-step-here">Jste tady</div>
+            </div>
+            <div class="tdash-step">
+              <div class="tdash-step-dot" aria-hidden="true">4</div>
+              <div class="tdash-step-label">Ověření tipu</div>
+            </div>
+            <div class="tdash-step">
+              <div class="tdash-step-dot" aria-hidden="true">5</div>
+              <div class="tdash-step-label">Předání realitní kanceláři</div>
+            </div>
+            <div class="tdash-step">
+              <div class="tdash-step-dot" aria-hidden="true">6</div>
+              <div class="tdash-step-label">Uzavřený obchod a odměna</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6.9 dva sloupce -->
+        <div class="tdash-cols">
+
+          <!-- 6.3 levý sloupec: tipy jako PROSTÉ ŘÁDKY, ne karty -->
+          <div class="tdash-col">
+            <div>
+              <h3 class="tdash-section-title">Co se děje s vašimi tipy</h3>
+              <p class="tdash-section-sub">Ukázková data.</p>
+              <div class="tdash-tip-row">
+                <span class="tdash-tip-name">Jana Nováková</span>
+                <span class="tdash-tip-stav">Čeká na ověření</span>
+              </div>
+              <div class="tdash-tip-row">
+                <span class="tdash-tip-name">Petr Svoboda</span>
+                <span class="tdash-tip-stav">Předáno realitní kanceláři</span>
+              </div>
+              <div class="tdash-tip-row">
+                <span class="tdash-tip-name">Marie Dvořáková</span>
+                <span class="tdash-tip-stav">Nemovitost v prodeji</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6.4 + 6.5 pravý sloupec: akademie a kvízový teaser -->
+          <div class="tdash-col">
+            <div>
+              <h3 class="tdash-section-title">Učte se vlastním tempem</h3>
+              <p class="tdash-section-sub">Ukázková data.</p>
+              <div class="tdash-progress" aria-hidden="true"><div class="tdash-progress-fill" style="width:50%;"></div></div>
+              <p class="tdash-progress-note">Úroveň Začátečník — 50 % dokončeno (3 z 6 lekcí)</p>
+
+              <div class="tdash-level">
+                <span class="tdash-level-icon" aria-hidden="true">●</span>
+                <span>
+                  <span class="tdash-level-name">Začátečník</span><br>
+                  <span class="tdash-level-sub">Jak poznat dobrý tip</span>
+                </span>
+              </div>
+              <div class="tdash-level tdash-level-locked">
+                <span class="tdash-level-icon" aria-hidden="true">🔒</span>
+                <span>
+                  <span class="tdash-level-name">Pokročilý</span><br>
+                  <span class="tdash-level-sub">Zamčeno — dokončete úroveň Začátečník</span>
+                </span>
+              </div>
+              <div class="tdash-level tdash-level-locked">
+                <span class="tdash-level-icon" aria-hidden="true">🔒</span>
+                <span>
+                  <span class="tdash-level-name">Expert</span><br>
+                  <span class="tdash-level-sub">Zamčeno</span>
+                </span>
+              </div>
+              <div class="tdash-level tdash-level-locked">
+                <span class="tdash-level-icon" aria-hidden="true">🔒</span>
+                <span>
+                  <span class="tdash-level-name">Mistr</span><br>
+                  <span class="tdash-level-sub">Zamčeno</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- 6.5 kvízový teaser - jedna ukázková otázka, bez vyhodnocení -->
+            <div class="tdash-panel">
+              <h4>Ověřte si své znalosti</h4>
+              <p class="tdash-quiz-q">Kdy má smysl poslat tip, i když majitel ještě váhá?</p>
+              <div class="tdash-quiz-options">
+                <button class="tdash-quiz-option" type="button">Nikdy — dokud se nerozhodne, tip nedává smysl</button>
+                <button class="tdash-quiz-option" type="button">Ano, pokud o prodeji uvažuje a souhlasí s oslovením</button>
+                <button class="tdash-quiz-option" type="button">Jen když už má inzerát u jiné kanceláře</button>
+              </div>
+              <p class="tdash-section-sub" style="margin:12px 0 0;">Ukázka — kvíz zatím nevyhodnocuje odpovědi.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6.6 osobní příběh zakladatelky (celá šířka) -->
+        <div class="tdash-story">
+          <h3 class="tdash-section-title">Proč Realitní tip vznikl</h3>
+          <p>Dlouho jsem koukala na to, jak lidé kolem mě vědí o někom, kdo chce prodat byt — a nemají to komu říct. Přišlo mi to škoda na obou stranách.</p>
+          <p>Tak jsem začala. Nejdřív jsem tipy sháněla po známých a předávala je sama, pak se přidali další a bylo jasné, že to potřebuje pořádné zázemí.</p>
+          <p>Nechci po vás, abyste cokoli prodávali nebo někoho přemlouvali. Stačí, když si vzpomenete, komu by se pomoc hodila — o zbytek se postaráme my. A když něco nebude jasné, napište mi. Fakt.</p>
+          <p class="tdash-story-sign">Zuzana<span>Vaše průvodkyně Realitním tipem</span></p>
+        </div>
+
+        <!-- 6.7 tři teasery budoucích článků - nic z toho nikam nevede -->
+        <div>
+          <h3 class="tdash-section-title">Připravujeme pro vás</h3>
+          <p class="tdash-section-sub">Ukázka — články zatím nejsou k dispozici.</p>
+          <div class="tdash-articles">
+            <div>
+              <p class="tdash-article-title">Jak mluvit o prodeji, aniž byste tlačili</p>
+              <p class="tdash-article-text">Tři věty, které otevřou téma přirozeně — a jedna, které se vyhnout.</p>
+              <span class="tdash-soon">Připravujeme</span>
+            </div>
+            <div>
+              <p class="tdash-article-title">Co se s tipem děje po odeslání</p>
+              <p class="tdash-article-text">Cesta od vašeho tipu k podpisu smlouvy, krok za krokem a bez zkratek.</p>
+              <span class="tdash-soon">Připravujeme</span>
+            </div>
+            <div>
+              <p class="tdash-article-title">Daně a odměny bez paniky</p>
+              <p class="tdash-article-text">Co si pohlídat, když vám přijde první odměna, a co řešit nemusíte.</p>
+              <span class="tdash-soon">Připravujeme</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6.8 komunita - náhled, ŽÁDNÁ reálná diskuzní funkčnost -->
+        <div class="tdash-panel">
+          <h4>Nejste na to sami</h4>
+          <p class="tdash-section-sub" style="margin:0 0 10px;">Ukázka diskuzních témat — komunita se teprve připravuje.</p>
+          <div class="tdash-topic">
+            <span class="tdash-topic-name">První tip a nervozita — jak jste to měli vy?</span>
+            <span class="tdash-topic-count">14 odpovědí</span>
+          </div>
+          <div class="tdash-topic">
+            <span class="tdash-topic-name">Soused prodává chatu. Má smysl ji poslat?</span>
+            <span class="tdash-topic-count">9 odpovědí</span>
+          </div>
+          <div class="tdash-topic">
+            <span class="tdash-topic-name">Jak dlouho vám trvalo ověření totožnosti?</span>
+            <span class="tdash-topic-count">6 odpovědí</span>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -2149,7 +2683,7 @@
   // Milník 14: číslo aktuální verze aplikace - MUSÍ odpovídat nejnovější položce
   // pole APP_CHANGELOG níže (položka na indexu 0). Při každém příštím milníku
   // se zvyšuje ROVNOU TADY i v APP_CHANGELOG - jsou to dvě navzájem závislá místa.
-  var APP_VERSION = "14.0";
+  var APP_VERSION = "15.0";
 
   // Milník 14 (bod 4): obsah panelu "Historie verzí" na přihlašovací
   // obrazovce - zrekonstruováno z reálné historie projektu (STAV.md,
@@ -2158,6 +2692,13 @@
   // pod tímto polem). Vykresluje se generickou šablonou renderAuthVersionAndChangelog()
   // - při dalším milníku se sem jen přidá nová položka na začátek pole.
   var APP_CHANGELOG = [
+    { verze: "15.0", datum: "12. 9. 2026", body: [
+      "Nový vzhled úvodní obrazovky tipaře",
+      "Uživatelé: nejdřív Detail, teprve pak Upravit",
+      "Změna sponzora má vlastní panel i vlastní záznam v Historii akcí",
+      "Přehlednější tabulka uživatelů (tučná jména, užší telefon a e-mail)",
+      "Přihlašovací stránka: nápověda a Historie verzí v jednom sloupci vpravo"
+    ] },
     { verze: "14.0", datum: "11. 9. 2026", body: [
       "Opraven zmizelý obsah záložky Ověření totožnosti",
       "Opraveno krátké probliknutí přehledu lídra běžnému uživateli",
@@ -2462,7 +3003,7 @@
   }
 
   // Milník 11 (bod 1/4): jednořádkové formátování adresy (trvalé i
-  // doručovací) - sdílený helper pro Detail uživatele (openUserForm) i
+  // doručovací) - sdílený helper pro Detail uživatele (renderUserDetailCard) i
   // Leaderovu obrazovku Ověření totožnosti (renderKycList).
   function adresaRadekHtml(ulice, mesto, psc, stat) {
     var parts = [];
@@ -3493,9 +4034,19 @@
       if (e) e.innerHTML = "";
     });
     resetDataTableInstances();
+    // Milník 16 (bod 3h): panely Detail/Upravit/Sponzor drží svůj stav i v
+    // JS proměnných (id cílového uživatele, režim, cache řádků) - samotné
+    // `innerHTML = ""` u #usersFormWrap výš by je nechalo naživu. Viz
+    // komentář u resetUsersPanelState().
+    resetUsersPanelState();
     // Prvky, které se neřídí innerHTML, ale viditelností podle role.
+    // Milník 16 (bod 5/6): #usersDemoResetWrap (destruktivní admin tlačítko)
+    // a #dashboardTiparWrap/#dashboardAdminWrap (obsah dashboardu podle
+    // role) se řídí viditelností, ne obsahem - musí tedy zhasnout dřív, než
+    // se potvrdí role nové identity.
     ["kycSubmitWrap", "networkAddUserBtnWrap", "networkAddTipBtnWrap",
-     "profileRegSummaryCard", "networkLoadingWrap"].forEach(function (id) {
+     "profileRegSummaryCard", "networkLoadingWrap", "usersDemoResetWrap",
+     "dashboardTiparWrap", "dashboardAdminWrap"].forEach(function (id) {
       var e = el(id);
       if (e) e.hidden = true;
     });
@@ -3915,18 +4466,33 @@
   // landing page je od Milníku 5). Administrator/tipar -> nová prázdná
   // záložka "dashboard" (bez tlačítka v tab-baru, viz TAB_SCREEN). RK ->
   // no-op (jediná obrazovka "rkportal" beztak).
+  // Milník 16 (bod 6): obrazovka "dashboard" má teď dvě vzájemně výlučné
+  // větve (administrátorský zástupný box vs. nový vizuální dashboard
+  // tipaře). Přepínání je na jednom místě, ať jedna role nikdy neuvidí
+  // obsah druhé - i kdyby se na obrazovku dostala jinou cestou.
+  function showDashboardVariant(variant) {
+    var adminWrap = el("dashboardAdminWrap");
+    var tiparWrap = el("dashboardTiparWrap");
+    if (adminWrap) adminWrap.hidden = (variant !== "administrator");
+    if (tiparWrap) tiparWrap.hidden = (variant !== "tipar");
+  }
+
   function logoNavigateHome() {
     if (!currentUser) return;
     if (currentUser.role === "leader") { setActiveTab("network"); return; }
     if (currentUser.role === "administrator") {
+      // Administrátorská větev - BEZE ZMĚNY oproti Milníku 15.
+      showDashboardVariant("administrator");
       el("dashboardScreenTitle").textContent = "Dashboard administrátora";
       el("dashboardScreenText").innerHTML = "<strong>Dashboard administrátora – připravujeme.</strong>";
       setActiveTab("dashboard");
       return;
     }
     if (currentUser.role === "tipar") {
-      el("dashboardScreenTitle").textContent = "Dashboard";
-      el("dashboardScreenText").innerHTML = "<strong>Dashboard – připravujeme.</strong>";
+      // Milník 16 (bod 6): místo zástupného boxu statický vizuální návrh
+      // (#dashboardTiparWrap). Žádná data se nenačítají - obsah je celý v
+      // HTML, takže tu není co fetchovat ani co po sobě uklízet.
+      showDashboardVariant("tipar");
       setActiveTab("dashboard");
       return;
     }
@@ -4027,10 +4593,29 @@
     return "demo" + key.charAt(0).toUpperCase() + key.slice(1) + "Btn";
   }
 
+  // Milník 16 (bod 2): klient chtěl mít Tipaře A a B DVAKRÁT - jednou jako
+  // velké popisné tlačítko v horní řadě (beze změny z Milníku 7) a jednou
+  // jako malé kolečko v nové řadě "Tipaři" A-M. Jsou to dvě různá tlačítka
+  // vedoucí ke stejnému demo účtu, což je vědomý požadavek, ne omyl.
+  // Aby se kvůli tomu nemusela duplikovat přihlašovací logika ani seznam
+  // účtů, drží se tu jen MAPA "klíč DEMO_ACCOUNTS -> další id tlačítek";
+  // wiring i hromadné znepřístupnění tlačítek během přihlašování pak jedou
+  // přes demoButtonIdsForKey(), tedy jedinou cestou pro obě varianty.
+  var DEMO_EXTRA_BUTTON_IDS = {
+    a: ["demoALetterBtn"],
+    b: ["demoBLetterBtn"]
+  };
+
+  function demoButtonIdsForKey(key) {
+    return [demoButtonId(key)].concat(DEMO_EXTRA_BUTTON_IDS[key] || []);
+  }
+
   function setAuthButtonsDisabled(disabled) {
     Object.keys(DEMO_ACCOUNTS).forEach(function (key) {
-      var b = el(demoButtonId(key));
-      if (b) b.disabled = disabled;
+      demoButtonIdsForKey(key).forEach(function (id) {
+        var b = el(id);
+        if (b) b.disabled = disabled;
+      });
     });
     var loginBtn = el("loginSubmitBtn");
     if (loginBtn) loginBtn.disabled = disabled;
@@ -4249,6 +4834,13 @@
     // (jediná role, která má tuhle obrazovku A zároveň záložku "new").
     var addTipNetworkWrap = el("networkAddTipBtnWrap");
     if (addTipNetworkWrap) addTipNetworkWrap.hidden = (role !== "leader");
+
+    // Milník 16 (bod 5): dočasné destruktivní tlačítko "Resetovat testovací
+    // účty A–C" vidí JEN administrátor. Schování je pohodlí v UI - RPC
+    // resetovat_demo_ucty_abc() si roli volajícího ověřuje znovu na serveru
+    // (je_administrator()), leader ani tipař ji nespustí ani přímým voláním.
+    var demoResetWrap = el("usersDemoResetWrap");
+    if (demoResetWrap) demoResetWrap.hidden = !isAdmin;
 
     renderAddressDeadlineBanner();
     renderKycRejectedBanner();
@@ -5228,7 +5820,7 @@
   // Milník 4 (bod 1, sekce 8.6.1 zadání v2.1) + Milník 5 (bod 6 zadání) →
   // Milník 13 (bod 3, SKUTEČNÉ zúžení, viz CSS .dt-col-narrow/.dt-col-mini
   // výše): 13 → 11 sloupců. "Role" odstraněna (dostupná v Upravit, viz
-  // openUserForm), "Přímí podřízení"+"Velikost týmu" sloučené do
+  // openUserDetail), "Přímí podřízení"+"Velikost týmu" sloučené do
   // "Podřízení" (1/2), "Registrace" jako 3 tečky (registraceDotsHtml),
   // "Plátce DPH"→"Plátce" bez pillu, "Stav" jako barevný čtvereček
   // (statusDotHtml) - žádný z těchto čtyř sloupců už není textový pill.
@@ -5238,10 +5830,25 @@
     usersRowsCache = rows || [];
 
     var columns = [
-      { key: "jmeno", label: "Jméno", get: function (r) { return r.jmeno || ""; } },
-      { key: "prijmeni", label: "Příjmení", get: function (r) { return r.prijmeni || ""; } },
-      { key: "telefon", label: "Telefon", get: function (r) { return r.telefon || ""; }, render: function (r) { return escapeHtml(r.telefon || "—"); } },
-      { key: "email", label: "E-mail", get: function (r) { return r.email || ""; }, render: function (r) { return escapeHtml(r.email || "—"); } },
+      // Milník 16 (bod 4): jméno/příjmení TUČNĚ (do Milníku 15 neměly
+      // žádný render(), jen get()) a telefon/e-mail v užších sloupcích -
+      // viz CSS .dt-strong / .dt-col-phone / .dt-col-email. Řadicí a
+      // vyhledávací hodnota zůstává v get() jako prostý text, takže se
+      // zvýraznění nepropisuje do řazení, hledání ani do exportu (ten bere
+      // data přímo z řádku, ne z vykresleného HTML).
+      { key: "jmeno", label: "Jméno", get: function (r) { return r.jmeno || ""; },
+        render: function (r) { return '<span class="dt-strong">' + escapeHtml(r.jmeno || "—") + '</span>'; } },
+      { key: "prijmeni", label: "Příjmení", get: function (r) { return r.prijmeni || ""; },
+        render: function (r) { return '<span class="dt-strong">' + escapeHtml(r.prijmeni || "—") + '</span>'; } },
+      { key: "telefon", label: "Telefon", className: "dt-col-phone", get: function (r) { return r.telefon || ""; },
+        render: function (r) { return escapeHtml(r.telefon || "—"); } },
+      // E-mail se v úzkém sloupci může oříznout (…), proto title s plnou
+      // hodnotou - jinak by se informace v tabulce fakticky ztratila.
+      { key: "email", label: "E-mail", className: "dt-col-email", get: function (r) { return r.email || ""; },
+        render: function (r) {
+          var v = r.email || "—";
+          return '<span title="' + escapeHtml(v) + '">' + escapeHtml(v) + '</span>';
+        } },
       // Milník 9 (bod 3/4) → Milník 13 (bod 3): fáze registrace teď jako 3
       // tečky (registraceDotsHtml) místo širokého textového pillu - plný
       // popis fáze (vč. PO TERMÍNU) je v title/aria-label pro přístupnost.
@@ -5259,9 +5866,13 @@
         render: function (r) { return r.plati_dph ? '<span class="dt-tag-ok">Plátce</span>' : '<span class="dt-muted">—</span>'; } },
       { key: "stav", label: "Stav", className: "dt-col-mini", get: function (r) { return r.aktivni ? "Aktivní" : "Vymazán"; },
         render: function (r) { return statusDotHtml(r.aktivni); } },
+      // Milník 16 (bod 3a): tlačítko se jmenuje "Detail", protože nově
+      // otevírá READ-ONLY kartu (openUserDetail) - k editaci se uživatel
+      // dostane až tlačítkem "Upravit" na té kartě. className zůstává
+      // `users-edit-btn`, aby se nemusel měnit wireExtra selektor.
       { key: "akce", label: "Akce", sortable: false, get: function () { return ""; },
         render: function (r) {
-          return '<button type="button" class="btn-small btn-small-ghost users-edit-btn" data-user-id="' + escapeHtml(r.id) + '">Upravit</button>';
+          return '<button type="button" class="btn-small btn-small-ghost users-edit-btn" data-user-id="' + escapeHtml(r.id) + '">Detail</button>';
         } }
     ];
 
@@ -5278,52 +5889,135 @@
         initialSortKey: "jmeno",
         wireExtra: function (container) {
           container.querySelectorAll(".users-edit-btn").forEach(function (btn) {
-            btn.addEventListener("click", function () { openUserForm(btn.getAttribute("data-user-id")); });
+            btn.addEventListener("click", function () { openUserDetail(btn.getAttribute("data-user-id")); });
           });
         }
       });
     }
   }
 
-  function closeUserForm() {
-    userFormTargetId = null;
-    el("usersFormWrap").innerHTML = "";
+  // ================= Milník 16 (bod 3): Detail → Upravit → Sponzor =========
+  //
+  // Do Milníku 15 vedlo tlačítko v tabulce rovnou do JEDNOHO formuláře, kde
+  // byla editovatelná úplně všechna pole VČETNĚ sponzora. Změna sponzora tak
+  // odcházela do DB spolu se jménem/telefonem/rolí v jednom `update` a
+  // zapsala se jako JEDEN auditní záznam s akcí `uprava_uzivatele` - z
+  // historie akcí tedy vůbec nešlo poznat, že se někomu přepsal sponzor.
+  // (Kód `zmena_sponzora` v AUDIT_ACTION_LABELS byl proto mrtvý - žádná
+  // cesta appkou ho neuměla vytvořit.)
+  //
+  // Klient chtěl změnu sponzora oddělit: "proto ji dáváme zvlášť". Od
+  // Milníku 16 je proto tok trojfázový a sponzor má vlastní panel, vlastní
+  // povinný důvod, vlastní RPC (zmenit_sponzora) a vlastní auditní záznam:
+  //
+  //   tabulka → [Detail]  ... read-only karta, žádný input, žádné Uložit
+  //             [Upravit] ... tatáž karta s inputy, ale BEZ sponzora
+  //             samostatná karta "Sponzor" pod ní → [Upravit sponzora]
+  //
+  // Obě karty se vykreslují do VLASTNÍHO obalu (#userDetailCardWrap /
+  // #userSponsorCardWrap) a překreslují se nezávisle na sobě. Je to
+  // schválně: kdyby obě žily v jednom innerHTML, otevření panelu sponzora
+  // by smazalo rozepsané (a ještě neuložené) hodnoty v editačním formuláři
+  // nad ním - přesně ta třída UX regrese, kterou musel odstraňovat Milník 15
+  // (zbytečné čištění legitimního rozpracovaného vstupu).
+
+  // false = Detail (read-only), true = Upravit (inputy). Sponzor má vlastní
+  // příznak, protože jeho panel je na stavu horní karty nezávislý.
+  var userPanelEditMode = false;
+  var userSponsorEditMode = false;
+
+  // Milník 16 (bod 3h / pravidlo z Milníku 15): veškerý stav těchhle panelů
+  // žije ve čtyřech proměnných výš + v #usersFormWrap. Kontejner samotný je
+  // od Milníku 15 v ROLE_SPECIFIC_CONTAINER_IDS (innerHTML="" při odhlášení
+  // i na začátku přihlášení), ale `innerHTML` se JS proměnných nedotkne -
+  // bez tohohle resetu by si nová identita odnesla `userFormTargetId` (id
+  // CIZÍHO uživatele) i obě mapy s jeho daty. Volá se z
+  // clearRoleSpecificContainers(), tedy JEN při skutečné změně identity,
+  // NE při pouhém přepnutí záložky.
+  function resetUsersPanelState() {
+    closeUserForm();
+    // Sdílená cache řádků (bod 3g) - v rámci JEDNÉ identity ji panely
+    // schválně sdílejí a NEzahazují (žádný duplicitní fetch při přepínání
+    // Detail/Upravit/Sponzor), při změně identity ale musí pryč: nese
+    // jména, telefony a e-maily cizích uživatelů.
+    usersById = {};
+    usersRowsCache = [];
   }
 
-  function openUserForm(targetId) {
-    userFormTargetId = targetId;
-    var target = usersById[targetId];
-    if (!target) return;
+  // Zavření panelů. Cache řádků tabulky tu ZÁMĚRNĚ nechává být - tabulka
+  // pod panely zůstává zobrazená a klik na "Detail" jiného řádku ji musí
+  // najít (viz resetUsersPanelState výš pro úklid při změně identity).
+  function closeUserForm() {
+    userFormTargetId = null;
+    userPanelEditMode = false;
+    userSponsorEditMode = false;
+    var wrap = el("usersFormWrap");
+    if (wrap) wrap.innerHTML = "";
+  }
 
-    // Sponzor smí být kdokoli z výsledku moje_uzivatele() kromě
-    // administrátorů (ti nemůžou být sponzorem - trigger i CHECK to
-    // stejně zamítnou, ale UI jim možnost ani nenabízí) a kromě cílového
-    // uživatele samotného. moje_uzivatele() nevrací volajícího SEBE (jen
-    // "ostatní"), takže pro Leadera přidáváme jeho vlastní řádek ručně -
-    // Leader smí být sponzorem (je součástí stromu, sekce 4 zadání).
-    // Administrátor součástí stromu není, takže se sám jako možnost
-    // nepřidává.
+  // Jméno sponzora k zobrazení. Leader v moje_uzivatele() SÁM SEBE nevidí
+  // (funkce vrací "ostatní"), takže vlastní id musí dohledat z currentUser -
+  // stejná výjimka, jakou má nabídka kandidátů níž.
+  function sponsorDisplayName(sponsorId) {
+    if (!sponsorId) return "— bez sponzora —";
+    if (currentUser && sponsorId === currentUser.id) return celeJmeno(currentUser) + " (já)";
+    var s = usersById[sponsorId];
+    if (s) return celeJmeno(s) || sponsorId;
+    return "(mimo váš seznam uživatelů)";
+  }
+
+  // Sponzor smí být kdokoli z výsledku moje_uzivatele() kromě
+  // administrátorů (ti nemůžou být sponzorem - trigger i CHECK to
+  // stejně zamítnou, ale UI jim možnost ani nenabízí) a kromě cílového
+  // uživatele samotného. moje_uzivatele() nevrací volajícího SEBE (jen
+  // "ostatní"), takže pro Leadera přidáváme jeho vlastní řádek ručně -
+  // Leader smí být sponzorem (je součástí stromu, sekce 4 zadání).
+  // Administrátor součástí stromu není, takže se sám jako možnost
+  // nepřidává.
+  // Milník 16 (bod 3d): logika je PŘESNĚ ta z Milníku 15, jen vytažená do
+  // vlastní funkce - přestěhovala se z formuláře Upravit do panelu Sponzor.
+  function sponsorCandidateOptionsHtml(target) {
     var candidateOptions = usersRowsCache
-      .filter(function (o) { return o && o.id !== targetId && o.role !== "administrator"; })
+      .filter(function (o) { return o && o.id !== target.id && o.role !== "administrator"; })
       .map(function (o) { return { id: o.id, label: celeJmeno(o) || o.id }; });
     if (currentUser.role === "leader") {
       candidateOptions.unshift({ id: currentUser.id, label: celeJmeno(currentUser) + " (já)" });
     }
-    var optionsHtml = candidateOptions.map(function (o) {
+    return candidateOptions.map(function (o) {
       return '<option value="' + escapeHtml(o.id) + '"' + (o.id === target.sponsor_id ? ' selected' : '') + '>' + escapeHtml(o.label) + '</option>';
     }).join("");
+  }
 
-    // Milník 9 (bod 3): stav registrace i na "detailu" uživatele (tady jde
-    // o formulář Upravit, nejbližší ekvivalent detailu - žádná samostatná
-    // obrazovka Detail uživatele dosud v appce neexistovala), ne jen v
-    // tabulce. Read-only, editace jde jen přes Adresu/KYC obrazovky
-    // samotného uživatele nebo Ověření totožnosti (schvalit_autentizaci).
-    // Milník 10 (bod 1+2): řádek KYC se zobrazuje jen u role tipar - Leader
-    // ani Administrator se totožnost neověřují (viz renderKycSection).
-    // Milník 11 (bod 1): "Detail uživatele pro leadera/admina" (tenhle
-    // formulář) teď navíc zobrazuje trvalou adresu, doručovací adresu
-    // (jen pokud se liší) a datum narození - data přicházejí z
-    // moje_uzivatele() (viz m11_moje_uzivatele_dorucovaci_a_narozeni_drop_create).
+  // Vstupní bod z tabulky (tlačítko "Detail"). Vykreslí obě karty v
+  // read-only stavu.
+  function openUserDetail(targetId) {
+    var target = usersById[targetId];
+    if (!target) return;
+    userFormTargetId = targetId;
+    userPanelEditMode = false;
+    userSponsorEditMode = false;
+
+    // Dva samostatné obaly - viz komentář nad blokem (nezávislé překreslení).
+    el("usersFormWrap").innerHTML =
+      '<div id="userDetailCardWrap"></div>' +
+      '<div id="userSponsorCardWrap"></div>';
+    renderUserDetailCard();
+    renderUserSponsorCard();
+
+    el("usersFormWrap").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  // Milník 9 (bod 3): stav registrace i na detailu uživatele, ne jen v
+  // tabulce. Read-only, editace jde jen přes Adresu/KYC obrazovky
+  // samotného uživatele nebo Ověření totožnosti (schvalit_autentizaci).
+  // Milník 10 (bod 1+2): řádek KYC se zobrazuje jen u role tipar - Leader
+  // ani Administrator se totožnost neověřují (viz renderKycSection).
+  // Milník 11 (bod 1): navíc trvalá adresa, doručovací adresa (jen pokud se
+  // liší) a datum narození - data přicházejí z moje_uzivatele() (viz
+  // m11_moje_uzivatele_dorucovaci_a_narozeni_drop_create).
+  // Milník 16 (bod 3b): obsah TĚCHHLE dvou bloků se nemění vůbec, jen se
+  // vykresluje i v read-only režimu (dřív existoval jen ve formuláři).
+  function userStavInfoHtml(target) {
     var adresaInfoHtml =
       '<div class="detail-item"><div class="detail-label">Trvalá adresa' + (target.je_firma ? ' (sídlo firmy)' : '') + '</div><div class="detail-value">' +
         escapeHtml(adresaRadekHtml(target.adresa_ulice, target.adresa_mesto, target.adresa_psc, target.adresa_stat)) + '</div></div>' +
@@ -5339,10 +6033,8 @@
         escapeHtml(formatDateOnly(target.datum_narozeni) || "—") + '</div></div>';
 
     // Milník 13 (bod 3): sloupec "Role" byl z tabulky Uživatelé odstraněn
-    // (viz renderUsersTable) - informace se neztrácí, jen se přesunula sem
-    // (Administrátor ji navíc rovnou může editovat přes #ufRole níže).
-    var stavInfoHtml =
-      '<div class="detail-card" style="margin-bottom:14px;">' +
+    // (viz renderUsersTable) - informace se neztrácí, jen se přesunula sem.
+    return '<div class="detail-card" style="margin-bottom:14px;">' +
         '<div style="margin-bottom:6px;">Role: ' + roleBadgeHtml(target.role) + '</div>' +
         '<div style="margin-bottom:6px;">Fáze registrace: ' + registraceStavPillHtml(target.registrace_stav) +
           (target.adresa_po_terminu ? ' <span class="po-terminu-flag">PO TERMÍNU</span>' : '') + '</div>' +
@@ -5351,18 +6043,49 @@
           : '') +
         '<div class="detail-grid">' + adresaInfoHtml + '</div>' +
       '</div>';
+  }
 
-    el("usersFormWrap").innerHTML =
-      '<div class="card detail-card">' +
-        '<h3 class="detail-section-title" style="margin-top:0;">Upravit uživatele — ' + escapeHtml(celeJmeno(target) || targetId) + '</h3>' +
-        stavInfoHtml +
+  function detailItemHtml(label, value) {
+    return '<div class="detail-item"><div class="detail-label">' + escapeHtml(label) +
+      '</div><div class="detail-value">' + escapeHtml(value == null || value === "" ? "—" : value) + '</div></div>';
+  }
+
+  // Horní karta - podle userPanelEditMode buď read-only Detail, nebo
+  // editační formulář. SPONZOR TU NENÍ ANI V JEDNOM REŽIMU (bod 3c/3d).
+  function renderUserDetailCard() {
+    var wrap = el("userDetailCardWrap");
+    if (!wrap) return;
+    var target = usersById[userFormTargetId];
+    if (!target) { wrap.innerHTML = ""; return; }
+
+    var hlavicka = escapeHtml(celeJmeno(target) || target.id);
+    var telo;
+
+    if (!userPanelEditMode) {
+      // ---- Detail (read-only). Žádný <input>, žádný <select>, žádné Uložit.
+      telo =
+        '<div class="detail-grid">' +
+          detailItemHtml("Jméno", target.jmeno) +
+          detailItemHtml("Příjmení", target.prijmeni) +
+          detailItemHtml("Telefon", target.telefon) +
+          detailItemHtml("E-mail", target.email) +
+          detailItemHtml("Role", ROLE_LABELS_CAP[target.role] || target.role) +
+          detailItemHtml("Aktivní", target.aktivni ? "Ano" : "Ne (označen jako „Vymazán“)") +
+          detailItemHtml("Plátce DPH", target.plati_dph ? "Ano" : "Ne") +
+        '</div>' +
+        '<div class="form-actions">' +
+          '<button class="btn-primary" type="button" id="userDetailEditBtn" style="width:auto;">Upravit</button>' +
+          '<button class="btn-ghost" type="button" id="userDetailCloseBtn">Zavřít</button>' +
+        '</div>';
+    } else {
+      // ---- Upravit. Identická pole jako v Milníku 15 MÍNUS #ufSponsor.
+      telo =
         '<form id="userFormPanel" novalidate>' +
           '<div class="form-grid">' +
             '<div class="field"><label for="ufJmeno">Jméno *</label><input type="text" id="ufJmeno" value="' + escapeHtml(target.jmeno || "") + '"></div>' +
             '<div class="field"><label for="ufPrijmeni">Příjmení</label><input type="text" id="ufPrijmeni" value="' + escapeHtml(target.prijmeni || "") + '"></div>' +
             '<div class="field"><label for="ufTelefon">Telefon</label><input type="tel" id="ufTelefon" value="' + escapeHtml(target.telefon || "") + '"></div>' +
             '<div class="field"><label for="ufEmail">E-mail</label><input type="email" id="ufEmail" value="' + escapeHtml(target.email || "") + '"></div>' +
-            '<div class="field col-span-2"><label for="ufSponsor">Sponzor</label><select id="ufSponsor"><option value="">— bez sponzora —</option>' + optionsHtml + '</select></div>' +
             (currentUser.role === "administrator"
               ? '<div class="field"><label for="ufRole">Role</label><select id="ufRole"><option value="tipar"' + (target.role === "tipar" ? " selected" : "") + '>Tipař</option><option value="leader"' + (target.role === "leader" ? " selected" : "") + '>Leader</option></select></div>'
               : "") +
@@ -5374,16 +6097,131 @@
             '<button class="btn-primary" type="submit" id="userFormSaveBtn" style="width:auto;">Uložit</button>' +
             '<button class="btn-ghost" type="button" id="userFormCancelBtn">Zrušit</button>' +
           '</div>' +
-        '</form>' +
+        '</form>';
+    }
+
+    wrap.innerHTML =
+      '<div class="card detail-card">' +
+        '<h3 class="detail-section-title" style="margin-top:0;">' +
+          (userPanelEditMode ? 'Upravit uživatele — ' : 'Detail uživatele — ') + hlavicka +
+        '</h3>' +
+        userStavInfoHtml(target) +
+        telo +
       '</div>';
 
-    el("userFormCancelBtn").addEventListener("click", closeUserForm);
-    el("userFormPanel").addEventListener("submit", function (e) {
-      e.preventDefault();
-      submitUpravitUzivatele(userFormTargetId);
-    });
+    if (!userPanelEditMode) {
+      el("userDetailEditBtn").addEventListener("click", function () {
+        userPanelEditMode = true;
+        renderUserDetailCard(); // panel sponzora zůstává, jak je (nepřekresluje se)
+      });
+      el("userDetailCloseBtn").addEventListener("click", closeUserForm);
+    } else {
+      // "Zrušit" vrací na Detail, NEZAVÍRÁ celý panel - uživatel se tak
+      // dostane zpátky k údajům, kvůli kterým si detail otevřel.
+      el("userFormCancelBtn").addEventListener("click", function () {
+        userPanelEditMode = false;
+        renderUserDetailCard();
+      });
+      el("userFormPanel").addEventListener("submit", function (e) {
+        e.preventDefault();
+        submitUpravitUzivatele(userFormTargetId);
+      });
+    }
+  }
 
-    el("usersFormWrap").scrollIntoView({ behavior: "smooth", block: "start" });
+  // Spodní, SAMOSTATNÁ karta (bod 3d) - vizuálně oddělený blok, ne sekce
+  // uvnitř karty výš. Vlastní povinný důvod, vlastní RPC, vlastní audit.
+  function renderUserSponsorCard() {
+    var wrap = el("userSponsorCardWrap");
+    if (!wrap) return;
+    var target = usersById[userFormTargetId];
+    if (!target) { wrap.innerHTML = ""; return; }
+
+    var telo;
+    if (!userSponsorEditMode) {
+      telo =
+        '<div class="detail-grid">' +
+          detailItemHtml("Aktuální sponzor", sponsorDisplayName(target.sponsor_id)) +
+        '</div>' +
+        '<div class="form-actions">' +
+          '<button class="btn-primary" type="button" id="userSponsorEditBtn" style="width:auto;">Upravit sponzora</button>' +
+        '</div>';
+    } else {
+      telo =
+        '<form id="userSponsorForm" novalidate>' +
+          '<div class="form-grid">' +
+            '<div class="field col-span-2"><label for="usSponsor">Nový sponzor</label>' +
+              '<select id="usSponsor"><option value="">— bez sponzora —</option>' + sponsorCandidateOptionsHtml(target) + '</select></div>' +
+            '<div class="field col-span-2"><label for="usDuvod">Důvod změny sponzora *</label>' +
+              '<input type="text" id="usDuvod" placeholder="Povinné zdůvodnění pro auditní log — samostatné od důvodu běžné úpravy"></div>' +
+          '</div>' +
+          '<div class="form-actions">' +
+            '<button class="btn-primary" type="submit" id="userSponsorSaveBtn" style="width:auto;">Uložit</button>' +
+            '<button class="btn-ghost" type="button" id="userSponsorCancelBtn">Zrušit</button>' +
+          '</div>' +
+        '</form>';
+    }
+
+    wrap.innerHTML =
+      '<div class="card detail-card">' +
+        '<h3 class="detail-section-title" style="margin-top:0;">Sponzor</h3>' +
+        '<p class="dt-muted" style="font-size:12.5px;margin:0 0 14px;">Změna sponzora se ukládá zvlášť od ostatních údajů a zapisuje se do Historie akcí jako samostatný záznam „Změna sponzora“.</p>' +
+        telo +
+      '</div>';
+
+    if (!userSponsorEditMode) {
+      el("userSponsorEditBtn").addEventListener("click", function () {
+        userSponsorEditMode = true;
+        renderUserSponsorCard(); // horní karta se NEPŘEKRESLUJE
+      });
+    } else {
+      el("userSponsorCancelBtn").addEventListener("click", function () {
+        userSponsorEditMode = false;
+        renderUserSponsorCard();
+      });
+      el("userSponsorForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        submitZmenitSponzora(userFormTargetId);
+      });
+    }
+  }
+
+  // Milník 16 (bod 3e): vlastní RPC zmenit_sponzora() - jediná cesta, kterou
+  // se od tohohle milníku dá sponzor na serveru změnit (upravit_uzivatele()
+  // parametr sponzora nově ignoruje, viz migrace m16_*). Vytváří vlastní
+  // auditní záznam s akcí 'zmena_sponzora'.
+  async function submitZmenitSponzora(targetId) {
+    var novySponsor = el("usSponsor").value || null;
+    var duvod = el("usDuvod").value.trim();
+    if (!duvod) {
+      showBanner(el("usersBanner"), "error", "Důvod změny sponzora je povinný.");
+      return;
+    }
+
+    var submitBtn = el("userSponsorSaveBtn");
+    if (submitBtn) submitBtn.disabled = true;
+    showBanner(el("usersBanner"), null, null);
+
+    var g = authGen; // Milník 15 (bod 4.5) - níž se po awaitu píše do DOM
+    var result = await sb.rpc("zmenit_sponzora", {
+      p_target_user_id: targetId,
+      p_novy_sponsor_id: novySponsor,
+      p_duvod: duvod
+    });
+    if (g !== authGen) return; // identita se během dotazu změnila
+
+    if (submitBtn) submitBtn.disabled = false;
+
+    if (result.error) {
+      console.error("Chyba při změně sponzora:", result.error);
+      showBanner(el("usersBanner"), "error", upravitUzivateleErrorMessage(result.error));
+      return;
+    }
+
+    closeUserForm();
+    showBanner(el("usersBanner"), "ok", "Sponzor byl změněn.");
+    setTimeout(function () { showBanner(el("usersBanner"), null, null); }, 5000);
+    await fetchUsersTable();
   }
 
   async function submitUpravitUzivatele(targetId) {
@@ -5395,10 +6233,11 @@
     var prijmeni = el("ufPrijmeni").value.trim();
     var telefon = el("ufTelefon").value.trim() || null;
     var email = el("ufEmail").value.trim() || null;
-    var sponsorId = el("ufSponsor").value || null;
+    // Milník 16 (bod 3c/3f): #ufSponsor už v tomhle formuláři NEEXISTUJE -
+    // sponzor se mění výhradně samostatným panelem (submitZmenitSponzora).
     var aktivni = el("ufAktivni").checked;
     var platiDph = el("ufPlatiDph").checked;
-    var roleEl = el("ufRole"); // jen pro Administrátora (viz openUserForm)
+    var roleEl = el("ufRole"); // jen pro Administrátora (viz renderUserDetailCard)
     var novaRole = roleEl ? roleEl.value : null;
     var duvod = el("ufDuvod").value.trim();
     if (!duvod) {
@@ -5410,18 +6249,29 @@
     if (submitBtn) submitBtn.disabled = true;
     showBanner(el("usersBanner"), null, null);
 
+    // Milník 16 (pravidlo z Milníku 15, bod 4.5): tahle funkce tu generační
+    // pojistku dosud neměla, přestože po `await` sahá do DOM (banner, znovu
+    // načtená tabulka). Doplněno při úpravě funkce kvůli bodu 3f.
+    var g = authGen;
+
+    // Milník 16 (bod 3c/3f): `p_novy_sponsor_id` se už NEPOSÍLÁ. Funkce v DB
+    // ten parametr kvůli zpětné kompatibilitě sice pořád má (a má ho nově s
+    // DEFAULT NULL, aby šel vynechat), ale obsahově ho IGNORUJE - sponzor
+    // zůstává vždy ten, který v profilu je. Vynucení je tedy na serveru, ne
+    // jen tím, že sem klient nic nedá. Viz migrace
+    // m16_zmenit_sponzora_samostatna_rpc.sql.
     var result = await sb.rpc("upravit_uzivatele", {
       p_target_user_id: targetId,
       p_jmeno: jmeno,
       p_prijmeni: prijmeni || null,
       p_telefon: telefon,
       p_email: email,
-      p_novy_sponsor_id: sponsorId,
       p_aktivni: aktivni,
       p_duvod: duvod,
       p_plati_dph: platiDph,
       p_novy_role: novaRole
     });
+    if (g !== authGen) return; // identita se během dotazu změnila
 
     if (submitBtn) submitBtn.disabled = false;
 
@@ -5434,6 +6284,47 @@
     closeUserForm();
     showBanner(el("usersBanner"), "ok", "Uživatel byl upraven.");
     setTimeout(function () { showBanner(el("usersBanner"), null, null); }, 5000);
+    await fetchUsersTable();
+  }
+
+  // ---------- Milník 16 (bod 5): DOČASNÁ testovací funkce ----------
+  // Reset záznamů demo účtů A/B/C. Destruktivní, proto DVA kroky: potvrzení
+  // window.confirm() (stejný vzor jako mazání RK a deaktivace uživatele,
+  // řádky ~3277) a teprve pak RPC. Žádná jednoklikvá destruktivní akce.
+  // Samotná funkce v DB (resetovat_demo_ucty_abc) má tři cílová UUID
+  // natvrdo - odsud se nedá nasměrovat na jiný účet ani omylem, klient
+  // žádné id neposílá. Viz migrations/m16_resetovat_demo_ucty_abc.sql.
+  async function submitResetDemoUctu() {
+    if (!window.confirm(
+      "Opravdu resetovat testovací demo účty A, B a C?\n\n" +
+      "Smažou se jejich tipy, nahrané doklady totožnosti, vyplněná adresa, " +
+      "stav ověření totožnosti a auditní záznamy, kde jsou cílem akce.\n\n" +
+      "Účty samotné ani jejich sponzory to nemaže. Akci nelze vzít zpět."
+    )) return;
+
+    var btn = el("usersDemoResetBtn");
+    var puvodniText = btn ? btn.textContent : "";
+    if (btn) { btn.disabled = true; btn.textContent = "Resetuji…"; }
+    showBanner(el("usersBanner"), null, null);
+
+    var g = authGen; // Milník 15 (bod 4.5) - níž se po awaitu píše do DOM
+    var result = await sb.rpc("resetovat_demo_ucty_abc");
+    if (g !== authGen) return; // identita se během dotazu změnila
+
+    if (btn) { btn.disabled = false; btn.textContent = puvodniText; }
+
+    if (result.error) {
+      console.error("Chyba při resetu demo účtů:", result.error);
+      showBanner(el("usersBanner"), "error",
+        "Reset demo účtů se nepodařil (" + escapeHtml(result.error.message || "neznámá chyba") + ").");
+      return;
+    }
+
+    var d = result.data || {};
+    showBanner(el("usersBanner"), "ok",
+      "Demo účty A–C byly resetovány. Smazáno tipů: " + Number(d.smazano_tipu || 0) +
+      ", dokladů: " + Number(d.smazano_dokladu || 0) +
+      ", auditních záznamů: " + Number(d.smazano_audit_zaznamu || 0) + ".");
     await fetchUsersTable();
   }
 
@@ -5458,6 +6349,9 @@
   // (vytvoreni_rk/uprava_rk/smazani_rk). Mapa je jediné místo, kde se
   // interní kód akce překládá na český popisek.
   var AUDIT_ACTION_LABELS = {
+    // Milník 16 (bod 3e): `zmena_sponzora` přestal být mrtvý kód - od
+    // tohohle milníku ho vytváří RPC zmenit_sponzora(), volaná ze
+    // samostatného panelu "Sponzor" (viz renderUserSponsorCard).
     zmena_sponzora: "Změna sponzora",
     oprava_stavu_tipu: "Oprava stavu tipu",
     uprava_uzivatele: "Úprava uživatele",
@@ -5475,7 +6369,9 @@
     // Milník 9
     rucni_zalozeni_uzivatele: "Ruční založení uživatele",
     schvaleni_identifikace: "Schválení ověření totožnosti",
-    zamitnuti_identifikace: "Zamítnutí ověření totožnosti"
+    zamitnuti_identifikace: "Zamítnutí ověření totožnosti",
+    // Milník 16 (bod 5) - dočasná testovací akce administrátora.
+    reset_demo_uctu: "Reset testovacích demo účtů A–C"
   };
 
   function auditActionLabel(action) {
@@ -7483,6 +8379,8 @@
     // sdílejí stejnou openAddUserModal() logiku jako dřív jediné tlačítko
     // v topbaru - jen jsou teď na dvou různých místech podle role.
     el("addUserUsersBtn").addEventListener("click", openAddUserModal);
+    // Milník 16 (bod 5): dočasné testovací tlačítko (viz submitResetDemoUctu).
+    el("usersDemoResetBtn").addEventListener("click", submitResetDemoUctu);
     el("addUserNetworkBtn").addEventListener("click", openAddUserModal);
 
     // Milník 15 (bod 3): "+ Přidat nový tip" na Přehledu lídra -> záložka
@@ -7532,9 +8430,15 @@
     // Milník 12 (bod 13): wiring pro všech 16 demo tlačítek (5 původních +
     // 11 nových C-M) - jeden generický listener na klíč DEMO_ACCOUNTS,
     // žádné ruční opakování na každé tlačítko zvlášť.
+    // Milník 16 (bod 2): tentýž mechanismus obsluhuje i nová malá tlačítka
+    // A/B (demoALetterBtn/demoBLetterBtn) - demoButtonIdsForKey() vrátí pro
+    // klíč 'a'/'b' obě id, takže obě vedou na TÝŽ demoLogin(key), bez druhé
+    // kopie logiky a bez ručního addEventListener navíc.
     Object.keys(DEMO_ACCOUNTS).forEach(function (key) {
-      var btn = el(demoButtonId(key));
-      if (btn) btn.addEventListener("click", function () { demoLogin(key); });
+      demoButtonIdsForKey(key).forEach(function (id) {
+        var btn = el(id);
+        if (btn) btn.addEventListener("click", function () { demoLogin(key); });
+      });
     });
 
     el("loginForm").addEventListener("submit", function (e) {
