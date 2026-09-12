@@ -4,6 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Realitní tip</title>
+<!-- Milník 18, bod 1 — FAVICON "RT".
+     Do Milníku 17 appka žádnou ikonu neměla a záložka prohlížeče ukazovala
+     prázdný/obecný list papíru. Ikona je INLINE SVG v data URI (žádný
+     externí soubor, žádná binární příloha) - app.html tak zůstává jediným
+     self-contained souborem, který jde nasadit beze změny build kroku.
+     Barvy NEJSOU nové: #1F6F5C je hodnota --accent ze světlého režimu,
+     #FFFFFF je --accent-contrast. Natvrdo zapsané tu být MUSÍ, protože
+     data URI se nevyhodnocuje jako CSS a k proměnným :root se nedostane;
+     ikona se proto záměrně drží světlé (značkové) varianty v obou režimech,
+     stejně jako se chová logo v hlavičce.
+     Kódování: plain `data:image/svg+xml,<url-encoded>` (ne base64), takže
+     obsah zůstane čitelný a diffovatelný. Test: vykresleno v Chromiu na
+     16/32/48 px a proti tmavému pozadí - "RT" je čitelné i v 16 px. -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%2264%22%20height=%2264%22%20viewBox=%220%200%2064%2064%22%3E%3Crect%20width=%2264%22%20height=%2264%22%20rx=%2214%22%20fill=%22%231F6F5C%22/%3E%3Ctext%20x=%2232%22%20y=%2244%22%20text-anchor=%22middle%22%20font-family=%22Helvetica,Arial,sans-serif%22%20font-size=%2231%22%20font-weight=%22700%22%20fill=%22%23FFFFFF%22%3ERT%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%2264%22%20height=%2264%22%20viewBox=%220%200%2064%2064%22%3E%3Crect%20width=%2264%22%20height=%2264%22%20rx=%2214%22%20fill=%22%231F6F5C%22/%3E%3Ctext%20x=%2232%22%20y=%2244%22%20text-anchor=%22middle%22%20font-family=%22Helvetica,Arial,sans-serif%22%20font-size=%2231%22%20font-weight=%22700%22%20fill=%22%23FFFFFF%22%3ERT%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,480;0,560;0,600;1,480;1,560&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -302,6 +317,23 @@
   .btn-demo-letter:hover { background: var(--accent); border-color: var(--accent); color: var(--accent-contrast); }
   .btn-demo-letter:disabled { opacity: .5; cursor: not-allowed; }
 
+  /* Milník 18 (bod 5): tlačítko fanfáry (easter egg) na konci řady za "M".
+     Dědí VŠECHNO z .btn-demo-letter (kulaté 28×28, stejné odsazení i
+     přechody) a přebíjí jen barvu - jantarová dvojice --warn-soft/--warn,
+     která už v appce existuje pro stavy "pozor/jiné", aby bylo na první
+     pohled vidět, že tohle není další demo účet. Žádná nová proměnná,
+     žádný nový tvar. Trojúhelník ▶ je opticky těžký vpravo, proto ho
+     nepatrně posouváme doleva, ať sedí v kolečku na střed. */
+  .btn-demo-fanfare {
+    background: var(--warn-soft);
+    border-color: var(--warn-soft);
+    color: var(--warn);
+    font-size: 11px;
+    line-height: 1;
+    padding-right: 1px;
+  }
+  .btn-demo-fanfare:hover { background: var(--warn); border-color: var(--warn); color: var(--surface); }
+
   .demo-note {
     text-align: center;
     font-size: 11.5px;
@@ -399,15 +431,13 @@
   }
   .switch-line button:hover { text-decoration: underline; }
 
-  .auth-footnote {
-    margin-top: 22px;
-    padding-top: 16px;
-    border-top: 1px solid var(--border);
-    font-size: 11px;
-    line-height: 1.5;
-    color: var(--text-muted);
-    text-align: center;
-  }
+  /* Milník 18 (bod 4): třída .auth-footnote tu byla jen pro jediný odstavec
+     s technickým popisem Supabase Auth / RLS na konci přihlašovací karty.
+     Odstavec je pryč (viz HTML), takže je pryč i pravidlo - jinak by v CSS
+     zůstalo mrtvé, a hlavně jeho `border-top` byl jedinou vodorovnou linkou
+     u dolní hrany karty: kdyby se třída nechala a někdo ji omylem použil,
+     vrátila by se přesně ta osiřelá linka, kvůli které se to odstraňovalo.
+     Dolní odsazení karty řeší padding .auth-card, nic dalšího netřeba. */
 
   /* ---------- Milník 14: číslo verze, nápověda a historie verzí na
      přihlašovací obrazovce ----------
@@ -1523,103 +1553,39 @@
   .modal-box { width: 100%; max-width: 480px; }
 
   /* =====================================================================
-     Milník 16, bod 6 — STATICKÝ vizuální redesign dashboardu TIPAŘE
+     Milník 18, bod 2 — STATICKÝ vizuální redesign dashboardu TIPAŘE
+     (nahrazuje rozvržení z Milníku 16 bod 6 / Milníku 17 bod 16)
      =====================================================================
-     Pozor: celá tahle sekce je POUZE VZHLED. Všechna čísla, tipy, lekce,
-     kvíz i příspěvky komunity jsou napevno v HTML (žádná data z databáze),
-     nic v ní není klikací a nic nikam nenaviguje - viz #dashboardTiparWrap.
-     Týká se výhradně role `tipar`; administrátorova větev dashboardu
-     zůstává beze změny (#dashboardAdminWrap).
+     Pozor, nic z toho se nezměnilo: celá tahle sekce je POUZE VZHLED.
+     Všechna čísla, jména, tipy i lekce jsou napevno v HTML (žádná data z
+     databáze), nic v ní není klikací a nic nikam nenaviguje - viz
+     #dashboardTiparWrap. Týká se výhradně role `tipar`; administrátorova
+     větev dashboardu zůstává beze změny (#dashboardAdminWrap).
 
-     Vizuální záměr podle zadání: vzdušné, moderní, lidské, profesionální.
-     V praxi to znamená hodně bílého prostoru, čitelnou typografii a
-     MINIMUM rámečků - karta (.tdash-panel) se používá jen tam, kde blok
-     opravdu drží pohromadě jako celek, ne kolem každého údaje. Barvy,
-     poloměry a stíny se berou z proměnných appky (--surface/--border/
-     --radius-l/--accent…), aby dashboard nevypadal jako cizí těleso.
+     CO SE V MILNÍKU 18 ZMĚNILO: klient dodal konkrétní vizuální mockup a
+     chtěl podle něj jiné rozvržení. Nový layout shora dolů:
+       1) hero jako DVA panely vedle sebe - bílý (uvítání + CTA) a tmavě
+          zelený ("Váš další krok"),
+       2) řada čtyř statistik,
+       3) dvousloupcové pásmo: vlevo tipy + články, vpravo jeden sjednocený
+          panel Akademie a pod ním panel "Váš budoucí tým".
+     Zaniklé bloky z Milníku 16: 6kroková pipeline (.tdash-pipeline/
+     .tdash-step*), osobní příběh zakladatelky (.tdash-story*, klient ho
+     výslovně odstranil), samostatný kvízový teaser (.tdash-quiz*, zbyla z
+     něj jedna věta uvnitř panelu Akademie) a komunitní panel
+     (.tdash-topic*). Jejich CSS je odstraněné, ne zakomentované - mrtvá
+     pravidla by jen mátla.
+
+     Vizuální jazyk se NEMĚNÍ a nové barvy se nezavádějí: panely dál stojí
+     na --surface/--border/--radius-l/--shadow-card, akcenty na --accent/
+     --accent-soft, stavy na --info-soft/--warn-soft/--surface-2. Jediná
+     výjimka je tmavě zelený panel, viz .tdash-next níž.
      Na mobilu se všechno sloupcuje pod sebe, žádná navigace navíc. */
 
-  .tdash { display: flex; flex-direction: column; gap: 40px; }
+  .tdash { display: flex; flex-direction: column; gap: 26px; }
 
-  /* --- 6.1 hero --- */
-  .tdash-hero { padding: 8px 0 0; }
-  .tdash-hero h2 { font-size: 30px; line-height: 1.2; margin: 0; }
-  .tdash-hero p { color: var(--text-muted); font-size: 15.5px; margin: 8px 0 20px; }
-
-  /* --- 6.2 "Vaše cesta právě začíná" --- */
-  .tdash-section-title { font-family: var(--font-display); font-size: 20px; font-weight: 600; margin: 0 0 4px; }
-  .tdash-section-sub { color: var(--text-muted); font-size: 13px; margin: 0 0 18px; }
-
-  /* Statistiky bez rámečků - jen typografie a tenká linka vlevo, ať to
-     nepůsobí jako čtyři krabice vedle sebe. */
-  .tdash-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 20px 28px; margin-bottom: 30px; }
-  .tdash-stat { border-left: 2px solid var(--accent-soft); padding-left: 14px; }
-  .tdash-stat-num { font-family: var(--font-display); font-size: 26px; font-weight: 600; line-height: 1.15; }
-  .tdash-stat-label { color: var(--text-muted); font-size: 13px; margin-top: 2px; }
-  /* Hvězdička u "možných odměn" - klient výslovně chtěl, aby částka
-     nepůsobila jako příslib ani garance. */
-  .tdash-stat-note { display: block; color: var(--text-muted); font-size: 11.5px; font-style: italic; margin-top: 4px; }
-
-  /* 6-kroková cesta tipaře místo prázdného grafu. Vodorovně na šířku,
-     pod sebou na úzké obrazovce. */
-  .tdash-pipeline { display: flex; gap: 6px; align-items: flex-start; flex-wrap: wrap; }
-  .tdash-step { flex: 1 1 120px; min-width: 110px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; position: relative; }
-  .tdash-step-dot {
-    width: 34px; height: 34px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px; font-weight: 700;
-    background: var(--surface-2); border: 1px solid var(--border); color: var(--text-muted);
-  }
-  .tdash-step-label { font-size: 12.5px; color: var(--text-muted); line-height: 1.35; }
-  .tdash-step-done .tdash-step-dot { background: var(--accent-soft); border-color: var(--accent-soft); color: var(--accent); }
-  .tdash-step-done .tdash-step-label { color: var(--text); }
-  /* Aktuální krok - zvýrazněný i tvarem (plná výplň) a slovem "Jste tady",
-     ne jen barvou. */
-  .tdash-step-current .tdash-step-dot { background: var(--accent); border-color: var(--accent); color: var(--accent-contrast); }
-  .tdash-step-current .tdash-step-label { color: var(--text); font-weight: 600; }
-  .tdash-step-here { font-size: 11px; color: var(--accent); font-weight: 600; }
-
-  /* --- 6.9 dvousloupcové pásmo (tipy vlevo, akademie + kvíz vpravo) --- */
-  .tdash-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
-  @media (max-width: 860px) { .tdash-cols { grid-template-columns: 1fr; gap: 32px; } }
-  .tdash-col { display: flex; flex-direction: column; gap: 28px; }
-
-  /* --- 6.3 tipy jako PROSTÉ ŘÁDKY, ne karty (výslovný požadavek) --- */
-  .tdash-tip-row {
-    display: flex; align-items: baseline; justify-content: space-between; gap: 14px;
-    padding: 12px 0; border-bottom: 1px solid var(--border);
-  }
-  .tdash-tip-row:last-of-type { border-bottom: none; }
-  .tdash-tip-name { font-weight: 600; }
-  .tdash-tip-stav { color: var(--text-muted); font-size: 13px; white-space: nowrap; }
-
-  /* --- 6.4 akademie / úrovně --- */
-  .tdash-progress { height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; margin: 4px 0 6px; }
-  .tdash-progress-fill { height: 100%; background: var(--accent); border-radius: 3px; }
-  .tdash-progress-note { font-size: 12px; color: var(--text-muted); margin: 0 0 18px; }
-  .tdash-level { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
-  .tdash-level:last-of-type { border-bottom: none; }
-  .tdash-level-icon { flex: 0 0 auto; width: 22px; text-align: center; font-size: 13px; }
-  .tdash-level-name { font-weight: 600; font-size: 14px; }
-  .tdash-level-sub { font-size: 12px; color: var(--text-muted); }
-  /* Zamčené úrovně: ztlumené A s ikonou zámku - význam nikdy jen barvou. */
-  .tdash-level-locked .tdash-level-name, .tdash-level-locked .tdash-level-sub { color: var(--text-muted); opacity: .65; }
-
-  /* --- 6.5 kvízový teaser / 6.7 články / 6.8 komunita: lehká karta --- */
-  .tdash-panel {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius-l); padding: 20px 22px;
-  }
-
-  /* Milník 17 (bod 16): klient chce "texty a obsah stránky uspořádané do
-     panelů s bílým pozadím" - do Milníku 16 měl dashboard tipaře karty jen
-     u kvízu a komunity, zbytek "plaval" přímo na pozadí stránky. Nová
-     třída .tdash-card dává KAŽDÉ hlavní sekci týž bílý panel a přebírá
-     přesně ty proměnné, které používají ostatní karty appky
-     (.card/.auth-card/.detail-card): --surface, --border, --radius-l,
-     --shadow-card. Žádná nová barva, žádná nová konstanta.
-     Obsahově se NEMĚNÍ nic - texty, čísla i (ne)funkčnost jsou z Milníku 16
-     beze změny, jde čistě o HTML/CSS strukturu. */
+  /* Sdílený bílý panel - přesně ty proměnné, které používají ostatní karty
+     appky (.card/.auth-card/.detail-card). Žádná nová konstanta. */
   .tdash-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -1628,50 +1594,251 @@
     padding: 22px 24px;
   }
   @media (max-width: 600px) { .tdash-card { padding: 18px 16px; } }
-  /* Panely mají vlastní vnitřní odsazení, takže sekce uvnitř nepotřebují
-     horní mezeru navíc - první nadpis/prvek v panelu sedí na jeho hraně. */
+  /* Panely mají vlastní vnitřní odsazení, takže první prvek uvnitř
+     nepotřebuje horní mezeru navíc. */
   .tdash-card > :first-child { margin-top: 0; }
-  /* .tdash-panel (kvíz, komunita) byl panel už od M16 - dostává jen stín,
-     ať vypadá jako zbytek nových karet. */
-  .tdash-panel { box-shadow: var(--shadow-card); }
-  /* Hero měl do M16 jen svislé odsazení; jako panel ho nepotřebuje. */
-  .tdash-card.tdash-hero { padding-top: 24px; }
-  /* Příběh zakladatelky měl omezenou šířku měřítka čtení. Uvnitř panelu ji
-     drží dál, jen se omezuje odstavec, ne celý panel - jinak by panel na
-     široké obrazovce končil uprostřed a vypadal rozbitě vedle ostatních. */
-  .tdash-card.tdash-story { max-width: none; }
-  .tdash-card.tdash-story p { max-width: 720px; }
-  .tdash-panel h4 { font-family: var(--font-display); font-size: 16px; font-weight: 600; margin: 0 0 10px; }
-  .tdash-quiz-q { font-size: 14.5px; margin: 0 0 12px; }
-  .tdash-quiz-options { display: flex; flex-direction: column; gap: 8px; }
-  /* Vypadá jako volba, ale nic nedělá - `type="button"` bez posluchače. */
-  .tdash-quiz-option {
-    text-align: left; background: transparent; border: 1px solid var(--border);
-    border-radius: var(--radius-s); padding: 9px 12px; font-size: 13.5px; color: var(--text);
-    cursor: default;
+
+  .tdash-section-title { font-family: var(--font-display); font-size: 19px; font-weight: 600; margin: 0 0 4px; }
+  .tdash-section-sub { color: var(--text-muted); font-size: 13px; margin: 0 0 16px; }
+
+  /* Drobný verzálkový štítek nad nadpisem (mockup ho má nad hero i nad
+     Akademií a "budoucím týmem"). */
+  .tdash-eyebrow {
+    font-family: var(--font-ui);
+    font-size: 11px; font-weight: 600;
+    letter-spacing: .09em; text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 8px;
   }
 
-  /* --- 6.6 osobní příběh zakladatelky --- */
-  .tdash-story { max-width: 720px; }
-  .tdash-story p { font-size: 15.5px; line-height: 1.7; margin: 0 0 14px; }
-  .tdash-story-sign { font-family: var(--font-display); font-size: 15px; color: var(--text); margin: 0; }
-  .tdash-story-sign span { display: block; font-family: var(--font-ui); font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
+  /* Nadpis sekce vlevo + "odkaz" vpravo na jednom řádku. Na úzké
+     obrazovce se zalomí, ať se nic netiskne do sebe. */
+  .tdash-head-row {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap; margin-bottom: 14px;
+  }
+  .tdash-head-row .tdash-section-title,
+  .tdash-head-row .tdash-section-sub { margin-bottom: 0; }
+  /* Vypadá jako odkaz, ale je to <button type="button"> BEZ posluchače -
+     v celém dashboardu není jediný <a href>. Proto i `cursor: default`:
+     kurzor nemá slibovat akci, která se nestane. */
+  .tdash-link {
+    background: transparent; border: 1px solid var(--border);
+    border-radius: 999px; padding: 5px 12px;
+    font-family: var(--font-ui); font-size: 12px; font-weight: 600;
+    color: var(--text-muted); cursor: default; white-space: nowrap;
+  }
 
-  /* --- 6.7 tři teasery budoucích článků --- */
-  .tdash-articles { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
-  .tdash-article-title { font-weight: 600; font-size: 14.5px; margin: 0 0 4px; }
-  .tdash-article-text { color: var(--text-muted); font-size: 13px; margin: 0 0 6px; }
-  .tdash-soon { font-size: 11.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; }
+  /* --- hero: dva panely vedle sebe, pod sebou na mobilu --- */
+  .tdash-hero-grid { display: grid; grid-template-columns: 1.55fr 1fr; gap: 20px; align-items: stretch; }
+  @media (max-width: 860px) { .tdash-hero-grid { grid-template-columns: 1fr; } }
 
-  /* --- 6.8 komunita --- */
-  .tdash-topic { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--border); }
-  .tdash-topic:last-of-type { border-bottom: none; }
-  .tdash-topic-name { font-size: 14px; }
-  .tdash-topic-count { font-size: 12.5px; color: var(--text-muted); white-space: nowrap; }
+  .tdash-hero h2 {
+    font-family: var(--font-display);
+    font-size: 31px; line-height: 1.15; font-weight: 600;
+    margin: 0 0 12px; max-width: 16em;
+  }
+  @media (max-width: 600px) { .tdash-hero h2 { font-size: 25px; } }
+  .tdash-hero-lead { color: var(--text-muted); font-size: 15px; line-height: 1.6; margin: 0 0 20px; max-width: 46em; }
+  /* CTA + poznámka na jednom řádku, zalomí se pod sebe na úzkém. */
+  .tdash-cta-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  /* Tlačítko vypadá jako primární akce appky, ale je to jen vzhled -
+     `type="button"` bez posluchače, viz HTML. */
+  .tdash-cta { width: auto; padding: 12px 22px; cursor: default; }
+  .tdash-cta-note { color: var(--text-muted); font-size: 12.5px; }
 
-  /* Tlačítko "Mám nový tip" v hero sekci - vypadá jako primární akce, ale
-     je to jen vzhled (bez posluchače, viz HTML). */
-  .tdash-cta { width: auto; padding: 12px 26px; }
+  /* --- tmavě zelený panel "Váš další krok" ---
+     Klient na tomhle panelu VÝSLOVNĚ reklamoval špatně čitelný text, takže
+     kontrast je tu řešený natvrdo a záměrně:
+       * pozadí #16503E a bílý text mají kontrast ~9.3:1 (WCAG AAA i pro
+         normální velikost písma),
+       * doplňkové texty jdou přes rgba(255,255,255,.88), ne přes
+         --text-muted - to je v tmavém režimu appky bledě zelenošedá, která
+         by na téhle ploše byla sotva vidět,
+       * hodnoty jsou NATVRDO, ne z proměnných: --accent je ve světlém
+         režimu tmavě zelená, ale v tmavém režimu světle mátová, takže by
+         se panel v noci "převrátil" na světlý a bílý text by z něj zmizel.
+         Tenhle panel má být tmavě zelený vždycky. */
+  .tdash-next {
+    background: #16503E;
+    border: 1px solid #16503E;
+    border-radius: var(--radius-l);
+    box-shadow: var(--shadow-card);
+    padding: 22px 24px;
+    display: flex; flex-direction: column; gap: 10px;
+    color: #FFFFFF;
+  }
+  @media (max-width: 600px) { .tdash-next { padding: 18px 16px; } }
+  .tdash-next .tdash-eyebrow { color: rgba(255,255,255,.88); margin-bottom: 2px; }
+  .tdash-next h3 {
+    font-family: var(--font-display);
+    font-size: 20px; line-height: 1.25; font-weight: 600;
+    color: #FFFFFF; margin: 0;
+  }
+  .tdash-next-lesson {
+    font-size: 13.5px; line-height: 1.5;
+    color: rgba(255,255,255,.88);
+    margin: 0;
+  }
+  /* Odsadí spodní "tlačítko" na dolní hranu panelu, ať oba hero panely
+     opticky končí stejně. */
+  .tdash-next-spacer { flex: 1 1 auto; min-height: 8px; }
+  .tdash-next-action { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  /* Opět jen vzhled tlačítka - bez posluchače. */
+  .tdash-next-btn {
+    background: rgba(255,255,255,.16);
+    border: 1px solid rgba(255,255,255,.45);
+    color: #FFFFFF;
+    border-radius: var(--radius-s);
+    padding: 9px 16px;
+    font-family: var(--font-ui); font-size: 13.5px; font-weight: 600;
+    cursor: default;
+  }
+  .tdash-next-time { font-size: 12.5px; color: rgba(255,255,255,.88); }
+
+  /* --- řada čtyř statistik ---
+     Bez rámečků a bez vlastních karet: jen typografie a tenká barevná
+     linka vlevo, jak to appka dělá i jinde. Všechny čtyři sedí v jednom
+     společném bílém panelu, takže působí jako jedna řada, ne jako čtyři
+     krabice. */
+  .tdash-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 18px 26px; }
+  .tdash-stat { border-left: 2px solid var(--accent-soft); padding-left: 14px; }
+  .tdash-stat-label { color: var(--text-muted); font-size: 12.5px; margin-bottom: 3px; }
+  .tdash-stat-num { font-family: var(--font-display); font-size: 25px; font-weight: 600; line-height: 1.15; }
+  /* Poznámka pod číslem. U "možné odměny" nese navíc věcné upozornění, že
+     částka NENÍ příslib ani garance - výslovný požadavek klienta z
+     Milníku 16, který tenhle redesign nesmí shodit pod stůl. */
+  .tdash-stat-note { display: block; color: var(--text-muted); font-size: 11.5px; margin-top: 4px; }
+
+  /* --- dvousloupcové pásmo --- */
+  .tdash-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start; }
+  @media (max-width: 980px) { .tdash-cols { grid-template-columns: 1fr; } }
+  .tdash-col { display: flex; flex-direction: column; gap: 22px; }
+
+  /* --- tipy jako PROSTÉ ŘÁDKY, ne karty (požadavek trvá od Milníku 16) --- */
+  .tdash-tip-row {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 13px 0; border-bottom: 1px solid var(--border);
+  }
+  .tdash-tip-row:last-of-type { border-bottom: none; padding-bottom: 0; }
+  .tdash-tip-dot {
+    flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent); margin-top: 7px;
+  }
+  .tdash-tip-main { flex: 1 1 auto; min-width: 0; }
+  .tdash-tip-name { font-weight: 600; font-size: 14.5px; }
+  .tdash-tip-desc { color: var(--text-muted); font-size: 13px; line-height: 1.5; margin: 3px 0 0; }
+  /* Stavový štítek. Význam nese vždycky TEXT - barva je jen doprovod, aby
+     se stav dal přečíst i bez rozlišení barev. */
+  .tdash-chip {
+    flex: 0 0 auto;
+    border-radius: 999px; padding: 3px 10px;
+    font-size: 11.5px; font-weight: 600; white-space: nowrap;
+    background: var(--surface-2); color: var(--text-muted); border: 1px solid var(--border);
+  }
+  .tdash-chip-move { background: var(--accent-soft); color: var(--accent); border-color: var(--accent-soft); }
+  .tdash-chip-rk { background: var(--info-soft); color: var(--info); border-color: var(--info-soft); }
+
+  /* --- články: dvě malé nefunkční karty --- */
+  .tdash-articles { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 520px) { .tdash-articles { grid-template-columns: 1fr; } }
+  .tdash-article { border: 1px solid var(--border); border-radius: var(--radius-m); padding: 13px 14px; }
+  .tdash-article-meta {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    font-size: 10.5px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 8px;
+  }
+  .tdash-article-title { font-weight: 600; font-size: 14px; line-height: 1.35; margin: 0 0 5px; }
+  .tdash-article-text { color: var(--text-muted); font-size: 12.5px; line-height: 1.5; margin: 0; }
+
+  /* --- sjednocený panel Akademie ---
+     Do Milníku 17 to byly tři samostatné bloky (úrovně, kvízový teaser a
+     progress). Mockup je slévá do jednoho panelu, takže tady je jen vnitřní
+     členění, ne tři karty. */
+  .tdash-acad-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+  .tdash-acad-pct {
+    flex: 0 0 auto;
+    font-family: var(--font-display); font-size: 27px; font-weight: 600;
+    color: var(--accent); line-height: 1;
+  }
+  .tdash-acad-text { color: var(--text-muted); font-size: 13px; line-height: 1.6; margin: 10px 0 16px; }
+  /* Popiskový řádek nad/pod progress barem: vlevo název, vpravo počet. */
+  .tdash-acad-row {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+    font-size: 12.5px; margin-bottom: 6px;
+  }
+  .tdash-acad-row strong { font-size: 13.5px; }
+  .tdash-acad-row-muted { color: var(--text-muted); font-size: 12px; margin: 6px 0 0; }
+  .tdash-progress { height: 7px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+  .tdash-progress-fill { height: 100%; background: var(--accent); border-radius: 4px; }
+
+  /* Zvýrazněný box "Co dokončením odemknete" - jantarová dvojice
+     --warn-soft/--warn, kterou appka používá pro "pozor, ještě není
+     hotovo". Ikona je dekorace (aria-hidden v HTML). */
+  .tdash-unlock {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: var(--warn-soft); border: 1px solid var(--warn-soft);
+    border-radius: var(--radius-m); padding: 13px 14px; margin: 18px 0 0;
+  }
+  .tdash-unlock-icon {
+    flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--warn); color: var(--surface); font-size: 13px; font-weight: 700;
+  }
+  .tdash-unlock-title { font-weight: 600; font-size: 13.5px; margin: 0 0 3px; }
+  .tdash-unlock-text { color: var(--text-muted); font-size: 12.5px; line-height: 1.5; margin: 0; }
+
+  /* Widget "další lekce" uvnitř panelu Akademie. Nahrazuje samostatnou
+     kvízovou sekci z Milníku 16 - z celého kvízu zbyla jediná věta
+     (.tdash-lesson-note), že po lekci následuje krátký kvíz. */
+  .tdash-lesson {
+    border: 1px solid var(--border); border-radius: var(--radius-m);
+    padding: 14px 15px; margin-top: 16px;
+  }
+  .tdash-lesson-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+  .tdash-lesson-title { font-weight: 600; font-size: 14px; line-height: 1.35; margin: 0; flex: 1 1 160px; }
+  /* Znovu jen vzhled tlačítka, bez posluchače. */
+  .tdash-lesson-btn {
+    flex: 0 0 auto;
+    background: var(--accent); border: 1px solid var(--accent); color: var(--accent-contrast);
+    border-radius: var(--radius-s); padding: 9px 16px;
+    font-family: var(--font-ui); font-size: 13px; font-weight: 600; cursor: default;
+  }
+  .tdash-lesson-note { color: var(--text-muted); font-size: 12px; margin: 10px 0 0; }
+
+  /* Třístupňový tracker na patě panelu Akademie. Zamčené stupně jsou
+     ztlumené A označené slovem "zamčeno" - význam nikdy jen barvou. */
+  .tdash-track { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .tdash-track-item { flex: 1 1 110px; min-width: 100px; font-size: 12px; }
+  /* Na úzké obrazovce by se tři stupně zalomily 2+1 a poslední by osaměle
+     visel na dalším řádku - pod 560 px proto jde každý na vlastní řádek. */
+  @media (max-width: 560px) { .tdash-track-item { flex: 1 1 100%; } }
+  .tdash-track-bar { height: 3px; border-radius: 2px; background: var(--accent); margin-bottom: 7px; }
+  .tdash-track-name { font-weight: 600; }
+  .tdash-track-sub { color: var(--text-muted); }
+  .tdash-track-locked .tdash-track-bar { background: var(--border); }
+  .tdash-track-locked .tdash-track-name, .tdash-track-locked .tdash-track-sub { color: var(--text-muted); opacity: .7; }
+
+  /* --- panel "Váš budoucí tým" ---
+     Jemně zelené pozadí místo bílého, ať je vidět, že jde o výhled do
+     budoucna, ne o stav účtu. */
+  .tdash-team { background: var(--accent-soft); border-color: var(--accent-soft); }
+  .tdash-team h3 { font-family: var(--font-display); font-size: 18px; line-height: 1.3; font-weight: 600; margin: 0 0 14px; }
+  .tdash-avatars { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .tdash-avatar-group { display: flex; }
+  /* Kolečka se lehce překrývají, jak bývá zvykem u náhledu skupiny lidí.
+     Jsou to INICIÁLY UKÁZKOVÝCH jmen, ne skuteční uživatelé. */
+  .tdash-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--surface); border: 1px solid var(--border); color: var(--text-muted);
+    font-size: 10.5px; font-weight: 700; letter-spacing: .02em;
+    margin-right: -7px;
+  }
+  .tdash-avatar:last-child { margin-right: 0; }
+  .tdash-avatar-more { background: var(--surface-2); }
+  .tdash-team-count { font-size: 12.5px; color: var(--text-muted); }
+  .tdash-team-note { font-size: 12px; line-height: 1.55; color: var(--text-muted); margin: 14px 0 0; }
 
   [hidden] { display: none !important; }
 </style>
@@ -1787,9 +1954,15 @@
 
           <!-- LOGIN VIEW -->
           <div id="loginView">
+            <!-- Milník 18 (bod 3): velká tlačítka "Tipař A" a "Tipař B" z
+                 této řady ODSTRANĚNA. Klient je chtěl pryč, protože od
+                 Milníku 16 existovala ke každému z těchto dvou účtů DVĚ
+                 tlačítka (velké popisné tady + malé kolečko v řadě
+                 "Tipaři" níž) a řada nahoře tím zbytečně narostla. Jedinou
+                 cestou k demo účtům Tipař A/B jsou teď kolečka A/B níže.
+                 Řada zůstává grid s auto-fit, takže se zbylá tři tlačítka
+                 sama rozprostřou bez prázdné buňky - žádná změna CSS. -->
             <div class="demo-row">
-              <button class="btn-demo" id="demoABtn" type="button">Tipař A</button>
-              <button class="btn-demo" id="demoBBtn" type="button">Tipař B</button>
               <button class="btn-demo" id="demoLeaderBtn" type="button">Leader</button>
               <button class="btn-demo" id="demoAdminBtn" type="button">Admin</button>
               <button class="btn-demo" id="demoRkBtn" type="button">RK</button>
@@ -1801,17 +1974,17 @@
                  vysvětlení scénáře každého písmene (title atribut = krátký
                  popis při najetí myší).
                  Milník 16 (bod 2): řada je nově uvozená nadpisem "Tipaři" a
-                 začíná písmeny A a B. Velká tlačítka "Tipař A"/"Tipař B" v
-                 řádku výš ZŮSTÁVAJÍ beze změny - klient výslovně chtěl
-                 obojí, tedy DVĚ různá tlačítka vedoucí ke stejnému demo
-                 účtu. Aby z toho nevznikla druhá, ručně udržovaná kopie
-                 přihlašovací logiky, mají nová tlačítka vlastní `id`, ale
-                 vážou se na TÝŽ klíč DEMO_ACCOUNTS ('a' / 'b') přes
-                 DEMO_EXTRA_BUTTON_IDS - viz demoButtonIdsForKey() v JS. -->
+                 začíná písmeny A a B.
+                 Milník 18 (bod 3): velká tlačítka "Tipař A"/"Tipař B" v
+                 řádku výš byla odstraněna, takže kolečka A/B jsou teď
+                 JEDINOU cestou k těmto dvěma demo účtům (jejich `title` už
+                 proto neodkazuje na neexistující velké tlačítko). Vazba na
+                 klíč DEMO_ACCOUNTS ('a' / 'b') se nemění, jen se řeší přes
+                 DEMO_BUTTON_IDS - viz demoButtonIdsForKey() v JS. -->
             <h4 class="demo-letters-title">Tipaři</h4>
             <div class="demo-row-letters" id="demoLettersRow">
-              <button class="btn-demo-letter" id="demoALetterBtn" type="button" title="Tipař A — stejný účet jako velké tlačítko „Tipař A“">A</button>
-              <button class="btn-demo-letter" id="demoBLetterBtn" type="button" title="Tipař B — stejný účet jako velké tlačítko „Tipař B“">B</button>
+              <button class="btn-demo-letter" id="demoALetterBtn" type="button" title="Tipař A — základní demo účet tipaře">A</button>
+              <button class="btn-demo-letter" id="demoBLetterBtn" type="button" title="Tipař B — druhý demo účet tipaře">B</button>
               <button class="btn-demo-letter" id="demoCBtn" type="button" title="Tipař C — email ověřen, adresa nevyplněná">C</button>
               <button class="btn-demo-letter" id="demoDBtn" type="button" title="Tipař D — adresa vyplněná, KYC nenahráno">D</button>
               <button class="btn-demo-letter" id="demoEBtn" type="button" title="Tipař E — KYC čeká na ověření">E</button>
@@ -1823,6 +1996,18 @@
               <button class="btn-demo-letter" id="demoKBtn" type="button" title="Tipař K — plátce DPH, KYC čeká">K</button>
               <button class="btn-demo-letter" id="demoLBtn" type="button" title="Tipař L — 2. generace sítě (pod Tipařem C)">L</button>
               <button class="btn-demo-letter" id="demoMBtn" type="button" title="RK 2 — druhý demo účet realitní kanceláře">M</button>
+              <!-- Milník 18 (bod 5): easter egg - přehraje krátkou vítěznou
+                   fanfáru. Je to JEDINÉ tlačítko v téhle řadě, které NEVEDE
+                   k demo účtu, proto má vlastní třídu .btn-demo-fanfare
+                   (jiná barva: --warn-soft/--warn) - tvar a velikost jsou
+                   stejné jako u koleček, ať řada nevypadá rozbitě, ale
+                   barva jasně říká "tohle není další písmenkový účet".
+                   Fanfára je VLASTNÍ, ORIGINÁLNÍ melodie skládaná přes Web
+                   Audio API přímo v JS (viz playFanfare() níže) - žádná
+                   nahrávka, žádný externí soubor, žádná cizí skladba.
+                   Není v DEMO_ACCOUNTS ani v DEMO_BUTTON_IDS, takže ho
+                   demo wiring ani setAuthButtonsDisabled() nevidí. -->
+              <button class="btn-demo-letter btn-demo-fanfare" id="fanfareBtn" type="button" title="Přehrát fanfáru" aria-label="Přehrát fanfáru">▶</button>
             </div>
             <p class="demo-note">Testovací účty — dočasné, do zavedení ostrého přihlašování.</p>
             <div class="divider">nebo se přihlaste ručně</div>
@@ -1911,7 +2096,22 @@
             <button class="btn-primary" id="checkEmailBackBtn" type="button">Zpět na přihlášení</button>
           </div>
 
-          <p class="auth-footnote" id="authFootnote">Přihlášení a registrace běží přes Supabase Auth, oprávnění k datům vynucuje Row Level Security v Postgresu na straně serveru — stejný princip jako u bezpečnostního testu Krok 0, jen jinou technologií.</p>
+          <!-- Milník 18 (bod 4): patička #authFootnote s technickým popisem
+               ("běží přes Supabase Auth … Row Level Security v Postgresu …")
+               byla ODSTRANĚNA. Je to interní/implementační detail, který
+               koncovému tipaři nic neříká, a přihlašovací karta kvůli němu
+               končila odstavcem drobného textu nad vodorovnou linkou.
+               Bezpečnostní model se NEMĚNÍ ani trochu - je dál popsaný v
+               komentáři na začátku <style> a v docs/krok4_supabase.md,
+               jen se už nevypisuje uživateli na obrazovku.
+               Spolu s odstavcem zmizela i třída .auth-footnote z CSS
+               (jediné použití) a tři řádky JS, které mu přepínaly `hidden`
+               (showLoginView / showRegisterView / showCheckEmailView).
+               Karta teď končí posledním prvkem právě zobrazeného view
+               (.switch-line u přihlášení i registrace, tlačítko "Zpět na
+               přihlášení" u potvrzení e-mailu) - vlastní spodní padding
+               .auth-card zůstává, takže po textu nezůstává prázdné místo
+               ani osiřelá linka. -->
         </div>
         </div>
 
@@ -2387,212 +2587,254 @@
       </div>
 
       <!-- ============================================================
-           Milník 16, bod 6 — DASHBOARD TIPAŘE (statický vizuální návrh)
+           Milník 18, bod 2 — DASHBOARD TIPAŘE (statický vizuální návrh)
+           přepracovaný podle mockupu dodaného klientem
            ============================================================
-           KRITICKÉ OMEZENÍ (klient ho zdůraznil opakovaně): tohle je čistě
-           VZHLED, žádná funkčnost.
-             * Všechna čísla, tipy, lekce, kvíz a příspěvky komunity jsou
+           KRITICKÉ OMEZENÍ (platí od Milníku 16 a nezměnilo se ani teď):
+           tohle je čistě VZHLED, žádná funkčnost.
+             * Všechna čísla, jména klientů, částky, lekce i procenta jsou
                UKÁZKOVÁ DATA napevno v tomhle HTML - nic se nenačítá z
-               databáze a nic se do ní nezapisuje.
+               databáze a nic se do ní nezapisuje (žádné sb.from / sb.rpc).
              * Nic tady nemá posluchače události: tlačítka jsou
                `type="button"` bez `addEventListener`, odkazy tu nejsou
-               vůbec (žádné href), takže klik nikam nevede a nic neotevře.
+               vůbec (ani jeden `<a href>`), takže klik nikam nevede a nic
+               neotevře. I "odkazy" typu „Zobrazit všechny“ jsou tlačítka
+               bez obsluhy, a mají proto `cursor: default`.
              * Nepřibyla žádná záložka, položka navigace, routing, role ani
-               oprávnění - obrazovka #dashboardScreen existovala od Milníku
-               12 a je dosažitelná jen klikem na logo (viz logoNavigateHome).
-           Rozvržení podle bodu 6.9: hero + "cesta" na celou šířku nahoře,
-           pak dva sloupce (tipy vlevo, akademie+kvíz vpravo), pak zase celá
-           šířka dole (příběh, články, komunita). -->
+               oprávnění - obrazovka #dashboardScreen existuje od Milníku 12
+               a je dosažitelná jen klikem na logo (viz logoNavigateHome).
+
+           CO SE OPROTI MILNÍKU 17 ZMĚNILO (jen rozvržení a texty):
+             + hero jsou nově DVA panely vedle sebe: bílý uvítací s CTA a
+               tmavě zelený „Váš další krok“,
+             + čtyři statistiky mají jiné popisky (aktivní tipy, možná
+               odměna, vyplaceno, akademie) a sedí v jednom panelu,
+             + tipy mají vedle jména i popisný řádek a barevný štítek stavu,
+             + články jsou DVA (ne tři) a mají typ + délku čtení,
+             + Akademie, úrovně a kvíz se slily do JEDNOHO panelu
+               („Cesta k vlastnímu týmu“), z kvízu zbyla jediná poznámka,
+             + přibyl panel „Váš budoucí tým“,
+             - ZMIZEL osobní příběh zakladatelky („Zuzana“) z Milníku 16 -
+               klient ho z mockupu výslovně odstranil,
+             - ZMIZELA 6kroková pipeline a komunitní panel (v mockupu
+               nejsou).
+
+           Rozvržení: hero (2 panely) → řada statistik → dva sloupce
+           (vlevo tipy + články, vpravo Akademie + budoucí tým). Na mobilu
+           se všechno sloupcuje pod sebe. -->
       <div class="tdash" id="dashboardTiparWrap" hidden>
 
-        <!-- 6.1 hero (Milník 17, bod 16: vlastní bílý panel) -->
-        <div class="tdash-card tdash-hero">
-          <h2>Vítejte v Realitním tipu</h2>
-          <p>Místo naděje, vzdělávání a přátelství</p>
-          <!-- Vizuálně primární akce, funkčně nic - bez posluchače. -->
-          <button class="btn-primary tdash-cta" type="button">Mám nový tip</button>
+        <!-- ---------- hero: dva panely vedle sebe ---------- -->
+        <div class="tdash-hero-grid">
+
+          <!-- levý bílý panel -->
+          <div class="tdash-card tdash-hero">
+            <p class="tdash-eyebrow">Místo naděje, vzdělávání a přátelství</p>
+            <h2>Stačí si všimnout. O zbytek se postaráme.</h2>
+            <p class="tdash-hero-lead">Nemusíte být makléř ani měnit svůj život. Předáte nám příležitost ze svého okolí, sledujete její cestu a učíte se o realitách vlastním tempem.</p>
+            <div class="tdash-cta-row">
+              <!-- Vizuálně primární akce, funkčně nic - bez posluchače. -->
+              <button class="btn-primary tdash-cta" type="button">+ Přidat nový tip</button>
+              <span class="tdash-cta-note">Jednoduše, přibližně za 3 minuty</span>
+            </div>
+          </div>
+
+          <!-- pravý tmavě zelený panel. Kontrast textu je řešený v CSS
+               natvrdo (bílá na #16503E, ~9.3:1) - klient na tomhle panelu
+               výslovně reklamoval špatně čitelný text. -->
+          <div class="tdash-next">
+            <p class="tdash-eyebrow">Váš další krok</p>
+            <h3>Dokončete lekci a přibližte se vlastnímu týmu.</h3>
+            <p class="tdash-next-lesson">Další lekce: Jak poznat opravdu použitelný tip</p>
+            <div class="tdash-next-spacer"></div>
+            <div class="tdash-next-action">
+              <button class="tdash-next-btn" type="button">Pokračovat v Akademii</button>
+              <span class="tdash-next-time">3 minuty</span>
+            </div>
+          </div>
         </div>
 
-        <!-- 6.2 "Vaše cesta právě začíná" (celá šířka, Milník 17 bod 16: panel) -->
+        <!-- ---------- řada čtyř statistik (bez vlastních rámečků) ---------- -->
         <div class="tdash-card">
-          <h3 class="tdash-section-title">Vaše cesta právě začíná</h3>
-          <p class="tdash-section-sub">Ukázkový přehled — takhle bude vypadat, až začnete.</p>
-
           <div class="tdash-stats">
             <div class="tdash-stat">
+              <div class="tdash-stat-label">Aktivní tipy</div>
               <div class="tdash-stat-num">3</div>
-              <div class="tdash-stat-label">odeslané tipy</div>
+              <span class="tdash-stat-note">2 se tento týden posunuly</span>
+            </div>
+            <!-- Částka MUSÍ zůstat viditelně označená jako nezaručená -
+                 výslovný požadavek klienta z Milníku 16, ať nepůsobí jako
+                 příslib ani garance. -->
+            <div class="tdash-stat">
+              <div class="tdash-stat-label">Možná odměna</div>
+              <div class="tdash-stat-num">42 500 Kč</div>
+              <span class="tdash-stat-note">orientační částka, nikoli záruka — závisí na tom, zda a za kolik se obchod uzavře</span>
             </div>
             <div class="tdash-stat">
-              <div class="tdash-stat-num">1</div>
-              <div class="tdash-stat-label">tip v jednání s realitní kanceláří</div>
-            </div>
-            <!-- Částka MUSÍ být viditelně označená jako nezaručená -
-                 výslovný požadavek klienta, ať nepůsobí jako příslib. -->
-            <div class="tdash-stat">
-              <div class="tdash-stat-num">42 500 Kč<span aria-hidden="true">*</span></div>
-              <div class="tdash-stat-label">v možných odměnách</div>
-              <span class="tdash-stat-note">*možná odměna, nikoli záruka — skutečná částka závisí na tom, zda a za kolik se obchod uzavře</span>
+              <div class="tdash-stat-label">Vyplaceno</div>
+              <div class="tdash-stat-num">18 000 Kč</div>
+              <span class="tdash-stat-note">z dokončených obchodů</span>
             </div>
             <div class="tdash-stat">
-              <div class="tdash-stat-num">12</div>
-              <div class="tdash-stat-label">dní s Realitním tipem</div>
-            </div>
-          </div>
-
-          <!-- Místo prázdného grafu: 6 kroků cesty tipaře. Zvýrazněný krok
-               je jen ukázka, nepočítá se z ničeho. -->
-          <div class="tdash-pipeline">
-            <div class="tdash-step tdash-step-done">
-              <div class="tdash-step-dot" aria-hidden="true">✓</div>
-              <div class="tdash-step-label">Registrace</div>
-            </div>
-            <div class="tdash-step tdash-step-done">
-              <div class="tdash-step-dot" aria-hidden="true">✓</div>
-              <div class="tdash-step-label">Ověření totožnosti</div>
-            </div>
-            <div class="tdash-step tdash-step-current">
-              <div class="tdash-step-dot" aria-hidden="true">3</div>
-              <div class="tdash-step-label">První tip</div>
-              <div class="tdash-step-here">Jste tady</div>
-            </div>
-            <div class="tdash-step">
-              <div class="tdash-step-dot" aria-hidden="true">4</div>
-              <div class="tdash-step-label">Ověření tipu</div>
-            </div>
-            <div class="tdash-step">
-              <div class="tdash-step-dot" aria-hidden="true">5</div>
-              <div class="tdash-step-label">Předání realitní kanceláři</div>
-            </div>
-            <div class="tdash-step">
-              <div class="tdash-step-dot" aria-hidden="true">6</div>
-              <div class="tdash-step-label">Uzavřený obchod a odměna</div>
+              <div class="tdash-stat-label">Akademie</div>
+              <div class="tdash-stat-num">3 / 6</div>
+              <span class="tdash-stat-note">lekcí v aktuální úrovni</span>
             </div>
           </div>
         </div>
 
-        <!-- 6.9 dva sloupce -->
+        <!-- ---------- dvousloupcové pásmo ---------- -->
         <div class="tdash-cols">
 
-          <!-- 6.3 levý sloupec: tipy jako PROSTÉ ŘÁDKY, ne karty -->
+          <!-- LEVÝ sloupec: tipy a články -->
           <div class="tdash-col">
+
+            <!-- tipy jako PROSTÉ ŘÁDKY, ne karty (požadavek trvá od M16) -->
             <div class="tdash-card">
-              <h3 class="tdash-section-title">Co se děje s vašimi tipy</h3>
-              <p class="tdash-section-sub">Ukázková data.</p>
-              <div class="tdash-tip-row">
-                <span class="tdash-tip-name">Jana Nováková</span>
-                <span class="tdash-tip-stav">Čeká na ověření</span>
+              <div class="tdash-head-row">
+                <div>
+                  <h3 class="tdash-section-title">Co se děje s vašimi tipy</h3>
+                  <p class="tdash-section-sub">Nejdůležitější změny na jednom místě.</p>
+                </div>
+                <button class="tdash-link" type="button">Zobrazit všechny</button>
               </div>
+
               <div class="tdash-tip-row">
-                <span class="tdash-tip-name">Petr Svoboda</span>
-                <span class="tdash-tip-stav">Předáno realitní kanceláři</span>
+                <span class="tdash-tip-dot" aria-hidden="true"></span>
+                <span class="tdash-tip-main">
+                  <span class="tdash-tip-name">Jana Nováková · byt 3+1 v Brně</span>
+                  <p class="tdash-tip-desc">Makléř ověřil kontakt a domlouvá první schůzku.</p>
+                </span>
+                <span class="tdash-chip tdash-chip-move">Nový posun</span>
               </div>
+
               <div class="tdash-tip-row">
-                <span class="tdash-tip-name">Marie Dvořáková</span>
-                <span class="tdash-tip-stav">Nemovitost v prodeji</span>
+                <span class="tdash-tip-dot" aria-hidden="true"></span>
+                <span class="tdash-tip-main">
+                  <span class="tdash-tip-name">Petr Svoboda · rodinný dům v Kuřimi</span>
+                  <p class="tdash-tip-desc">Tip byl předán realitní kanceláři. Čekáme na zpětnou vazbu.</p>
+                </span>
+                <span class="tdash-chip tdash-chip-rk">Předáno RK</span>
+              </div>
+
+              <div class="tdash-tip-row">
+                <span class="tdash-tip-dot" aria-hidden="true"></span>
+                <span class="tdash-tip-main">
+                  <span class="tdash-tip-name">Marie Dvořáková · pozemek u Tišnova</span>
+                  <p class="tdash-tip-desc">Majitel zatím prodávat nechce. Tip zůstává v historii.</p>
+                </span>
+                <span class="tdash-chip">Uzavřeno</span>
+              </div>
+            </div>
+
+            <!-- dvě malé nefunkční karty článků (v M16 jich byly tři) -->
+            <div class="tdash-card">
+              <div class="tdash-head-row">
+                <div>
+                  <h3 class="tdash-section-title">Průvodce a články</h3>
+                  <p class="tdash-section-sub">Nepovinné čtení pro chvíli, kdy chcete vědět víc.</p>
+                </div>
+                <button class="tdash-link" type="button">Všechny články</button>
+              </div>
+              <div class="tdash-articles">
+                <div class="tdash-article">
+                  <div class="tdash-article-meta"><span>Článek</span><span>5 min</span></div>
+                  <p class="tdash-article-title">Jak dlouho trvá realitní obchod a kdy vzniká odměna</p>
+                  <p class="tdash-article-text">Od prvního kontaktu až po výplatu provize.</p>
+                </div>
+                <div class="tdash-article">
+                  <div class="tdash-article-meta"><span>Průvodce</span><span>4 min</span></div>
+                  <p class="tdash-article-title">Pět situací, ve kterých můžete narazit na dobrý tip</p>
+                  <p class="tdash-article-text">Praktické příklady z běžného života.</p>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- 6.4 + 6.5 pravý sloupec: akademie a kvízový teaser -->
+          <!-- PRAVÝ sloupec: sjednocená Akademie a budoucí tým -->
           <div class="tdash-col">
+
+            <!-- Jeden panel místo tří bloků z M16/M17: úrovně, progress,
+                 odemykání i „další lekce“ (včetně zbytku po kvízu) jsou
+                 nově pohromadě. -->
             <div class="tdash-card">
-              <h3 class="tdash-section-title">Učte se vlastním tempem</h3>
-              <p class="tdash-section-sub">Ukázková data.</p>
+              <div class="tdash-acad-head">
+                <div>
+                  <p class="tdash-eyebrow">Akademie realitního tipaře</p>
+                  <h3 class="tdash-section-title">Cesta k vlastnímu týmu</h3>
+                </div>
+                <span class="tdash-acad-pct">50 %</span>
+              </div>
+              <p class="tdash-acad-text">Naučíte se bezpečně předávat kvalitní tipy. Po dokončení Akademie a závěrečného testu si můžete vybudovat vlastní síť tipařů a získávat odměny z jejich úspěšných tipů.</p>
+
+              <div class="tdash-acad-row">
+                <span><strong>Úroveň 1 ze 3</strong> · Začátečník</span>
+                <span>3 z 6 lekcí</span>
+              </div>
               <div class="tdash-progress" aria-hidden="true"><div class="tdash-progress-fill" style="width:50%;"></div></div>
-              <p class="tdash-progress-note">Úroveň Začátečník — 50 % dokončeno (3 z 6 lekcí)</p>
+              <div class="tdash-acad-row tdash-acad-row-muted">
+                <span>Zbývají 3 lekce · asi 35 minut</span>
+                <span>Celkem asi 3 hodiny</span>
+              </div>
 
-              <div class="tdash-level">
-                <span class="tdash-level-icon" aria-hidden="true">●</span>
+              <div class="tdash-unlock">
+                <span class="tdash-unlock-icon" aria-hidden="true">★</span>
                 <span>
-                  <span class="tdash-level-name">Začátečník</span><br>
-                  <span class="tdash-level-sub">Jak poznat dobrý tip</span>
+                  <p class="tdash-unlock-title">Co dokončením odemknete</p>
+                  <p class="tdash-unlock-text">Možnost vybudovat vlastní síť tipařů a získávat týmové odměny z jejich uzavřených obchodů.</p>
                 </span>
               </div>
-              <div class="tdash-level tdash-level-locked">
-                <span class="tdash-level-icon" aria-hidden="true">🔒</span>
-                <span>
-                  <span class="tdash-level-name">Pokročilý</span><br>
-                  <span class="tdash-level-sub">Zamčeno — dokončete úroveň Začátečník</span>
+
+              <!-- Widget „další lekce“. Poznámka o kvízu je vše, co zbylo
+                   ze samostatné kvízové sekce z Milníku 16 - žádné otázky,
+                   žádné vyhodnocování. -->
+              <div class="tdash-lesson">
+                <p class="tdash-eyebrow">Další lekce · 8 minut</p>
+                <div class="tdash-lesson-row">
+                  <p class="tdash-lesson-title">Jak poznat opravdu použitelný realitní tip</p>
+                  <button class="tdash-lesson-btn" type="button">Pokračovat</button>
+                </div>
+                <p class="tdash-lesson-note">Po lekci následuje krátký kvíz.</p>
+              </div>
+
+              <!-- Třístupňový tracker. Zamčené stupně jsou ztlumené a
+                   současně popsané slovem „zamčeno“ - význam se nikdy
+                   nenese jen barvou. -->
+              <div class="tdash-track">
+                <div class="tdash-track-item">
+                  <div class="tdash-track-bar" aria-hidden="true"></div>
+                  <div class="tdash-track-name">1. Začátečník</div>
+                  <div class="tdash-track-sub">3/6 lekcí</div>
+                </div>
+                <div class="tdash-track-item tdash-track-locked">
+                  <div class="tdash-track-bar" aria-hidden="true"></div>
+                  <div class="tdash-track-name">2. Pokročilý</div>
+                  <div class="tdash-track-sub">zamčeno</div>
+                </div>
+                <div class="tdash-track-item tdash-track-locked">
+                  <div class="tdash-track-bar" aria-hidden="true"></div>
+                  <div class="tdash-track-name">3. Lídr týmu</div>
+                  <div class="tdash-track-sub">zamčeno</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel „Váš budoucí tým“. Iniciály v kolečkách jsou
+                 UKÁZKOVÁ jména, ne skuteční uživatelé - nic se nenačítá. -->
+            <div class="tdash-card tdash-team">
+              <p class="tdash-eyebrow">Váš budoucí tým</p>
+              <h3>Učíte se, abyste mohli růst společně s dalšími.</h3>
+              <div class="tdash-avatars">
+                <span class="tdash-avatar-group" aria-hidden="true">
+                  <span class="tdash-avatar">JN</span>
+                  <span class="tdash-avatar">PS</span>
+                  <span class="tdash-avatar">MD</span>
+                  <span class="tdash-avatar tdash-avatar-more">+9</span>
                 </span>
+                <span class="tdash-team-count">Ukázka sítě 12 lidí</span>
               </div>
-              <div class="tdash-level tdash-level-locked">
-                <span class="tdash-level-icon" aria-hidden="true">🔒</span>
-                <span>
-                  <span class="tdash-level-name">Expert</span><br>
-                  <span class="tdash-level-sub">Zamčeno</span>
-                </span>
-              </div>
-              <div class="tdash-level tdash-level-locked">
-                <span class="tdash-level-icon" aria-hidden="true">🔒</span>
-                <span>
-                  <span class="tdash-level-name">Mistr</span><br>
-                  <span class="tdash-level-sub">Zamčeno</span>
-                </span>
-              </div>
+              <p class="tdash-team-note">Tahle možnost se zpřístupní až po dokončení Akademie a úspěšném závěrečném testu.</p>
             </div>
-
-            <!-- 6.5 kvízový teaser - jedna ukázková otázka, bez vyhodnocení -->
-            <div class="tdash-panel">
-              <h4>Ověřte si své znalosti</h4>
-              <p class="tdash-quiz-q">Kdy má smysl poslat tip, i když majitel ještě váhá?</p>
-              <div class="tdash-quiz-options">
-                <button class="tdash-quiz-option" type="button">Nikdy — dokud se nerozhodne, tip nedává smysl</button>
-                <button class="tdash-quiz-option" type="button">Ano, pokud o prodeji uvažuje a souhlasí s oslovením</button>
-                <button class="tdash-quiz-option" type="button">Jen když už má inzerát u jiné kanceláře</button>
-              </div>
-              <p class="tdash-section-sub" style="margin:12px 0 0;">Ukázka — kvíz zatím nevyhodnocuje odpovědi.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- 6.6 osobní příběh zakladatelky (celá šířka) -->
-        <div class="tdash-card tdash-story">
-          <h3 class="tdash-section-title">Proč Realitní tip vznikl</h3>
-          <p>Dlouho jsem koukala na to, jak lidé kolem mě vědí o někom, kdo chce prodat byt — a nemají to komu říct. Přišlo mi to škoda na obou stranách.</p>
-          <p>Tak jsem začala. Nejdřív jsem tipy sháněla po známých a předávala je sama, pak se přidali další a bylo jasné, že to potřebuje pořádné zázemí.</p>
-          <p>Nechci po vás, abyste cokoli prodávali nebo někoho přemlouvali. Stačí, když si vzpomenete, komu by se pomoc hodila — o zbytek se postaráme my. A když něco nebude jasné, napište mi. Fakt.</p>
-          <p class="tdash-story-sign">Zuzana<span>Vaše průvodkyně Realitním tipem</span></p>
-        </div>
-
-        <!-- 6.7 tři teasery budoucích článků - nic z toho nikam nevede (Milník 17 bod 16: panel) -->
-        <div class="tdash-card">
-          <h3 class="tdash-section-title">Připravujeme pro vás</h3>
-          <p class="tdash-section-sub">Ukázka — články zatím nejsou k dispozici.</p>
-          <div class="tdash-articles">
-            <div>
-              <p class="tdash-article-title">Jak mluvit o prodeji, aniž byste tlačili</p>
-              <p class="tdash-article-text">Tři věty, které otevřou téma přirozeně — a jedna, které se vyhnout.</p>
-              <span class="tdash-soon">Připravujeme</span>
-            </div>
-            <div>
-              <p class="tdash-article-title">Co se s tipem děje po odeslání</p>
-              <p class="tdash-article-text">Cesta od vašeho tipu k podpisu smlouvy, krok za krokem a bez zkratek.</p>
-              <span class="tdash-soon">Připravujeme</span>
-            </div>
-            <div>
-              <p class="tdash-article-title">Daně a odměny bez paniky</p>
-              <p class="tdash-article-text">Co si pohlídat, když vám přijde první odměna, a co řešit nemusíte.</p>
-              <span class="tdash-soon">Připravujeme</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 6.8 komunita - náhled, ŽÁDNÁ reálná diskuzní funkčnost -->
-        <div class="tdash-panel">
-          <h4>Nejste na to sami</h4>
-          <p class="tdash-section-sub" style="margin:0 0 10px;">Ukázka diskuzních témat — komunita se teprve připravuje.</p>
-          <div class="tdash-topic">
-            <span class="tdash-topic-name">První tip a nervozita — jak jste to měli vy?</span>
-            <span class="tdash-topic-count">14 odpovědí</span>
-          </div>
-          <div class="tdash-topic">
-            <span class="tdash-topic-name">Soused prodává chatu. Má smysl ji poslat?</span>
-            <span class="tdash-topic-count">9 odpovědí</span>
-          </div>
-          <div class="tdash-topic">
-            <span class="tdash-topic-name">Jak dlouho vám trvalo ověření totožnosti?</span>
-            <span class="tdash-topic-count">6 odpovědí</span>
           </div>
         </div>
       </div>
@@ -2847,7 +3089,7 @@
   // Milník 14: číslo aktuální verze aplikace - MUSÍ odpovídat nejnovější položce
   // pole APP_CHANGELOG níže (položka na indexu 0). Při každém příštím milníku
   // se zvyšuje ROVNOU TADY i v APP_CHANGELOG - jsou to dvě navzájem závislá místa.
-  var APP_VERSION = "17.0";
+  var APP_VERSION = "18.0";
 
   // Milník 14 (bod 4): obsah panelu "Historie verzí" na přihlašovací
   // obrazovce - zrekonstruováno z reálné historie projektu (STAV.md,
@@ -2856,6 +3098,11 @@
   // pod tímto polem). Vykresluje se generickou šablonou renderAuthVersionAndChangelog()
   // - při dalším milníku se sem jen přidá nová položka na začátek pole.
   var APP_CHANGELOG = [
+    { verze: "18.0", datum: "12. 9. 2026", body: [
+      "Nový favicon appky",
+      "Dashboard tipaře přepracovaný podle nového vizuálního návrhu",
+      "Přihlašovací stránka zjednodušená - odstraněna velká tlačítka Tipař A/B a technická poznámka o zabezpečení"
+    ] },
     { verze: "17.0", datum: "12. 9. 2026", body: [
       "Dashboard má vlastní záložku a je domovskou stránkou tipaře",
       "Přehled lídra: nová sekce Nově prodáno s částkou k výplatě",
@@ -4850,7 +5097,10 @@
     el("loginView").hidden = false;
     el("registerView").hidden = true;
     el("checkEmailView").hidden = true;
-    el("authFootnote").hidden = false;
+    // Milník 18 (bod 4): dřív se tu přepínala i viditelnost #authFootnote
+    // (technický popis Supabase Auth/RLS). Odstavec je z HTML pryč, takže
+    // by el("authFootnote") vrátilo null a `.hidden = false` shodilo celé
+    // přepnutí na přihlašovací pohled - řádek proto zmizel taky.
     el("authSubtitle").hidden = false;
     el("authSubtitle").textContent = "Přihlaste se ke svému účtu tipaře";
     showBanner(el("authBanner"), null, null);
@@ -4860,7 +5110,7 @@
     el("loginView").hidden = true;
     el("registerView").hidden = false;
     el("checkEmailView").hidden = true;
-    el("authFootnote").hidden = false;
+    // Milník 18 (bod 4): viz showLoginView - #authFootnote už neexistuje.
     el("authSubtitle").hidden = false;
     el("authSubtitle").textContent = "Založte si nový účet tipaře";
     showBanner(el("authBanner"), null, null);
@@ -4870,14 +5120,15 @@
   // Milník 9 (bod 1): plnohodnotná obrazovka místo dřívějšího malého
   // "ok" banneru - viz doRegister níže a docs/milnik9_registrace_kyc_dashboard.md
   // pro zjištěnou příčinu, proč se ten banner uživateli reálně nezobrazil.
-  // Skryje i podnadpis/patičku přihlašovací karty, ať nic nerozptyluje -
-  // zůstává viditelná, dokud uživatel sám neklikne na tlačítko zpět.
+  // Skryje i podnadpis přihlašovací karty, ať nic nerozptyluje - zůstává
+  // viditelná, dokud uživatel sám neklikne na tlačítko zpět.
+  // Milník 18 (bod 4): dřív se tu skrývala i patička #authFootnote; ta je
+  // z HTML odstraněná, takže se skrývat nemá co.
   function showCheckEmailView(email) {
     el("loginView").hidden = true;
     el("registerView").hidden = true;
     el("checkEmailView").hidden = false;
     el("authSubtitle").hidden = true;
-    el("authFootnote").hidden = true;
     el("checkEmailAddress").textContent = email || "";
     showBanner(el("authBanner"), null, null);
   }
@@ -4905,28 +5156,35 @@
 
   // Milník 12 (bod 13): id tlačítka se odvozuje z klíče DEMO_ACCOUNTS
   // (demo + Key[0].toUpperCase() + Key.slice(1) + "Btn") - funguje pro
-  // jednopísmenné klíče (a -> demoABtn) i víceznakové (leader ->
+  // jednopísmenné klíče (c -> demoCBtn) i víceznakové (leader ->
   // demoLeaderBtn, rk -> demoRkBtn), takže nový klíč v DEMO_ACCOUNTS
-  // automaticky funguje beze změny tady.
+  // automaticky funguje beze změny tady. Výjimky, kde se id neodvozuje,
+  // řeší DEMO_BUTTON_IDS níž.
   function demoButtonId(key) {
     return "demo" + key.charAt(0).toUpperCase() + key.slice(1) + "Btn";
   }
 
-  // Milník 16 (bod 2): klient chtěl mít Tipaře A a B DVAKRÁT - jednou jako
-  // velké popisné tlačítko v horní řadě (beze změny z Milníku 7) a jednou
-  // jako malé kolečko v nové řadě "Tipaři" A-M. Jsou to dvě různá tlačítka
-  // vedoucí ke stejnému demo účtu, což je vědomý požadavek, ne omyl.
-  // Aby se kvůli tomu nemusela duplikovat přihlašovací logika ani seznam
-  // účtů, drží se tu jen MAPA "klíč DEMO_ACCOUNTS -> další id tlačítek";
-  // wiring i hromadné znepřístupnění tlačítek během přihlašování pak jedou
-  // přes demoButtonIdsForKey(), tedy jedinou cestou pro obě varianty.
-  var DEMO_EXTRA_BUTTON_IDS = {
+  // Milník 16 (bod 2) zavedl pro klíče 'a'/'b' DVĚ tlačítka najednou (velké
+  // popisné "Tipař A" v horní řadě + malé kolečko A v řadě "Tipaři") a
+  // držel to mapou "klíč -> DALŠÍ id navíc" (DEMO_EXTRA_BUTTON_IDS).
+  //
+  // Milník 18 (bod 3): velká tlačítka "Tipař A"/"Tipař B" jsou z HTML pryč,
+  // takže odvozená id demoABtn/demoBBtn už neexistují. Mapa se proto mění
+  // z "extra id navíc" na PLNÝ SEZNAM id pro daný klíč (override): pro
+  // 'a'/'b' vrací výhradně kolečka, pro všechny ostatní klíče se id dál
+  // odvozuje z názvu klíče přes demoButtonId().
+  // Proč override a ne jen spolehnutí na `if (btn)` u volajících: volající
+  // sice existenci elementu kontrolují (a appka by tedy nespadla), ale
+  // seznam by pořád vracel id, které v dokumentu nikdy nebude - tichý
+  // mrtvý záznam, který svádí k domněnce, že tlačítko někde je. Takhle je
+  // seznam id vždycky totožný s tím, co je v HTML.
+  var DEMO_BUTTON_IDS = {
     a: ["demoALetterBtn"],
     b: ["demoBLetterBtn"]
   };
 
   function demoButtonIdsForKey(key) {
-    return [demoButtonId(key)].concat(DEMO_EXTRA_BUTTON_IDS[key] || []);
+    return DEMO_BUTTON_IDS[key] || [demoButtonId(key)];
   }
 
   function setAuthButtonsDisabled(disabled) {
@@ -4962,6 +5220,97 @@
     var account = DEMO_ACCOUNTS[key];
     if (!account) return;
     doLogin(account.email, DEMO_PASSWORD, el("authBanner"));
+  }
+
+  // ------------- Milník 18 (bod 5): fanfára (easter egg) -------------
+  //
+  // PROČ JE MELODIE VLASTNÍ, A NE TA VYŽÁDANÁ FILMOVÁ:
+  // klient si přál konkrétně znělku "Gonna Fly Now" z filmu Rocky. To je
+  // ale chráněné autorské dílo - nesmíme ho stáhnout, přiložit jako
+  // nahrávku, ani ho přepsat nota po notě do oscilátorů (přepis melodie je
+  // pořád užití téhož díla, jen jiným nosičem). Níže je proto ZCELA
+  // PŮVODNÍ krátká vítězná fanfára napsaná pro tenhle projekt: vzestupný
+  // motiv po tónech durového kvintakordu, zakončený drženým akordem.
+  // Není to citace, aranž ani parafráze ničeho existujícího.
+  // Podrobněji viz docs/milnik18_favicon_dashboard_prihlaseni_fanfara.md.
+  //
+  // Technicky: tóny se skládají za běhu z OscillatorNode + GainNode -
+  // žádný zvukový soubor, žádná binární příloha, app.html zůstává
+  // self-contained. Tlačítko nic jiného nedělá: žádná navigace, žádné RPC,
+  // žádný zápis do databáze.
+
+  // Jeden SDÍLENÝ AudioContext na celou stránku, vytvořený AŽ uvnitř
+  // obsluhy kliknutí. Dva důvody, proč ne při načtení a proč ne nový při
+  // každém kliknutí:
+  //   1) prohlížeče blokují zvuk bez interakce uživatele - kontext
+  //      vytvořený při načtení stránky by naběhl "suspended";
+  //   2) počet AudioContextů na jednu kartu je omezený (v praxi kolem
+  //      šesti) - nový kontext při každém kliknutí by po pár stiscích
+  //      přestal jít vytvořit a tlačítko by tiše zmrtvělo.
+  var fanfareCtx = null;
+  // Čas (na ose fanfareCtx.currentTime), do kdy ještě dohrává předchozí
+  // stisk. Opakovaný klik během fanfáry se ignoruje, ať se tóny
+  // nepřekrývají přes sebe do kaše.
+  var fanfareBusyUntil = 0;
+
+  // Vlastní melodie: [frekvence v Hz, začátek v s, délka v s, hlasitost].
+  // Prvních sedm hodnot je vzestupný motiv, poslední čtyři tvoří závěrečný
+  // držený akord (zní současně, proto mají stejný začátek).
+  var FANFARE_NOTES = [
+    [392.00, 0.00, 0.17, 0.50],
+    [523.25, 0.17, 0.17, 0.50],
+    [659.25, 0.34, 0.30, 0.55],
+    [587.33, 0.68, 0.15, 0.45],
+    [783.99, 0.83, 0.40, 0.60],
+    [659.25, 1.28, 0.20, 0.45],
+    [783.99, 1.52, 0.22, 0.50],
+    [523.25, 1.80, 1.00, 0.30],
+    [659.25, 1.80, 1.00, 0.26],
+    [783.99, 1.80, 1.00, 0.30],
+    [1046.50, 1.80, 1.00, 0.22]
+  ];
+
+  function playFanfare() {
+    var Ctor = window.AudioContext || window.webkitAudioContext;
+    // Prohlížeč bez Web Audio: tlačítko prostě neudělá nic, nic nespadne.
+    if (!Ctor) return;
+    try {
+      if (!fanfareCtx) fanfareCtx = new Ctor();
+      // Po interakci uživatele smí kontext běžet; pokud ho prohlížeč mezitím
+      // uspal (např. přepnutá karta), probudíme ho.
+      if (fanfareCtx.state === "suspended" && fanfareCtx.resume) fanfareCtx.resume();
+
+      var now = fanfareCtx.currentTime;
+      if (now < fanfareBusyUntil) return;
+      var start = now + 0.05;
+      var end = start;
+
+      FANFARE_NOTES.forEach(function (note) {
+        var freq = note[0], at = start + note[1], dur = note[2], vol = note[3];
+        var osc = fanfareCtx.createOscillator();
+        var gain = fanfareCtx.createGain();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(freq, at);
+        // Krátký náběh a plynulé doznění - bez obálky oscilátor na začátku
+        // i na konci nepříjemně lupne.
+        gain.gain.setValueAtTime(0.0001, at);
+        gain.gain.exponentialRampToValueAtTime(vol, at + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+        osc.connect(gain);
+        gain.connect(fanfareCtx.destination);
+        osc.start(at);
+        // Uzly se samy odpojí a uvolní po stop() - kontext se drží dál,
+        // ale oscilátory se nehromadí.
+        osc.stop(at + dur + 0.03);
+        if (at + dur > end) end = at + dur;
+      });
+
+      fanfareBusyUntil = end;
+    } catch (e) {
+      // Zvuk je čistě ozdobný - jakékoli selhání Web Audio nesmí shodit
+      // přihlašovací obrazovku.
+      console.warn("Fanfáru se nepodařilo přehrát:", e);
+    }
   }
 
   // Milník 5 (bod 6 zadání): "Jméno a příjmení" rozdělené na dvě pole +
@@ -9566,19 +9915,26 @@
     });
     el("kycSubmitBtn").addEventListener("click", submitOdeslatKOvereni);
 
-    // Milník 12 (bod 13): wiring pro všech 16 demo tlačítek (5 původních +
-    // 11 nových C-M) - jeden generický listener na klíč DEMO_ACCOUNTS,
-    // žádné ruční opakování na každé tlačítko zvlášť.
-    // Milník 16 (bod 2): tentýž mechanismus obsluhuje i nová malá tlačítka
-    // A/B (demoALetterBtn/demoBLetterBtn) - demoButtonIdsForKey() vrátí pro
-    // klíč 'a'/'b' obě id, takže obě vedou na TÝŽ demoLogin(key), bez druhé
-    // kopie logiky a bez ručního addEventListener navíc.
+    // Milník 12 (bod 13): wiring pro všechna demo tlačítka - jeden generický
+    // listener na klíč DEMO_ACCOUNTS, žádné ruční opakování na každé
+    // tlačítko zvlášť.
+    // Milník 16 (bod 2): tentýž mechanismus obsluhuje i malá tlačítka A/B
+    // (demoALetterBtn/demoBLetterBtn) - id pro klíč vrací výhradně
+    // demoButtonIdsForKey(), takže je jen jedna cesta k demoLogin(key).
+    // Milník 18 (bod 3): po zrušení velkých tlačítek "Tipař A"/"Tipař B"
+    // vrací demoButtonIdsForKey() pro klíče 'a'/'b' právě jedno id (kolečko),
+    // takže se tu nic neměnilo - jen se navazuje o dvě tlačítka míň.
     Object.keys(DEMO_ACCOUNTS).forEach(function (key) {
       demoButtonIdsForKey(key).forEach(function (id) {
         var btn = el(id);
         if (btn) btn.addEventListener("click", function () { demoLogin(key); });
       });
     });
+
+    // Milník 18 (bod 5): easter egg s fanfárou. Záměrně stojí MIMO smyčku
+    // nad ním - není to demo účet, nemá klíč v DEMO_ACCOUNTS a nesmí ho
+    // vypínat setAuthButtonsDisabled() během přihlašování.
+    if (el("fanfareBtn")) el("fanfareBtn").addEventListener("click", playFanfare);
 
     el("loginForm").addEventListener("submit", function (e) {
       e.preventDefault();
