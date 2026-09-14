@@ -59,6 +59,14 @@
        použité jen jako akcent na okraji/pozadí-nádechu/ikoně, nikdy jako
        barva textu čísla/popisku - viz .stat-tile pravidla níže). */
     --lt-ok:#0ca30c; --lt-warn:#fab219; --lt-serious:#ec835a; --lt-critical:#d03b3b; --lt-neutral:#2a78d6;
+
+    /* Milník 23 (bod 3): TMAVĚ ZELENÁ pro skupinu `vyplata` (dlaždice
+       „Čeká na vyplacení"). Klient chce, aby byla ZŘETELNĚ TMAVŠÍ než běžná
+       zelená skupiny f/g/h, která používá --ok (#2E7D46). Je to jediná nová
+       barevná dvojice, kterou tenhle milník zavádí; ostatní tři skupiny
+       přebírají EXISTUJÍCÍ tokeny (--danger, --warn, --ok), aby se odstín
+       nemohl rozejít s pracovní frontou (viz .ld-faze-* níž). */
+    --deep-ok:#0F3D21; --deep-ok-soft:#B7D9C4;
   }
 
   @media (prefers-color-scheme: dark) {
@@ -68,6 +76,9 @@
       --accent:#4FBE9E; --accent-hover:#69CDB1; --accent-contrast:#07130F; --accent-soft:#1B3A31;
       --ok:#5FCB7C; --ok-soft:#173323; --warn:#E0A94B; --warn-soft:#3A2C13;
       --danger:#E27272; --danger-soft:#3A1D1D; --info:#7EA8E0; --info-soft:#1B2C42;
+      /* Milník 23 (bod 3): v tmavém režimu se role obracejí — „tmavší"
+         znamená hlubší pozadí a světlejší, sytější text než u --ok. */
+      --deep-ok:#A7E8BF; --deep-ok-soft:#0B2E1A;
       --shadow-card: 0 1px 2px rgba(0,0,0,0.35), 0 1px 1px rgba(0,0,0,0.25);
     }
   }
@@ -78,6 +89,7 @@
     --accent:#4FBE9E; --accent-hover:#69CDB1; --accent-contrast:#07130F; --accent-soft:#1B3A31;
     --ok:#5FCB7C; --ok-soft:#173323; --warn:#E0A94B; --warn-soft:#3A2C13;
     --danger:#E27272; --danger-soft:#3A1D1D; --info:#7EA8E0; --info-soft:#1B2C42;
+    --deep-ok:#A7E8BF; --deep-ok-soft:#0B2E1A;
     --shadow-card: 0 1px 2px rgba(0,0,0,0.35), 0 1px 1px rgba(0,0,0,0.25);
   }
 
@@ -301,6 +313,17 @@
   .btn-demo:hover { background: var(--accent); border-color: var(--accent); color: var(--accent-contrast); }
   .btn-demo:active { transform: translateY(1px); }
   .btn-demo:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+  /* MILNÍK 23 (bod 7): místo JEDNOHO tlačítka „RK" jsou tu TŘI (RK1/RK2/RK3),
+     ale DOHROMADY musí zabrat PŘESNĚ TOLIK MÍSTA, kolik zabíralo to jedno.
+     Řeší to vnořená mřížka, která obsadí JEDNU buňku `.demo-row` a uvnitř se
+     rozdělí na tři stejné díly. Rodičovská mřížka `repeat(auto-fit,
+     minmax(85px, 1fr))` tak dál vidí tři prvky (Leader, Admin, tenhle blok)
+     a šířka celé řady se nemění ani o pixel.
+     Menší vnitřní odsazení a písmo jsou nutné: do ~85 px na tři tlačítka se
+     „RK1" v původních 13,5 px/11 px paddingu nevejde. */
+  .demo-rk-group { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+  .demo-rk-group .btn-demo { padding: 11px 2px; font-size: 12.5px; }
 
   /* Milník 12 (bod 13): 11 dalších demo tlačítek (C-M) - kompaktní kulatá
      tlačítka s jedním písmenem, jedna řada i na malé obrazovce
@@ -1322,60 +1345,137 @@
   .ld-kpi-note-warn { color: var(--danger); }
   .ld-kpi-note-up { color: var(--accent); }
 
-  /* --- tipy v procesu (M21 sekce E -> Milník 22 bod 3) ---
-     DEVĚT dlaždic (a-ch) místo dosavadních sedmi. BARVU NEURČUJE POŘADÍ, ale
-     `skupina`, kterou posílá server (SQL public.tip_faze_skupina) - jeden zdroj
-     pravdy pro obě strany:
-       tym       a, b, c   … pracuje na tom tým Realitního tipu (lídr)
-       rk_pred   d, e      … předsmluvní fáze u RK - ZÁMĚRNĚ nejsvětlejší odstín
-       rk_prodej f, g, h   … smlouva, prodej, prodáno
-       vyplata   ch        … dokončení obchodního případu (neutrální, odlišná)
-     Pět sloupců (9 dlaždic = 5 + 4) - devět ve vodorovné řadě by při 1280 px
-     dalo ~130 px na dlaždici a popisky by se lámaly do pěti řádků. */
-  .ld-faze { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+  /* --- tipy v procesu (M21 sekce E -> M22 bod 3 -> MILNÍK 23 bod 3) ---
+     DEVĚT dlaždic. BARVU NEURČUJE POŘADÍ, ale `skupina`, kterou posílá server
+     (SQL public.tip_faze_skupina) - jeden zdroj pravdy pro obě strany.
+
+     MILNÍK 23, ZMĚNA 1 — JEDEN ŘÁDEK.
+     M22 mělo `repeat(5, 1fr)`, tedy 5 + 4 dlaždice ve dvou řadách. Klient chce
+     všech devět vedle sebe na běžné desktopové šířce (~1280 px). Rozpočet:
+       1280 px viewport − 2×24 px odsazení stránky − 2×22 px vnitřní odsazení
+       panelu ≈ 1188 px; minus 8 mezer × 8 px = 1124 px / 9 ≈ 124 px na dlaždici.
+     Proto se zmenšuje mezera (10 → 8 px), vnitřní odsazení (14 → 9 px) i písmo
+     popisku (13 → 11 px) a číslo (17 → 16 px). Dlaždice se smí LÁMAT DO VÍCE
+     ŘÁDKŮ NA VÝŠKU (`overflow-wrap: anywhere` kvůli slovu
+     „zprostředkovatelská"), protože klientova priorita je JEDEN VODOROVNÝ
+     ŘÁDEK, ne stejná výška textu.
+     Pod 1100 px se řada rozpadne na 5 a pod 720 px na 3 sloupce — devět
+     dlaždic po ~70 px by na mobilu už bylo nečitelných.
+
+     MILNÍK 23, ZMĚNA 2 — BARVY. Klient zadal konkrétní významovou škálu.
+     Tři ze čtyř skupin proto přebírají TYTÉŽ tokeny, jaké má pracovní fronta
+     „Co musím dnes vyřídit", aby se odstíny nemohly rozejít:
+       tym       (a,b,c)  ČERVENÁ      = --danger / --danger-soft  … TOTÉŽ, co
+                                         .ld-chip-late („po termínu")
+       rk_pred   (d,e)    ŽLUTÁ        = --warn / --warn-soft      … TOTÉŽ, co
+                                         .ld-chip-today („vyřídit dnes")
+       rk_prodej (f,g,h)  ZELENÁ       = --ok / --ok-soft          … běžná zelená
+       vyplata   (ch)     TMAVĚ ZELENÁ = --deep-ok / --deep-ok-soft … jediná nová
+                                         dvojice, viz :root výš
+     PRAVIDLO Z MILNÍKU 21 PLATÍ DÁL: stav není sdělen jen barvou. Každá
+     dlaždice nese text názvu fáze (.ld-faze-label) a barva je jen doplňková
+     signalizace; skupina „vyplata" má navíc levý plný pruh, takže se odliší
+     i při černobílém tisku nebo barvosleposti. */
+  .ld-faze { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 6px; margin-top: 16px; }
+  @media (max-width: 1100px) { .ld-faze { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+  @media (max-width: 720px)  { .ld-faze { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   .ld-faze-card {
     text-align: left; cursor: pointer; border-radius: var(--radius-m);
-    padding: 14px 14px 16px; border: 1px solid var(--border); background: var(--surface-2);
-    display: flex; flex-direction: column; gap: 4px; min-width: 0;
+    padding: 9px 7px 11px; border: 1px solid var(--border); background: var(--surface-2);
+    display: flex; flex-direction: column; gap: 3px; min-width: 0;
+    /* Dělení dlouhých slov: `hyphens: auto` (dokument má lang="cs", takže
+       Chrome/Firefox použijí české vzory a slovo se rozdělí SE SPOJOVNÍKEM
+       — „zprostředko-vatelská"). `overflow-wrap: break-word` je jen pojistka
+       pro prohlížeče bez české hyphenace: zalomí teprve slovo, které se do
+       řádku nevejde ani celé. ZÁMĚRNĚ NE `anywhere` — ta láme uprostřed
+       slova bez spojovníku, i když by se dělit dalo. */
+    hyphens: auto; -webkit-hyphens: auto; overflow-wrap: break-word;
   }
   .ld-faze-card:hover { border-color: var(--accent); }
-  .ld-faze-num { font-size: 17px; font-weight: 700; }
-  .ld-faze-label { font-size: 13px; line-height: 1.35; }
-  .ld-faze-pismeno {
-    font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
-    color: var(--text-muted); opacity: .75;
-  }
-  .ld-faze-note { font-size: 12.5px; margin-top: 2px; }
-  /* a, b, c - činnost týmu Realitního tipu. */
-  .ld-faze-tym { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 22%, transparent); }
-  .ld-faze-tym .ld-faze-note { color: var(--accent); }
-  /* d, e - předsmluvní fáze u RK, nejsvětlejší ze všech skupin. */
-  .ld-faze-rkpred {
-    background: color-mix(in srgb, var(--info-soft) 55%, var(--surface));
-    border-color: color-mix(in srgb, var(--info) 12%, transparent);
-  }
-  .ld-faze-rkpred .ld-faze-note { color: var(--info); }
-  /* f, g, h - smlouva uzavřena, v prodeji, prodáno. */
-  .ld-faze-prodej { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 22%, transparent); }
-  .ld-faze-prodej .ld-faze-note { color: var(--warn); }
-  /* ch - čeká na vyplacení: neutrální/informační, vědomě mimo barvy a-h. */
+  .ld-faze-num { font-size: 16px; font-weight: 700; line-height: 1.1; }
+  /* 10,5 px je zvolené tak, aby se do dlaždice vešlo i nejdelší slovo celé
+     taxonomie („zprostředkovatelská", 19 znaků ≈ 106 px) BEZ zalomení
+     uprostřed slova. Změřeno v testu (viz „žádný popisek dlaždice
+     nepřetéká"); `overflow-wrap: break-word` výš zůstává jen jako pojistka
+     pro jiný fontový fallback. */
+  .ld-faze-label { font-size: 10.5px; line-height: 1.3; }
+  .ld-faze-note { font-size: 10.5px; margin-top: 2px; line-height: 1.25; }
+  /* a, b, c — pracuje na tom tým Realitního tipu. */
+  .ld-faze-tym { background: var(--danger-soft); border-color: color-mix(in srgb, var(--danger) 22%, transparent); }
+  .ld-faze-tym .ld-faze-note { color: var(--danger); }
+  /* d, e — předsmluvní fáze u RK. */
+  .ld-faze-rkpred { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 22%, transparent); }
+  .ld-faze-rkpred .ld-faze-note { color: var(--warn); }
+  /* f, g, h — smlouva uzavřena, v prodeji, prodáno. */
+  .ld-faze-prodej { background: var(--ok-soft); border-color: color-mix(in srgb, var(--ok) 22%, transparent); }
+  .ld-faze-prodej .ld-faze-note { color: var(--ok); }
+  /* ch — čeká na vyplacení: TMAVĚ ZELENÁ + levý pruh (odlišení i bez barvy). */
   .ld-faze-vyplata {
-    background: var(--surface-2);
-    border-style: dashed;
-    border-color: color-mix(in srgb, var(--text-muted) 35%, transparent);
+    background: var(--deep-ok-soft);
+    border-color: color-mix(in srgb, var(--deep-ok) 34%, transparent);
+    border-left: 4px solid var(--deep-ok);
   }
-  .ld-faze-vyplata .ld-faze-note { color: var(--text-muted); }
-  /* Klíčový milník (f = uzavřená ZS) už NENÍ tmavě zelená dlaždice - klient
-     chce u f/g/h jednotnou barvu. Zůstává jen jako textová poznámka. */
-  .ld-faze-klicovy .ld-faze-pismeno { color: var(--accent); opacity: 1; }
+  .ld-faze-vyplata .ld-faze-num { color: var(--deep-ok); }
+  .ld-faze-vyplata .ld-faze-note { color: var(--deep-ok); }
+  /* Klíčový milník (f = uzavřená ZS) zůstává JEN textovou poznámkou
+     („Klíčový milník" v .ld-faze-note), barvu nemění - viz M22. */
 
   /* --- dvousloupcové řady (sekce P body 5-7) --- */
   .ld-duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }
 
-  /* --- grafy --- */
+  /* --- grafy ---
+     MILNÍK 23 (bod 4): klient si stěžoval, že grafy jsou „nicneříkající" —
+     hodnota byla napsaná jen u POSLEDNÍHO bodu a osa neměla popisky.
+     Nově má KAŽDÝ bod svůj vlastní interaktivní terčík s přesnou hodnotou.
+
+     PROČ SE BODY KRESLÍ JAKO HTML VRSTVA NAD <svg>, A NE DO <svg>:
+     graf používá `preserveAspectRatio="none"`, aby se plocha roztáhla přes
+     celou šířku panelu. Cokoli nakresleného UVNITŘ svg se tím ale roztáhne
+     taky — z kolečka by byla elipsa a z textu deformovaný nápis. Body,
+     hodnoty i bublina jsou proto obyčejné HTML prvky pozicované v procentech
+     nad grafem; SVG dál kreslí jen plochu a čáru. */
   .ld-chart { margin-top: 14px; }
   .ld-chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .ld-chart-plot { position: relative; }
+  .ld-chart-points { position: absolute; inset: 0; }
+  /* Terčík bodu: průhledné tlačítko se zvětšenou aktivní plochou (44 px),
+     aby se dalo trefit myší i prstem. Viditelná je jen tečka uvnitř. */
+  .ld-point {
+    position: absolute; transform: translate(-50%, -50%);
+    width: 34px; height: 34px; padding: 0; margin: 0;
+    background: none; border: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ld-point-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--surface); border: 2px solid var(--accent);
+    transition: width .1s, height .1s;
+  }
+  .ld-point:hover .ld-point-dot, .ld-point:focus-visible .ld-point-dot {
+    width: 11px; height: 11px; background: var(--accent);
+  }
+  .ld-point:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: 50%; }
+  /* Hodnota natvrdo vedle bodu — ZÁMĚRNĚ jen u denního kroku (7 bodů).
+     U 13 nebo 52 týdenních bodů by se čísla překrývala a graf by přestal být
+     „graficky čistý", což klient výslovně chce zachovat; tam hodnotu nese
+     bublina při najetí myší. */
+  .ld-point-val {
+    position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+    font-size: 11px; font-weight: 700; color: var(--text-muted); line-height: 1;
+    pointer-events: none; white-space: nowrap;
+  }
+  .ld-chart-tip {
+    position: absolute; z-index: 5; transform: translate(-50%, -100%);
+    background: var(--text); color: var(--surface);
+    padding: 5px 9px; border-radius: var(--radius-s);
+    font-size: 12.5px; font-weight: 600; white-space: nowrap;
+    pointer-events: none; box-shadow: var(--shadow-card);
+  }
   .ld-chart-axis { display: flex; justify-content: space-between; margin-top: 8px; font-size: 13px; color: var(--text-muted); }
+  /* Osa s popisky KAŽDÉHO bodu (denní krok). Rozprostře se stejně jako body
+     nad ní: každý popisek dostane stejný díl šířky a je vycentrovaný. */
+  .ld-chart-axis-body { display: grid; margin-top: 8px; font-size: 11.5px; color: var(--text-muted); }
+  .ld-chart-axis-body span { text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .ld-chart-peak { font-size: 14px; font-weight: 700; color: var(--accent); text-align: right; }
   .ld-switch { display: inline-flex; gap: 2px; background: var(--surface-2); border-radius: 999px; padding: 3px; }
   .ld-switch button {
@@ -1685,6 +1785,33 @@
     white-space: nowrap;
   }
   .dt-table td.dt-wrap { white-space: normal; }
+
+  /* MILNÍK 23 (body 8 a 11c): tabulka „Předané tipy" role RK dostala DVA nové
+     sloupce (Velikost marže, Podíl Realitního tipu). S výchozím odsazením
+     14 px a nezalomitelnými záhlavími by se na 1280 px nevešla a musela by se
+     posouvat do strany — přesně ten typ „roztažené tabulky", na který si
+     klient v bodě 8 stěžoval.
+     Řešení je SCOPED (jen tahle jedna tabulka, ostatní se nemění):
+       * menší vodorovné odsazení buněk,
+       * záhlaví se smí zalomit do dvou řádků (šířku sloupce pak určuje
+         OBSAH, ne delší nadpis).
+     Názvy sloupců se NEZKRACUJÍ — klient výslovně chtěl „Podíl Realitního
+     tipu" srozumitelně pojmenovaný. */
+  #rkPortalTableWrap .dt-table th,
+  #rkPortalTableWrap .dt-table td { padding: 10px 9px; }
+  #rkPortalTableWrap .dt-table th { white-space: normal; line-height: 1.25; vertical-align: bottom; }
+
+  /* MILNÍK 23 (bod 11a): vstupy v HROMADNÉ EDITACI pásem provizního schématu.
+     Musí se vejít do buňky tabulky, takže nesmí přebírat šířku ani odsazení
+     běžných formulářových polí (.field input). Vlastní třída, aby se změna
+     nikam jinam nepromítla. */
+  .rps-row-input {
+    width: 100%; min-width: 92px; max-width: 180px;
+    padding: 6px 8px; font-size: 13.5px; font-family: inherit;
+    border: 1px solid var(--border); border-radius: var(--radius-s);
+    background: var(--surface); color: var(--text);
+  }
+  .rps-row-input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: var(--accent); }
   .dt-table tbody tr:last-child td { border-bottom: none; }
   .dt-table th.dt-sortable {
     cursor: pointer;
@@ -1904,6 +2031,29 @@
     border: 1px dashed var(--border);
     display: flex; align-items: center; justify-content: center;
     color: var(--text-muted); font-size: 12px; text-align: center; padding: 8px;
+  }
+
+  /* MILNÍK 23 (bod 10): náhled LOGA realitní kanceláře na obrazovce
+     „Profil realitní kanceláře".
+     Rozdíl proti .dobro-avatar (osobní fotka) je záměrný a významový:
+     logo se zobrazuje `object-fit: contain` na světlém podkladu, aby se
+     NEOŘÍZLO. U fotky obličeje dává smysl výřez ze středu (cover), u
+     firemního loga by ukrojil kus názvu. */
+  .rk-logo-preview {
+    width: 160px; height: 160px;
+    object-fit: contain;
+    background: var(--surface);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    display: block;
+    padding: 8px;
+  }
+  .rk-logo-empty {
+    width: 160px; height: 160px;
+    border-radius: 12px;
+    border: 1px dashed var(--border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); font-size: 12px; text-align: center; padding: 10px;
   }
 
   /* Milník 20 (bod 3): malý kulatý avatar PŘED jménem v kartě
@@ -2385,7 +2535,10 @@
            ["rkportal", "rkprofile", "rkprovize"]). Všechny tři má výhradně
            role rk; žádná jiná role je nikdy nevidí (applyNavForRole skryje
            vše, co v jejím poli není). -->
-      <button class="tab" id="tabRkPortalBtn" role="tab" type="button" aria-selected="false" hidden>Moje tipy</button>
+      <!-- MILNÍK 23 (bod 8): „Moje tipy" -> „Předané tipy". Tipy nejsou
+           kanceláře, ta je jen dostala předané — nový název to říká přesně.
+           Klíč záložky (`rkportal`), id tlačítka i routing se NEMĚNÍ. -->
+      <button class="tab" id="tabRkPortalBtn" role="tab" type="button" aria-selected="false" hidden>Předané tipy</button>
       <button class="tab" id="tabRkProfileBtn" role="tab" type="button" aria-selected="false" hidden>Profil realitní kanceláře</button>
       <button class="tab" id="tabRkProvizeBtn" role="tab" type="button" aria-selected="false" hidden>Provizní schéma</button>
     </nav>
@@ -2430,10 +2583,25 @@
                  cestou k demo účtům Tipař A/B jsou teď kolečka A/B níže.
                  Řada zůstává grid s auto-fit, takže se zbylá tři tlačítka
                  sama rozprostřou bez prázdné buňky - žádná změna CSS. -->
+            <!-- MILNÍK 23 (bod 7): jedno tlačítko „RK" nahradila TROJICE
+                 RK1/RK2/RK3 uvnitř `.demo-rk-group`. Skupina je v mřížce
+                 jedním prvkem, takže dohromady zabírá přesně tutéž šířku,
+                 jakou mělo dřív jedno velké tlačítko RK.
+                   RK1 = Demo reality s.r.o.   (rk-demo@…,   klíč `rk`)
+                   RK2 = Druhá realitní        (rk-demo-2@…, klíč `rk2`)
+                   RK3 = Třetí realitní s.r.o. (rk-demo-3@…, klíč `rk3`)
+                 RK3 je NOVÝ demo účet založený migrací m23_06 — v databázi
+                 byly před tímhle milníkem jen DVA demo přihlašovací účty RK
+                 (třetí kancelář „První realitní s.r.o." patří skutečnému
+                 uživateli a demo tlačítko mít nesmí). -->
             <div class="demo-row">
               <button class="btn-demo" id="demoLeaderBtn" type="button">Leader</button>
               <button class="btn-demo" id="demoAdminBtn" type="button">Admin</button>
-              <button class="btn-demo" id="demoRkBtn" type="button">RK</button>
+              <div class="demo-rk-group" role="group" aria-label="Demo účty realitních kanceláří">
+                <button class="btn-demo" id="demoRkBtn" type="button" title="RK1 — Demo reality s.r.o.">RK1</button>
+                <button class="btn-demo" id="demoRk2Btn" type="button" title="RK2 — Druhá realitní">RK2</button>
+                <button class="btn-demo" id="demoRk3Btn" type="button" title="RK3 — Třetí realitní s.r.o.">RK3</button>
+              </div>
             </div>
             <!-- Milník 12 (bod 13): 11 dalších demo účtů (C-M), kompaktní
                  řada malých tlačítek s jedním písmenem (klient výslovně
@@ -2463,7 +2631,11 @@
               <button class="btn-demo-letter" id="demoJBtn" type="button" title="Tipař J — firma (IČO/DIČ)">J</button>
               <button class="btn-demo-letter" id="demoKBtn" type="button" title="Tipař K — plátce DPH, KYC čeká">K</button>
               <button class="btn-demo-letter" id="demoLBtn" type="button" title="Tipař L — 2. generace sítě (pod Tipařem C)">L</button>
-              <button class="btn-demo-letter" id="demoMBtn" type="button" title="RK 2 — druhý demo účet realitní kanceláře">M</button>
+              <!-- MILNÍK 23 (bod 7): tlačítko „M" (druhý demo účet RK) je PRYČ.
+                   Řada se jmenuje „Tipaři", ale M vedlo na realitní kancelář —
+                   a od tohohle milníku má tentýž účet vlastní tlačítko RK2
+                   v horní řadě. Dvě tlačítka k jednomu demo účtu jsou přesně
+                   to, co klient odmítl v Milníku 18 (bod 3). -->
               <!-- Milník 18 (bod 5): easter egg - přehraje krátkou vítěznou
                    fanfáru. Je to JEDINÉ tlačítko v téhle řadě, které NEVEDE
                    k demo účtu, proto má vlastní třídu .btn-demo-fanfare
@@ -3067,8 +3239,8 @@
          datum prodeje/kupní cenu (aktualizovat_rk_tip()), sekce 5.3/8.6.2. -->
     <section id="rkPortalScreen" class="page" hidden>
       <div class="section-head">
-        <h2>Moje tipy</h2>
-        <p>Tipy přiřazené vaší realitní kanceláři. Klikněte na „Upravit“ pro zadání nabídkové ceny, marže a stavu obchodu.</p>
+        <h2>Předané tipy</h2>
+        <p>Tipy předané vaší realitní kanceláři. Tlačítkem „Detail“ otevřete všechny informace o tipu — od tipaře i z ověření lídrem — a teprve odtud se dostanete k úpravě stavu obchodu.</p>
       </div>
 
       <div id="rkPortalBanner"></div>
@@ -3106,19 +3278,39 @@
     <section id="rkProvizeScreen" class="page" hidden>
       <div class="section-head">
         <h2>Provizní schéma</h2>
-        <p>Vaše pásma marže podle hodnoty nemovitosti. Slouží jako orientační sazebník — provizi u konkrétního obchodu zadáváte dál u jednotlivého tipu v záložce „Moje tipy“.</p>
+        <p>Vaše pásma marže podle hodnoty nemovitosti. Slouží jako orientační sazebník — provizi u konkrétního obchodu zadáváte dál u jednotlivého tipu v záložce „Předané tipy“.</p>
       </div>
 
       <div id="rkProvizeBanner"></div>
 
-      <!-- Milník 20 (bod 1): JEDEN řádek pro JEDNO pásmo (třída
-           .form-grid-radek-4 - scoped modifikátor, sdílená .form-grid se
-           nemění). Týž formulář slouží i pro EDITACI existujícího pásma:
-           přepíná ho rkProvizeEditId (viz openRkProvizeEdit()), mění se
-           jen nadpis, popisek tlačítka a viditelnost tlačítka „Zrušit". -->
-      <div class="card detail-card">
-        <h3 class="detail-section-title" style="margin-top:0;" id="rkProvizeFormTitle">Přidat pásmo</h3>
-        <p class="dt-muted" style="margin-top:-6px;" id="rkProvizeFormHint">Pásma musí na sebe přesně navazovat: horní hranice jednoho pásma je zároveň spodní hranicí toho následujícího (hodnota přesně na hranici patří vždy vyššímu pásmu). Nové pásmo se proto připojuje nahoru a „Od“ je předvyplněné.</p>
+      <!-- MILNÍK 23 (bod 11b): upozornění na pásma uložená ve STARÉ konvenci
+           (horní hranice = spodní hranice dalšího pásma). Vykresluje ho
+           renderRkProvizeLegacyVarovani() a je vidět jen tehdy, když sada
+           opravdu staré konvenci odpovídá. -->
+      <div id="rkProvizeLegacyWrap"></div>
+
+      <!-- MILNÍK 23 (bod 11a): HROMADNÁ EDITACE.
+           Do M22 se pásma upravovala PO JEDNOM (tlačítko „Upravit" u řádku
+           přepnulo horní formulář do editačního režimu). Klient chce jedno
+           tlačítko „Upravit" NAD tabulkou, které přepne VŠECHNY řádky
+           najednou, a jedno „Uložit", které uloží všechno naráz.
+           „Smazat" zůstává per řádek, přesně jak zadání říká. -->
+      <div class="toolbar-row-end" id="rkProvizeToolbar">
+        <button class="btn-small" type="button" id="rkProvizeEditAllBtn">Upravit</button>
+        <button class="btn-primary" type="button" id="rkProvizeSaveAllBtn" style="width:auto;" hidden>Uložit</button>
+        <button class="btn-ghost" type="button" id="rkProvizeCancelAllBtn" hidden>Zrušit</button>
+      </div>
+
+      <div id="rkProvizeTableWrap"></div>
+
+      <!-- MILNÍK 23 (bod 11a): formulář se PŘESUNUL POD TABULKU a jmenuje se
+           „Přidat tarifní pásmo". Jinak zůstává, jak byl — jeden řádek pro
+           jedno pásmo (.form-grid-radek-4). Editační režim tohohle formuláře
+           (rkProvizeEditId z Milníku 20) UŽ NEEXISTUJE: úpravy dělá hromadná
+           editace nad tabulkou, takže formulář slouží výhradně k PŘIDÁVÁNÍ. -->
+      <div class="card detail-card" id="rkProvizeAddCard">
+        <h3 class="detail-section-title" style="margin-top:0;" id="rkProvizeFormTitle">Přidat tarifní pásmo</h3>
+        <p class="dt-muted" style="margin-top:-6px;" id="rkProvizeFormHint">Pásma na sebe musí navazovat: spodní hranice nového pásma je o <strong>jednu korunu vyšší</strong> než horní hranice toho předchozího (např. 0–2 000 000 a pak 2 000 001–5 000 000). Hodnota přesně na horní hranici patří <strong>nižšímu</strong> pásmu. „Od“ se proto předvyplňuje samo.</p>
         <form id="rkProvizeForm" novalidate>
           <div class="form-grid form-grid-radek-4">
             <div class="field" id="rpsOdField"><label for="rpsOd">Od (Kč) *</label><input type="number" id="rpsOd" min="0" step="1" placeholder="např. 0"></div>
@@ -3126,14 +3318,16 @@
             <div class="field"><label for="rpsTyp">Typ</label><select id="rpsTyp"><option value="procento" selected>Procento z ceny</option><option value="fix">Pevná částka (Kč)</option></select></div>
             <div class="field" id="rpsHodnotaField"><label for="rpsHodnota">Hodnota *</label><input type="number" id="rpsHodnota" min="0" step="0.01" placeholder="např. 4"></div>
           </div>
+          <!-- MILNÍK 23 (bod 11b): po vyplnění „Do“ se hned pod formulářem
+               ukáže, čím bude začínat PŘÍŠTÍ pásmo (o 1 Kč výš). Klient si
+               tohle předvyplnění výslovně vyžádal; tady je to náhled dopředu,
+               v hromadné editaci se spodní hranice souseda rovnou přepisuje. -->
+          <p class="dt-muted" id="rpsDalsiNapoveda" style="margin:2px 0 0;" hidden></p>
           <div class="form-actions">
-            <button class="btn-primary" type="submit" id="rkProvizeSaveBtn" style="width:auto;">Přidat pásmo</button>
-            <button class="btn-ghost" type="button" id="rkProvizeCancelBtn" hidden>Zrušit úpravu</button>
+            <button class="btn-primary" type="submit" id="rkProvizeSaveBtn" style="width:auto;">Přidat tarifní pásmo</button>
           </div>
         </form>
       </div>
-
-      <div id="rkProvizeTableWrap"></div>
     </section>
 
     <!-- ============== OBSAH (placeholder, bod 9 zadání) ============== -->
@@ -3162,14 +3356,17 @@
            statický vizuální návrh (viz komentář u ní). Přepíná mezi nimi
            logoNavigateHome(), viditelnost nuluje clearRoleSpecificContainers()
            při změně identity, aby jedné roli neproblikla obrazovka druhé. -->
+      <!-- MILNÍK 23 (bod 6): zástupný box „Dashboard administrátora –
+           připravujeme" je PRYČ. Záložka teď vykresluje TÝŽ přehled, jaký má
+           lídr — stejným kódem (renderLeaderPrehled), stejnou RPC
+           (leader_dashboard_prehled), jen do jiného kontejneru. RPC roli
+           `administrator` podporovala už od Milníku 21, takže šlo výhradně
+           o frontend; ověřeno dotazem jako `authenticated` administrátor
+           (viz docs/milnik23_*.md, bod 6).
+           Vlastní `section-head` tu nezůstává — přehled si kreslí vlastní
+           záhlaví (ldHeadHtml), stejně jako u lídra. -->
       <div id="dashboardAdminWrap" hidden>
-        <div class="section-head">
-          <h2 id="dashboardScreenTitle">Dashboard</h2>
-        </div>
-        <div class="placeholder-box">
-          <div class="placeholder-icon">🚧</div>
-          <p id="dashboardScreenText"><strong>Dashboard – připravujeme.</strong></p>
-        </div>
+        <div id="dashboardAdminPrehledWrap"></div>
       </div>
 
       <!-- ============================================================
@@ -3790,7 +3987,7 @@
   // Milník 14: číslo aktuální verze aplikace - MUSÍ odpovídat nejnovější položce
   // pole APP_CHANGELOG níže (položka na indexu 0). Při každém příštím milníku
   // se zvyšuje ROVNOU TADY i v APP_CHANGELOG - jsou to dvě navzájem závislá místa.
-  var APP_VERSION = "22.0";
+  var APP_VERSION = "23.0";
 
   // Milník 14 (bod 4): obsah panelu "Historie verzí" na přihlašovací
   // obrazovce - zrekonstruováno z reálné historie projektu (STAV.md,
@@ -3799,6 +3996,23 @@
   // pod tímto polem). Vykresluje se generickou šablonou renderAuthVersionAndChangelog()
   // - při dalším milníku se sem jen přidá nová položka na začátek pole.
   var APP_CHANGELOG = [
+    { verze: "23.0", datum: "14. 9. 2026", body: [
+      "Z názvů kroků v panelu „Tipy v procesu“ i ve filtru tabulky Tipy zmizela pořadová písmena a), b), c)…",
+      "Panel „Tipy v procesu“ má všech devět kroků v jedné řadě a nové barvy: červená = řeší tým Realitního tipu, žlutá = předsmluvní jednání RK, zelená = smlouva a prodej, tmavě zelená = čeká na vyplacení",
+      "Fotka v záhlaví je ostrá: nahrávaná fotka se zmenší na čtverec a už uložené fotky se před zobrazením kvalitně převzorkují",
+      "Graf „Nové tipy v čase“ nově umí i rozlišení „1 týden“ s jednotlivými dny na ose",
+      "Oba grafy mají popisky osy a u každého bodu se po najetí myší ukáže přesná hodnota – ne už jen u posledního bodu",
+      "Přehled lídra se načítá rychleji: dotazy běží paralelně a jeden zbytečný odpadl úplně",
+      "Administrátor má místo prázdné záložky „Dashboard“ stejný přehled jako lídr, za celý systém",
+      "Na přihlašovací obrazovce jsou místo jednoho tlačítka RK tři – RK1, RK2 a RK3",
+      "Realitní kancelář: „Moje tipy“ se jmenují „Předané tipy“ a sloupec Status RK má kratší popisky (celé znění po najetí myší)",
+      "Realitní kancelář: nový filtr „Aktivní tipy“ a vedle něj „Nově předané“, „Prodané“ a „Ukončené“",
+      "Realitní kancelář: v profilu si nahrajete logo kanceláře, které se pak ukazuje v záhlaví",
+      "Realitní kancelář: provizní pásma se upravují hromadně jedním tlačítkem „Upravit“ a uloží najednou; formulář „Přidat tarifní pásmo“ je nově pod tabulkou",
+      "Provizní pásma na sebe navazují po korunách: pásmo končí na 2 000 000 a další začíná na 2 000 001 (hodnota přesně na hranici patří nižšímu pásmu)",
+      "Realitní kancelář vidí u předaných tipů velikost své marže v korunách i podíl Realitního tipu",
+      "Realitní kancelář má u tipu nově „Detail“ se vším, co zadal tipař i co zjistil lídr při ověření; úprava stavu je uvnitř detailu"
+    ] },
     { verze: "22.0", datum: "14. 9. 2026", body: [
       "Nový tip je ve frontě naléhavý hned – nikdy nespadne do „běžné priority“",
       "Tlačítka ve frontě mají jednotnou šířku a kratší, věcné popisky",
@@ -3950,6 +4164,17 @@
     // založený migrací m7_demo_rk_ucet (RPC vytvorit_pristup_rk,
     // impersonace demo Leadera), viz docs/milnik7_rk_portal_a_vyplaty.md.
     rk: { email: "rk-demo@demo.realitnitip.cz" },
+    // MILNÍK 23 (bod 7): tři demo účty RK vedle sebe (RK1/RK2/RK3).
+    //   * `rk2` je TÝŽ účet, který do M22 visel v řadě „Tipaři" pod
+    //     písmenem M. Tlačítko M se ruší — účet je realitní kancelář, ne
+    //     tipař, a od M23 má vlastní tlačítko v řadě RK. Je to táž úvaha,
+    //     jakou klient uplatnil v M18 (bod 3), když nechtěl mít k jednomu
+    //     demo účtu dvě různá tlačítka.
+    //   * `rk3` je NOVÝ demo účet ke kanceláři „Třetí realitní s.r.o.",
+    //     kterou zakládá migrace m23_06_demo_rk3.sql. Před tímhle milníkem
+    //     existovaly jen DVA demo přihlašovací účty RK.
+    rk2: { email: "rk-demo-2@demo.realitnitip.cz" },
+    rk3: { email: "rk-demo-3@demo.realitnitip.cz" },
     // Milník 12 (bod 13): 11 dalších demo účtů (C-M), založených migrací
     // m12_demo_accounts_c_az_m - každý pokrývá jinou fázi registrace/KYC/
     // adresy (viz title atributy u tlačítek a docs/milnik12_ux_dashboard_a_demo.md
@@ -3963,8 +4188,10 @@
     i: { email: "tipar-i@demo.realitnitip.cz" },
     j: { email: "tipar-j@demo.realitnitip.cz" },
     k: { email: "tipar-k@demo.realitnitip.cz" },
-    l: { email: "tipar-l@demo.realitnitip.cz" },
-    m: { email: "rk-demo-2@demo.realitnitip.cz" }
+    l: { email: "tipar-l@demo.realitnitip.cz" }
+    // Klíč `m` (rk-demo-2@…) je od MILNÍKU 23 pryč — tentýž účet je nově
+    // pod klíčem `rk2` v řadě RK, viz komentář výše. Tlačítko „M" z řady
+    // „Tipaři" se odstranilo i z HTML.
   };
   var ROLE_LABELS = { tipar: "tipař", leader: "leader", administrator: "administrátor", rk: "RK" };
   var ROLE_LABELS_CAP = { tipar: "Tipař", leader: "Leader", administrator: "Administrátor", rk: "RK" };
@@ -4375,7 +4602,158 @@
     var alt = celeJmeno(currentUser) || currentUser.email || "";
     slot.innerHTML = '<span class="topbar-avatar-empty" title="' + escapeHtml(alt) + '" aria-hidden="true">' +
       escapeHtml(inicialyUzivatele(currentUser)) + '</span>';
-    if (currentUser.profilova_fotka_cesta) renderTopbarAvatar(currentUser.profilova_fotka_cesta, alt);
+    // MILNÍK 23 (bod 10): u role RK je „fotkou v záhlaví" LOGO KANCELÁŘE.
+    // Osobní profilovou fotku role RK nikdy nemá (obrazovku „Něco o vás"
+    // nevidí — ROLE_TAB_ORDER.rk žádný `profile` neobsahuje), takže se ty
+    // dva zdroje nemůžou potkat; přesto se logo bere přednostně, aby bylo
+    // pořadí jednoznačné.
+    var cesta = (currentUser.role === "rk" && currentUser.rk_logo_cesta)
+      ? currentUser.rk_logo_cesta
+      : currentUser.profilova_fotka_cesta;
+    if (cesta) renderTopbarAvatar(cesta, alt);
+  }
+
+  // =========================================================================
+  // MILNÍK 23 (bod 2) — OSTRÝ AVATAR / LOGO V ZÁHLAVÍ
+  // =========================================================================
+  // DIAGNÓZA (ne odhad — změřeno na produkčních datech):
+  // v bucketu `profilove-fotky` leží nahrané fotky o velikosti 85 kB, 208 kB
+  // a 378 kB, tedy plnoformátové snímky z fotoaparátu/plochy (řádově tisíce
+  // pixelů na šířku). Zobrazují se v kolečku o 34 CSS px. Prohlížeč tedy
+  // zmenšuje v poměru řádově 30–90×, a to jedním krokem bilineárního
+  // převzorkování — výsledek je přesně to, co klient popsal: rozmazané a
+  // zároveň „kostičkované" (aliasing na ostrých hranách).
+  //
+  // CO SE NAOPAK UKÁZALO JAKO V POŘÁDKU (a proto se nemění):
+  //   * CSS už čtvercový rámeček i `object-fit: cover` má (34×34, kruh),
+  //     takže poměr stran originálu layout nerozbíjí.
+  //   * Na <img> nejsou žádné atributy width/height, které by se rozcházely
+  //     s CSS — k dvojímu škálování tedy nedochází.
+  //   * `image-rendering` by situaci ZHORŠILO: `pixelated`/`crisp-edges`
+  //     vypínají vyhlazování, což je přesně naopak, než co zmenšování o
+  //     desítky procent potřebuje. Proto se NEPOUŽÍVÁ.
+  //
+  // OPRAVA MÁ DVĚ ČÁSTI:
+  //   1) PŘI NAHRÁNÍ se obrázek na klientovi zmenší na čtverec 512×512
+  //      (postupným půlením, viz nakreslitCtverec). Do úložiště tak od teď
+  //      chodí malý čtverec a poměr zmenšení při zobrazení klesne z ~60× na
+  //      ~7×. Řeší to všechna místa najednou (34 px v záhlaví, 56 px u
+  //      registračních údajů, 120 px na „Můj profil").
+  //   2) PŘI ZOBRAZENÍ v záhlaví se i tak udělá jeden kvalitní převzorkovací
+  //      průchod — kvůli fotkám nahraným PŘED tímhle milníkem, které v
+  //      úložišti zůstanou velké. Bez toho by klient po nasazení viděl svou
+  //      starou fotku pořád rozmazanou.
+  //
+  // Postupné půlení (každý krok max. na polovinu) dává výrazně lepší
+  // výsledek než jediný skok, protože při každém kroku průměruje jen 2×2
+  // pixely — to je klasické „mipmapové" zmenšení.
+  var AVATAR_CIL_PX = 512;     // co se ukládá do bucketu
+  var TOPBAR_AVATAR_CIL_PX = 96; // 34 CSS px × ~2,5 (rezerva pro HiDPI)
+
+  function nakreslitCtverec(img, cilPx, rezim) {
+    var sw = img.naturalWidth || img.width;
+    var sh = img.naturalHeight || img.height;
+    if (!sw || !sh) return null;
+
+    // Zdrojový výřez. 'cover' = čtverec ze středu (fotka obličeje),
+    // 'contain' = celý obrázek doplněný průhledným okrajem do čtverce
+    // (logo kanceláře — oříznutí by z něj ukrojilo kus názvu).
+    var canvas = document.createElement("canvas");
+    canvas.width = cilPx; canvas.height = cilPx;
+    var ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    ctx.imageSmoothingEnabled = true;
+    if ("imageSmoothingQuality" in ctx) ctx.imageSmoothingQuality = "high";
+
+    var sx = 0, sy = 0, ss = Math.min(sw, sh);
+    if (rezim === "contain") ss = Math.max(sw, sh);
+    else { sx = (sw - ss) / 2; sy = (sh - ss) / 2; }
+
+    // Mezikrok: půlíme, dokud je zdroj víc než 2× větší než cíl.
+    var prub = document.createElement("canvas");
+    var pctx = prub.getContext("2d");
+    if (!pctx) return null;
+    var w = sw, h = sh;
+    prub.width = w; prub.height = h;
+    pctx.drawImage(img, 0, 0, w, h);
+    var pomer = (rezim === "contain") ? (cilPx / ss) : (cilPx / ss);
+    while (pomer < 0.5) {
+      var nw = Math.max(1, Math.round(w / 2));
+      var nh = Math.max(1, Math.round(h / 2));
+      var dalsi = document.createElement("canvas");
+      dalsi.width = nw; dalsi.height = nh;
+      var dctx = dalsi.getContext("2d");
+      if (!dctx) break;
+      dctx.imageSmoothingEnabled = true;
+      if ("imageSmoothingQuality" in dctx) dctx.imageSmoothingQuality = "high";
+      dctx.drawImage(prub, 0, 0, nw, nh);
+      prub = dalsi;
+      sx = sx / w * nw; sy = sy / h * nh; ss = ss / w * nw;
+      w = nw; h = nh;
+      pomer = cilPx / ss;
+    }
+
+    if (rezim === "contain") {
+      var mer = cilPx / Math.max(w, h);
+      var dw = Math.round(w * mer), dh = Math.round(h * mer);
+      ctx.drawImage(prub, 0, 0, w, h, Math.round((cilPx - dw) / 2), Math.round((cilPx - dh) / 2), dw, dh);
+    } else {
+      ctx.drawImage(prub, sx, sy, ss, ss, 0, 0, cilPx, cilPx);
+    }
+    return canvas;
+  }
+
+  function nactiObrazek(src, crossOrigin) {
+    return new Promise(function (resolve) {
+      var img = new Image();
+      if (crossOrigin) img.crossOrigin = "anonymous";
+      img.onload = function () { resolve(img); };
+      img.onerror = function () { resolve(null); };
+      img.src = src;
+    });
+  }
+
+  // Zmenší vybraný soubor na čtverec a vrátí Blob k nahrání.
+  // Když se to z jakéhokoli důvodu nepovede (neznámý formát, chybí canvas),
+  // vrátí null a volající nahraje ORIGINÁL — nahrávání se kvůli optimalizaci
+  // nikdy nesmí rozbít.
+  async function ctvercovyBlobZeSouboru(file, cilPx, rezim) {
+    try {
+      var url = URL.createObjectURL(file);
+      var img = await nactiObrazek(url, false);
+      URL.revokeObjectURL(url);
+      if (!img) return null;
+      var canvas = nakreslitCtverec(img, cilPx, rezim);
+      if (!canvas) return null;
+      // PNG se drží PNG kvůli PRŮHLEDNOSTI (loga ji běžně mají); ostatní
+      // formáty jdou do JPEG, který je pro fotky výrazně menší.
+      var jePng = (file.type === "image/png");
+      var typ = jePng ? "image/png" : "image/jpeg";
+      var blob = await new Promise(function (res) {
+        canvas.toBlob(function (b) { res(b); }, typ, jePng ? undefined : 0.92);
+      });
+      if (!blob) return null;
+      return { blob: blob, typ: typ, pripona: jePng ? "png" : "jpg" };
+    } catch (e) {
+      console.error("Zmenšení obrázku selhalo, nahraje se originál:", e);
+      return null;
+    }
+  }
+
+  // Kvalitní převzorkování UŽ NAHRANÉHO obrázku pro zobrazení.
+  // Vrací data: URL, nebo null (pak se použije původní adresa).
+  // Může selhat na CORS (tainted canvas) — to je očekávaný, ošetřený stav.
+  async function ostryNahledZUrl(url, cilPx) {
+    try {
+      var img = await nactiObrazek(url, true);
+      if (!img) return null;
+      var canvas = nakreslitCtverec(img, cilPx, "cover");
+      if (!canvas) return null;
+      return canvas.toDataURL("image/png");
+    } catch (e) {
+      console.error("Převzorkování avataru selhalo, použije se originál:", e);
+      return null;
+    }
   }
 
   async function renderTopbarAvatar(cesta, alt) {
@@ -4398,12 +4776,22 @@
         return;
       }
       url = signed.data.signedUrl;
+      // MILNÍK 23 (bod 2): jeden kvalitní převzorkovací průchod na klientovi.
+      // Týká se hlavně fotek nahraných PŘED tímhle milníkem, které jsou
+      // v úložišti pořád velké. Když se nepovede (CORS, starý prohlížeč),
+      // zůstane původní adresa a chování je přesně jako dosud.
+      var ostry = await ostryNahledZUrl(url, TOPBAR_AVATAR_CIL_PX);
+      if (g !== authGen) return;
+      if (ostry) url = ostry;
       topbarAvatarCache = { cesta: cesta, url: url, platiDo: Date.now() + TOPBAR_AVATAR_TTL_MS };
     }
 
     var slot = el("topbarAvatarSlot");
     if (!slot) return;
-    slot.innerHTML = '<img src="' + escapeHtml(url) + '" class="topbar-avatar" alt="' + escapeHtml(alt || "") + '">';
+    // Atributy width/height jsou ZÁMĚRNĚ shodné s CSS (34 px) — vylučují
+    // jakékoli dvojí škálování a zároveň drží místo, než se obrázek načte.
+    slot.innerHTML = '<img src="' + escapeHtml(url) + '" class="topbar-avatar" width="34" height="34" decoding="async" alt="' +
+      escapeHtml(alt || "") + '">';
   }
 
   function formatDateTime(iso) {
@@ -4590,18 +4978,62 @@
     return RK_STAV_LABELS[stav] || stav;
   }
 
-  function rkStavPillHtml(stav) {
-    if (!stav) return '<span class="pill pill-ceka_na_overeni">Zatím neoceněno</span>';
-    // Vizuálně odlišené barvy pill (znovupoužití existujících tříd pill-*,
-    // ne nová CSS sada jen pro pět dalších hodnot) - "prodáno" = ok/zelená,
-    // "klient nepřistoupil" = zamítnuto/červená, ostatní = neutrální info.
-    var cls = "pill pill-tip_overen_hledame_rk";
-    if (stav === "prodano") cls = "pill pill-tip_overen_hledame_rk";
+  // ---------------- MILNÍK 23 (bod 8): zkrácené popisky pro ÚZKÝ SLOUPEC ----
+  //
+  // Klient: sloupec „Status RK" je extrémně široký kvůli hodnotě
+  // „Spolupráce s realitní kanceláří nenavázána" (41 znaků) a roztahuje se
+  // na úkor ostatních sloupců.
+  //
+  // Řeší se STEJNÝM vzorem, jaký appka používá u jiných zúžených sloupců:
+  // v buňce je ZKRÁCENÁ varianta, plné znění je v atributu `title` (a v
+  // `aria-label`, aby ho dostala i čtečka). Plné popisky se NEMĚNÍ nikde
+  // jinde — dropdown „Status RK" v editaci, detail tipu i časová osa dál
+  // ukazují celou větu, protože tam na šířce nezáleží a zkratka by byla
+  // ztrátou informace.
+  //
+  // Zkracuje se JEN tam, kde je co zkracovat; hodnoty, které se do sloupce
+  // vejdou (např. „Prodáno"), zůstávají doslova.
+  var RK_STAV_LABELS_KRATKE = {
+    rk_prevzala_kontakt: "Domlouvá schůzku",
+    oceneno_rk: "Oceněno",
+    klient_nepristoupil_ke_koupi: "Nepřistoupil ke koupi",
+    podepsana_rezervacni_smlouva: "Smlouva podepsána",
+    nemovitost_v_prodeji: "V prodeji",
+    spoluprace_nenavazana: "Nenavázána",
+    prodano: "Prodáno"
+  };
+
+  function rkStavLabelKratky(stav) {
+    if (!stav) return "Neoceněno";
+    return RK_STAV_LABELS_KRATKE[stav] || RK_STAV_LABELS[stav] || stav;
+  }
+
+  // Pill se zkráceným textem a plným zněním v title/aria-label.
+  function rkStavPillKratkyHtml(stav) {
+    var plny = rkStavLabel(stav);
+    var kratky = rkStavLabelKratky(stav);
+    var cls = rkStavPillTrida(stav);
+    return '<span class="' + cls + '" title="' + escapeHtml(plny) + '" aria-label="' +
+      escapeHtml(plny) + '">' + escapeHtml(kratky) + '</span>';
+  }
+
+  // Vizuálně odlišené barvy pill (znovupoužití existujících tříd pill-*,
+  // ne nová CSS sada jen pro pět dalších hodnot) - "prodáno" = ok/zelená,
+  // "klient nepřistoupil" = zamítnuto/červená, ostatní = neutrální info.
+  // MILNÍK 23 (bod 8): vyčleněno do vlastní funkce, aby zkrácená i plná
+  // varianta pillu používaly TOTÉŽ mapování barev (jeden zdroj pravdy).
+  function rkStavPillTrida(stav) {
+    if (!stav) return "pill pill-ceka_na_overeni";
+    if (stav === "prodano") return "pill pill-tip_overen_hledame_rk";
     // Milník 21 (sekce G): „Spolupráce nenavázána" je ukončení stejně jako
     // „Klient nepřistoupil ke koupi" - obojí červené.
-    else if (stav === "klient_nepristoupil_ke_koupi" || stav === "spoluprace_nenavazana") cls = "pill pill-zamitnuto";
-    else cls = "pill pill-probiha_overeni";
-    return '<span class="' + cls + '">' + escapeHtml(rkStavLabel(stav)) + '</span>';
+    if (stav === "klient_nepristoupil_ke_koupi" || stav === "spoluprace_nenavazana") return "pill pill-zamitnuto";
+    return "pill pill-probiha_overeni";
+  }
+
+  function rkStavPillHtml(stav) {
+    if (!stav) return '<span class="pill pill-ceka_na_overeni">Zatím neoceněno</span>';
+    return '<span class="' + rkStavPillTrida(stav) + '">' + escapeHtml(rkStavLabel(stav)) + '</span>';
   }
 
   // Milník 8 (Bug 2 oprava, sekce 8.4/8.4.1 zadání): jakmile RK na tipu
@@ -5581,6 +6013,11 @@
     // Milník 19 (bod 5): + #networkDetailWrap (Detail člena sítě - jméno,
     // telefon a e-mail konkrétního člověka z předchozí identity).
     "leaderDashboardWrap", "networkListWrap", "networkDetailWrap", "networkStats", "networkBanner",
+    // MILNÍK 23 (bod 6): administrátorova záložka „Dashboard" nově nese TÝŽ
+    // přehled jako lídr — tedy jména lidí i klientů z konkrétní sítě. Patří
+    // proto do úklidu při změně identity ze STEJNÉHO důvodu jako
+    // #leaderDashboardWrap.
+    "dashboardAdminPrehledWrap",
     // moje tipy (tipař)
     "tipListWrap",
     // tipy / uživatelé / RK / provize / výplaty / audit / KYC fronta
@@ -5650,7 +6087,11 @@
     // Milník 22 (bod 2): + „Nastavení panelu" (prahy fronty leadera).
     profile: ["profileRegistraceStavWrap", "profileRegSummaryWrap", "profileBanner", "addressReadonlyGrid", "dobrovolnyReadonlyBody",
               "panelNastaveniReadonlyBody", "panelNastaveniFormBody", "panelNastaveniBanner"],
-    mykyc: ["kycStatusWrap", "kycDocsWrap", "kycMissingWrap", "myKycBanner"]
+    mykyc: ["kycStatusWrap", "kycDocsWrap", "kycMissingWrap", "myKycBanner"],
+    // MILNÍK 23 (bod 6): administrátorův „Dashboard" už není statický
+    // zástupný box, ale dynamicky plněný přehled — musí se tedy při vstupu
+    // na záložku vyprázdnit dřív, než doběhne jeho fetch.
+    dashboard: ["dashboardAdminPrehledWrap"]
   };
 
   // Instance initDataTable drží vlastní config.rows z PŘEDCHOZÍHO
@@ -6225,14 +6666,13 @@
     var tiparWrap = el("dashboardTiparWrap");
     if (adminWrap) adminWrap.hidden = (variant !== "administrator");
     if (tiparWrap) tiparWrap.hidden = (variant !== "tipar");
-    // Milník 17 (bod 16): na dashboard se nově dá dostat DVĚMA cestami
-    // (logo i nová záložka), takže naplnění administrátorského zástupného
-    // boxu patří sem, ne do logoNavigateHome() - jinak by po kliku na
-    // záložku zůstal titulek prázdný. Text i tak zůstává doslova ten z
-    // Milníku 15/16.
+    // Milník 17 (bod 16): na dashboard se dá dostat DVĚMA cestami (logo i
+    // záložka), takže naplnění administrátorské větve patří sem, ne do
+    // logoNavigateHome().
+    // MILNÍK 23 (bod 6): místo zástupného textu se vykreslí PLNÝ přehled.
+    // Volá se stejná funkce jako u lídra, jen s jiným cílovým kontejnerem.
     if (variant === "administrator") {
-      el("dashboardScreenTitle").textContent = "Dashboard administrátora";
-      el("dashboardScreenText").innerHTML = "<strong>Dashboard administrátora – připravujeme.</strong>";
+      renderLeaderPrehled("dashboardAdminPrehledWrap");
     }
   }
 
@@ -6737,7 +7177,9 @@
       // Milník 19 (bod 6): + profese, koniceky, profilova_fotka_cesta -
       // DOBROVOLNÉ údaje, které vykresluje panel "Něco o vás" na "Můj
       // profil". Nemají žádný vliv na fázi registrace ani na KYC.
-      .select("jmeno, prijmeni, role, telefon, invite_code, vytvoreno_kdy, adresa_ulice, adresa_mesto, adresa_psc, adresa_stat, je_firma, ico, dic, adresa_vyplnena_kdy, autentizace_stav, autentizace_duvod_zamitnuti, autentizace_overeno_kdy, cislo_dokladu_totoznosti, vyzadovat_zmenu_hesla, profese, koniceky, profilova_fotka_cesta")
+      // MILNÍK 23 (bod 10): + rk_id — potřebuje ho dotaz na logo kanceláře
+      // hned pod tímhle blokem (role `rk`).
+      .select("jmeno, prijmeni, role, telefon, invite_code, vytvoreno_kdy, adresa_ulice, adresa_mesto, adresa_psc, adresa_stat, je_firma, ico, dic, adresa_vyplnena_kdy, autentizace_stav, autentizace_duvod_zamitnuti, autentizace_overeno_kdy, cislo_dokladu_totoznosti, vyzadovat_zmenu_hesla, profese, koniceky, profilova_fotka_cesta, rk_id")
       .eq("id", user.id).single();
     // Milník 15 (bod 4.5): i samotné přihlášení má svůj `await` - kdyby se
     // během něj identita znovu změnila (rychlé přepnutí demo účtů, dvě
@@ -6768,8 +7210,30 @@
       // Milník 19 (bod 6): dobrovolné údaje.
       profese: profile.profese || "",
       koniceky: profile.koniceky || "",
-      profilova_fotka_cesta: profile.profilova_fotka_cesta || null
+      profilova_fotka_cesta: profile.profilova_fotka_cesta || null,
+      // MILNÍK 23 (bod 10): logo realitní kanceláře. U ostatních rolí je
+      // vždy null — plní se až o pár řádků níž a jen roli `rk`.
+      rk_logo_cesta: null
     };
+
+    // MILNÍK 23 (bod 10): u role RK se v záhlaví místo osobní fotky ukazuje
+    // LOGO KANCELÁŘE. Cesta k němu není v `profiles` (patří kanceláři, ne
+    // uživateli), takže se dotahuje z `realitni_kancelare`. Čtení řádku
+    // kanceláře pouští RLS politika „Kazdy prihlaseny vidi RK" — žádná nová
+    // oprávnění tu nevznikají, jen se čte jeden sloupec navíc.
+    // Dotaz se posílá JEN pro roli `rk`; ostatní role žádnou obrátku navíc
+    // nedostávají (Milník 23, bod 5 — nepřidávat sériové čekání).
+    if (role === "rk") {
+      var rkRow = await sb.from("realitni_kancelare").select("logo_cesta").eq("id", profile.rk_id).maybeSingle();
+      if (g !== authGen) return;
+      if (rkRow.error) {
+        // Logo je kosmetika. Když se nenačte, zůstanou iniciály — žádná
+        // chybová hláška, stejná úvaha jako u avataru v Milníku 20.
+        console.error("Nepodařilo se načíst logo realitní kanceláře:", rkRow.error);
+      } else if (rkRow.data) {
+        currentUser.rk_logo_cesta = rkRow.data.logo_cesta || null;
+      }
+    }
 
     renderTopbarUserInfo();
 
@@ -7076,18 +7540,24 @@
   // moje_sit_tipy() z Milníku 3 a ne místo ní).
   async function fetchMyTips(userId) {
     var g = authGen; // Milník 15 (bod 4.5)
-    var ownResult = await sb.from("tips").select("*").eq("autor_id", userId).order("vlozeno_kdy", { ascending: false });
+    // MILNÍK 23 (bod 5): oba dotazy najednou. Do M22 se `moje_prime_tipy()`
+    // posílala až po dokončení dotazu na vlastní tipy, přestože na něm
+    // nezávisí — tipařova obrazovka „Tipy v mé síti" tak čekala na součet
+    // obou latencí. Pořadí zpracování ani chování při chybě se nemění.
+    var davkaT = await Promise.all([
+      sb.from("tips").select("*").eq("autor_id", userId).order("vlozeno_kdy", { ascending: false }),
+      sb.rpc("moje_prime_tipy")
+    ]);
+    var ownResult = davkaT[0];
+    var subResult = davkaT[1];
+    // Milník 15 (bod 4.5): zbytek funkce staví `rows` z dat OBOU dotazů a
+    // předává je renderMojeTipyTable() -> zápis do #tipListWrap.
     if (g !== authGen) return; // identita se během dotazu změnila
     if (ownResult.error) {
       console.error("Chyba při načítání vlastních tipů:", ownResult.error);
       showBanner(el("listBanner"), "error", "Nepodařilo se načíst vaše tipy. Zkuste to prosím znovu.");
       return;
     }
-
-    var subResult = await sb.rpc("moje_prime_tipy");
-    // Milník 15 (bod 4.5): zbytek funkce staví `rows` z dat OBOU dotazů a
-    // předává je renderMojeTipyTable() -> zápis do #tipListWrap.
-    if (g !== authGen) return;
     if (subResult.error) {
       console.error("Chyba při načítání tipů přímo podřízených tipařů:", subResult.error);
     }
@@ -7246,6 +7716,34 @@
 
     el("inviteLinkText").textContent = location.origin + location.pathname + "?ref=" + (currentUser.invite_code || "");
 
+    // ------------------------------------------------------------------
+    // MILNÍK 23 (bod 5, diagnostika zpomalení): LÍDR UŽ `moje_sit()` NEVOLÁ.
+    //
+    // Od Milníku 21 kreslí lídrovi celou obrazovku `renderLeaderPrehled()` a
+    // applyNavForRole() mu SKRÝVÁ jak hlavičku, tak pozvánkový box, tak řádku
+    // stat-dlaždic (#networkStats). Jediné, k čemu se výsledek `moje_sit()`
+    // u lídra používal, byl obsah těch SKRYTÝCH dlaždic — tedy celá jedna
+    // obrátka na server jen proto, aby se vykreslilo něco neviditelného.
+    // (Tipař obrazovku i RPC používá dál beze změny — jemu se nic nemění.)
+    //
+    // Ověřeno čtením kódu i měřením: viz docs/milnik23_*.md, bod 5.
+    var isLeader = currentUser.role === "leader";
+    if (isLeader) {
+      // Bod 3 zadání M5: žádný plochý seznam pro lídra. Reset instance
+      // tabulky, ať se případně příště (jiná role ve stejné relaci) postaví
+      // znovu od nuly.
+      el("networkListWrap").innerHTML = "";
+      el("networkStats").innerHTML = "";
+      mojeSitTable = null;
+      mojeSitRowsCache = [];
+      if (networkLoading) networkLoading.hidden = true;
+      // Cílový kontejner se předává VÝSLOVNĚ — administrátor kreslí týž
+      // přehled do #dashboardAdminPrehledWrap (Milník 23, bod 6) a proměnná
+      // ldWrapId si pamatuje poslední použitou hodnotu.
+      await renderLeaderPrehled("leaderDashboardWrap");
+      return;
+    }
+
     var result = await sb.rpc("moje_sit");
     // Milník 15 (bod 4.5): KLÍČOVÝ řádek celé opravy. Bez něj se níž
     // vyhodnotí `currentUser.role` UŽ NAD NOVOU identitou a leaderova
@@ -7258,7 +7756,12 @@
       return;
     }
     var rows = result.data || [];
-    var isLeader = currentUser.role === "leader";
+    // MILNÍK 23 (bod 5): proměnná se zakládá UŽ VÝŠ (větev, která lídrovi
+    // `moje_sit()` vůbec nevolá). Tady se jen PŘEPOČÍTÁ po awaitu — kdyby se
+    // mezitím změnila identita, musí se rozhodovat podle té nové. Následující
+    // `if (isLeader)` je proto obrana do hloubky, ne mrtvý kód: sem se dá
+    // dostat jen tehdy, když se z tipaře stal během dotazu lídr.
+    isLeader = currentUser.role === "leader";
     if (networkLoading) networkLoading.hidden = true;
 
     var direct = 0;
@@ -7453,17 +7956,43 @@
 
   async function fetchTipyTable() {
     var g = authGen; // Milník 15 (bod 4.5)
-    var tipsResult = await sb.from("tips").select("*").order("vlozeno_kdy", { ascending: false });
+
+    // ------------------------------------------------------------------
+    // MILNÍK 23 (bod 5, diagnostika zpomalení): ČTYŘI NEZÁVISLÉ DOTAZY
+    // SE POSÍLAJÍ NAJEDNOU.
+    //
+    // Do M22 se `tips`, `profiles`, názvy RK a `vyplaty` natahovaly ZA SEBOU
+    // (každý až po dokončení předchozího), přestože na sobě žádný z nich
+    // nezávisí — tabulka Tipy tak čekala na SOUČET čtyř latencí místo na tu
+    // nejdelší z nich. Zpracování výsledků zůstává v původním pořadí i
+    // s původním chováním při chybě (tips = tvrdá chyba, ostatní jen
+    // console.error a degradovaný sloupec).
+    var davka = await Promise.all([
+      sb.from("tips").select("*").order("vlozeno_kdy", { ascending: false }),
+      sb.from("profiles").select("id, jmeno, prijmeni, role, sponsor_id, invite_code").order("jmeno"),
+      // Milník 17 (bod 2): sloupec "RK" potřebuje název kanceláře i u tipů
+      // přiřazených RK, která byla mezitím deaktivovaná - proto vlastní mapa
+      // ze VŠECH záznamů, ne rkAktivniList (viz fetchRkNazvyById).
+      fetchRkNazvyById(),
+      // Milník 22 (bod 3): filtr „Čeká na vyplacení" potřebuje vědět, ke
+      // kterým tipům UŽ výplata existuje. Tentýž zdroj, jaký používá server
+      // (leader_dashboard_prehled) i panel „Nově prodáno", takže se počty
+      // nemohou rozejít. Přístup hlídá RLS tabulky `vyplaty` - tipař sem
+      // nedohlédne, a když dotaz selže, filtr jen nic nenajde (nespadne).
+      sb.from("vyplaty").select("tip_id")
+    ]);
+    var tipsResult = davka[0];
+    var profilesResult = davka[1];
+    var vyplatyResult = davka[3];
+
+    // Zbytek plní adminUsersById/allTipsById (globální cache) a kreslí
+    // tabulku - u cizí identity by šlo o únik jmen celé sítě.
     if (g !== authGen) return;
     if (tipsResult.error) {
       console.error("Chyba při načítání tipů:", tipsResult.error);
       showBanner(el("tipyBanner"), "error", "Nepodařilo se načíst seznam tipů. Zkuste to prosím znovu.");
       return;
     }
-    var profilesResult = await sb.from("profiles").select("id, jmeno, prijmeni, role, sponsor_id, invite_code").order("jmeno");
-    // Zbytek plní adminUsersById/allTipsById (globální cache) a kreslí
-    // tabulku - u cizí identity by šlo o únik jmen celé sítě.
-    if (g !== authGen) return;
     if (profilesResult.error) {
       console.error("Chyba při načítání uživatelů pro jména tipařů:", profilesResult.error);
     } else {
@@ -7471,19 +8000,6 @@
       (profilesResult.data || []).forEach(function (u) { if (u && u.id) adminUsersById[u.id] = u; });
     }
 
-    // Milník 17 (bod 2): sloupec "RK" potřebuje název kanceláře i u tipů
-    // přiřazených RK, která byla mezitím deaktivovaná - proto vlastní mapa
-    // ze VŠECH záznamů, ne rkAktivniList (viz fetchRkNazvyById).
-    await fetchRkNazvyById();
-    if (g !== authGen) return;
-
-    // Milník 22 (bod 3): filtr „ch) Čeká na vyplacení" potřebuje vědět, ke
-    // kterým tipům UŽ výplata existuje. Tentýž zdroj, jaký používá server
-    // (leader_dashboard_prehled) i panel „Nově prodáno", takže se počty
-    // nemohou rozejít. Přístup hlídá RLS tabulky `vyplaty` - tipař sem
-    // nedohlédne, a když dotaz selže, filtr jen nic nenajde (nespadne).
-    var vyplatyResult = await sb.from("vyplaty").select("tip_id");
-    if (g !== authGen) return;
     tipyMaVyplatu = {};
     if (vyplatyResult.error) {
       console.error("Chyba při načítání výplat pro filtr tipů:", vyplatyResult.error);
@@ -7581,10 +8097,19 @@
     // Prefix `faze:` se zachovává, protože na tyhle hodnoty vedou dlaždice
     // Přehledu lídra (setFilterValue) a `matches` je podle něj pozná.
     var statusOptions = [];
+    // MILNÍK 23 (bod 1): popisek je nově SAMOTNÝ NÁZEV FÁZE, bez pořadového
+    // písmene. Písmena a) až ch) byla MOJE pracovní značení fází v zadání
+    // Milníku 22 (kvůli orientaci v briefu), ne text, který měl skončit
+    // v aplikaci. Klient si jich všiml jako „únikových písmen". Pořadí
+    // položek ve filtru zůstává PŘESNĚ TOTÉŽ (řídí ho M22_FAZE_CODES),
+    // takže se nabídka nijak nepřeskládala — jen zmizel prefix.
+    // M22_FAZE_PISMENA se tím z uživatelsky viditelných textů vytrácí úplně;
+    // interní kódy fází (f1_ceka_na_overeni…) se NEMĚNÍ ani v datové vrstvě,
+    // ani ve filtrech (`faze:` prefix zůstává).
     M22_FAZE_CODES.forEach(function (kod) {
       statusOptions.push({
         value: "faze:" + kod,
-        label: (M22_FAZE_PISMENA[kod] ? M22_FAZE_PISMENA[kod] + ") " : "") + M22_FAZE_LABELS[kod]
+        label: M22_FAZE_LABELS[kod]
       });
     });
     M22_UKONCENI_CODES.forEach(function (kod) {
@@ -9249,15 +9774,18 @@
     // vidí zásahy všech), takže si adminUsersById plní sám, přímo z
     // `profiles` (stejná RLS politika "Leader a Admin vidi vsechny
     // profily" jako dřív používala "Tipy").
-    var profilesResult = await sb.from("profiles").select("id, jmeno, prijmeni, role, sponsor_id, invite_code").order("jmeno");
+    // MILNÍK 23 (bod 5): oba dotazy najednou — nezávisí na sobě.
+    var davkaA = await Promise.all([
+      sb.from("profiles").select("id, jmeno, prijmeni, role, sponsor_id, invite_code").order("jmeno"),
+      sb.from("audit_log").select("*").order("created_at", { ascending: false })
+    ]);
+    var profilesResult = davkaA[0];
+    var result = davkaA[1];
     if (g !== authGen) return; // Milník 15 (bod 4.5)
     if (!profilesResult.error) {
       adminUsersById = {};
       (profilesResult.data || []).forEach(function (u) { if (u && u.id) adminUsersById[u.id] = u; });
     }
-
-    var result = await sb.from("audit_log").select("*").order("created_at", { ascending: false });
-    if (g !== authGen) return; // Milník 15 (bod 4.5)
     if (result.error) {
       console.error("Chyba při načítání auditního logu:", result.error);
       el("auditTableWrap").innerHTML = '<div class="empty-state"><p>Auditní log se nepodařilo načíst.</p></div>';
@@ -9352,7 +9880,8 @@
   //   * RPC vytvorit_provizni_schema() - stejná signatura, stejné kontroly
   //     (leader/admin, nezáporné sazby, součet <= 30 %, atomické uzavření
   //     předchozí verze). Ukládá se PŘESNĚ přes ni.
-  //   * najdiPasmoSchematuRk() - vyhledání pásma podle konvence [min, max).
+  //   * najdiPasmoSchematuRk() - vyhledání pásma; MILNÍK 23 (bod 11b) mění
+  //     konvenci z polootevřeného [min, max) na UZAVŘENÝ [min, max].
   //   * renderProvizeTable() - historie verzí.
   //   * Vzorec:  provizeRk = (typ === 'procento') ? cena * hodnota / 100 : hodnota
   //              podíl     = provizeRk * sazba_<role> / 100
@@ -9366,17 +9895,28 @@
   var provizeUkazkaPasma = [];
 
   // Najde pásmo schématu RK, do kterého spadá daná hodnota nemovitosti.
-  // Interval je [min_hodnota, max_hodnota) - horní hranice patří až
-  // následujícímu pásmu, takže se hranice jako 2 000 000 nikdy nezapočítá
-  // dvakrát. max_hodnota NULL = pásmo bez horní hranice.
-  // LOGIKA BEZE ZMĚNY od Milníku 19.
+  //
+  // MILNÍK 23 (bod 11b) — ZMĚNA KONVENCE INTERVALU.
+  //   do M22:  POLOOTEVŘENÝ [min, max)  — hodnota přesně na hranici patřila
+  //            VYŠŠÍMU pásmu (podmínka `cena >= max` -> přeskoč)
+  //   od M23:  UZAVŘENÝ     [min, max]  — hodnota přesně na hranici patří
+  //            NIŽŠÍMU pásmu (podmínka `cena > max` -> přeskoč)
+  // Sousední pásma se nepřekrývají proto, že mezi nimi je mezera 1 Kč
+  // (vynucuje ji trigger rk_provizni_schema_navaznost_trg, migrace m23_03).
+  // max_hodnota NULL = pásmo bez horní hranice.
+  //
+  // POZOR NA STARÁ DATA: sada uložená ve staré konvenci (max == min souseda)
+  // se tímhle porovnáním stane PŘEKRÝVAJÍCÍ SE — částka přesně na hranici by
+  // vyhověla oběma pásmům a vrátí se to NIŽŠÍ (první v pořadí). Je to
+  // vědomý, dokumentovaný důsledek; sady ve staré konvenci aplikace označuje
+  // výstražným panelem a vede uživatele k převodu. Viz R-11-DATA.
   function najdiPasmoSchematuRk(cena) {
     for (var i = 0; i < provizeUkazkaPasma.length; i++) {
       var p = provizeUkazkaPasma[i];
       if (p == null) continue;
       var min = Number(p.min_hodnota);
       if (cena < min) continue;
-      if (p.max_hodnota != null && cena >= Number(p.max_hodnota)) continue;
+      if (p.max_hodnota != null && cena > Number(p.max_hodnota)) continue;
       return p;
     }
     return null;
@@ -9670,7 +10210,7 @@
 
   function renderRkPortalTable(rows) {
     var columns = [
-      { key: "klient", label: "Klient", get: function (r) { return r.jmeno_klienta || ""; } },
+      { key: "klient", label: "Klient", className: "dt-wrap", get: function (r) { return r.jmeno_klienta || ""; } },
       { key: "kontakt", label: "Kontakt", className: "dt-wrap",
         get: function (r) { return (r.telefon || "") + " " + (r.email || ""); },
         render: function (r) { return escapeHtml(r.telefon || "—") + (r.email ? '<br><span class="dt-muted">' + escapeHtml(r.email) + '</span>' : ''); } },
@@ -9681,19 +10221,27 @@
       // jmenovat a formátovat třemi způsoby. `moje_rk_tipy()` vrací
       // typ_nemovitosti i lokalitu, takže helper funguje přímo nad `r` a
       // žádná DB změna tu potřeba není.
-      { key: "nemovitost_lokalita", label: "Nemovitost / lokalita",
+      // MILNÍK 23: `dt-wrap` = buňka se smí zalomit. Bez toho si tabulka
+      // se dvěma novými peněžními sloupci (bod 11c) vynutí vodorovný posuv —
+      // přesně to, na co si klient v bodě 8 stěžoval.
+      { key: "nemovitost_lokalita", label: "Nemovitost / lokalita", className: "dt-wrap",
         get: function (r) { return tipNemovitostLokalita(r); },
         render: function (r) { return escapeHtml(tipNemovitostLokalita(r) || "—"); } },
       { key: "typ_transakce", label: "Typ transakce", get: function (r) { return r.typ_transakce || ""; },
         render: function (r) { return escapeHtml(r.typ_transakce || "—"); } },
       { key: "nabidkova_cena", label: "Nabídková cena", get: function (r) { return r.rk_nabidkova_cena != null ? Number(r.rk_nabidkova_cena) : -1; },
         render: function (r) { return escapeHtml(formatCena(r.rk_nabidkova_cena)); } },
-      { key: "marze", label: "Marže", sortable: false, get: function () { return ""; },
-        render: function (r) {
-          if (r.rk_marze_typ == null || r.rk_marze_hodnota == null) return '<span class="dt-muted">—</span>';
-          return r.rk_marze_typ === "procento" ? escapeHtml(String(r.rk_marze_hodnota)) + " %" : escapeHtml(formatCena(r.rk_marze_hodnota));
-        } },
-      { key: "rk_stav", label: "Status RK", get: function (r) { return rkStavLabel(r.rk_stav); }, render: function (r) { return rkStavPillHtml(r.rk_stav); } },
+
+      // MILNÍK 23 (bod 8): sloupec „Status RK" ukazuje ZKRÁCENÝ popisek,
+      // plné znění je v title/aria-label. Do M22 se tu psalo celé
+      // „Spolupráce s realitní kanceláří nenavázána" a sloupec se kvůli
+      // jediné hodnotě roztahoval na úkor ostatních.
+      { key: "rk_stav", label: "Status RK", className: "dt-wrap",
+        // `get` vrací PLNÝ popisek schválně — používá ho fulltextové
+        // hledání nad tabulkou, a to má najít i text, který v buňce vidět
+        // není („nenavázána" i „realitní kanceláří").
+        get: function (r) { return rkStavLabel(r.rk_stav); },
+        render: function (r) { return rkStavPillKratkyHtml(r.rk_stav); } },
       // Milník 19 (bod 9): datum prodeje se vypisovalo SYROVĚ, tedy jako
       // ISO "2026-09-12". `tips.datum_prodeje` je čistý DATE sloupec (ne
       // timestamptz), takže sem patří formatDateOnly() - ta parsuje
@@ -9704,8 +10252,50 @@
         render: function (r) { return escapeHtml(formatDateOnly(r.datum_prodeje) || "—"); } },
       { key: "kupni_cena", label: "Kupní cena", get: function (r) { return r.kupni_cena != null ? Number(r.kupni_cena) : -1; },
         render: function (r) { return escapeHtml(formatCena(r.kupni_cena)); } },
+      // ------------------- MILNÍK 23 (bod 11c): dva peněžní sloupce --------
+      // Obě čísla POČÍTÁ SERVER (moje_rk_tipy, migrace m23_04) — klient si
+      // je nedopočítává, aby se výpočet nemohl rozejít s výplatní logikou.
+      // `zaklad_typ` říká, z čeho se počítalo:
+      //    'kupni'     … z KUPNÍ ceny → konečné číslo
+      //    'nabidkova' … z NABÍDKOVÉ ceny → zatím jen odhad (označuje se)
+      //    'fix'       … pevná marže, na ceně nezávisí
+      // MILNÍK 23 (bod 11c): sloupec „Marže" (samotné % nebo pevná částka) se
+      // SLOUČIL do tohoto sloupce — v jedné buňce je teď částka v Kč a za ní
+      // sazba, ze které vznikla („210 000 Kč · 3,5 %"). Dvanáct sloupců by se
+      // na běžné desktopové šířce už nevešlo a dvě čísla o téže marži vedle
+      // sebe byla stejně matoucí. Žádná informace se neztratila.
+      { key: "marze_kc", label: "Velikost marže", className: "dt-wrap",
+        get: function (r) { return r.marze_kc != null ? Number(r.marze_kc) : -1; },
+        render: function (r) {
+          var sazba = (r.rk_marze_typ != null && r.rk_marze_hodnota != null)
+            ? (r.rk_marze_typ === "procento"
+                ? '<span class="dt-muted"> · ' + escapeHtml(String(r.rk_marze_hodnota)) + ' %</span>'
+                : '<span class="dt-muted"> · pevná</span>')
+            : "";
+          if (r.marze_kc == null) return '<span class="dt-muted">—</span>' + sazba;
+          return escapeHtml(formatCena(r.marze_kc)) + sazba + rkPortalOdhadZnackaHtml(r);
+        } },
+      { key: "podil_rt", label: "Podíl Realitního tipu", className: "dt-wrap",
+        get: function (r) { return r.podil_rt_kc != null ? Number(r.podil_rt_kc) : -1; },
+        render: function (r) {
+          if (r.podil_rt_kc == null) {
+            return '<span class="dt-muted" title="' +
+              escapeHtml("Nelze spočítat: chybí marže kanceláře, cena nemovitosti nebo provizní schéma tipu.") +
+              '">—</span>';
+          }
+          var pct = r.podil_rt_pct != null ? Number(r.podil_rt_pct) : null;
+          return '<span title="' + escapeHtml(rkPortalPodilVysvetlivka(r)) + '">' +
+            escapeHtml(formatCena(r.podil_rt_kc)) +
+            (pct != null ? ' <span class="dt-muted">(' + escapeHtml(String(pct)) + ' %)</span>' : '') +
+            '</span>' + rkPortalOdhadZnackaHtml(r);
+        } },
+      // MILNÍK 23 (bod 12): „Upravit" -> „Detail".
+      // Pojmenování je záměrně TOTÉŽ, jaké má tabulka Uživatelé a tabulka
+      // Tipy („Detail"), aby se stejná věc na třech obrazovkách nejmenovala
+      // třikrát jinak. Vlastní úprava stavu se přesouvá O ÚROVEŇ HLOUB —
+      // tlačítko „Upravit" je až uvnitř detailu.
       { key: "akce", label: "Akce", sortable: false, get: function () { return ""; },
-        render: function (r) { return '<button type="button" class="btn-small btn-small-ghost rkportal-edit-btn" data-tip-id="' + escapeHtml(r.tip_id) + '">Upravit</button>'; } }
+        render: function (r) { return '<button type="button" class="btn-small btn-small-ghost rkportal-detail-btn" data-tip-id="' + escapeHtml(r.tip_id) + '">Detail</button>'; } }
     ];
 
     if (rkPortalTable) {
@@ -9716,16 +10306,86 @@
         rows: rows,
         rowId: function (r) { return r.tip_id; },
         searchPlaceholder: "Hledat (klient, lokalita…)",
-        emptyMessage: "Zatím vám nejsou přiřazené žádné tipy.",
+        emptyMessage: "Zatím vám nejsou předané žádné tipy.",
         itemNoun: "tipů",
         initialSortKey: "klient",
+        // ---------------- MILNÍK 23 (bod 9): filtry „Předaných tipů" ------
+        // Do M22 tahle tabulka NEMĚLA filtr vůbec. Klient si explicitně
+        // vyžádal „Aktivní tipy"; zbytek nabídky je zvolený tak, aby pokryl
+        // tytéž tři situace, ve kterých se RK rozhoduje, a aby seděl na
+        // taxonomii z M22 (fáze d–h + ukončení).
+        //
+        // DEFINICE „AKTIVNÍCH TIPŮ" (přesně podle zadání bodu 9):
+        //   má nastavený `rk_stav` (tedy RK ho už převzala a někam posunula)
+        //   A NENÍ v žádném z UKONČOVACÍCH stavů
+        //   A NENÍ prodaný.
+        // Tipy BEZ `rk_stav` (čerstvě předané, kterých se RK ještě nedotkla)
+        // tedy do „Aktivních" ZÁMĚRNĚ nepatří — mají vlastní položku
+        // „Nově předané", aby nezapadly.
+        //
+        // „Čeká na vyplacení" se ZÁMĚRNĚ NEPŘIDÁVÁ, přestože ji bod 9 zmiňuje
+        // jako námět: ta fáze se pozná podle toho, že k prodanému tipu ještě
+        // neexistuje řádek ve `vyplaty`, a výplaty Realitního tipu jsou
+        // interní finanční data, která realitní kancelář nevidí a vidět nemá
+        // (RPC moje_rk_tipy je nevrací). Filtr by se musel opřít o údaj, ke
+        // kterému RK nemá přístup. Viz rozhodnutí R-9-VYPLATY.
+        selectFilter: {
+          get: function (r) { return r.rk_stav || ""; },
+          matches: function (r, v) {
+            var stav = r.rk_stav || null;
+            if (v === "aktivni") {
+              return !!stav && RK_STAV_UKONCUJICI.indexOf(stav) === -1 && stav !== "prodano";
+            }
+            if (v === "nove") return !stav;
+            if (v === "prodane") return stav === "prodano";
+            if (v === "ukoncene") return !!stav && RK_STAV_UKONCUJICI.indexOf(stav) !== -1;
+            return stav === v;
+          },
+          options: [].concat(
+            [
+              { value: "aktivni", label: "Aktivní tipy" },
+              { value: "nove", label: "Nově předané (bez stavu)" },
+              { value: "prodane", label: "Prodané" },
+              { value: "ukoncene", label: "Ukončené" }
+            ],
+            // Jednotlivé stavy zůstávají dostupné taky — souhrnné skupiny
+            // výše je nenahrazují, jen zkracují nejčastější cestu.
+            Object.keys(RK_STAV_LABELS).map(function (k) {
+              return { value: k, label: "— " + RK_STAV_LABELS[k] };
+            })
+          ),
+          allLabel: "Všechny tipy"
+        },
         wireExtra: function (container) {
-          container.querySelectorAll(".rkportal-edit-btn").forEach(function (btn) {
-            btn.addEventListener("click", function () { openRkPortalForm(btn.getAttribute("data-tip-id")); });
+          container.querySelectorAll(".rkportal-detail-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () { openRkPortalDetail(btn.getAttribute("data-tip-id")); });
           });
         }
       });
     }
+  }
+
+  // MILNÍK 23 (bod 9): stavy, které obchodní případ UKONČUJÍ. Jeden zdroj
+  // pravdy pro filtr „Ukončené" i pro definici „Aktivních tipů". Odpovídá
+  // skupině „Ukončené" z taxonomie M22 (u2/u3) v podobě, v jaké ji vidí RK.
+  var RK_STAV_UKONCUJICI = ["spoluprace_nenavazana", "klient_nepristoupil_ke_koupi"];
+
+  // Značka „odhad" u peněžních sloupců: dokud není prodáno, počítá se
+  // z NABÍDKOVÉ ceny, a to číslo se ještě změní. Tiché zobrazení bez
+  // označení by RK svádělo brát odhad jako konečnou částku.
+  function rkPortalOdhadZnackaHtml(r) {
+    if (r.zaklad_typ === "nabidkova") {
+      return ' <span class="dt-muted" title="Odhad z nabídkové ceny. Po zadání kupní ceny se přepočte definitivně.">(odhad)</span>';
+    }
+    return "";
+  }
+
+  function rkPortalPodilVysvetlivka(r) {
+    var zaklad = r.zaklad_typ === "kupni" ? "kupní ceny"
+      : (r.zaklad_typ === "nabidkova" ? "nabídkové ceny" : "pevné marže");
+    return "Součet podílů všech rolí Realitního tipu (tipař + sponzor + lídr + marže RT), "
+      + "tedy maximálně " + (r.podil_rt_pct != null ? r.podil_rt_pct : 30) + " % z vaší marže. "
+      + "Marže se počítá z " + zaklad + ".";
   }
 
   async function fetchRkPortal() {
@@ -9746,6 +10406,115 @@
   function closeRkPortalForm() {
     rkPortalFormTargetId = null;
     el("rkPortalFormWrap").innerHTML = "";
+  }
+
+  // =========================================================================
+  // MILNÍK 23 (bod 12) — DETAIL PŘEDANÉHO TIPU (read-only)
+  // =========================================================================
+  // KRITICKÁ OPRAVA, kterou klient nahlásil: do M22 vedlo jediné tlačítko u
+  // řádku („Upravit") rovnou na formulář stavu. Realitní kancelář tedy měla
+  // k dispozici POUZE to, co sama zadala — ani popis nemovitosti od tipaře,
+  // ani kontakt na prodávajícího v souvislé podobě, ani nic z toho, co při
+  // ověření zjistil lídr. Podle čeho měla obchod vést, nebylo z aplikace
+  // poznat.
+  //
+  // Nový Detail je ČISTĚ ČTECÍ a skládá se ze tří bloků v pořadí, v jakém
+  // informace vznikaly:
+  //     1) Co zadal TIPAŘ           (kontakt, nemovitost, představa ceny, popis)
+  //     2) Co zjistil LÍDR PŘI OVĚŘENÍ (adresa, motivace, stav, poznámka, kdy)
+  //     3) Co vede sama RK           (ceny, marže, podíl RT, stav obchodu)
+  // Teprve uvnitř je tlačítko „Upravit", které otevírá PŘESNĚ TÝŽ formulář
+  // jako dosud — jeho pole ani logika se nemění ani o řádek.
+  //
+  // ZDROJ DAT: rozšířená RPC moje_rk_tipy() (migrace m23_04). Žádné pole se
+  // nedotahuje jinudy a nic se nedopočítává na klientovi.
+  //
+  // ZMĚNA POLITIKY VIDITELNOSTI: Milník 7 (sekce 5.3/7.1 původního zadání)
+  // záměrně určil, že RK NEVIDÍ status ověření ani poznámku lídra. Klient to
+  // v Milníku 23 (bod 12) výslovně ruší. Je to vědomé rozhodnutí zadavatele,
+  // ne opomenutí — viz R-12-VIDITELNOST v docs/milnik23_*.md.
+  function openRkPortalDetail(tipId) {
+    var t = rkPortalRowsCache.filter(function (r) { return r.tip_id === tipId; })[0];
+    if (!t) return;
+    rkPortalFormTargetId = null;
+
+    var duvodText = "";
+    if (t.rk_stav === "spoluprace_nenavazana") {
+      duvodText = (DUVOD_NENAVAZANI_RK_LABELS[t.duvod_nenavazani_rk] || t.duvod_nenavazani_rk || "—") +
+        (t.duvod_nenavazani_rk_poznamka ? (" — " + t.duvod_nenavazani_rk_poznamka) : "");
+    }
+
+    // Blok lídra se zobrazuje VŽDY, i když je prázdný. Prázdné pole je totiž
+    // taky informace („lídr tohle nezjistil"), zatímco skrytý blok by budil
+    // dojem, že tip žádným ověřením neprošel.
+    var maNecoOdLidra = !!(t.overena_adresa || t.motivace_prodeje || t.stav_nemovitosti || t.poznamka_leadera);
+
+    el("rkPortalFormWrap").innerHTML =
+      '<div class="card detail-card" id="rkPortalDetailCard">' +
+        '<h3 class="detail-section-title" style="margin-top:0;">Detail — ' + escapeHtml(t.jmeno_klienta || "tip") + '</h3>' +
+
+        '<h4 class="detail-section-title" style="font-size:15px;">Od tipaře</h4>' +
+        '<p class="dt-muted" style="margin-top:-6px;">Informace, se kterými tip vznikl.</p>' +
+        '<div class="detail-grid">' +
+          detailItemBold("Prodávající", t.jmeno_klienta) +
+          detailItemBold("Telefon", t.telefon) +
+          detailItemBold("E-mail", t.email) +
+          detailItemBold("Nemovitost / lokalita", tipNemovitostLokalita(t)) +
+          detailItem("Typ transakce", t.typ_transakce) +
+          detailItem("Představa ceny prodávajícího", t.pozadovana_cena != null ? formatCena(t.pozadovana_cena) : null) +
+          detailItem("Tip vložen", formatDatumZCasu(t.vlozeno_kdy)) +
+        '</div>' +
+        '<div class="detail-item" style="margin-top:8px;"><div class="detail-label">Popis nemovitosti</div>' +
+          '<div class="detail-value" style="white-space:pre-wrap;">' +
+          (t.popis ? escapeHtml(t.popis) : '<span class="dt-muted">Tipař popis nevyplnil.</span>') + '</div></div>' +
+
+        '<h4 class="detail-section-title" style="font-size:15px;">Z ověření lídrem</h4>' +
+        '<p class="dt-muted" style="margin-top:-6px;">Co si tým Realitního tipu ověřil, než vám tip předal.</p>' +
+        '<div class="detail-grid">' +
+          detailItem("Status ověření", stavLabel(t.stav)) +
+          detailItem("Ověřeno", formatDatumZCasu(t.overeno_kdy)) +
+          detailItem("Předáno vaší kanceláři", formatDatumZCasu(t.predano_rk_kdy)) +
+          detailItemBold("Ověřená adresa", t.overena_adresa) +
+          detailItem("Motivace prodeje", t.motivace_prodeje) +
+          detailItem("Stav nemovitosti", t.stav_nemovitosti) +
+        '</div>' +
+        '<div class="detail-item" style="margin-top:8px;"><div class="detail-label">Poznámka lídra z ověření</div>' +
+          '<div class="detail-value" style="white-space:pre-wrap;">' +
+          (t.poznamka_leadera ? escapeHtml(t.poznamka_leadera)
+            : '<span class="dt-muted">' + (maNecoOdLidra ? "Bez poznámky." : "Lídr zatím k tipu nic nedoplnil.") + '</span>') +
+          '</div></div>' +
+
+        '<h4 class="detail-section-title" style="font-size:15px;">Obchod u vás</h4>' +
+        '<p class="dt-muted" style="margin-top:-6px;">Údaje, které vedete vy. Měnit je můžete tlačítkem „Upravit“ dole.</p>' +
+        '<div class="detail-grid">' +
+          detailItem("Odhad ceny nemovitosti", t.odhadovana_cena != null ? formatCena(t.odhadovana_cena) : null) +
+          detailItem("Nabídková cena", t.rk_nabidkova_cena != null ? formatCena(t.rk_nabidkova_cena) : null) +
+          detailItem("Marže", (t.rk_marze_typ && t.rk_marze_hodnota != null)
+            ? (t.rk_marze_typ === "procento" ? (t.rk_marze_hodnota + " %") : formatCena(t.rk_marze_hodnota))
+            : null) +
+          detailItemBold("Velikost marže", t.marze_kc != null
+            ? (formatCena(t.marze_kc) + (t.zaklad_typ === "nabidkova" ? " (odhad)" : "")) : null) +
+          detailItemBold("Podíl Realitního tipu", t.podil_rt_kc != null
+            ? (formatCena(t.podil_rt_kc) + (t.podil_rt_pct != null ? (" (" + t.podil_rt_pct + " %)") : "")
+               + (t.zaklad_typ === "nabidkova" ? " (odhad)" : "")) : null) +
+          detailItem("Status RK", rkStavLabel(t.rk_stav)) +
+          (duvodText ? detailItem("Důvod nenavázání spolupráce", duvodText) : "") +
+          detailItem("Datum prodeje", formatDateOnly(t.datum_prodeje)) +
+          detailItem("Kupní cena", t.kupni_cena != null ? formatCena(t.kupni_cena) : null) +
+        '</div>' +
+        '<p class="dt-muted" style="margin-top:10px;">' +
+          escapeHtml("„Podíl Realitního tipu“ je součet odměn všech rolí (tipař + sponzor + lídr + marže Realitního tipu), tedy maximálně 30 % z vaší marže. Vaší kanceláři zůstává zbytek.") +
+        '</p>' +
+
+        '<div class="form-actions">' +
+          '<button class="btn-primary" type="button" id="rkPortalDetailEditBtn" style="width:auto;">Upravit</button>' +
+          '<button class="btn-ghost" type="button" id="rkPortalDetailCloseBtn">Zavřít</button>' +
+        '</div>' +
+      '</div>';
+
+    el("rkPortalDetailEditBtn").addEventListener("click", function () { openRkPortalForm(tipId); });
+    el("rkPortalDetailCloseBtn").addEventListener("click", closeRkPortalForm);
+    el("rkPortalFormWrap").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function openRkPortalForm(tipId) {
@@ -9994,6 +10763,24 @@
         '<h3 class="detail-section-title" style="margin-top:0;">Kontaktní osoba</h3>' +
         '<p class="dt-muted" style="margin-top:-6px;">Jediné údaje, které si můžete upravit sami — typicky když se u vás změní člověk, který má tipy na starosti. <strong>Telefon kontaktní osoby je jiné číslo než telefon kanceláře</strong> uvedený v registračních údajích výš.</p>' +
         kontaktBlok +
+      '</div>' +
+      // MILNÍK 23 (bod 10): LOGO kanceláře. Je to obdoba dobrovolné fotky
+      // z Milníku 19, ale VĚCNĚ JINÁ VĚC — firemní značka, ne osobní portrét.
+      // Proto vlastní sloupec (realitni_kancelare.logo_cesta), vlastní cesta
+      // v úložišti (rk/<rk_id>/logo.*) a vlastní RPC; viz migrace m23_05.
+      '<div class="card detail-card">' +
+        '<h3 class="detail-section-title" style="margin-top:0;">Logo kanceláře</h3>' +
+        '<p class="dt-muted" style="margin-top:-6px;">Nepovinné. Nahrané logo se vám zobrazí v záhlaví aplikace místo iniciál. Doporučený formát je čtverec (PNG s průhledným pozadím vypadá nejlépe) — obrázek se automaticky zmenší a doplní do čtverce, aby se nic neořízlo.</p>' +
+        '<div id="rkLogoPreviewWrap" style="margin-bottom:12px;"></div>' +
+        '<div class="field" style="max-width:420px;">' +
+          '<label for="rkLogoFile">Vybrat soubor</label>' +
+          '<input type="file" id="rkLogoFile" accept="image/jpeg,image/png,image/webp">' +
+          '<p class="dt-muted" style="font-size:12px;margin:4px 0 0;">JPEG, PNG nebo WebP, nejvýše 3 MB.</p>' +
+        '</div>' +
+        '<div class="form-actions">' +
+          '<button class="btn-primary" type="button" id="rkLogoSaveBtn" style="width:auto;">Uložit logo</button>' +
+          (r.logo_cesta ? '<button class="btn-ghost" type="button" id="rkLogoRemoveBtn">Odstranit logo</button>' : '') +
+        '</div>' +
       '</div>';
 
     if (rkProfileEditMode) {
@@ -10015,6 +10802,135 @@
         renderRkProfile();
       });
     }
+
+    // MILNÍK 23 (bod 10): logo — náhled i obsluha tlačítek.
+    renderRkLogoPreview();
+    var logoSave = el("rkLogoSaveBtn");
+    if (logoSave) logoSave.addEventListener("click", submitRkLogo);
+    var logoRemove = el("rkLogoRemoveBtn");
+    if (logoRemove) logoRemove.addEventListener("click", odstranitRkLogo);
+  }
+
+  // Náhled loga. Stejný vzor jako u profilové fotky: privátní bucket,
+  // krátkodobě podepsaná URL, nikdy veřejná adresa.
+  async function renderRkLogoPreview() {
+    var wrap = el("rkLogoPreviewWrap");
+    if (!wrap) return;
+    var cesta = rkProfileRow && rkProfileRow.logo_cesta;
+    if (!cesta) {
+      wrap.innerHTML = '<div class="rk-logo-empty">Zatím bez loga</div>';
+      return;
+    }
+    wrap.innerHTML = '<div class="rk-logo-empty">Načítání…</div>';
+    var g = authGen;
+    var signed = await sb.storage.from("profilove-fotky").createSignedUrl(cesta, 300);
+    if (g !== authGen) return;
+    if (signed.error || !signed.data) {
+      console.error("Logo se nepodařilo načíst:", signed.error);
+      wrap.innerHTML = '<div class="rk-logo-empty">Logo se nepodařilo načíst</div>';
+      return;
+    }
+    wrap.innerHTML = '<img src="' + escapeHtml(signed.data.signedUrl) + '" class="rk-logo-preview" alt="Logo vaší realitní kanceláře">';
+  }
+
+  async function submitRkLogo() {
+    if (!currentUser || currentUser.role !== "rk") return;
+    var g = authGen;
+    var input = el("rkLogoFile");
+    var file = input && input.files && input.files[0] ? input.files[0] : null;
+    if (!file) {
+      showBanner(el("rkProfileBanner"), "error", "Nejdřív prosím vyberte soubor s logem.");
+      return;
+    }
+    if (["image/jpeg", "image/png", "image/webp"].indexOf(file.type) === -1) {
+      showBanner(el("rkProfileBanner"), "error", "Logo musí být JPEG, PNG nebo WebP.");
+      return;
+    }
+    if (file.size > DOBROVOLNY_FOTKA_MAX_B) {
+      showBanner(el("rkProfileBanner"), "error", "Logo je větší než 3 MB.");
+      return;
+    }
+    var rkId = rkProfileRow && rkProfileRow.id;
+    if (!rkId) {
+      showBanner(el("rkProfileBanner"), "error", "Nepodařilo se určit vaši kancelář. Načtěte prosím stránku znovu.");
+      return;
+    }
+
+    var btn = el("rkLogoSaveBtn");
+    if (btn) btn.disabled = true;
+    showBanner(el("rkProfileBanner"), null, null);
+
+    // Režim 'contain': logo se doplní do čtverce PRŮHLEDNÝM okrajem, nikdy
+    // se neořízne (na rozdíl od portrétní fotky, kde se bere výřez ze středu).
+    var ext = (file.type === "image/png") ? "png" : (file.type === "image/webp" ? "webp" : "jpg");
+    var nahravane = file, typ = file.type;
+    var zmenseny = await ctvercovyBlobZeSouboru(file, AVATAR_CIL_PX, "contain");
+    if (g !== authGen) return;
+    if (zmenseny) { nahravane = zmenseny.blob; typ = zmenseny.typ; ext = zmenseny.pripona; }
+
+    var cesta = "rk/" + rkId + "/logo." + ext;
+    var up = await sb.storage.from("profilove-fotky").upload(cesta, nahravane, { upsert: true, contentType: typ });
+    if (g !== authGen) return;
+    if (up.error) {
+      console.error("Chyba při nahrávání loga:", up.error);
+      if (btn) btn.disabled = false;
+      showBanner(el("rkProfileBanner"), "error", "Logo se nepodařilo nahrát. Zkuste to prosím znovu.");
+      return;
+    }
+
+    // Táž obrana proti duplicitám jako u profilových fotek (Milník 12, bod 2):
+    // `upsert` přepíše jen objekt na STEJNÉ cestě, takže při změně přípony
+    // (logo.png -> logo.jpg) by starý soubor zůstal ležet.
+    var listAfter = await sb.storage.from("profilove-fotky").list("rk/" + rkId, { limit: 100 });
+    if (g !== authGen) return;
+    if (!listAfter.error && listAfter.data) {
+      var stale = listAfter.data
+        .filter(function (f) { return f && f.name && f.name.indexOf("logo.") === 0 && f.name !== ("logo." + ext); })
+        .map(function (f) { return "rk/" + rkId + "/" + f.name; });
+      if (stale.length) {
+        var rem = await sb.storage.from("profilove-fotky").remove(stale);
+        if (rem.error) console.error("Nepodařilo se smazat staré logo:", rem.error);
+      }
+    }
+
+    await ulozitCestuLoga(cesta, btn, "Logo bylo uloženo.");
+  }
+
+  async function odstranitRkLogo() {
+    if (!window.confirm("Opravdu odstranit logo kanceláře? V záhlaví se pak zase zobrazí iniciály.")) return;
+    var btn = el("rkLogoRemoveBtn");
+    if (btn) btn.disabled = true;
+    // Prázdný řetězec = „smazat" (sémantika RPC upravit_moje_rk_logo).
+    // Samotný soubor v úložišti se maže taky, ať po sobě neleží.
+    var rkId = rkProfileRow && rkProfileRow.id;
+    var cesta = rkProfileRow && rkProfileRow.logo_cesta;
+    if (cesta && rkId) {
+      var rem = await sb.storage.from("profilove-fotky").remove([cesta]);
+      if (rem.error) console.error("Soubor loga se nepodařilo smazat:", rem.error);
+    }
+    await ulozitCestuLoga("", btn, "Logo bylo odstraněno.");
+  }
+
+  async function ulozitCestuLoga(cesta, btn, hlaska) {
+    var g = authGen;
+    var result = await sb.rpc("upravit_moje_rk_logo", { p_logo_cesta: cesta });
+    if (g !== authGen) return;
+    if (btn) btn.disabled = false;
+    if (result.error) {
+      console.error("Chyba při ukládání loga:", result.error);
+      showBanner(el("rkProfileBanner"), "error",
+        result.error.code === "42501" ? "Nemáte oprávnění tuto akci provést." : "Logo se nepodařilo uložit.");
+      return;
+    }
+    // Re-fetch přes moje_rk(), nikdy patch z odeslané hodnoty.
+    await fetchRkProfile();
+    if (g !== authGen) return;
+    // Záhlaví musí logo ukázat okamžitě, ne až po dalším přihlášení.
+    currentUser.rk_logo_cesta = (rkProfileRow && rkProfileRow.logo_cesta) || null;
+    topbarAvatarCache = { cesta: null, url: null, platiDo: 0 };
+    renderTopbarUserInfo();
+    showBanner(el("rkProfileBanner"), "ok", hlaska);
+    setTimeout(function () { showBanner(el("rkProfileBanner"), null, null); }, 4000);
   }
 
   async function submitRkKontaktniOsoba() {
@@ -10076,9 +10992,17 @@
       : formatCena(r.hodnota);
   }
 
-  // Milník 20 (bod 1): týž formulář slouží pro přidání i pro editaci.
-  // null = režim "Přidat pásmo", id = režim "Upravit pásmo".
-  var rkProvizeEditId = null;
+  // Milník 20 (bod 1) zavedl režim „týž formulář přidává i edituje"
+  // (rkProvizeEditId). MILNÍK 23 (bod 11a) ho RUŠÍ: editace se přesunula do
+  // hromadného režimu nad tabulkou, takže formulář dole slouží VÝHRADNĚ
+  // k přidávání nového pásma. Proměnná `rkProvizeEditId` i funkce
+  // openRkProvizeEdit()/submitRkProvizeEdit()/zrusitRkProvizeEdit() zanikly.
+  //
+  // HROMADNÁ EDITACE (bod 11a):
+  //   rkProvizeEditVse    … jsme v editačním režimu?
+  //   rkProvizeDraft      … rozpracované hodnoty (pole objektů v pořadí sady)
+  var rkProvizeEditVse = false;
+  var rkProvizeDraft = null;
 
   function resetRkProvizeForm() {
     var form = el("rkProvizeForm");
@@ -10092,30 +11016,9 @@
     setFieldError(el("rpsOdField"), false);
     setFieldError(el("rpsDoField"), false);
     setFieldError(el("rpsHodnotaField"), false);
-    rkProvizeEditId = null;
-    aktualizovatRkProvizeFormMod();
-  }
-
-  // Přepne popisky formuláře podle režimu a v režimu "přidat" předvyplní
-  // "Od" nejvyšší existující horní hranicí (bod 1, UX požadavek) - nové
-  // pásmo se tak připojí přesně tam, kde to předchozí skončilo.
-  function aktualizovatRkProvizeFormMod() {
-    var title = el("rkProvizeFormTitle");
-    var saveBtn = el("rkProvizeSaveBtn");
-    var cancelBtn = el("rkProvizeCancelBtn");
-    var hint = el("rkProvizeFormHint");
-    var editace = rkProvizeEditId != null;
-
-    if (title) title.textContent = editace ? "Upravit pásmo" : "Přidat pásmo";
-    if (saveBtn) saveBtn.textContent = editace ? "Uložit změny" : "Přidat pásmo";
-    if (cancelBtn) cancelBtn.hidden = !editace;
-    if (hint) {
-      hint.innerHTML = editace
-        ? 'Pásma musí na sebe přesně navazovat. Když posunete hranici tohohle pásma, aplikace <strong>sama dorovná sousední pásmo</strong>, aby mezi nimi nevznikla mezera ani překryv — a uloží obojí najednou.'
-        : 'Pásma musí na sebe přesně navazovat: horní hranice jednoho pásma je zároveň spodní hranicí toho následujícího (hodnota přesně na hranici patří vždy vyššímu pásmu). Nové pásmo se proto připojuje nahoru a „Od“ je předvyplněné.';
-    }
-
-    if (!editace) predvyplnitOdProNovePasmo();
+    var hint = el("rpsDalsiNapoveda");
+    if (hint) { hint.hidden = true; hint.textContent = ""; }
+    predvyplnitOdProNovePasmo();
   }
 
   // Nejvyšší horní hranice mezi existujícími pásmy. null = buď žádná
@@ -10128,11 +11031,25 @@
     return posledni.max_hodnota == null ? null : Number(posledni.max_hodnota);
   }
 
+  // MILNÍK 23 (bod 11b): „Od“ nového pásma je o JEDNU KORUNU VYŠŠÍ než
+  // horní hranice dosud nejvyššího pásma (dřív se rovnalo přímo jí).
   function predvyplnitOdProNovePasmo() {
     var od = el("rpsOd");
     if (!od) return;
     var hranice = rkProvizeNejvyssiHranice();
-    od.value = rkProvizeRowsCache.length === 0 ? "0" : (hranice == null ? "" : String(hranice));
+    od.value = rkProvizeRowsCache.length === 0 ? "0" : (hranice == null ? "" : String(hranice + 1));
+  }
+
+  // MILNÍK 23 (bod 11b): živý náhled „čím bude začínat příští pásmo“.
+  // Aktualizuje se při psaní do pole „Do“.
+  function aktualizovatNapoveduDalsihoPasma() {
+    var hint = el("rpsDalsiNapoveda");
+    var doInput = el("rpsDo");
+    if (!hint || !doInput) return;
+    var raw = doInput.value;
+    if (raw === "" || isNaN(Number(raw))) { hint.hidden = true; hint.textContent = ""; return; }
+    hint.hidden = false;
+    hint.textContent = "Příští pásmo pak bude začínat na " + formatCena(Number(raw) + 1) + ".";
   }
 
   // Vždy stejné řazení jako v DB (order("min_hodnota")) - klientská
@@ -10155,13 +11072,16 @@
       if (a.max_hodnota == null) {
         return "Pásmo od " + formatCena(a.min_hodnota) + " nemá horní hranici, takže za ním už žádné další pásmo být nemůže. Bez horní hranice smí zůstat jen nejvyšší pásmo.";
       }
-      if (Number(a.max_hodnota) < Number(b.min_hodnota)) {
+      // MILNÍK 23 (bod 11b): nová konvence — mezi pásmy je mezera PŘESNĚ 1 Kč.
+      if (Number(a.max_hodnota) + 1 < Number(b.min_hodnota)) {
         return "Mezi pásmy by vznikla mezera: jedno končí na " + formatCena(a.max_hodnota) +
-          ", další začíná až na " + formatCena(b.min_hodnota) + ". Musí na sebe přesně navazovat.";
+          ", další začíná až na " + formatCena(b.min_hodnota) + ". Spodní hranice dalšího pásma musí být přesně " +
+          formatCena(Number(a.max_hodnota) + 1) + ".";
       }
-      if (Number(a.max_hodnota) > Number(b.min_hodnota)) {
-        return "Pásma by se překrývala: jedno končí až na " + formatCena(a.max_hodnota) +
-          ", ale další už začíná na " + formatCena(b.min_hodnota) + ".";
+      if (Number(a.max_hodnota) + 1 > Number(b.min_hodnota)) {
+        return "Pásma by se překrývala: jedno končí na " + formatCena(a.max_hodnota) +
+          ", ale další už začíná na " + formatCena(b.min_hodnota) + ". Spodní hranice dalšího pásma musí být přesně " +
+          formatCena(Number(a.max_hodnota) + 1) + ".";
       }
     }
     return null;
@@ -10188,12 +11108,182 @@
       return;
     }
     rkProvizeRowsCache = rkProvizeSerazenaKopie(result.data || []);
+    // Načtení z databáze VŽDY ukončí rozpracovanou hromadnou editaci —
+    // draft by se jinak vztahoval k datům, která už na serveru nejsou.
+    rkProvizeEditVse = false;
+    rkProvizeDraft = null;
     renderRkProvizeTable(rkProvizeRowsCache);
+    renderRkProvizeLegacyVarovani();
+    aktualizovatRkProvizeToolbar();
     // Předvyplnění "Od" musí vycházet z ČERSTVÝCH dat.
-    if (rkProvizeEditId == null) predvyplnitOdProNovePasmo();
+    predvyplnitOdProNovePasmo();
+  }
+
+  // =========================================================================
+  // MILNÍK 23 (bod 11b) — VAROVÁNÍ U PÁSEM VE STARÉ KONVENCI
+  // =========================================================================
+  // Sada uložená podle Milníku 20 (horní hranice = spodní hranice dalšího
+  // pásma) NOVÉ konvenci nevyhovuje, takže ji databázový trigger odmítne
+  // při JAKÉKOLI další mutaci. Aplikace to nesmí zamlčet — jinak by
+  // uživateli jen záhadně nešlo nic uložit.
+  //
+  // Panel proto říká rovnou: co je špatně, co se stane, a že převod NIC
+  // NEZMĚNÍ na tom, do kterého pásma která částka spadne (snížení horní
+  // hranice o 1 Kč je čistě změna zápisu téhož rozsahu).
+  // Data se NIKDY nepřepisují na pozadí — teprve když uživatel klikne na
+  // „Upravit" a pak „Uložit". Viz R-11-DATA v docs/milnik23_*.md.
+  function rkProvizeJeStaraKonvence(rows) {
+    var serazena = rkProvizeSerazenaKopie(rows);
+    for (var i = 0; i + 1 < serazena.length; i++) {
+      var a = serazena[i], b = serazena[i + 1];
+      if (a.max_hodnota == null) continue;
+      if (Number(a.max_hodnota) === Number(b.min_hodnota)) return true;
+    }
+    return false;
+  }
+
+  function renderRkProvizeLegacyVarovani() {
+    var wrap = el("rkProvizeLegacyWrap");
+    if (!wrap) return;
+    if (!rkProvizeJeStaraKonvence(rkProvizeRowsCache)) { wrap.innerHTML = ""; return; }
+    wrap.innerHTML =
+      '<div class="banner banner-error" style="text-align:left;">' +
+        '<strong>Vaše pásma jsou uložená ve starším zápisu.</strong><br>' +
+        'Horní hranice pásma se u vás rovná spodní hranici toho následujícího (např. 0–2 000 000 a 2 000 000–5 000 000). ' +
+        'Nově má být mezi pásmy mezera jedné koruny (0–2 000 000 a 2 000 001–5 000 000) a hodnota přesně na horní hranici patří nižšímu pásmu. ' +
+        'Dokud zápis nepřevedete, nepůjde pásma přidávat, upravovat ani mazat.<br>' +
+        'Převod provedete tlačítkem <strong>Upravit</strong> níže — hranice se předvyplní už podle nového zápisu a stačí je <strong>Uložit</strong>. ' +
+        '<em>Na to, do kterého pásma která částka spadne, se tím nic nemění.</em>' +
+      '</div>';
+  }
+
+  // =========================================================================
+  // MILNÍK 23 (bod 11a) — HROMADNÁ EDITACE CELÉ TABULKY
+  // =========================================================================
+  // PROČ SE V EDITAČNÍM REŽIMU NEPOUŽÍVÁ initDataTable:
+  // ta tabulka se překresluje při každém řazení i psaní do hledání, což by
+  // rozepsaným <input> polím vynulovalo hodnoty. Read-only režim si
+  // initDataTable ponechává (nic se neztrácí — hledání i řazení jsou tam
+  // dál), editační režim kreslí prostou tabulku se STEJNÝMI třídami
+  // .dt-table, takže vypadá identicky.
+  function aktualizovatRkProvizeToolbar() {
+    var editBtn = el("rkProvizeEditAllBtn");
+    var saveBtn = el("rkProvizeSaveAllBtn");
+    var cancelBtn = el("rkProvizeCancelAllBtn");
+    var addCard = el("rkProvizeAddCard");
+    var maRadky = rkProvizeRowsCache.length > 0;
+    if (editBtn) { editBtn.hidden = rkProvizeEditVse || !maRadky; }
+    if (saveBtn) saveBtn.hidden = !rkProvizeEditVse;
+    if (cancelBtn) cancelBtn.hidden = !rkProvizeEditVse;
+    // Přidávání a hromadná editace se navzájem vylučují — jinak by uživatel
+    // mohl vložit nové pásmo nad rozpracovaný (a ještě neuložený) draft.
+    if (addCard) addCard.hidden = rkProvizeEditVse;
+  }
+
+  function spustitRkProvizeEditVse() {
+    // Bez jediného pásma není co upravovat. Tlačítko je v takovém případě
+    // skryté (aktualizovatRkProvizeToolbar), tohle je pojistka pro případ,
+    // že by se na něj někdo dostal dřív, než doběhne první načtení.
+    if (!rkProvizeRowsCache.length) return;
+    // Draft vychází ze seřazené kopie a rovnou se PŘEVEDE NA NOVOU KONVENCI:
+    // u každého pásma, jehož horní hranice se rovná spodní hranici souseda
+    // (starý zápis), se horní hranice sníží o 1 Kč. Uživatel tedy vidí
+    // rovnou správné hodnoty a stačí mu je potvrdit.
+    var serazena = rkProvizeSerazenaKopie(rkProvizeRowsCache);
+    rkProvizeDraft = serazena.map(function (r) {
+      return {
+        id: r.id, rk_id: r.rk_id,
+        min_hodnota: Number(r.min_hodnota),
+        max_hodnota: r.max_hodnota == null ? null : Number(r.max_hodnota),
+        typ: r.typ, hodnota: Number(r.hodnota)
+      };
+    });
+    for (var i = 0; i + 1 < rkProvizeDraft.length; i++) {
+      var a = rkProvizeDraft[i], b = rkProvizeDraft[i + 1];
+      if (a.max_hodnota != null && a.max_hodnota === b.min_hodnota) a.max_hodnota = a.max_hodnota - 1;
+    }
+    rkProvizeEditVse = true;
+    showBanner(el("rkProvizeBanner"), null, null);
+    renderRkProvizeTable(rkProvizeRowsCache);
+    aktualizovatRkProvizeToolbar();
+  }
+
+  function zrusitRkProvizeEditVse() {
+    rkProvizeEditVse = false;
+    rkProvizeDraft = null;
+    showBanner(el("rkProvizeBanner"), null, null);
+    renderRkProvizeTable(rkProvizeRowsCache);
+    aktualizovatRkProvizeToolbar();
+  }
+
+  // Přečte hodnoty ze všech inputů do draftu. Nic nevaliduje — to dělá až
+  // uložení; průběžné hlášky při psaní by uživatele jen otravovaly.
+  function nacistRkProvizeDraftZFormulare() {
+    if (!rkProvizeDraft) return;
+    rkProvizeDraft.forEach(function (d, i) {
+      var od = el("rpsRowOd_" + i), doo = el("rpsRowDo_" + i);
+      var typ = el("rpsRowTyp_" + i), hod = el("rpsRowHod_" + i);
+      if (od) d.min_hodnota = od.value === "" ? null : Number(od.value);
+      if (doo) d.max_hodnota = doo.value === "" ? null : Number(doo.value);
+      if (typ) d.typ = typ.value;
+      if (hod) d.hodnota = hod.value === "" ? null : Number(hod.value);
+    });
   }
 
   function renderRkProvizeTable(rows) {
+    // ---------------------------- EDITAČNÍ REŽIM --------------------------
+    if (rkProvizeEditVse && rkProvizeDraft) {
+      var telo = rkProvizeDraft.map(function (d, i) {
+        var posledni = (i === rkProvizeDraft.length - 1);
+        return '<tr>' +
+          '<td><input type="number" id="rpsRowOd_' + i + '" class="rps-row-input" data-rps-i="' + i + '" data-rps-pole="od" min="0" step="1" value="' +
+            (d.min_hodnota == null ? "" : escapeHtml(String(d.min_hodnota))) + '"></td>' +
+          '<td><input type="number" id="rpsRowDo_' + i + '" class="rps-row-input" data-rps-i="' + i + '" data-rps-pole="do" min="0" step="1" placeholder="' +
+            (posledni ? "prázdné = bez horní hranice" : "") + '" value="' +
+            (d.max_hodnota == null ? "" : escapeHtml(String(d.max_hodnota))) + '"></td>' +
+          '<td><select id="rpsRowTyp_' + i + '" class="rps-row-input" data-rps-i="' + i + '" data-rps-pole="typ">' +
+            '<option value="procento"' + (d.typ !== "fix" ? " selected" : "") + '>Procento z ceny</option>' +
+            '<option value="fix"' + (d.typ === "fix" ? " selected" : "") + '>Pevná částka (Kč)</option>' +
+            '</select></td>' +
+          '<td><input type="number" id="rpsRowHod_' + i + '" class="rps-row-input" data-rps-i="' + i + '" data-rps-pole="hodnota" min="0" step="0.01" value="' +
+            (d.hodnota == null ? "" : escapeHtml(String(d.hodnota))) + '"></td>' +
+          // „Smazat" zůstává PER ŘÁDEK — přesně jak zadání říká. V editačním
+          // režimu je ale vypnuté: mazání je samostatná serverová operace
+          // (a u prostředního pásma dokonce vícekrokové přeskládání), takže
+          // nad nezapsaným draftem by nedávalo smysl.
+          '<td class="dt-col-mini"><button type="button" class="btn-small btn-small-danger" disabled title="Nejdřív změny uložte, nebo je zrušte.">Smazat</button></td>' +
+          '</tr>';
+      }).join("");
+
+      el("rkProvizeTableWrap").innerHTML =
+        '<p class="dt-muted" style="margin:0 0 8px;">Upravujete všechna pásma najednou. Když změníte „Do“, spodní hranice dalšího pásma se sama přepíše na hodnotu o korunu vyšší.</p>' +
+        '<div class="dt-table-wrap"><table class="dt-table"><thead><tr>' +
+          '<th>Od (Kč)</th><th>Do (Kč)</th><th>Typ</th><th>Hodnota</th><th class="dt-col-mini">Akce</th>' +
+        '</tr></thead><tbody>' + telo + '</tbody></table></div>';
+
+      // MILNÍK 23 (bod 11b): živé dorovnání sousedů. Napsáním horní hranice
+      // se spodní hranice NÁSLEDUJÍCÍHO pásma přepíše na hodnotu o 1 Kč
+      // vyšší — přesně to, co klient popsal.
+      el("rkProvizeTableWrap").querySelectorAll(".rps-row-input").forEach(function (inp) {
+        inp.addEventListener("input", function () {
+          nacistRkProvizeDraftZFormulare();
+          if (inp.getAttribute("data-rps-pole") !== "do") return;
+          var i = Number(inp.getAttribute("data-rps-i"));
+          var d = rkProvizeDraft[i];
+          var dalsi = rkProvizeDraft[i + 1];
+          if (!dalsi || d.max_hodnota == null || isNaN(d.max_hodnota)) return;
+          dalsi.min_hodnota = d.max_hodnota + 1;
+          var cil = el("rpsRowOd_" + (i + 1));
+          if (cil) cil.value = String(dalsi.min_hodnota);
+        });
+      });
+      // Instanci read-only tabulky je nutné zahodit — její kontejner jsme
+      // právě přepsali a setRows() by psal do uzlu, který v DOM není.
+      rkProvizeTable = null;
+      return;
+    }
+
+    // ---------------------------- READ-ONLY REŽIM -------------------------
     var columns = [
       { key: "od", label: "Od (Kč)", get: function (r) { return Number(r.min_hodnota || 0); },
         render: function (r) { return escapeHtml(formatCena(r.min_hodnota)); } },
@@ -10206,9 +11296,9 @@
         render: function (r) { return escapeHtml(rkProvizeHodnotaText(r)); } },
       { key: "akce", label: "Akce", sortable: false, className: "dt-col-mini", get: function () { return ""; },
         render: function (r) {
-          // Milník 20 (bod 1): vedle "Smazat" přibylo "Upravit".
-          return '<button type="button" class="btn-small rkprovize-edit-btn" data-id="' + escapeHtml(r.id) + '">Upravit</button> ' +
-            '<button type="button" class="btn-small btn-small-danger rkprovize-delete-btn" data-id="' + escapeHtml(r.id) + '">Smazat</button>';
+          // MILNÍK 23 (bod 11a): tlačítko „Upravit" u řádku je PRYČ — úpravy
+          // se dělají hromadně nad celou tabulkou. „Smazat" zůstává per řádek.
+          return '<button type="button" class="btn-small btn-small-danger rkprovize-delete-btn" data-id="' + escapeHtml(r.id) + '">Smazat</button>';
         } }
     ];
 
@@ -10220,15 +11310,12 @@
         rows: rows,
         rowId: function (r) { return r.id; },
         searchPlaceholder: "Hledat v pásmech…",
-        emptyMessage: "Zatím nemáte definované žádné pásmo. Přidejte první formulářem výše.",
+        emptyMessage: "Zatím nemáte definované žádné pásmo. Přidejte první formulářem níže.",
         itemNoun: "pásem",
         // Výchozí řazení od nejmenší spodní hranice po největší (bod 1).
         initialSortKey: "od",
         initialSortDir: "asc",
         wireExtra: function (container) {
-          container.querySelectorAll(".rkprovize-edit-btn").forEach(function (btn) {
-            btn.addEventListener("click", function () { openRkProvizeEdit(btn.getAttribute("data-id")); });
-          });
           container.querySelectorAll(".rkprovize-delete-btn").forEach(function (btn) {
             btn.addEventListener("click", function () { submitDeleteRkProvize(btn.getAttribute("data-id")); });
           });
@@ -10237,27 +11324,75 @@
     }
   }
 
-  function openRkProvizeEdit(id) {
-    var row = rkProvizeRowsCache.filter(function (r) { return r.id === id; })[0];
-    if (!row) return;
-    rkProvizeEditId = id;
-    el("rpsOd").value = String(Number(row.min_hodnota));
-    el("rpsDo").value = row.max_hodnota == null ? "" : String(Number(row.max_hodnota));
-    el("rpsTyp").value = row.typ || "procento";
-    el("rpsHodnota").value = String(Number(row.hodnota));
-    setFieldError(el("rpsOdField"), false);
-    setFieldError(el("rpsDoField"), false);
-    setFieldError(el("rpsHodnotaField"), false);
+  // --------------------------- ULOŽENÍ HROMADNÉ EDITACE --------------------
+  // Jeden `upsert` se VŠEMI změněnými řádky. Je to nutnost, ne optimalizace:
+  // posun sdílené hranice mění vždy DVĚ sousední pásma a dva samostatné
+  // UPDATE příkazy by mezi sebou nechaly stav, který trigger navaznosti
+  // odmítne. AFTER ... FOR EACH ROW trigger se vyhodnocuje až na konci
+  // příkazu, takže jeden upsert vidí rovnou celou novou (souvislou) sadu.
+  async function submitRkProvizeUlozitVse() {
+    if (!rkProvizeEditVse || !rkProvizeDraft) return;
+    var g = authGen;
+    nacistRkProvizeDraftZFormulare();
     showBanner(el("rkProvizeBanner"), null, null);
-    aktualizovatRkProvizeFormMod();
-    var form = el("rkProvizeForm");
-    if (form && form.scrollIntoView) form.scrollIntoView({ behavior: "smooth", block: "center" });
-  }
 
-  function zrusitRkProvizeEdit() {
-    rkProvizeEditId = null;
-    resetRkProvizeForm();
-    showBanner(el("rkProvizeBanner"), null, null);
+    // 1) kontrola jednotlivých řádků (totéž, co hlídají CHECK constrainty)
+    for (var i = 0; i < rkProvizeDraft.length; i++) {
+      var d = rkProvizeDraft[i];
+      var poradi = "pásmo č. " + (i + 1);
+      if (d.min_hodnota == null || isNaN(d.min_hodnota) || d.min_hodnota < 0) {
+        showBanner(el("rkProvizeBanner"), "error", "Spodní hranice musí být nezáporné číslo (" + poradi + ").");
+        return;
+      }
+      if (d.max_hodnota != null && (isNaN(d.max_hodnota) || d.max_hodnota <= d.min_hodnota)) {
+        showBanner(el("rkProvizeBanner"), "error", "Horní hranice musí být větší než spodní, nebo prázdná (" + poradi + ").");
+        return;
+      }
+      if (d.hodnota == null || isNaN(d.hodnota) || d.hodnota < 0) {
+        showBanner(el("rkProvizeBanner"), "error", "Hodnota musí být nezáporné číslo (" + poradi + ").");
+        return;
+      }
+      if (d.typ === "procento" && d.hodnota > 100) {
+        showBanner(el("rkProvizeBanner"), "error", "Procento nemůže být vyšší než 100 % (" + poradi + ").");
+        return;
+      }
+    }
+
+    // 2) kontrola navázání celé sady (klientské zrcadlo triggeru)
+    var chyba = zkontrolovatNavaznostPasem(rkProvizeDraft);
+    if (chyba) { showBanner(el("rkProvizeBanner"), "error", chyba); return; }
+
+    // 3) posílají se jen ŘÁDKY, KTERÉ SE SKUTEČNĚ ZMĚNILY
+    var puvodni = rkProvizeSerazenaKopie(rkProvizeRowsCache);
+    var zmenene = rkProvizeDraft.filter(function (d, k) {
+      var p = puvodni[k];
+      if (!p) return true;
+      return Number(p.min_hodnota) !== d.min_hodnota ||
+        (p.max_hodnota == null ? null : Number(p.max_hodnota)) !== d.max_hodnota ||
+        p.typ !== d.typ || Number(p.hodnota) !== d.hodnota;
+    }).map(function (d) {
+      return { id: d.id, rk_id: d.rk_id, min_hodnota: d.min_hodnota,
+               max_hodnota: d.max_hodnota, typ: d.typ, hodnota: d.hodnota };
+    });
+
+    if (!zmenene.length) { zrusitRkProvizeEditVse(); return; }
+
+    var btn = el("rkProvizeSaveAllBtn");
+    if (btn) btn.disabled = true;
+    var result = await sb.from("rk_provizni_schema").upsert(zmenene, { onConflict: "id" });
+    if (g !== authGen) return;
+    if (btn) btn.disabled = false;
+    if (result.error) {
+      console.error("Chyba při hromadném uložení pásem:", result.error);
+      showBanner(el("rkProvizeBanner"), "error", rkProvizeChybaText(result.error, "Pásma se nepodařilo uložit. Zkontrolujte prosím zadané hodnoty."));
+      return;
+    }
+    rkProvizeEditVse = false;
+    rkProvizeDraft = null;
+    showBanner(el("rkProvizeBanner"), "ok",
+      zmenene.length === 1 ? "Změna byla uložena." : ("Uloženo " + zmenene.length + " změněných pásem."));
+    setTimeout(function () { showBanner(el("rkProvizeBanner"), null, null); }, 4000);
+    await fetchRkProvize();
   }
 
   // Přečte a zvaliduje samotná pole formuláře (bez ohledu na sousedy).
@@ -10308,8 +11443,9 @@
   // navazujících pásem. Server je stejně vynutí - tohle je jen proto, aby
   // jedinou zpětnou vazbou nebyla syrová DB hláška.
   async function submitRkProvizeForm() {
-    if (rkProvizeEditId != null) { await submitRkProvizeEdit(); return; }
-
+    // MILNÍK 23 (bod 11a): formulář UŽ NIKDY needituje — editace je hromadná
+    // nad tabulkou (submitRkProvizeUlozitVse). Tahle funkce tedy vždy jen
+    // PŘIDÁVÁ nové pásmo.
     var g = authGen;
     var vstup = precistRkProvizeForm();
     if (!vstup) return;
@@ -10329,10 +11465,13 @@
           "Nejvyšší pásmo (od " + formatCena(posledni.min_hodnota) + ") nemá horní hranici, takže za něj už nic přidat nejde. Nejdřív mu přes „Upravit“ horní hranici nastavte.");
         return;
       }
-      if (Number(vstup.od) !== Number(posledni.max_hodnota)) {
+      // MILNÍK 23 (bod 11b): navázání je nově „o jednu korunu výš“.
+      if (Number(vstup.od) !== Number(posledni.max_hodnota) + 1) {
         setFieldError(el("rpsOdField"), true);
         showBanner(el("rkProvizeBanner"), "error",
-          "Nové pásmo musí navázat na to nejvyšší: „Od“ musí být přesně " + formatCena(posledni.max_hodnota) + ".");
+          "Nové pásmo musí navázat na to nejvyšší: „Od“ musí být přesně " +
+          formatCena(Number(posledni.max_hodnota) + 1) + " (o korunu víc než " +
+          formatCena(posledni.max_hodnota) + ").");
         return;
       }
     }
@@ -10371,96 +11510,12 @@
     return vychozi;
   }
 
-  // ------------------------------------------------------------------
-  // Milník 20 (bod 1): EDITACE pásma.
-  //
-  // Protože pásma musí tvořit souvislou řadu, posun SDÍLENÉ hranice se
-  // nikdy netýká jen jednoho řádku - druhý ho musí následovat. Kdyby se
-  // poslaly dva samostatné UPDATE příkazy, ten první by nutně na okamžik
-  // porušil invariant a trigger by ho odmítl (ověřeno SQL testem).
-  // Řešení: JEDINÝ upsert se všemi dotčenými řádky. AFTER ... FOR EACH ROW
-  // trigger se v PostgreSQL vyhodnocuje až na KONCI příkazu, takže vidí
-  // rovnou celou novou (souvislou) sadu. Pořád je to přímý CRUD přes
-  // sb.from(), žádná RPC.
-  // ------------------------------------------------------------------
-  async function submitRkProvizeEdit() {
-    var g = authGen;
-    var id = rkProvizeEditId;
-    var vstup = precistRkProvizeForm();
-    if (!vstup) return;
-
-    var serazena = rkProvizeSerazenaKopie(rkProvizeRowsCache);
-    var idx = -1;
-    for (var i = 0; i < serazena.length; i++) { if (serazena[i].id === id) { idx = i; break; } }
-    if (idx === -1) {
-      showBanner(el("rkProvizeBanner"), "error", "Upravované pásmo už neexistuje. Načtěte prosím stránku znovu.");
-      return;
-    }
-
-    // Pracovní kopie celé sady s aplikovanou změnou + dorovnáním sousedů.
-    var nova = serazena.map(function (r) {
-      return { id: r.id, rk_id: r.rk_id, min_hodnota: Number(r.min_hodnota),
-               max_hodnota: r.max_hodnota == null ? null : Number(r.max_hodnota),
-               typ: r.typ, hodnota: Number(r.hodnota) };
-    });
-    nova[idx].min_hodnota = vstup.od;
-    nova[idx].max_hodnota = vstup.horni;
-    nova[idx].typ = vstup.typ;
-    nova[idx].hodnota = vstup.hodnota;
-    if (idx > 0) nova[idx - 1].max_hodnota = vstup.od;
-    if (idx < nova.length - 1) {
-      if (vstup.horni == null) {
-        setFieldError(el("rpsDoField"), true);
-        showBanner(el("rkProvizeBanner"), "error",
-          "Horní hranici smí vynechat jen nejvyšší pásmo. Tohle pásmo má nad sebou další, takže „Do“ musí být vyplněné.");
-        return;
-      }
-      nova[idx + 1].min_hodnota = vstup.horni;
-    }
-
-    // Dorovnání sousedů mohlo některé z nich „přetočit" (max <= min).
-    for (var j = 0; j < nova.length; j++) {
-      if (nova[j].max_hodnota != null && nova[j].max_hodnota <= nova[j].min_hodnota) {
-        showBanner(el("rkProvizeBanner"), "error",
-          "Takhle posunutá hranice by sousednímu pásmu (od " + formatCena(nova[j].min_hodnota) +
-          ") nenechala žádný rozsah. Zvolte prosím hodnotu mezi hranicemi sousedních pásem.");
-        return;
-      }
-      if (nova[j].min_hodnota < 0) {
-        showBanner(el("rkProvizeBanner"), "error", "Spodní hranice pásma nesmí být záporná.");
-        return;
-      }
-    }
-
-    var chyba = zkontrolovatNavaznostPasem(nova);
-    if (chyba) { showBanner(el("rkProvizeBanner"), "error", chyba); return; }
-
-    // Posílají se jen řádky, které se skutečně mění (ten upravovaný a
-    // nanejvýš dva sousedé) - jeden příkaz, jedna kontrola triggerem.
-    var zmenene = nova.filter(function (r, k) {
-      var p = serazena[k];
-      return Number(p.min_hodnota) !== r.min_hodnota ||
-        (p.max_hodnota == null ? null : Number(p.max_hodnota)) !== r.max_hodnota ||
-        p.typ !== r.typ || Number(p.hodnota) !== r.hodnota;
-    });
-    if (!zmenene.length) { zrusitRkProvizeEdit(); return; }
-
-    var btn = el("rkProvizeSaveBtn");
-    if (btn) btn.disabled = true;
-    var result = await sb.from("rk_provizni_schema").upsert(zmenene, { onConflict: "id" });
-    if (g !== authGen) return;
-    if (btn) btn.disabled = false;
-    if (result.error) {
-      console.error("Chyba při úpravě pásma:", result.error);
-      showBanner(el("rkProvizeBanner"), "error", rkProvizeChybaText(result.error, "Pásmo se nepodařilo uložit. Zkontrolujte prosím zadané hodnoty."));
-      return;
-    }
-    zrusitRkProvizeEdit();
-    showBanner(el("rkProvizeBanner"), "ok",
-      zmenene.length > 1 ? "Pásmo bylo upraveno (spolu se sousedním pásmem, aby hranice navazovaly)." : "Pásmo bylo upraveno.");
-    setTimeout(function () { showBanner(el("rkProvizeBanner"), null, null); }, 5000);
-    await fetchRkProvize();
-  }
+  // MILNÍK 23 (bod 11a): funkce submitRkProvizeEdit() (editace JEDNOHO pásma
+  // z formuláře, Milník 20) byla ODSTRANĚNA. Její podstata — posun sdílené
+  // hranice musí dorovnat i souseda a obojí se musí zapsat JEDNÍM příkazem,
+  // jinak trigger navaznosti mezistav odmítne — se nezachovala jen jako
+  // poznámka: přesně to dělá submitRkProvizeUlozitVse() pro celou tabulku
+  // najednou (jeden `upsert` se všemi změněnými řádky).
 
   // rk_id volající kanceláře. Bere se z už načteného profilu RK
   // (moje_rk()); když uživatel na záložku Profil ještě nevkročil, dotáhne
@@ -10568,7 +11623,9 @@
       vrchol.max_hodnota = vrchol.min_hodnota + 1;
       otevritNaZaver = true;
     }
-    parkOd = vrchol.max_hodnota;
+    // MILNÍK 23 (bod 11b): pomocné („zaparkované“) pásmo musí na vrchol
+    // navázat podle NOVÉ konvence, tedy začínat o 1 Kč výš než jeho konec.
+    parkOd = vrchol.max_hodnota + 1;
 
     var davka = [{
       id: posledniRadekId, rk_id: serazena[n - 1].rk_id || rkId,
@@ -10770,30 +11827,32 @@
   async function fetchVyplatyTable() {
     if (!currentUser) return;
     var g = authGen; // Milník 15 (bod 4.5)
-    // Jména příjemců + klienti tipů - stejný vzor jako Audit log/Tipy.
-    var profilesResult = await sb.from("profiles").select("id, jmeno, prijmeni, role, sponsor_id, invite_code").order("jmeno");
+    // MILNÍK 23 (bod 5): ČTYŘI nezávislé dotazy se posílají NAJEDNOU.
+    // Do M22 šly za sebou (profiles -> tips -> názvy RK -> vyplaty), takže
+    // obrazovka Výplaty čekala na SOUČET čtyř latencí. Zpracování výsledků
+    // i chování při chybě zůstává doslova stejné.
+    var davkaV = await Promise.all([
+      // Jména příjemců + klienti tipů - stejný vzor jako Audit log/Tipy.
+      sb.from("profiles").select("id, jmeno, prijmeni, role, sponsor_id, invite_code").order("jmeno"),
+      // Milník 17 (bod 24): select rozšířený o rk_id (sloupec "Realitní
+      // kancelář") a typ_nemovitosti + lokalita (sloupec "Co se prodalo").
+      sb.from("tips").select("id, jmeno_klienta, rk_id, typ_nemovitosti, lokalita"),
+      // Milník 17 (bod 24): tatáž sdílená mapa názvů RK jako v tabulce Tipy
+      // (bod 2) - VŠECHNY kanceláře, i deaktivované.
+      fetchRkNazvyById(),
+      sb.from("vyplaty").select("*").order("splatnost_do")
+    ]);
+    var profilesResult = davkaV[0];
+    var tipsResult = davkaV[1];
+    var result = davkaV[3];
     if (g !== authGen) return; // Milník 15 (bod 4.5)
     if (!profilesResult.error) {
       adminUsersById = {};
       (profilesResult.data || []).forEach(function (u) { if (u && u.id) adminUsersById[u.id] = u; });
     }
-    // Milník 17 (bod 24): select rozšířený o rk_id (sloupec "Realitní
-    // kancelář") a typ_nemovitosti + lokalita (sloupec "Co se prodalo").
-    // Do Milníku 17 se tahaly jen id a jméno klienta, takže `allTipsById`
-    // naplněné TOUHLE cestou tato pole vůbec nemělo.
-    var tipsResult = await sb.from("tips").select("id, jmeno_klienta, rk_id, typ_nemovitosti, lokalita");
-    if (g !== authGen) return; // Milník 15 (bod 4.5)
     if (!tipsResult.error) {
       (tipsResult.data || []).forEach(function (t) { if (t && t.id) allTipsById[t.id] = Object.assign(allTipsById[t.id] || {}, t); });
     }
-
-    // Milník 17 (bod 24): tatáž sdílená mapa názvů RK jako v tabulce Tipy
-    // (bod 2) - VŠECHNY kanceláře, i deaktivované.
-    await fetchRkNazvyById();
-    if (g !== authGen) return; // Milník 15 (bod 4.5)
-
-    var result = await sb.from("vyplaty").select("*").order("splatnost_do");
-    if (g !== authGen) return; // Milník 15 (bod 4.5)
     if (result.error) {
       console.error("Chyba při načítání výplat:", result.error);
       el("vyplatyTableWrap").innerHTML = '<div class="empty-state"><p>Výplaty se nepodařilo načíst.</p></div>';
@@ -11452,8 +12511,22 @@
     if (file) {
       var extMatch = /\.([a-zA-Z0-9]+)$/.exec(file.name || "");
       var ext = extMatch ? extMatch[1].toLowerCase() : (file.type === "image/png" ? "png" : (file.type === "image/webp" ? "webp" : "jpg"));
+      // MILNÍK 23 (bod 2): fotka se PŘED nahráním zmenší na čtverec 512×512.
+      // Do M22 se nahrával originál z fotoaparátu (v produkci 85–378 kB,
+      // řádově tisíce px), který se pak v záhlaví zmenšoval 30–90× najednou —
+      // odtud rozmazaný a „kostičkovaný" avatar, který klient nahlásil.
+      // Výřez je ZE STŘEDU ('cover'), protože kolečko v záhlaví stejně
+      // zobrazuje čtverec; zmenšením se tedy nic neztratí navíc.
+      // Když se zmenšení nepovede, nahraje se ORIGINÁL (chování jako dosud).
+      var nahravane = file;
+      var zmenseny = await ctvercovyBlobZeSouboru(file, AVATAR_CIL_PX, "cover");
+      if (g !== authGen) return;
+      if (zmenseny) { nahravane = zmenseny.blob; ext = zmenseny.pripona; }
       cesta = currentUser.id + "/avatar." + ext;
-      var up = await sb.storage.from("profilove-fotky").upload(cesta, file, { upsert: true, contentType: file.type || undefined });
+      var up = await sb.storage.from("profilove-fotky").upload(cesta, nahravane, {
+        upsert: true,
+        contentType: (zmenseny ? zmenseny.typ : (file.type || undefined))
+      });
       if (g !== authGen) return; // Milník 15 (bod 4.5): upload je dlouhý await
       if (up.error) {
         console.error("Chyba při nahrávání profilové fotky:", up.error);
@@ -12819,7 +13892,14 @@
   var ldFrontaVse = false;       // „Celá fronta →" rozbalí celý seznam
   var LD_FRONTA_NAHLED = 5;      // kolik položek fronty je vidět na první pohled
 
-  var LD_OBDOBI_LABELS = { "30d": "30 dní", "3m": "3 měsíce", "12m": "12 měsíců" };
+  // MILNÍK 23 (bod 4): ke třem obdobím přibylo „1 týden" s DENNÍM krokem.
+  // Nabízí se ale JEN u grafu „Nové tipy v čase" (kód "tipy") — klient ho
+  // žádal právě tam. „Růst celé sítě" je KUMULATIVNÍ křivka celkového počtu
+  // lidí; denní řez by u ní ukázal sedm skoro shodných čísel a informační
+  // hodnotu by nepřidal. Proto dvě různé nabídky, ne jedna sdílená.
+  var LD_OBDOBI_LABELS = { "7d": "1 týden", "30d": "30 dní", "3m": "3 měsíce", "12m": "12 měsíců" };
+  var LD_OBDOBI_TIPY = ["7d", "30d", "3m", "12m"];
+  var LD_OBDOBI_SIT = ["30d", "3m", "12m"];
 
   // Sekce Q, poslední odrážka (přístupnost): ke každé barvě naléhavosti
   // patří VŽDY i text a znak — barva nikdy nenese informaci sama.
@@ -12877,15 +13957,88 @@
     var line = coords.map(function (c, i) { return (i ? "L" : "M") + c[0].toFixed(1) + " " + c[1].toFixed(1); }).join(" ");
     var area = line + " L" + (W - PAD).toFixed(1) + " " + (H - PAD).toFixed(1) +
       " L" + PAD.toFixed(1) + " " + (H - PAD).toFixed(1) + " Z";
-    var last = coords[coords.length - 1];
+    // MILNÍK 23 (bod 4): kolečko jen u POSLEDNÍHO bodu je pryč — terčík má
+    // nově KAŽDÝ bod a kreslí ho HTML vrstva `ldChartPointsHtml()` nad svg
+    // (uvnitř svg by se kvůli preserveAspectRatio="none" deformoval).
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' +
         escapeHtml(opts.popis || "Vývoj v čase") + '" preserveAspectRatio="none">' +
       '<path d="' + area + '" fill="var(--accent-soft)"></path>' +
       '<path d="' + line + '" fill="none" stroke="var(--accent)" stroke-width="2.5" ' +
         'stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>' +
-      (opts.tecka === false ? '' :
-        '<circle cx="' + last[0].toFixed(1) + '" cy="' + last[1].toFixed(1) + '" r="4" fill="var(--surface)" stroke="var(--accent)" stroke-width="2.5"></circle>') +
       '</svg>';
+  }
+
+  // -------------------------------------------- MILNÍK 23 (bod 4): body grafu
+  //
+  // Vrací procentuální pozici každého bodu TOUŽ matematikou, jakou používá
+  // ldAreaChartSvg() — kdyby se ty dva vzorce rozešly, tečky by se rozjely
+  // s křivkou. Proto je konstanta PAD/H uvedená na obou místech stejně.
+  function ldChartPozice(body) {
+    var pts = (body || []).map(function (b) { return ldNum(b.pocet); });
+    if (pts.length < 2) return [];
+    var W = 620, H = 168, PAD = 8;
+    var max = Math.max.apply(null, pts);
+    if (max <= 0) max = 1;
+    var stepX = (W - PAD * 2) / (pts.length - 1);
+    return pts.map(function (v, i) {
+      var x = PAD + i * stepX;
+      var y = PAD + (H - PAD * 2) * (1 - v / max);
+      return { x: (x / W) * 100, y: (y / H) * 100, v: v };
+    });
+  }
+
+  // Popisek bodu. Přednost má `label` ZE SERVERU (u denní řady a u řady růstu
+  // sítě ho posílá migrace m23_02), aby se datum neformátovalo dvěma různými
+  // logikami. Když ho server neposílá (týdenní řady grafu tipů), složí se
+  // tady ve STEJNÉM tvaru „DD.MM.".
+  function ldBodPopisek(b) {
+    if (b && b.label) return b.label;
+    var d = new Date(b && b.od);
+    if (isNaN(d.getTime())) return "";
+    return String(d.getDate()).padStart(2, "0") + "." + String(d.getMonth() + 1).padStart(2, "0") + ".";
+  }
+
+  function ldBodPopisekDlouhy(b) {
+    if (b && b.label_dlouhy) return b.label_dlouhy;
+    var d = new Date(b && b.od);
+    if (isNaN(d.getTime())) return ldBodPopisek(b);
+    return String(d.getDate()).padStart(2, "0") + "." + String(d.getMonth() + 1).padStart(2, "0") + "." + d.getFullYear();
+  }
+
+  // HTML vrstva s terčíky. `jednotka` je slovo do bubliny („tipů" / „lidí"),
+  // `krok` rozhoduje, jestli se hodnota píše i natvrdo nad bod (jen u 7 dnů).
+  function ldChartPointsHtml(body, jednotka, krok) {
+    var pozice = ldChartPozice(body);
+    if (!pozice.length) return "";
+    var denni = (krok === "den");
+    return '<div class="ld-chart-points">' + pozice.map(function (p, i) {
+      var b = body[i];
+      var popis = denni
+        ? (ldBodPopisekDlouhy(b) + " · " + p.v + " " + jednotka)
+        : ("týden od " + ldBodPopisekDlouhy(b) + " · " + p.v + " " + jednotka);
+      return '<button type="button" class="ld-point"' +
+          ' style="left:' + p.x.toFixed(2) + '%; top:' + p.y.toFixed(2) + '%;"' +
+          ' data-ld-tip="' + escapeHtml(popis) + '"' +
+          ' aria-label="' + escapeHtml(popis) + '">' +
+          (denni ? '<span class="ld-point-val">' + p.v + '</span>' : '') +
+          '<span class="ld-point-dot"></span>' +
+        '</button>';
+    }).join("") + '</div>';
+  }
+
+  // Celý graf i s osou. Jediné místo, kde se skládá dohromady svg + body +
+  // osa, aby oba panely („Nové tipy v čase" i „Růst celé sítě") vypadaly
+  // a chovaly se identicky.
+  function ldChartHtml(body, opts) {
+    opts = opts || {};
+    var svg = ldAreaChartSvg(body, { popis: opts.popis });
+    if (!body || body.length < 2) return '<div class="ld-chart">' + svg + '</div>';
+    return '<div class="ld-chart">' +
+        '<div class="ld-chart-plot">' + svg +
+          ldChartPointsHtml(body, opts.jednotka || "", opts.krok) +
+        '</div>' +
+        ldOsaHtml(body, opts.krok) +
+      '</div>';
   }
 
   function ldMesicPopisek(iso) {
@@ -12896,32 +14049,73 @@
     return m[d.getMonth()];
   }
 
-  function ldOsaHtml(body) {
+  // MILNÍK 23 (bod 4): osa uměla jen tři názvy měsíců (první / prostřední /
+  // poslední). Klient: „ose chybí jednotlivé hodnoty, graf je nicneříkající."
+  // Nově:
+  //   krok 'den'   → popisek KAŽDÉHO ze sedmi dní (mřížka, stejné díly jako body)
+  //   krok 'tyden' → popisky se ŘEDÍ tak, aby jich bylo nejvýš osm a nepřekrývaly
+  //                  se: u 5 bodů všechny, u 13 každý druhý, u 52 každý osmý.
+  //                  Prázdné buňky drží rozestup, takže popisek sedí přesně pod
+  //                  svým bodem (to stará verze s justify-content: space-between
+  //                  neuměla — prostřední měsíc „plaval").
+  function ldOsaHtml(body, krok) {
     if (!body || body.length < 2) return "";
-    var first = ldMesicPopisek(body[0].od);
-    var mid = ldMesicPopisek(body[Math.floor(body.length / 2)].od);
-    var last = ldMesicPopisek(body[body.length - 1].od);
-    return '<div class="ld-chart-axis"><span>' + escapeHtml(first) + '</span>' +
-      (mid !== first && mid !== last ? '<span>' + escapeHtml(mid) + '</span>' : '<span></span>') +
-      '<span>' + escapeHtml(last) + '</span></div>';
+    var n = body.length;
+    var kazdyKolikaty = (krok === "den") ? 1 : Math.max(1, Math.ceil(n / 8));
+    var bunky = body.map(function (b, i) {
+      // Poslední bod se popisuje vždy — je to „teď" a uživatel ho hledá první.
+      var zobrazit = (i % kazdyKolikaty === 0) || (i === n - 1);
+      return '<span>' + (zobrazit ? escapeHtml(ldBodPopisek(b)) : "") + '</span>';
+    }).join("");
+    return '<div class="ld-chart-axis-body" style="grid-template-columns:repeat(' + n + ',minmax(0,1fr));">' +
+      bunky + '</div>';
   }
 
-  function ldSwitchHtml(kod, aktivni) {
+  // `seznam` je nově parametr — graf tipů má o položku „1 týden" víc než graf
+  // růstu sítě (viz LD_OBDOBI_TIPY / LD_OBDOBI_SIT).
+  function ldSwitchHtml(kod, aktivni, seznam) {
     return '<div class="ld-switch" role="group" aria-label="Období">' +
-      ["30d", "3m", "12m"].map(function (o) {
+      (seznam || LD_OBDOBI_SIT).map(function (o) {
         return '<button type="button" data-ld-switch="' + kod + '" data-ld-obdobi="' + o + '"' +
           ' aria-pressed="' + (o === aktivni ? "true" : "false") + '">' + escapeHtml(LD_OBDOBI_LABELS[o]) + '</button>';
       }).join("") + '</div>';
   }
 
   // ---------------------------------------------------------------- render
-  async function renderLeaderPrehled() {
-    var wrap = el("leaderDashboardWrap");
+  //
+  // MILNÍK 23 (bod 6): přehled se nově kreslí do DVOU různých kontejnerů —
+  // lídrovi do #leaderDashboardWrap na obrazovce „Přehled lídra",
+  // administrátorovi do #dashboardAdminPrehledWrap na jeho záložce
+  // „Dashboard". Je to TÝŽ kód a TÁŽ RPC; liší se jen cíl. Id se drží
+  // v modulové proměnné, protože ho potřebuje i ldRenderAll(), které se
+  // volá znovu při každém přepnutí období nebo rozbalení fronty.
+  var ldWrapId = "leaderDashboardWrap";
+
+  async function renderLeaderPrehled(cilovyWrapId) {
+    if (cilovyWrapId) ldWrapId = cilovyWrapId;
+    var wrap = el(ldWrapId);
     if (!wrap) return;
     var g = authGen; // Milník 15 (bod 4.5) — identita se během awaitu může změnit
     wrap.innerHTML = '<p class="dt-muted">Načítání přehledu…</p>';
 
-    var result = await sb.rpc("leader_dashboard_prehled");
+    // ------------------------------------------------------------------
+    // MILNÍK 23 (bod 5, diagnostika zpomalení): OBĚ RPC SE VOLAJÍ PARALELNĚ.
+    //
+    // Do M22 se `leader_dashboard_prehled()` a `leader_nove_prodane_tipy()`
+    // volaly ZA SEBOU (druhá až po dokončení první a po vykreslení panelů),
+    // takže se jejich latence sčítaly. Nezávisí přitom na sobě ani jednou
+    // hodnotou. Paralelizací ubývá JEDNA celá obrátka na server z doby, než
+    // lídr uvidí hotovou stránku.
+    //
+    // Pořadí VYKRESLOVÁNÍ zůstává nutně sériové: `renderLeaderNoveProdano…`
+    // zapisuje do #leaderNoveProdanoWrap, který teprve vytvoří ldRenderAll().
+    // Paralelní je jen síťová část.
+    var vysledky = await Promise.all([
+      sb.rpc("leader_dashboard_prehled"),
+      sb.rpc("leader_nove_prodane_tipy")
+    ]);
+    var result = vysledky[0];
+    var prodane = vysledky[1];
     if (g !== authGen) return; // identita se změnila — nic nevykreslovat
     if (result.error) {
       console.error("Chyba při načítání Přehledu lídra:", result.error);
@@ -12932,11 +14126,11 @@
     ldFrontaVse = false;
     ldRenderAll();
     if (g !== authGen) return;
-    await renderLeaderNoveProdano();
+    renderLeaderNoveProdanoZVysledku(prodane);
   }
 
   function ldRenderAll() {
-    var wrap = el("leaderDashboardWrap");
+    var wrap = el(ldWrapId);
     if (!wrap || !leaderPrehled) return;
     var d = leaderPrehled;
 
@@ -12964,15 +14158,32 @@
         "</strong>, které vyžadují pozornost.";
     // Pozn.: pozvánkový odkaz ani technické údaje do záhlaví NEPATŘÍ
     // (sekce B) — odkaz je níž, v panelu „Moje síť podle úrovní".
+    //
+    // MILNÍK 23 (bod 6): týž panel vidí i administrátor. Dvě věci se u něj
+    // musí lišit, jinak by titulek lhal a tlačítko vedlo do prázdna:
+    //   1) NÁZEV — administrátor nevidí „svou síť", ale CELÝ systém
+    //      (RPC mu do `_m21_sit` dává všechny profily, ne podstrom).
+    //      Psát mu nad to „Přehled lídra" by bylo zavádějící.
+    //   2) TLAČÍTKO „Přidat nový tip" — administrátor záložku „Nový tip"
+    //      vůbec nemá (ROLE_TAB_ORDER.administrator ji neobsahuje) a tipy
+    //      podle RLS ani vkládat nesmí („Tipar vklada vlastni tipy se
+    //      souhlasem" má `not je_administrator()`). Tlačítko by tedy vedlo
+    //      na obrazovku, kterou nemá, nebo na chybu 42501 — proto se mu
+    //      NEZOBRAZUJE.
+    // Rozhodnutí o znění nadpisu i o skrytí tlačítka viz R-6-ZAHLAVI.
+    var jeAdmin = !!d.je_admin;
     return '<div class="ld-head">' +
         '<div>' +
           '<p class="ld-eyebrow">Řízení sítě</p>' +
-          '<h2 class="ld-title">Přehled lídra</h2>' +
-          '<p class="ld-sub">' + veta + '</p>' +
+          '<h2 class="ld-title">' + (jeAdmin ? "Přehled administrátora" : "Přehled lídra") + '</h2>' +
+          '<p class="ld-sub">' + veta +
+            (jeAdmin ? ' <span class="dt-muted">Zahrnuje všechny uživatele a tipy v systému.</span>' : '') +
+          '</p>' +
         '</div>' +
-        '<div class="ld-head-action">' +
-          '<button type="button" class="btn-primary" id="ldAddTipBtn">Přidat nový tip</button>' +
-        '</div>' +
+        (jeAdmin ? '' :
+          '<div class="ld-head-action">' +
+            '<button type="button" class="btn-primary" id="ldAddTipBtn">Přidat nový tip</button>' +
+          '</div>') +
       '</div>';
   }
 
@@ -13106,10 +14317,11 @@
       // poslal bez prefixu (tak to dělala RPC do Milníku 21), sestavíme si ji
       // z kódu sami - jinak by dlaždice otevřela seznam s neplatným filtrem.
       var filtr = (f.filtr && f.filtr.indexOf("faze:") === 0) ? f.filtr : ("faze:" + (f.kod || ""));
-      var pismeno = f.pismeno || M22_FAZE_PISMENA[f.kod] || "";
+      // MILNÍK 23 (bod 1): pořadové písmeno a) až ch) se UŽ NEVYKRESLUJE.
+      // Server ho v datech (`f.pismeno`) dál posílá — je to jeho interní
+      // pořadí a mění se jen migrací; frontend ho prostě nezobrazuje.
       return '<button type="button" class="' + cls + '" data-ld-faze-filtr="' + escapeHtml(filtr) + '"' +
           ' title="Otevřít Tipy s filtrem „' + escapeHtml(f.label || "") + '“">' +
-          (pismeno ? '<span class="ld-faze-pismeno">' + escapeHtml(pismeno) + ')</span>' : '') +
           '<span class="ld-faze-num">' + ldNum(f.pocet) + '</span>' +
           '<span class="ld-faze-label">' + escapeHtml(f.label || "") + '</span>' +
           (pozn ? '<span class="ld-faze-note">' + escapeHtml(pozn) + '</span>' : '') +
@@ -13133,22 +14345,33 @@
     var vse = d.nove_tipy_v_case || {};
     var rada = vse[ldObdobiTipy] || {};
     var body = rada.body || [];
+    // MILNÍK 23 (bod 4): `krok` posílá server ('den' u nové řady „7d",
+    // 'tyden' u ostatních). Fallback na 'tyden' je kvůli tomu, aby appka
+    // fungovala i proti staršímu (nezmigrovanému) serveru.
+    var krok = rada.krok || "tyden";
+    var denni = (krok === "den");
     var celkem = ldNum(rada.celkem), predchozi = ldNum(rada.predchozi_celkem);
     var rozdil = celkem - predchozi;
     var srovnani = predchozi === 0
       ? (celkem === 0 ? "ve srovnatelném předchozím období také nic" : "v předchozím stejně dlouhém období 0")
       : ((rozdil >= 0 ? "+" : "") + rozdil + " oproti předchozímu období (" + predchozi + ")");
+    var rozsah = denni
+      ? ("Posledních " + body.length + " " + ldSklonDny(body.length))
+      : ("Posledních " + body.length + " týdnů");
 
     return '<section class="ld-panel" aria-labelledby="ldTipyCasTitle">' +
         '<div class="ld-panel-head">' +
           '<div>' +
             '<h3 class="ld-panel-title" id="ldTipyCasTitle">Nové tipy v čase</h3>' +
-            '<p class="ld-panel-sub">Posledních ' + body.length + ' týdnů · celkem ' + celkem + ' ' +
+            '<p class="ld-panel-sub">' + escapeHtml(rozsah) + ' · celkem ' + celkem + ' ' +
               (celkem === 1 ? "tip" : (celkem < 5 ? "tipy" : "tipů")) + ' · ' + escapeHtml(srovnani) + '</p>' +
-          '</div>' + ldSwitchHtml("tipy", ldObdobiTipy) +
+          '</div>' + ldSwitchHtml("tipy", ldObdobiTipy, LD_OBDOBI_TIPY) +
         '</div>' +
-        '<div class="ld-chart">' + ldAreaChartSvg(body, { popis: "Nové tipy po týdnech" }) + '</div>' +
-        ldOsaHtml(body) +
+        ldChartHtml(body, {
+          popis: denni ? "Nové tipy po dnech" : "Nové tipy po týdnech",
+          jednotka: "tipů",
+          krok: krok
+        }) +
       '</section>';
   }
 
@@ -13249,11 +14472,14 @@
             '<p class="ld-panel-sub">' + celkem + ' lidí · +' + ldNum(s.novych_7) + ' za 7 dní · +' +
               ldNum(s.novych_30) + ' za 30 dní · ' + ldNum(s.aktivni_tipari) + ' aktivních tipařů · ' +
               ldNum(s.bez_aktivity) + ' členů bez aktivity</p>' +
-          '</div>' + ldSwitchHtml("sit", ldObdobiSit) +
+          '</div>' + ldSwitchHtml("sit", ldObdobiSit, LD_OBDOBI_SIT) +
         '</div>' +
+        // MILNÍK 23 (bod 4): tenhle řádek BYL JEDINOU hodnotou v celém panelu —
+        // číslo u posledního bodu. Zůstává jako souhrn „kde jsme teď", ale
+        // hodnotu má nově KAŽDÝ bod (bublina při najetí myší i při zaměření
+        // klávesnicí) a osa má popisky, takže se dá z grafu skutečně číst.
         '<div class="ld-chart-peak">' + celkem + ' lidí</div>' +
-        '<div class="ld-chart">' + ldAreaChartSvg(body, { popis: "Růst sítě v čase" }) + '</div>' +
-        ldOsaHtml(body) +
+        ldChartHtml(body, { popis: "Růst sítě v čase", jednotka: "lidí", krok: "tyden" }) +
       '</section>';
   }
 
@@ -13273,23 +14499,39 @@
         }).join("")
       : '<p class="dt-muted" style="margin:18px 0;">Zatím nemáte v síti nikoho pod sebou.</p>';
 
-    // Sekce L: detailní genealogický strom na dashboard NEPATŘÍ — jen odkaz.
-    // Sekce B: pozvánkový odkaz smí být dostupný právě tady, méně výrazně.
-    return '<section class="ld-panel" aria-labelledby="ldUrovneTitle">' +
-        '<div class="ld-panel-head">' +
-          '<div>' +
-            '<h3 class="ld-panel-title" id="ldUrovneTitle">Moje síť podle úrovní</h3>' +
-            '<p class="ld-panel-sub">Struktura, aktivita a přínos jednotlivých pater.</p>' +
-          '</div>' +
-          '<button type="button" class="ld-panel-link" data-ld-goto="users">Celý seznam lidí →</button>' +
-        '</div>' +
-        '<div class="ld-levels">' + radky + '</div>' +
+    // MILNÍK 23 (bod 6): u ADMINISTRÁTORA je tenhle panel jiný případ.
+    // RPC mu do `_m21_sit` vkládá všechny profily s `uroven = 0`, a panel
+    // vypisuje jen úrovně > 0 — dostal by tedy prázdný seznam s větou
+    // „Zatím nemáte v síti nikoho pod sebou", což by u administrátora bylo
+    // prostě nepravdivé (vidí celou síť, jen nemá VLASTNÍ podstrom).
+    // Stejně tak POZVÁNKOVÝ ODKAZ: administrátor záměrně není součástí
+    // stromu sponzorství (migrace m2_admin_neni_soucasti_stromu) a nikoho
+    // pod sebe zvát nemá — odkaz by vedl k založení uživatele bez sponzora.
+    // Obojí se mu proto nahrazuje vysvětlením. Viz R-6-UROVNE.
+    var jeAdmin = !!d.je_admin;
+    var telo = jeAdmin
+      ? '<p class="dt-muted" style="margin:18px 0;">Administrátor není součástí stromu sponzorství, ' +
+        'takže vlastní úrovně sítě nemá. Strukturu celé sítě najdete v záložce ' +
+        '<strong>Uživatelé</strong>, souhrnná čísla jsou v ukazatelích výše.</p>'
+      : '<div class="ld-levels">' + radky + '</div>' +
         '<div class="ld-row" style="margin-top:16px;border-top:1px solid var(--border);">' +
           '<div class="ld-row-main"><div class="ld-row-note">Pozvánkový odkaz</div>' +
             '<code id="ldInviteText" style="font-size:12.5px;word-break:break-all;">' +
               escapeHtml(ldInviteUrl()) + '</code></div>' +
           '<div class="ld-row-right"><button type="button" class="btn-small" id="ldInviteCopyBtn">Zkopírovat</button></div>' +
-        '</div>' +
+        '</div>';
+
+    // Sekce L: detailní genealogický strom na dashboard NEPATŘÍ — jen odkaz.
+    // Sekce B: pozvánkový odkaz smí být dostupný právě tady, méně výrazně.
+    return '<section class="ld-panel" aria-labelledby="ldUrovneTitle">' +
+        '<div class="ld-panel-head">' +
+          '<div>' +
+            '<h3 class="ld-panel-title" id="ldUrovneTitle">' +
+              (jeAdmin ? "Síť podle úrovní" : "Moje síť podle úrovní") + '</h3>' +
+            '<p class="ld-panel-sub">Struktura, aktivita a přínos jednotlivých pater.</p>' +
+          '</div>' +
+          '<button type="button" class="ld-panel-link" data-ld-goto="users">Celý seznam lidí →</button>' +
+        '</div>' + telo +
       '</section>';
   }
 
@@ -13342,6 +14584,40 @@
         if (kod === "tipy") ldObdobiTipy = obdobi; else ldObdobiSit = obdobi;
         ldRenderAll();
       });
+    });
+
+    // MILNÍK 23 (bod 4): bublina s přesnou hodnotou u bodu grafu.
+    //
+    // PROČ VLASTNÍ BUBLINA A NE ATRIBUT `title`: nativní tooltip se objeví až
+    // po ~1 sekundě a v některých prohlížečích vůbec ne u SVG/absolutně
+    // pozicovaných prvků. Graf má být „čitelný/měřitelný" okamžitě.
+    // Text je ZÁROVEŇ v `aria-label`, takže čtečka i klávesnice dostanou
+    // tutéž informaci bez ohledu na to, jestli se bublina vykreslí.
+    //
+    // Bublina se vkládá do `.ld-chart-plot` (position: relative), takže se
+    // pozicuje v jeho souřadnicích a při překreslení panelu zmizí s ním —
+    // žádný osiřelý prvek v DOM.
+    wrap.querySelectorAll(".ld-point").forEach(function (bod) {
+      function ukaz() {
+        var plot = bod.closest(".ld-chart-plot");
+        if (!plot) return;
+        skryj();
+        var tip = document.createElement("div");
+        tip.className = "ld-chart-tip";
+        tip.textContent = bod.getAttribute("data-ld-tip") || "";
+        tip.style.left = bod.style.left;
+        tip.style.top = "calc(" + bod.style.top + " - 14px)";
+        plot.appendChild(tip);
+      }
+      function skryj() {
+        var plot = bod.closest(".ld-chart-plot");
+        if (!plot) return;
+        plot.querySelectorAll(".ld-chart-tip").forEach(function (t) { t.remove(); });
+      }
+      bod.addEventListener("mouseenter", ukaz);
+      bod.addEventListener("focus", ukaz);
+      bod.addEventListener("mouseleave", skryj);
+      bod.addEventListener("blur", skryj);
     });
 
     // Sekce R: každý pracovní úkol odkazuje PŘÍMO na konkrétní tip /
@@ -13430,12 +14706,22 @@
   // přesouvá na KONEC stránky (sekce P, bod 8) a dostává vizuál z návrhu
   // (teplá béžová „Dokončení obchodního případu"). Data i výpočet částky
   // beze změny: leader_nove_prodane_tipy() + sdílená vypocitat_vyplatu_pro_tip().
+  // MILNÍK 23 (bod 5): funkce se rozdělila na ZÍSKÁNÍ dat a VYKRESLENÍ.
+  // Data si teď natahuje renderLeaderPrehled() paralelně s hlavní RPC
+  // (Promise.all) a sem posílá hotový výsledek. Původní `renderLeaderNoveProdano()`
+  // zůstává jako tenký obal pro případné samostatné použití — vykreslovací
+  // logika se NEDUPLIKUJE, obě cesty vedou do téhož těla.
   async function renderLeaderNoveProdano() {
-    var wrap = el("leaderNoveProdanoWrap");
-    if (!wrap) return;
-    var g = authGen; // Milník 15 (bod 4.5)
+    var g = authGen;
     var result = await sb.rpc("leader_nove_prodane_tipy");
     if (g !== authGen) return;
+    renderLeaderNoveProdanoZVysledku(result);
+  }
+
+  function renderLeaderNoveProdanoZVysledku(result) {
+    var wrap = el("leaderNoveProdanoWrap");
+    if (!wrap) return;
+    if (!result) return;
     if (result.error) {
       console.error("Chyba při načítání nově prodaných tipů:", result.error);
       wrap.innerHTML = '<div class="banner banner-error">Přehled nových prodejů se nepodařilo načíst.</div>';
@@ -13779,15 +15065,18 @@
       submitPanelNastaveni(false);
     });
 
-    // Milník 19 (bod 8): formulář "Přidat pásmo" na záložce RK Provizní schéma.
-    // Milník 20 (bod 1): týž formulář slouží i k editaci - viz
-    // submitRkProvizeForm(), která podle rkProvizeEditId přepne na
-    // submitRkProvizeEdit().
+    // Milník 19 (bod 8): formulář „Přidat tarifní pásmo" na záložce RK
+    // Provizní schéma. MILNÍK 23 (bod 11a): formulář UŽ JEN PŘIDÁVÁ —
+    // editace je hromadná nad tabulkou (tři tlačítka v #rkProvizeToolbar).
     el("rkProvizeForm").addEventListener("submit", function (e) {
       e.preventDefault();
       submitRkProvizeForm();
     });
-    el("rkProvizeCancelBtn").addEventListener("click", zrusitRkProvizeEdit);
+    // MILNÍK 23 (bod 11b): živý náhled „čím bude začínat příští pásmo".
+    el("rpsDo").addEventListener("input", aktualizovatNapoveduDalsihoPasma);
+    el("rkProvizeEditAllBtn").addEventListener("click", spustitRkProvizeEditVse);
+    el("rkProvizeSaveAllBtn").addEventListener("click", submitRkProvizeUlozitVse);
+    el("rkProvizeCancelAllBtn").addEventListener("click", zrusitRkProvizeEditVse);
 
     // Milník 7 (Část H) — export do XLSX bere aktuálně vyfiltrovaná data
     // z initDataTable (getVisibleRows). Rozsah sloupců u Uživatelé je
