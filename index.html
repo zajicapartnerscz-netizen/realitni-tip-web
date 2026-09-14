@@ -1175,6 +1175,251 @@
   .lvl-row-count { font-size: 13.5px; font-weight: 700; color: var(--text); text-align: right; font-variant-numeric: proportional-nums; }
   .lvl-empty { color: var(--text-muted); font-size: 13.5px; }
 
+  /* ================= Milník 21: Přehled lídra (kompletně přepracovaný) ======
+     Vizuální styl podle sekce Q zadání a přiloženého návrhu klienta:
+     max. šířka obsahu ~1280px, světlé neutrální pozadí, BÍLÉ panely,
+     tmavě zelená hlavní barva (--accent), teplá béžová pro upozornění
+     (--warn-soft), výrazná čitelná typografie, střídmé zaoblení,
+     MINIMUM stínů, ČERVENÁ jen pro skutečně kritické/opožděné.
+     Stav ani priorita se NIKDY nesdělují jen barvou - u každé barevné
+     značky je vždy i text (a u teček aria-hidden ikona + textový popis),
+     viz sekce Q, poslední odrážka (přístupnost).
+     ======================================================================== */
+  .ld { max-width: 1280px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+
+  /* Milník 21 (sekce O): laskavé vysvětlení výsledku v tipařově detailu
+     tipu. Teplá béžová, ne červená - není to chyba tipaře. */
+  .tip-vysvetleni {
+    background: var(--warn-soft); border-radius: var(--radius-m);
+    padding: 16px 18px; line-height: 1.55; font-size: 14.5px;
+  }
+  .tip-vysvetleni-pouceni,
+  .tip-vysvetleni-pozn { display: block; margin-top: 10px; color: var(--text-muted); font-size: 13.5px; }
+  .tip-vysvetleni-pozn { font-style: italic; }
+
+  /* Text jen pro odečítače obrazovky - doplňuje informaci, kterou vizuálně
+     nese barva (sekce Q: stav/priorita se nesmí sdělovat JEN barvou). */
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  /* --- záhlaví (sekce B) --- */
+  .ld-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  .ld-eyebrow {
+    font-size: 12px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 14px;
+  }
+  .ld-title { font-size: 21px; font-weight: 600; margin: 0 0 4px; }
+  .ld-sub { margin: 0; color: var(--text-muted); font-size: 14.5px; }
+  .ld-sub strong { color: var(--text); font-weight: 700; }
+  .ld-head-action { flex: 0 0 auto; }
+  .ld-head-action .btn-primary { width: auto; padding: 12px 26px; border-radius: var(--radius-m); font-size: 14.5px; }
+
+  /* --- obecný panel --- */
+  .ld-panel {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-l); padding: 22px 24px;
+  }
+  .ld-panel-beige { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 28%, var(--border)); }
+  .ld-panel-soft { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 22%, var(--border)); }
+  .ld-panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .ld-panel-title { font-family: var(--font-ui); font-size: 16px; font-weight: 600; margin: 0; }
+  .ld-panel-sub { margin: 3px 0 0; color: var(--text-muted); font-size: 13.5px; }
+  .ld-panel-link {
+    background: none; border: 0; padding: 0; cursor: pointer;
+    color: var(--accent); font-weight: 700; font-size: 14px; white-space: nowrap;
+  }
+  .ld-panel-link:hover { text-decoration: underline; }
+  .ld-count-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 26px; height: 24px; padding: 0 8px; margin-left: 10px;
+    border-radius: 999px; background: var(--danger-soft); color: var(--danger);
+    font-size: 13px; font-weight: 700; vertical-align: middle;
+  }
+  .ld-count-badge-quiet { background: var(--surface-2); color: var(--text-muted); }
+
+  /* --- pracovní fronta (sekce C) --- */
+  .ld-queue-chips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 18px 0 4px; }
+  .ld-chip { border-radius: var(--radius-m); padding: 12px 16px; border: 1px solid transparent; }
+  .ld-chip-num { font-size: 17px; font-weight: 700; line-height: 1.2; }
+  .ld-chip-label { font-size: 13.5px; }
+  .ld-chip-late { background: var(--danger-soft); border-color: color-mix(in srgb, var(--danger) 22%, transparent); }
+  .ld-chip-late .ld-chip-num, .ld-chip-late .ld-chip-label { color: var(--danger); }
+  .ld-chip-today { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 22%, transparent); }
+  .ld-chip-today .ld-chip-num, .ld-chip-today .ld-chip-label { color: var(--warn); }
+  .ld-chip-normal { background: var(--ok-soft); border-color: color-mix(in srgb, var(--ok) 20%, transparent); }
+  .ld-chip-normal .ld-chip-num, .ld-chip-normal .ld-chip-label { color: var(--ok); }
+
+  .ld-queue { display: flex; flex-direction: column; margin-top: 10px; }
+  .ld-queue-row {
+    display: grid; grid-template-columns: 14px minmax(0, 1fr) auto auto;
+    align-items: center; gap: 14px;
+    padding: 16px 0; border-top: 1px solid var(--border);
+  }
+  .ld-queue-row:first-child { border-top: 0; }
+  .ld-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--text-muted); }
+  .ld-dot-late { background: var(--danger); }
+  .ld-dot-today { background: var(--warn); }
+  .ld-dot-normal { background: var(--ok); }
+  .ld-queue-main { min-width: 0; }
+  .ld-queue-nadpis { font-size: 15px; font-weight: 600; }
+  .ld-queue-meta { font-size: 13.5px; color: var(--text-muted); margin-top: 2px; }
+  .ld-queue-time { text-align: right; min-width: 150px; }
+  .ld-queue-time-strong { font-size: 14px; font-weight: 700; }
+  .ld-queue-time-note { font-size: 13px; color: var(--text-muted); }
+  .ld-time-late { color: var(--danger); }
+  .ld-time-today { color: var(--warn); }
+  .ld-queue-btn {
+    border-radius: var(--radius-m); padding: 10px 20px; font-size: 14px; font-weight: 600;
+    cursor: pointer; white-space: nowrap;
+    background: var(--surface); color: var(--text); border: 1px solid var(--border);
+  }
+  .ld-queue-btn-primary { background: var(--accent); color: var(--accent-contrast); border-color: var(--accent); }
+  .ld-queue-btn:hover { border-color: var(--accent); }
+  .ld-empty {
+    margin: 18px 0 0; padding: 22px; text-align: center;
+    background: var(--ok-soft); border-radius: var(--radius-m); color: var(--ok); font-weight: 600;
+  }
+  .ld-empty-sub { display: block; margin-top: 4px; font-weight: 400; color: var(--text-muted); font-size: 13.5px; }
+
+  /* --- čtyři souhrnné ukazatele (sekce D) - ZÁMĚRNĚ tišší než fronta --- */
+  .ld-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+  .ld-kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-m); padding: 16px 18px; }
+  .ld-kpi-label { font-size: 13.5px; color: var(--text-muted); }
+  .ld-kpi-num { font-size: 20px; font-weight: 600; margin-top: 8px; }
+  .ld-kpi-note { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+  .ld-kpi-note-warn { color: var(--danger); }
+  .ld-kpi-note-up { color: var(--accent); }
+
+  /* --- tipy v procesu (sekce E) --- */
+  .ld-faze { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+  .ld-faze-card {
+    text-align: left; cursor: pointer; border-radius: var(--radius-m);
+    padding: 14px 14px 16px; border: 1px solid var(--border); background: var(--surface-2);
+    display: flex; flex-direction: column; gap: 4px; min-width: 0;
+  }
+  .ld-faze-card:hover { border-color: var(--accent); }
+  .ld-faze-num { font-size: 17px; font-weight: 700; }
+  .ld-faze-label { font-size: 13px; line-height: 1.35; }
+  .ld-faze-note { font-size: 12.5px; margin-top: 2px; }
+  .ld-faze-early { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 22%, transparent); }
+  .ld-faze-early .ld-faze-note { color: var(--warn); }
+  .ld-faze-rk { background: var(--info-soft); border-color: color-mix(in srgb, var(--info) 18%, transparent); }
+  .ld-faze-rk .ld-faze-note { color: var(--info); }
+  .ld-faze-done { background: var(--ok-soft); border-color: color-mix(in srgb, var(--ok) 18%, transparent); }
+  .ld-faze-done .ld-faze-note { color: var(--ok); }
+  /* Klíčový milník (fáze 6) - jediná TMAVĚ ZELENÁ dlaždice na stránce. */
+  .ld-faze-key { background: var(--accent); border-color: var(--accent); color: var(--accent-contrast); }
+  .ld-faze-key .ld-faze-note { color: var(--accent-contrast); opacity: .85; font-weight: 600; }
+
+  /* --- dvousloupcové řady (sekce P body 5-7) --- */
+  .ld-duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }
+
+  /* --- grafy --- */
+  .ld-chart { margin-top: 14px; }
+  .ld-chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .ld-chart-axis { display: flex; justify-content: space-between; margin-top: 8px; font-size: 13px; color: var(--text-muted); }
+  .ld-chart-peak { font-size: 14px; font-weight: 700; color: var(--accent); text-align: right; }
+  .ld-switch { display: inline-flex; gap: 2px; background: var(--surface-2); border-radius: 999px; padding: 3px; }
+  .ld-switch button {
+    border: 0; background: none; cursor: pointer; border-radius: 999px;
+    padding: 5px 12px; font-size: 13px; font-weight: 600; color: var(--text-muted);
+  }
+  .ld-switch button[aria-pressed="true"] { background: var(--surface); color: var(--accent); }
+
+  /* --- trychtýř (sekce I) --- */
+  .ld-funnel { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+  .ld-funnel-row { display: grid; grid-template-columns: 150px minmax(0, 1fr) 52px; align-items: center; gap: 12px; }
+  .ld-funnel-label { font-size: 14px; }
+  .ld-funnel-track { background: var(--surface-2); border-radius: var(--radius-s); height: 26px; overflow: hidden; }
+  .ld-funnel-bar {
+    height: 100%; background: var(--accent); border-radius: var(--radius-s);
+    min-width: 34px; display: flex; align-items: center; padding: 0 10px;
+    color: var(--accent-contrast); font-size: 13px; font-weight: 700;
+  }
+  .ld-funnel-pct { text-align: right; font-size: 13.5px; color: var(--text-muted); }
+  .ld-funnel-note {
+    margin-top: 16px; padding: 14px 16px; border-radius: var(--radius-m);
+    background: var(--accent-soft); font-size: 13.5px; color: var(--text);
+  }
+  .ld-funnel-note strong { color: var(--accent); }
+  .ld-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+  .ld-summary-item { font-size: 13.5px; color: var(--text-muted); }
+  .ld-summary-item b { color: var(--text); font-size: 15px; margin-right: 6px; }
+
+  /* --- seznamové řádky (RK, síť potřebuje pozornost) --- */
+  .ld-rows { margin-top: 12px; }
+  .ld-row {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 14px;
+    padding: 14px 0; border-top: 1px solid var(--border);
+  }
+  .ld-rows > .ld-row:first-child { border-top: 0; }
+  .ld-row-main { min-width: 0; }
+  .ld-row-name { font-size: 14.5px; font-weight: 600; }
+  .ld-row-note { font-size: 13.5px; color: var(--text-muted); margin-top: 2px; }
+  .ld-row-note-warn { color: var(--danger); }
+  .ld-row-right { text-align: right; white-space: nowrap; }
+  .ld-row-val { font-size: 14px; font-weight: 600; }
+  .ld-row-sub { font-size: 13.5px; color: var(--text-muted); }
+  .ld-linkrow {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;
+    background: none; border: 0; border-top: 1px solid color-mix(in srgb, var(--accent) 18%, transparent);
+    padding: 13px 0; cursor: pointer; text-align: left; font-size: 14px; color: var(--text);
+  }
+  .ld-linkrow:hover .ld-linkrow-val { text-decoration: underline; }
+  .ld-linkrow-val { font-weight: 700; color: var(--accent); white-space: nowrap; }
+  .ld-gap-note { font-size: 12.5px; color: var(--text-muted); font-style: italic; }
+
+  /* --- úrovně sítě (sekce L) --- */
+  .ld-levels { display: flex; flex-direction: column; gap: 14px; margin-top: 16px; }
+  .ld-level { display: grid; grid-template-columns: 84px minmax(0, 1fr) auto; align-items: center; gap: 12px; }
+  .ld-level-label { font-size: 14px; }
+  .ld-level-track { background: var(--surface-2); border-radius: 999px; height: 14px; overflow: hidden; }
+  .ld-level-bar { height: 100%; background: var(--accent); border-radius: 999px; min-width: 6px; }
+  .ld-level-val { font-size: 13.5px; color: var(--text-muted); white-space: nowrap; }
+
+  /* --- nově prodáno (sekce N) --- */
+  .ld-sold-row {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    gap: 16px; align-items: start; padding: 16px 0; border-top: 1px solid color-mix(in srgb, var(--warn) 25%, transparent);
+  }
+  .ld-sold-row > :last-child { align-self: center; }
+  .ld-sold-label { font-size: 13px; color: var(--text-muted); }
+  .ld-sold-val { font-size: 14.5px; font-weight: 600; margin-top: 2px; }
+  .ld-sold-blocked { color: var(--danger); font-weight: 600; font-size: 13.5px; }
+  .ld-sold-fix { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+  @media (max-width: 1080px) {
+    .ld-faze { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .ld-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 860px) {
+    /* Sekce P: na mobilu se všechno skládá POD SEBE ve STEJNÉM pořadí. */
+    .ld-duo { grid-template-columns: minmax(0, 1fr); }
+    .ld-faze { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .ld-queue-chips { grid-template-columns: minmax(0, 1fr); }
+    .ld-queue-row { grid-template-columns: 14px minmax(0, 1fr); }
+    .ld-queue-time { text-align: left; grid-column: 2; min-width: 0; }
+    .ld-queue-row > .ld-queue-btn { grid-column: 2; justify-self: start; }
+    .ld-funnel-row { grid-template-columns: 120px minmax(0, 1fr) 46px; }
+    .ld-sold-row { grid-template-columns: minmax(0, 1fr); }
+    .ld-summary { grid-template-columns: minmax(0, 1fr); }
+    .ld-panel { padding: 18px 16px; }
+    /* Popisek úrovně („15 · 1 aktivních · +14 za 30 dní · 14 tipů“) je na
+       širokém displeji na jednom řádku vedle pruhu; na mobilu se musí zalomit
+       POD pruh, jinak by svou nezalomitelnou šířkou roztáhl celou stránku
+       do vodorovného scrollu (ověřeno headless testem na 390 px). */
+    .ld-level { grid-template-columns: 84px minmax(0, 1fr); row-gap: 4px; }
+    .ld-level-val { grid-column: 1 / -1; white-space: normal; }
+    .ld-row { flex-wrap: wrap; }
+    .ld-row-right { text-align: left; white-space: normal; }
+  }
+  @media (max-width: 560px) {
+    .ld-kpis, .ld-faze { grid-template-columns: minmax(0, 1fr); }
+    .ld-head-action, .ld-head-action .btn-primary { width: 100%; }
+  }
+
   .net-list { display: flex; flex-direction: column; gap: 8px; }
   .net-item {
     display: flex;
@@ -2438,7 +2683,13 @@
          (název "Moje síť", tabulka podřízených zůstává - viz
          fetchMyNetworkTable v JS, které se podle role větví). -->
     <section id="networkScreen" class="page" hidden>
-      <div class="section-head">
+      <!-- Milník 21 (sekce B): pro roli LEADER se tenhle obecný
+           section-head SKRÝVÁ - přepracovaný Přehled lídra má vlastní
+           záhlaví („ŘÍZENÍ SÍTĚ" / „Přehled lídra" / dynamická věta o
+           počtu úkolů + tlačítko „Přidat nový tip"), které se vykresluje
+           uvnitř #leaderDashboardWrap. Tipař tuhle hlavičku vidí dál
+           beze změny. Viditelnost řídí applyNavForRole(), ne CSS. -->
+      <div class="section-head" id="networkSectionHead">
         <h2 id="networkScreenTitle">Moje síť</h2>
         <p id="networkScreenSubtitle">Váš pozvánkový odkaz a tabulka lidí, které jste (přímo i nepřímo) přivedli.</p>
       </div>
@@ -3408,7 +3659,7 @@
   // Milník 14: číslo aktuální verze aplikace - MUSÍ odpovídat nejnovější položce
   // pole APP_CHANGELOG níže (položka na indexu 0). Při každém příštím milníku
   // se zvyšuje ROVNOU TADY i v APP_CHANGELOG - jsou to dvě navzájem závislá místa.
-  var APP_VERSION = "20.0";
+  var APP_VERSION = "21.0";
 
   // Milník 14 (bod 4): obsah panelu "Historie verzí" na přihlašovací
   // obrazovce - zrekonstruováno z reálné historie projektu (STAV.md,
@@ -3417,6 +3668,17 @@
   // pod tímto polem). Vykresluje se generickou šablonou renderAuthVersionAndChangelog()
   // - při dalším milníku se sem jen přidá nová položka na začátek pole.
   var APP_CHANGELOG = [
+    { verze: "21.0", datum: "14. 9. 2026", body: [
+      "Přehled lídra je celý nový: nahoře pracovní fronta „Co musím dnes vyřídit“ s konkrétními případy a tlačítkem dalšího kroku",
+      "Tipy v procesu mají sedm skutečných fází – nově je vidět, jestli RK domlouvá schůzku, oceňuje, nebo už má uzavřenou zprostředkovatelskou smlouvu",
+      "Ukončení tipu vyžaduje konkrétní důvod ze seznamu, ne jen „Zamítnuto“",
+      "Realitní kancelář nově uzavírá případ stavem „Spolupráce nenavázána“ s konkrétním důvodem",
+      "Tipař se v detailu svého tipu dozví srozumitelně, proč tip nepokračuje a co si z toho odnést",
+      "Nepodařilo se zastihnout: eviduje se počet pokusů i čas posledního z nich",
+      "Nové grafy: nové tipy v čase, cesta všech tipů od přijetí po prodej a růst sítě",
+      "Přehled případů u realitních kanceláří včetně těch, které dlouho neaktualizovaly",
+      "Panel „Síť potřebuje pozornost“ otevírá rovnou filtrovaný seznam lidí"
+    ] },
     { verze: "20.0", datum: "13. 9. 2026", body: [
       "Provizní schéma realitní kanceláře: pásma se přidávají na jednom řádku, jdou upravit a musí na sebe přesně navazovat",
       "Profil realitní kanceláře: přehlednější zobrazení, vlastní telefon a funkce kontaktní osoby",
@@ -3570,18 +3832,124 @@
   // obě osy sdílejí časovou osu (tip_status_history.osa), ale mají
   // vlastní mapování na české názvy a vlastní dropdown.
   var RK_STAV_LABELS = {
+    // Milník 21 (sekce E, fáze 4): nová hodnota pro fázi „RK převzala
+    // kontakt a snaží se sjednat schůzku". Do Milníku 20 pro ni žádná
+    // hodnota neexistovala - tip po předání ležel s rk_stav = NULL.
+    rk_prevzala_kontakt: "RK domlouvá schůzku",
     oceneno_rk: "Oceněno RK",
     klient_nepristoupil_ke_koupi: "Klient nepřistoupil ke koupi",
     // Milník 9 (přejmenování labelu): jen zobrazovany text, DB slug
     // "podepsana_rezervacni_smlouva" (CHECK constraint) beze zmeny.
     podepsana_rezervacni_smlouva: "Podepsaná zprostředkovatelská smlouva",
-    nemovitost_v_prodeji: "Nemovitost v prodeji",
+    nemovitost_v_prodeji: "V prodeji – uzavřena zprostředkovatelská smlouva",
+    // Milník 21 (sekce G): po předání RK se UŽ NEPOUŽÍVÁ „Tip zamítnut" -
+    // nenavázaná spolupráce je vlastní stav s povinným strukturovaným důvodem.
+    spoluprace_nenavazana: "Spolupráce s realitní kanceláří nenavázána",
     prodano: "Prodáno"
   };
   var RK_STAV_CODES = [
-    "oceneno_rk", "klient_nepristoupil_ke_koupi", "podepsana_rezervacni_smlouva",
-    "nemovitost_v_prodeji", "prodano"
+    "rk_prevzala_kontakt", "oceneno_rk", "podepsana_rezervacni_smlouva",
+    "nemovitost_v_prodeji", "prodano", "spoluprace_nenavazana",
+    "klient_nepristoupil_ke_koupi"
   ];
+
+  // ---------------- Milník 21: strukturované důvody ukončení ----------------
+  //
+  // DVĚ NEZÁVISLÉ sady (sekce F a G zadání). Kódy odpovídají 1:1 CHECK
+  // constraintům tips.duvod_ukonceni_leader / tips.duvod_nenavazani_rk
+  // (migrace m21_01) - server je ověřuje znovu, tohle je jen český text.
+  var DUVOD_UKONCENI_LEADER_LABELS = {
+    vlastnik_neprodava: "Vlastník ve skutečnosti prodávat nechce",
+    informace_se_nepotvrdila: "Informace o plánovaném prodeji se nepotvrdila",
+    odmita_spolupraci_s_rk: "Vlastník odmítá spolupráci s realitní kanceláří",
+    nabizi_jina_rk: "Nemovitost už nabízí jiná realitní kancelář",
+    duplicita: "Tip je duplicitní",
+    neplatny_kontakt: "Kontakt nebo údaje jsou neplatné",
+    nezastizen_dlouhodobe: "Vlastníka se dlouhodobě nepodařilo zastihnout",
+    jiny_duvod: "Jiný důvod (vyžaduje poznámku)"
+  };
+  var DUVOD_UKONCENI_LEADER_CODES = [
+    "vlastnik_neprodava", "informace_se_nepotvrdila", "odmita_spolupraci_s_rk",
+    "nabizi_jina_rk", "duplicita", "neplatny_kontakt", "nezastizen_dlouhodobe", "jiny_duvod"
+  ];
+
+  var DUVOD_NENAVAZANI_RK_LABELS = {
+    odmitl_navrzenou_cenu: "Vlastník odmítl navrženou cenu",
+    pozadoval_nerealnou_cenu: "Vlastník požadoval nereálnou cenu",
+    vybral_jinou_rk: "Vlastník si vybral jinou realitní kancelář",
+    konkurence_slibila_vyssi_cenu: "Konkurenční RK přislíbila vyšší cenu",
+    odmitl_podminky_spoluprace: "Vlastník odmítl podmínky spolupráce",
+    prodej_odlozen: "Vlastník prodej odložil",
+    schuzku_se_nepodarilo_sjednat: "Nepodařilo se sjednat schůzku",
+    nemovitost_neni_prodejna: "Nemovitost není v aktuálním stavu prodejná",
+    pravni_prekazka: "Právní nebo vlastnická překážka",
+    jiny_duvod: "Jiný důvod (vyžaduje poznámku)"
+  };
+  var DUVOD_NENAVAZANI_RK_CODES = [
+    "odmitl_navrzenou_cenu", "pozadoval_nerealnou_cenu", "vybral_jinou_rk",
+    "konkurence_slibila_vyssi_cenu", "odmitl_podminky_spoluprace", "prodej_odlozen",
+    "schuzku_se_nepodarilo_sjednat", "nemovitost_neni_prodejna", "pravni_prekazka", "jiny_duvod"
+  ];
+
+  // Sekce O zadání: TENTÝŽ strukturovaný důvod se tipaři v detailu jeho tipu
+  // ukazuje LASKAVĚ formulovaný - ne strohé „Zamítnuto". Ke každému kódu
+  // patří vysvětlení (co se zjistilo) a krátké poučení (co si odnést).
+  var DUVOD_VYSVETLENI_PRO_TIPARE = {
+    vlastnik_neprodava: ["Při ověření jsme zjistili, že vlastník zatím nemovitost skutečně prodávat nechce.",
+      "Nevadí - záměr se může časem změnit. Klidně se ozvěte znovu za pár měsíců."],
+    informace_se_nepotvrdila: ["Informaci o plánovaném prodeji se nám nepodařilo potvrdit.",
+      "Příště pomůže, když si u majitele krátce ověříte, že prodej opravdu zvažuje."],
+    odmita_spolupraci_s_rk: ["Vlastník prodej zvažuje, ale spolupráci s realitní kanceláří odmítl.",
+      "Tohle nejde ovlivnit. Zkuste při dalším tipu zmínit, že nabídku RK nic nestojí."],
+    nabizi_jina_rk: ["Nemovitost už v době ověření nabízela jiná realitní kancelář.",
+      "Rychlost se vyplácí - tip poslaný hned po rozhovoru má mnohem větší šanci."],
+    duplicita: ["Stejnou nemovitost už do systému někdo zadal dříve.",
+      "Nic jste neudělali špatně. Pokud jste tip poslali jako první, ozvěte se nám."],
+    neplatny_kontakt: ["Na uvedeném kontaktu se nám nepodařilo nikoho zastihnout - číslo nebo e-mail nefungovaly.",
+      "Zkontrolujte prosím příště telefonní číslo znak po znaku, ať se ověření nezdrží."],
+    nezastizen_dlouhodobe: ["Vlastníka jsme opakovaně kontaktovali, ale nepodařilo se nám ho zastihnout.",
+      "Pomáhá, když majiteli dopředu řeknete, že se mu ozveme - hovor pak spíš vezme."],
+    jiny_duvod: ["Tento tip tentokrát nemohl pokračovat.",
+      "Podrobnosti najdete v poznámce níže."]
+  };
+  var DUVOD_RK_VYSVETLENI_PRO_TIPARE = {
+    odmitl_navrzenou_cenu: ["Realitní kancelář se s vlastníkem sešla, ale ten odmítl navrženou prodejní cenu.",
+      "Cena je nejčastější důvod, proč spolupráce nezačne - nic jste neudělali špatně."],
+    pozadoval_nerealnou_cenu: ["Vlastník trval na ceně, která je pro dnešní trh nereálná.",
+      "Takové případy se často vracejí později, až majitel cenu přehodnotí."],
+    vybral_jinou_rk: ["Vlastník si nakonec vybral jinou realitní kancelář.",
+      "Váš tip byl v pořádku, rozhodnutí bylo čistě na majiteli."],
+    konkurence_slibila_vyssi_cenu: ["Konkurenční kancelář majiteli přislíbila vyšší cenu.",
+      "Bohužel běžná praxe. Slíbená cena ale často nevydrží do podpisu."],
+    odmitl_podminky_spoluprace: ["Vlastník odmítl podmínky zprostředkovatelské smlouvy.",
+      "Nic jste nemohli ovlivnit - jde o dohodu mezi majitelem a kanceláří."],
+    prodej_odlozen: ["Vlastník se rozhodl prodej odložit na pozdější dobu.",
+      "Dobrý důvod se za čas ozvat znovu - tip může ožít."],
+    schuzku_se_nepodarilo_sjednat: ["S vlastníkem se nepodařilo sjednat schůzku.",
+      "Pomůže, když majiteli dopředu řeknete, že se mu kancelář ozve."],
+    nemovitost_neni_prodejna: ["Nemovitost není v aktuálním stavu prodejná.",
+      "Za pokus to stálo - stav nemovitosti se z vyprávění pozná jen těžko."],
+    pravni_prekazka: ["Prodeji brání právní nebo vlastnická překážka (například spoluvlastnictví či zástava).",
+      "To se zvenčí poznat nedá, tohle opravdu nešlo předvídat."],
+    jiny_duvod: ["Spolupráce s realitní kanceláří tentokrát nezačala.",
+      "Podrobnosti najdete v poznámce níže."]
+  };
+
+  // Milník 21 (sekce E): sedm fází živého tipu. Pořadí i popisky odpovídají
+  // zadání klienta; mapování dvou stavových os na fázi dělá SERVER
+  // (SQL funkce public.tip_faze), tohle je jen zobrazení.
+  var M21_FAZE_LABELS = {
+    f1_ceka_na_overeni: "Čeká na ověření lídrem",
+    f2_overovani: "Ověřování prodávajícího",
+    f3_hledame_rk: "Hledáme vhodnou realitní kancelář",
+    f4_rk_schuzka: "Realitní kancelář domlouvá schůzku",
+    f5_oceneni: "Ocenění a návrh prodejní ceny",
+    f6_v_prodeji: "V prodeji – uzavřena zprostředkovatelská smlouva",
+    f7_prodano: "Prodáno",
+    u1_ukonceno_leader: "Ukončeno při ověření lídrem",
+    u2_spoluprace_nenavazana: "Spolupráce s realitní kanceláří nenavázána",
+    u3_ukonceno_po_smlouve: "Ukončeno po podpisu smlouvy"
+  };
 
   // Milník 4 (sekce 5.1 zadání v2.1) — status ověření tipu je JEDEN
   // volný výběr ze 7 hodnot (interní kódy = CHECK constraint v DB),
@@ -4000,7 +4368,9 @@
     // "klient nepřistoupil" = zamítnuto/červená, ostatní = neutrální info.
     var cls = "pill pill-tip_overen_hledame_rk";
     if (stav === "prodano") cls = "pill pill-tip_overen_hledame_rk";
-    else if (stav === "klient_nepristoupil_ke_koupi") cls = "pill pill-zamitnuto";
+    // Milník 21 (sekce G): „Spolupráce nenavázána" je ukončení stejně jako
+    // „Klient nepřistoupil ke koupi" - obojí červené.
+    else if (stav === "klient_nepristoupil_ke_koupi" || stav === "spoluprace_nenavazana") cls = "pill pill-zamitnuto";
     else cls = "pill pill-probiha_overeni";
     return '<span class="' + cls + '">' + escapeHtml(rkStavLabel(stav)) + '</span>';
   }
@@ -4020,6 +4390,28 @@
   }
   function aktualniStavPillHtml(t) {
     return (t && t.rk_stav) ? rkStavPillHtml(t.rk_stav) : stavPillHtml(t && t.stav);
+  }
+
+  // Milník 21 (sekce E): KLIENTSKÉ ZRCADLO serverové SQL funkce
+  // public.tip_faze(stav, rk_stav) z migrace m21_02. Používá se VÝHRADNĚ
+  // pro filtrování už načtené tabulky Tipy podle fáze - žádný počet na
+  // dashboardu se tímhle nepočítá (ty chodí hotové ze serveru, sekce A).
+  // Když se někdy bude měnit mapování, MUSÍ se změnit na obou místech;
+  // proto je tu jediná kopie a je takhle nahlas označená.
+  function tipFazeKod(t) {
+    if (!t) return "neurceno";
+    var rk = t.rk_stav, s = t.stav;
+    if (rk === "prodano") return "f7_prodano";
+    if (rk === "spoluprace_nenavazana") return "u2_spoluprace_nenavazana";
+    if (rk === "klient_nepristoupil_ke_koupi") return "u3_ukonceno_po_smlouve";
+    if (rk === "podepsana_rezervacni_smlouva" || rk === "nemovitost_v_prodeji") return "f6_v_prodeji";
+    if (rk === "oceneno_rk") return "f5_oceneni";
+    if (s === "zamitnuto") return "u1_ukonceno_leader";
+    if (s === "predano_rk") return "f4_rk_schuzka";
+    if (s === "tip_overen_hledame_rk") return "f3_hledame_rk";
+    if (s === "probiha_overeni" || s === "nepodarilo_se_zastihnout" || s === "potrebujeme_doplnit_informace") return "f2_overovani";
+    if (s === "ceka_na_overeni") return "f1_ceka_na_overeni";
+    return "neurceno";
   }
 
   function rkStavSelectOptionsHtml(selected) {
@@ -4072,6 +4464,26 @@
     }
     if (msg.indexOf("Duvod je pro tento prechod povinny") !== -1 || msg.indexOf("Duvod opravy je povinny") !== -1) {
       return "Důvod je pro tuto akci povinný.";
+    }
+    // ---- Milník 21 (sekce C a F) ----
+    if (msg.indexOf("Duvod ukonceni je povinny") !== -1) {
+      return "Vyberte prosím konkrétní důvod ukončení tipu.";
+    }
+    if (msg.indexOf("Neznamy duvod ukonceni tipu") !== -1) {
+      return "Neznámý důvod ukončení tipu.";
+    }
+    if (msg.indexOf("poznamka povinna") !== -1 || msg.indexOf("tips_jiny_duvod_vyzaduje_poznamku") !== -1) {
+      return 'U „jiného důvodu“ je poznámka povinná.';
+    }
+    if (msg.indexOf("zatim nelze ukoncit pro nezastizeni") !== -1) {
+      return "Tip zatím nelze ukončit pro nezastižení – zaznamenejte nejdřív další pokus, " +
+        "nebo vyčkejte do uplynutí sedmidenní lhůty od posledního pokusu.";
+    }
+    if (msg.indexOf("Pokus o kontakt lze zaznamenat jen u tipu") !== -1) {
+      return "Pokus o kontakt lze zaznamenat jen u tipu, který lídr právě ověřuje.";
+    }
+    if (msg.indexOf("Nemate opravneni zaznamenat pokus") !== -1) {
+      return "Nemáte oprávnění zaznamenat pokus o kontakt.";
     }
     if (msg.indexOf("Pro predani RK je nutne vybrat realitni kancelar") !== -1) {
       return "Pro předání RK je nutné vybrat realitní kancelář.";
@@ -4126,7 +4538,14 @@
       var rows = (config.rows || []).slice();
 
       if (config.selectFilter && state.filterValue) {
-        rows = rows.filter(function (r) { return config.selectFilter.get(r) === state.filterValue; });
+        var sf = config.selectFilter;
+        // Milník 21: volitelný `matches(row, value)` pro filtry, které
+        // nejsou prostou rovností nad jedním sloupcem (tabulka Tipy filtruje
+        // ve TŘECH skupinách - fáze / stav ověření / stav u RK). Bez
+        // `matches` se chová přesně jako dřív, tedy `get(row) === value`.
+        rows = rows.filter(function (r) {
+          return sf.matches ? sf.matches(r, state.filterValue) : (sf.get(r) === state.filterValue);
+        });
       }
 
       if (state.query) {
@@ -4257,6 +4676,11 @@
     return {
       setRows: function (newRows) { config.rows = newRows; render(); },
       rerender: render,
+      // Milník 21 (sekce R): „Každý souhrnný počet a fáze otevírá existující
+      // seznam s odpovídajícím filtrem." Dashboard lídra tím nastaví hodnotu
+      // rozbalovacího filtru tabulky zvenčí - dosud šlo jen o výchozí
+      // hodnotu při vzniku instance (initialFilterValue, Milník 17).
+      setFilterValue: function (value) { state.filterValue = value || ""; render(); },
       // Milník 7 (Část H): export bere přesně to, co je zrovna vidět
       // (aktuální hledání + filtr), ne nutně úplně všechna data - viz
       // docs/milnik7_rk_portal_a_vyplaty.md.
@@ -5009,6 +5433,13 @@
     vyplatyTable = null;
     // Milník 19 (bod 8): tabulka pásem marže RK.
     rkProvizeTable = null;
+    // Milník 21: „objednané" filtry z Přehledu lídra i jeho načtená data.
+    // Data z leader_dashboard_prehled() obsahují jména lidí i klientů z
+    // konkrétní sítě - při změně identity musí zmizet ze stejného důvodu
+    // jako obsah tabulek (poučení z Milníku 15, bod 4.5).
+    pendingTipyFilter = null;
+    pendingUsersFilter = null;
+    leaderPrehled = null;
   }
 
   // Kompletní úklid všeho, co se plní podle role. Volá se při odhlášení i
@@ -5606,11 +6037,26 @@
     // vlastní sítě beze změny), Leader "Přehled leadra" (dashboard bez
     // plochého seznamu - viz fetchMyNetworkTable).
     var isLeader = role === "leader";
-    el(TAB_BUTTON.network).textContent = isLeader ? "Přehled leadra" : "Moje síť";
-    el("networkScreenTitle").textContent = isLeader ? "Přehled leadra" : "Moje síť";
+    // Milník 21 (sekce B): název záložky je nově „Přehled lídra" (s
+    // dlouhým í) - přesně tak, jak je uvedený v zadání i v návrhu.
+    el(TAB_BUTTON.network).textContent = isLeader ? "Přehled lídra" : "Moje síť";
+    el("networkScreenTitle").textContent = isLeader ? "Přehled lídra" : "Moje síť";
     el("networkScreenSubtitle").textContent = isLeader
       ? "Váš pozvánkový odkaz a souhrnný přehled vaší sítě. Seznam jednotlivých uživatelů je v záložce „Uživatelé“."
       : "Váš pozvánkový odkaz a tabulka lidí, které jste (přímo i nepřímo) přivedli.";
+
+    // Milník 21 (sekce B a P): leaderovi se obecná hlavička obrazovky,
+    // pozvánkový box i stará řádka stat-dlaždic SKRÝVAJÍ - celý obsah
+    // přehledu kreslí renderLeaderPrehled() do #leaderDashboardWrap ve
+    // vlastním pořadí panelů. Pozvánkový odkaz se tím ze záhlaví
+    // NEZTRÁCÍ: přesouvá se, méně výrazně, do panelu „Moje síť podle
+    // úrovní" (přesně jak zadání v sekci B vyžaduje).
+    var sectionHead = el("networkSectionHead");
+    if (sectionHead) sectionHead.hidden = isLeader;
+    var inviteBox = el("inviteBoxWrap");
+    if (inviteBox) inviteBox.hidden = isLeader;
+    var netStats = el("networkStats");
+    if (netStats) netStats.hidden = isLeader;
   }
 
   // ---------------- auth view (login/register toggle) ----------------
@@ -6028,10 +6474,13 @@
     var addUserNetworkWrap = el("networkAddUserBtnWrap");
     if (addUserNetworkWrap) addUserNetworkWrap.hidden = (role !== "tipar");
 
-    // Milník 15 (bod 3): "+ Přidat nový tip" na Přehledu lídra - jen leader
-    // (jediná role, která má tuhle obrazovku A zároveň záložku "new").
+    // Milník 15 (bod 3) → Milník 21 (sekce B): tlačítko „Přidat nový tip"
+    // se PŘESUNULO do záhlaví přepracovaného Přehledu lídra (vpravo vedle
+    // nadpisu, viz renderLeaderPrehled). Tenhle samostatný toolbar-row už
+    // tedy nikdo nepoužívá a zůstává trvale skrytý - element se nemaže
+    // jen proto, že na #addTipNetworkBtn visí handler ve wireEvents().
     var addTipNetworkWrap = el("networkAddTipBtnWrap");
-    if (addTipNetworkWrap) addTipNetworkWrap.hidden = (role !== "leader");
+    if (addTipNetworkWrap) addTipNetworkWrap.hidden = true;
 
     // Milník 16 (bod 5): dočasné destruktivní tlačítko "Resetovat testovací
     // účty A–C" vidí JEN administrátor. Schování je pohodlí v UI - RPC
@@ -6508,7 +6957,8 @@
       // ve stejné relaci po odhlášení) postaví znovu od nuly.
       el("networkListWrap").innerHTML = "";
       mojeSitTable = null;
-      await renderLeaderDashboardStats();
+      // Milník 21: kompletně přepracovaný Přehled lídra (sekce A-S zadání).
+      await renderLeaderPrehled();
       return;
     }
     el("leaderDashboardWrap").innerHTML = "";
@@ -6666,6 +7116,12 @@
 
   var tipyTable = null;
 
+  // Milník 21 (sekce E/R): dashboard lídra sem „předává" požadovaný filtr
+  // před přepnutím na záložku Tipy. Hodnota se SPOTŘEBUJE (vynuluje) hned
+  // při prvním vykreslení tabulky, aby se nezachovala do dalšího vstupu na
+  // záložku ani - což je důležitější - do relace jiné identity.
+  var pendingTipyFilter = null;
+
   async function fetchTipyTable() {
     var g = authGen; // Milník 15 (bod 4.5)
     var tipsResult = await sb.from("tips").select("*").order("vlozeno_kdy", { ascending: false });
@@ -6765,8 +7221,28 @@
     // druhá stavová osa (Milník 7). Řeší to computed get(): pro původních
     // 7 hodnot se chování nemění ani o řádek, nová volba zachytí všechny
     // tipy s rk_stav='prodano' bez ohledu na to, v jakém `stav` zůstaly.
-    var statusOptions = STAV_CODES.map(function (code) { return { value: code, label: STAV_LABELS[code] }; });
-    statusOptions.push({ value: "prodano", label: RK_STAV_LABELS.prodano });
+    // Milník 17 (bod 4) → Milník 21 (sekce E/R): filtr má TŘI skupiny voleb,
+    // odlišené prefixem v hodnotě, aby se klíče nemohly potkat:
+    //   faze:*  — sedm živých fází + tři způsoby ukončení (slovník nového
+    //             Přehledu lídra; právě na tyhle hodnoty vedou dlaždice
+    //             panelu „Tipy v procesu"),
+    //   stav:*  — původních sedm hodnot `tips.stav` (beze změny významu),
+    //   rk:*    — hodnoty `tips.rk_stav` (beze změny významu).
+    // Původní volba „Prodáno" z Milníku 17 tedy nezmizela, jen se jmenuje
+    // "rk:prodano" (a existuje i jako "faze:f7_prodano").
+    var statusOptions = [];
+    ["f1_ceka_na_overeni", "f2_overovani", "f3_hledame_rk", "f4_rk_schuzka",
+     "f5_oceneni", "f6_v_prodeji", "f7_prodano",
+     "u1_ukonceno_leader", "u2_spoluprace_nenavazana", "u3_ukonceno_po_smlouve"
+    ].forEach(function (kod) {
+      statusOptions.push({ value: "faze:" + kod, label: "Fáze — " + M21_FAZE_LABELS[kod] });
+    });
+    STAV_CODES.forEach(function (code) {
+      statusOptions.push({ value: "stav:" + code, label: "Ověření — " + STAV_LABELS[code] });
+    });
+    RK_STAV_CODES.forEach(function (code) {
+      statusOptions.push({ value: "rk:" + code, label: "U RK — " + RK_STAV_LABELS[code] });
+    });
 
     if (tipyTable) {
       tipyTable.setRows(rows);
@@ -6782,7 +7258,15 @@
         initialSortKey: "vlozeno_kdy",
         initialSortDir: "desc",
         selectFilter: {
+          // `get` zůstává kvůli zpětné kompatibilitě rozhraní initDataTable,
+          // ale skutečné porovnání dělá `matches` (tři skupiny voleb výš).
           get: function (r) { return r.rk_stav === "prodano" ? "prodano" : r.stav; },
+          matches: function (r, v) {
+            if (v.indexOf("faze:") === 0) return tipFazeKod(r) === v.slice(5);
+            if (v.indexOf("stav:") === 0) return r.stav === v.slice(5);
+            if (v.indexOf("rk:") === 0) return r.rk_stav === v.slice(3);
+            return false;
+          },
           options: statusOptions,
           allLabel: "Všechny statusy"
         },
@@ -6797,6 +7281,16 @@
           });
         }
       });
+    }
+
+    // Milník 21 (sekce E/R): filtr „objednaný" dlaždicí fáze na Přehledu
+    // lídra. Aplikuje se až tady, tedy nad hotovou instancí tabulky, a
+    // HNED SE SPOTŘEBUJE - další vstup na záložku (ani jiná identita) ho
+    // už nezdědí. `tipyTable` se navíc nuluje v preclearScreenForTab
+    // ("tipy") i v resetDataTableInstances().
+    if (pendingTipyFilter) {
+      tipyTable.setFilterValue(pendingTipyFilter);
+      pendingTipyFilter = null;
     }
   }
 
@@ -7042,7 +7536,26 @@
             '<div class="form-grid">' +
               '<div class="field"><label for="dtStavSelect">Status ověření *</label><select id="dtStavSelect">' + stavSelectOptionsHtml(t.stav) + '</select></div>' +
               (rkPrevzalaInfo ? '<div class="col-span-2">' + rkPrevzalaInfo + '</div>' : '') +
-              '<div class="field" id="dtDuvodField" hidden><label for="dtDuvodInput">Důvod (povinné pro „Zamítnuto“) *</label><input type="text" id="dtDuvodInput" placeholder="Povinné zdůvodnění"></div>' +
+              // Milník 21 (sekce F): ukončení tipu při ověřování lídrem má
+              // nově POVINNÝ STRUKTUROVANÝ důvod z pevného číselníku -
+              // ne jen volný text. Volná poznámka zůstává (a u „jiného
+              // důvodu" je povinná), ale důvod samotný se ukládá jako
+              // samostatná hodnota použitelná ve statistikách (sekce J).
+              // Vynucení je NA SERVERU (posunout_stav_tipu + CHECK
+              // constraint tips_jiny_duvod_vyzaduje_poznamku).
+              '<div class="field col-span-2" id="dtDuvodKodField" hidden>' +
+                '<label for="dtDuvodKodSelect">Důvod ukončení tipu *</label>' +
+                '<select id="dtDuvodKodSelect"><option value="">— vyberte důvod —</option>' +
+                DUVOD_UKONCENI_LEADER_CODES.map(function (code) {
+                  return '<option value="' + escapeHtml(code) + '"' +
+                    (code === t.duvod_ukonceni_leader ? ' selected' : '') + '>' +
+                    escapeHtml(DUVOD_UKONCENI_LEADER_LABELS[code]) + '</option>';
+                }).join("") + '</select>' +
+                '<p class="dt-muted" style="font-size:12px;margin:4px 0 0;">Důvod uvidí i tipař v detailu svého tipu, srozumitelně přeložený.</p>' +
+              '</div>' +
+              '<div class="field col-span-2" id="dtDuvodField" hidden><label for="dtDuvodInput">Poznámka k důvodu<span id="dtDuvodHvezdicka" hidden> *</span></label>' +
+                '<input type="text" id="dtDuvodInput" placeholder="Nepovinné upřesnění (u „jiného důvodu“ povinné)" value="' +
+                escapeHtml(t.duvod_ukonceni_leader_poznamka || "") + '"></div>' +
               '<div class="field" id="dtRkField" hidden><label for="dtRkSelect">Realitní kancelář (povinné pro „Předáno RK“) *</label><select id="dtRkSelect"><option value="">— vyberte RK —</option>' + rkSelectOptionsHtml() + '</select></div>' +
               '<div class="field"><label for="dtPozadovanaCena">Požadovaná cena (Kč)</label><input type="number" id="dtPozadovanaCena" min="0" step="1" value="' + (t.pozadovana_cena != null ? escapeHtml(String(t.pozadovana_cena)) : "") + '"></div>' +
               // Milník 17 (bod 22a): "Odhadovaná cena" je pro leadera i
@@ -7059,13 +7572,35 @@
               '<div class="field"><label for="dtStavNemovitosti">Stav nemovitosti</label><input type="text" id="dtStavNemovitosti" value="' + escapeHtml(t.stav_nemovitosti || "") + '"></div>' +
               '<div class="field col-span-2"><label for="dtPoznamkaLeadera">Poznámka Leadera</label><textarea id="dtPoznamkaLeadera" rows="2">' + escapeHtml(t.poznamka_leadera || "") + '</textarea></div>' +
             '</div>' +
+            // Milník 21 (sekce C a F): pokusy o zastižení prodávajícího.
+            // Do Milníku 20 systém NEEVIDOVAL ani počet pokusů, ani kdy
+            // poslední proběhl - obojí přibylo v migraci m21_01 a plní ho
+            // výhradně server (zaznamenat_pokus_o_kontakt).
+            (["ceka_na_overeni", "probiha_overeni", "nepodarilo_se_zastihnout",
+              "potrebujeme_doplnit_informace"].indexOf(t.stav) !== -1
+              ? '<div class="detail-item" style="margin-top:12px;">' +
+                  '<div class="detail-label">Pokusy o zastižení prodávajícího</div>' +
+                  '<div class="detail-value">' +
+                    escapeHtml(String(Number(t.pocet_pokusu_kontakt || 0))) + ' ze 3' +
+                    (t.posledni_pokus_kdy ? ' · poslední ' + escapeHtml(formatDatumZCasu(t.posledni_pokus_kdy) || "—") : ' · zatím žádný') +
+                  '</div>' +
+                  '<p class="dt-muted" style="font-size:12px;margin:4px 0 6px;">Ukončit tip s důvodem „Vlastníka se dlouhodobě nepodařilo zastihnout" jde až po 3 pokusech nebo po 7 dnech od posledního pokusu.</p>' +
+                  '<button type="button" class="btn-small" id="dtPokusBtn">Zaznamenat další pokus</button>' +
+                '</div>'
+              : '') +
             '<div class="form-actions"><button class="btn-primary" type="submit" id="dtSaveBtn">Uložit</button></div>' +
           '</form>' +
         '</div>';
     } else {
       // Tipař vidí vlastní tip jen ke čtení (3.1) - dropdown/uložení a
       // doplňková pole Leadera se tu nezobrazují vůbec.
-      editHtml = '<div class="card detail-card"><div class="detail-item"><div class="detail-label">Status ověření</div><div class="detail-value">' + stavPillHtml(t.stav) + '</div></div></div>';
+      //
+      // Milník 21 (sekce O): pokud tip skončil, tipař MUSÍ dostat stejný
+      // strukturovaný důvod, jaký uložil lídr / realitní kancelář - ale
+      // LASKAVĚ formulovaný. Tedy: co se ověřovalo, proč tip nepokračuje
+      // a co si z toho odnést. Žádné strohé „Zamítnuto".
+      editHtml = '<div class="card detail-card"><div class="detail-item"><div class="detail-label">Status ověření</div><div class="detail-value">' +
+        aktualniStavPillHtml(t) + '</div></div>' + tiparVysvetleniHtml(t) + '</div>';
     }
 
     // Milník 7 (5.3): "Status RK" je NEZÁVISLÁ druhá stavová osa, kterou
@@ -7191,9 +7726,56 @@
     '</div>';
   }
 
+  // Milník 21 (sekce O): vysvětlení výsledku tipaři. Vrací prázdný řetězec,
+  // dokud tip běží - nic se tedy nepřidává k živým tipům.
+  //
+  // Text je LASKAVÝ, ale stojí na TÉŽE strukturované hodnotě, kterou vidí
+  // lídr (tips.duvod_ukonceni_leader / tips.duvod_nenavazani_rk) - žádný
+  // druhý, samostatně udržovaný text, který by se mohl rozejít.
+  function tiparVysvetleniHtml(t) {
+    if (!t) return "";
+    var kod = null, mapa = null, uvod = null;
+    if (t.rk_stav === "spoluprace_nenavazana" && t.duvod_nenavazani_rk) {
+      kod = t.duvod_nenavazani_rk;
+      mapa = DUVOD_RK_VYSVETLENI_PRO_TIPARE;
+      uvod = "Tento tip se u realitní kanceláře nakonec neproměnil ve spolupráci.";
+    } else if (t.stav === "zamitnuto" && t.duvod_ukonceni_leader) {
+      kod = t.duvod_ukonceni_leader;
+      mapa = DUVOD_VYSVETLENI_PRO_TIPARE;
+      uvod = "Tento tip tentokrát nemohl pokračovat.";
+    } else if (t.stav === "zamitnuto") {
+      // Starší tipy ukončené ještě před Milníkem 21 strukturovaný důvod
+      // nemají (gap R3 v dokumentaci) - tipaři se ukáže aspoň lidská věta
+      // místo holého „Zamítnuto", nic se nedomýšlí.
+      return '<div class="detail-item"><div class="detail-value tip-vysvetleni">' +
+        '<strong>Tento tip nepokračuje.</strong><br>' +
+        'Podrobnější důvod u něj nemáme zaznamenaný. Děkujeme za něj - další tip může dopadnout jinak.' +
+        '</div></div>';
+    }
+    if (!kod || !mapa) return "";
+    var texty = mapa[kod] || mapa.jiny_duvod;
+    var poznamka = (t.rk_stav === "spoluprace_nenavazana")
+      ? t.duvod_nenavazani_rk_poznamka : t.duvod_ukonceni_leader_poznamka;
+
+    return '<div class="detail-item"><div class="detail-value tip-vysvetleni">' +
+        '<strong>' + escapeHtml(uvod) + '</strong><br>' +
+        escapeHtml(texty[0]) +
+        '<span class="tip-vysvetleni-pouceni">' + escapeHtml(texty[1]) + '</span>' +
+        (poznamka ? '<span class="tip-vysvetleni-pozn">Poznámka od nás: ' + escapeHtml(poznamka) + '</span>' : '') +
+      '</div></div>';
+  }
+
   function updateDetailConditionalFields() {
     var stavVal = el("dtStavSelect").value;
-    el("dtDuvodField").hidden = stavVal !== "zamitnuto";
+    var jeUkonceni = stavVal === "zamitnuto";
+    el("dtDuvodKodField").hidden = !jeUkonceni;
+    el("dtDuvodField").hidden = !jeUkonceni;
+    // Milník 21 (sekce F, bod 8): hvězdička u poznámky naskočí jen u
+    // „jiného důvodu" - u ostatních důvodů je poznámka nepovinná, takže by
+    // tam hvězdička lhala (stejná úvaha jako u marže RK v Milníku 17).
+    var kodSel = el("dtDuvodKodSelect");
+    var hv = el("dtDuvodHvezdicka");
+    if (hv) hv.hidden = !(jeUkonceni && kodSel && kodSel.value === "jiny_duvod");
     el("dtRkField").hidden = stavVal !== "predano_rk";
     if (stavVal === "predano_rk" && detailTip.rk_id) {
       var rkSel = el("dtRkSelect");
@@ -7208,12 +7790,45 @@
   // použití, jen se odsud nevolá (viz docs/milnik5_ux_opravy.md).
   function wireDetailEditForm() {
     el("dtStavSelect").addEventListener("change", updateDetailConditionalFields);
+    var kodSel = el("dtDuvodKodSelect");
+    if (kodSel) kodSel.addEventListener("change", updateDetailConditionalFields);
     updateDetailConditionalFields();
+
+    // Milník 21 (sekce C/F): „Zaznamenat další pokus" přímo v detailu tipu.
+    var pokusBtn = el("dtPokusBtn");
+    if (pokusBtn) pokusBtn.addEventListener("click", function () { submitPokusOKontakt(detailTip.id); });
 
     el("detailSaveForm").addEventListener("submit", function (e) {
       e.preventDefault();
       submitDetailSave();
     });
+  }
+
+  // Milník 21 (sekce F, druhý odstavec): „Nepodařilo se zastihnout" je
+  // NEJDŘÍV rozpracovaný stav vyžadující další pokus. Počítadlo i časové
+  // razítko drží SERVER (zaznamenat_pokus_o_kontakt) - odtud se jen volá.
+  async function submitPokusOKontakt(tipId) {
+    var g = authGen; // Milník 15 (bod 4.5)
+    var btn = el("dtPokusBtn");
+    if (btn) btn.disabled = true;
+    showBanner(el("detailBanner"), null, null);
+
+    var result = await sb.rpc("zaznamenat_pokus_o_kontakt", { p_tip_id: tipId, p_poznamka: null });
+    if (g !== authGen) return;
+    if (btn) btn.disabled = false;
+
+    if (result.error) {
+      console.error("Chyba při zápisu pokusu o kontakt:", result.error);
+      showBanner(el("detailBanner"), "error", stavZmenaErrorMessage(result.error));
+      return;
+    }
+    showBanner(el("detailBanner"), "ok", "Zaznamenán pokus o kontakt č. " + result.data + ".");
+    setTimeout(function () { showBanner(el("detailBanner"), null, null); }, 4000);
+
+    var refreshed = await sb.from("tips").select("*").eq("id", tipId).single();
+    if (g !== authGen) return;
+    if (!refreshed.error && refreshed.data) detailTip = refreshed.data;
+    renderTipDetail();
   }
 
   // Jedno uložení pro vše (bod 7 zadání uživatele): posunout_stav_tipu
@@ -7225,7 +7840,21 @@
     var g = authGen; // Milník 15 (bod 4.5) - detailTip i renderTipDetail() žijí až za awaity
     var stavVal = el("dtStavSelect").value;
     var duvodVal = !el("dtDuvodField").hidden ? el("dtDuvodInput").value.trim() : "";
+    // Milník 21 (sekce F): strukturovaný kód důvodu ukončení.
+    var duvodKod = !el("dtDuvodKodField").hidden ? (el("dtDuvodKodSelect").value || "") : "";
     var rkVal = !el("dtRkField").hidden ? (el("dtRkSelect").value || null) : null;
+
+    // Klientská kontrola je jen pohodlí - TOTÉŽ vynucuje server
+    // (posunout_stav_tipu) i CHECK constraint v tabulce tips, takže se to
+    // nedá obejít ani přímým voláním RPC (scénář S4/S10).
+    if (stavVal === "zamitnuto" && !duvodKod) {
+      showBanner(el("detailBanner"), "error", "Vyberte prosím konkrétní důvod ukončení tipu.");
+      return;
+    }
+    if (stavVal === "zamitnuto" && duvodKod === "jiny_duvod" && !duvodVal) {
+      showBanner(el("detailBanner"), "error", 'U „jiného důvodu“ je poznámka povinná.');
+      return;
+    }
     var pozadovanaCena = el("dtPozadovanaCena").value;
     // Milník 17 (bod 22a/22b): #dtOdhadovanaCena jako <input> UŽ NEEXISTUJE
     // a p_odhadovana_cena se ani neposílá. Server ho stejně ignoruje
@@ -7254,7 +7883,10 @@
       // teď editovatelná i pro Leadera/Administrátora, ne jen tipařem
       // při vložení. Stejný "PUT" vzor jako ostatní pole RPC - vždy se
       // přepíše aktuální hodnotou formuláře.
-      p_pozadovana_cena: pozadovanaCena === "" ? null : Number(pozadovanaCena)
+      p_pozadovana_cena: pozadovanaCena === "" ? null : Number(pozadovanaCena),
+      // Milník 21 (sekce F): strukturovaný důvod ukončení. Server ho u
+      // přechodu na „zamitnuto" VYŽADUJE a ověřuje proti číselníku.
+      p_duvod_kod: duvodKod || null
     });
     if (g !== authGen) return; // Milník 15 (bod 4.5)
 
@@ -7345,6 +7977,10 @@
   }
 
   var usersTable = null;
+  // Milník 21 (sekce M/R): panel „Síť potřebuje pozornost" sem před
+  // přepnutím záložky uloží kategorii, kterou má seznam lidí zobrazit.
+  // Stejný vzor i stejná pravidla úklidu jako `pendingTipyFilter`.
+  var pendingUsersFilter = null;
   var usersRowsCache = []; // poslední načtení moje_uzivatele() - pro nabídku sponzora ve formuláři Upravit
   var usersById = {}; // lokální mapa jen pro tenhle formulář (NEpřepisuje sdílenou adminUsersById)
   var userFormTargetId = null;
@@ -7440,7 +8076,35 @@
         initialFilterValue: "aktivni",
         selectFilter: {
           get: function (r) { return r.aktivni ? "aktivni" : "neaktivni"; },
-          options: [{ value: "aktivni", label: "Aktivní" }, { value: "neaktivni", label: "Neaktivní" }],
+          // Milník 21 (sekce M/R): k dvěma původním volbám přibývají čtyři
+          // kategorie panelu „Síť potřebuje pozornost", aby jeho řádky
+          // otevíraly SKUTEČNĚ FILTROVANÝ seznam, ne jen obecnou tabulku.
+          // Původní dvě volby i výchozí hodnota "aktivni" zůstávají beze
+          // změny - nové kategorie jsou alternativa, ne náhrada.
+          matches: function (r, v) {
+            if (v === "aktivni") return !!r.aktivni;
+            if (v === "neaktivni") return !r.aktivni;
+            if (v === "bez_prvniho_tipu") return r.role === "tipar" && Number(r.pocet_tipu || 0) === 0;
+            if (v === "nedokoncena_registrace") return !r.adresa_vyplnena_kdy || !r.datum_narozeni;
+            if (v === "ceka_kyc") return r.autentizace_stav === "ceka_na_overeni";
+            if (v === "bez_aktivity") {
+              // „Aktivní tipař bez aktivity" = někdy poslal tip, ale poslední
+              // je starší než 30 dní. `posledni_tip_kdy` doplnila migrace
+              // m21_05 - dřív šel z RPC jen POČET tipů, ne jejich datum.
+              if (r.role !== "tipar" || Number(r.pocet_tipu || 0) === 0) return false;
+              if (!r.posledni_tip_kdy) return true;
+              return (Date.now() - new Date(r.posledni_tip_kdy).getTime()) > 30 * 24 * 3600 * 1000;
+            }
+            return false;
+          },
+          options: [
+            { value: "aktivni", label: "Aktivní" },
+            { value: "neaktivni", label: "Neaktivní" },
+            { value: "bez_prvniho_tipu", label: "Bez prvního tipu" },
+            { value: "nedokoncena_registrace", label: "Nedokončená registrace" },
+            { value: "ceka_kyc", label: "Čeká ověření totožnosti" },
+            { value: "bez_aktivity", label: "Bez aktivity 30 dní" }
+          ],
           allLabel: "Všichni"
         },
         wireExtra: function (container) {
@@ -7449,6 +8113,13 @@
           });
         }
       });
+    }
+
+    // Milník 21 (sekce M/R): kategorie „objednaná" panelem Síť potřebuje
+    // pozornost. Stejně jako u tabulky Tipy se hodnota hned spotřebuje.
+    if (pendingUsersFilter) {
+      usersTable.setFilterValue(pendingUsersFilter);
+      pendingUsersFilter = null;
     }
   }
 
@@ -8626,6 +9297,16 @@
     }
     if (msg.indexOf("Neznamy typ marze") !== -1) return "Neznámý typ marže.";
     if (msg.indexOf("Neznamy status RK") !== -1) return "Neznámý status RK.";
+    // Milník 21 (sekce G)
+    if (msg.indexOf("Duvod nenavazani spoluprace je povinny") !== -1) {
+      return "Vyberte prosím konkrétní důvod, proč spolupráce nezačala.";
+    }
+    if (msg.indexOf("Neznamy duvod nenavazani spoluprace") !== -1) {
+      return "Neznámý důvod nenavázání spolupráce.";
+    }
+    if (msg.indexOf("poznamka povinna") !== -1 || msg.indexOf("tips_jiny_duvod_vyzaduje_poznamku") !== -1) {
+      return 'U „jiného důvodu“ je poznámka povinná.';
+    }
     if (msg.indexOf("Tip nenalezen") !== -1) return "Tip nebyl nalezen nebo k němu nemáte přístup.";
     return "Změnu se nepodařilo uložit (" + escapeHtml(msg || "neznámá chyba") + ").";
   }
@@ -8741,6 +9422,23 @@
             // by hvězdička lhala: u ostatních stavů marže povinná není.
             '<div class="field"><label for="rpfMarzeHodnota">Hodnota marže<span id="rpfMarzeHvezdicka"' + (t.rk_stav === "prodano" ? "" : " hidden") + '> *</span></label><input type="number" id="rpfMarzeHodnota" min="0" step="0.01" value="' + (t.rk_marze_hodnota != null ? escapeHtml(String(t.rk_marze_hodnota)) : "") + '"></div>' +
             '<div class="field"><label for="rpfStav">Status RK</label><select id="rpfStav"><option value="">— nevybráno —</option>' + rkStavSelectOptionsHtml(t.rk_stav) + '</select></div>' +
+            // Milník 21 (sekce G): po převzetí tipu se UŽ NEPOUŽÍVÁ „Tip
+            // zamítnut" - nenavázaná spolupráce je vlastní stav s POVINNÝM
+            // strukturovaným důvodem, který je pak použitelný ve
+            // statistikách (sekce J). Vynucení je na serveru
+            // (aktualizovat_rk_tip), tohle je jen formulář k tomu.
+            '<div class="field col-span-2" id="rpfDuvodKodField"' + (t.rk_stav === "spoluprace_nenavazana" ? "" : " hidden") + '>' +
+              '<label for="rpfDuvodKod">Důvod nenavázání spolupráce *</label>' +
+              '<select id="rpfDuvodKod"><option value="">— vyberte důvod —</option>' +
+              DUVOD_NENAVAZANI_RK_CODES.map(function (code) {
+                return '<option value="' + escapeHtml(code) + '"' +
+                  (code === t.duvod_nenavazani_rk ? ' selected' : '') + '>' +
+                  escapeHtml(DUVOD_NENAVAZANI_RK_LABELS[code]) + '</option>';
+              }).join("") + '</select></div>' +
+            '<div class="field col-span-2" id="rpfDuvodPoznField"' + (t.rk_stav === "spoluprace_nenavazana" ? "" : " hidden") + '>' +
+              '<label for="rpfDuvodPozn">Poznámka k důvodu<span id="rpfDuvodHvezdicka" hidden> *</span></label>' +
+              '<input type="text" id="rpfDuvodPozn" placeholder="Nepovinné upřesnění (u „jiného důvodu“ povinné)" value="' +
+              escapeHtml(t.duvod_nenavazani_rk_poznamka || "") + '"></div>' +
             '<div class="field" id="rpfDatumField"' + (t.rk_stav === "prodano" ? "" : " hidden") + '><label for="rpfDatum">Datum prodeje *</label><input type="date" id="rpfDatum" value="' + escapeHtml(t.datum_prodeje || "") + '"></div>' +
             '<div class="field" id="rpfKupniField"' + (t.rk_stav === "prodano" ? "" : " hidden") + '><label for="rpfKupni">Kupní cena (Kč) *</label><input type="number" id="rpfKupni" min="0" step="1" value="' + (t.kupni_cena != null ? escapeHtml(String(t.kupni_cena)) : "") + '"></div>' +
           '</div>' +
@@ -8752,13 +9450,20 @@
       '</div>';
 
     function updateConditional() {
-      var isProdano = el("rpfStav").value === "prodano";
+      var stavNyni = el("rpfStav").value;
+      var isProdano = stavNyni === "prodano";
+      var isNenavazano = stavNyni === "spoluprace_nenavazana";
       el("rpfDatumField").hidden = !isProdano;
       el("rpfKupniField").hidden = !isProdano;
       // Milník 17 (bod 23): hvězdička u "Hodnota marže" jen u stavu "Prodáno".
       el("rpfMarzeHvezdicka").hidden = !isProdano;
+      // Milník 21 (sekce G): strukturovaný důvod jen u „Spolupráce nenavázána".
+      el("rpfDuvodKodField").hidden = !isNenavazano;
+      el("rpfDuvodPoznField").hidden = !isNenavazano;
+      el("rpfDuvodHvezdicka").hidden = !(isNenavazano && el("rpfDuvodKod").value === "jiny_duvod");
     }
     el("rpfStav").addEventListener("change", updateConditional);
+    el("rpfDuvodKod").addEventListener("change", updateConditional);
 
     el("rkPortalCancelBtn").addEventListener("click", closeRkPortalForm);
     el("rkPortalFormPanel").addEventListener("submit", function (e) {
@@ -8790,6 +9495,20 @@
       showBanner(el("rkPortalBanner"), "error", 'Pro stav „Prodáno" je nutné vyplnit i marži (typ i hodnotu).');
       return;
     }
+    // Milník 21 (sekce G): povinný strukturovaný důvod u nenavázané
+    // spolupráce. TOTÉŽ vynucuje server (aktualizovat_rk_tip) i CHECK
+    // constraint tips_jiny_duvod_vyzaduje_poznamku - tohle je jen rychlejší
+    // hláška bez cesty na server.
+    var duvodKod = (stav === "spoluprace_nenavazana") ? (el("rpfDuvodKod").value || "") : "";
+    var duvodPozn = (stav === "spoluprace_nenavazana") ? (el("rpfDuvodPozn").value || "").trim() : "";
+    if (stav === "spoluprace_nenavazana" && !duvodKod) {
+      showBanner(el("rkPortalBanner"), "error", "Vyberte prosím konkrétní důvod, proč spolupráce nezačala.");
+      return;
+    }
+    if (duvodKod === "jiny_duvod" && !duvodPozn) {
+      showBanner(el("rkPortalBanner"), "error", 'U „jiného důvodu“ je poznámka povinná.');
+      return;
+    }
 
     var btn = el("rkPortalSaveBtn");
     if (btn) btn.disabled = true;
@@ -8806,7 +9525,10 @@
       // Milník 17 (bod 22c): odhad ceny. Prázdné pole se posílá jako null a
       // server to chápe jako "neměnit" (ne "vymazat") - viz komentář u
       // aktualizovat_rk_tip v migraci m17_rk_odhadovana_cena_marze_a_moje_sit.
-      p_odhadovana_cena: odhadCenaRaw === "" ? null : Number(odhadCenaRaw)
+      p_odhadovana_cena: odhadCenaRaw === "" ? null : Number(odhadCenaRaw),
+      // Milník 21 (sekce G): strukturovaný důvod + volná poznámka.
+      p_duvod_nenavazani_kod: duvodKod || null,
+      p_duvod_nenavazani_poznamka: duvodPozn || null
     });
 
     if (btn) btn.disabled = false;
@@ -11542,112 +12264,637 @@
     if (activeTab === "users") fetchUsersTable();
   }
 
-  // ---------------- Milník 12 (bod 6) → Milník 13 (bod 5, PŘEPSÁNO): Přehled leadra ----------------
+  // Milník 12 (bod 6) → Milník 13 (bod 5) → Milník 21: pomocná funkce
+  // statTileHtml() (dlaždice starého Přehledu leadra) je ODSTRANĚNA -
+  // jediným jejím uživatelem byl renderLeaderDashboardStats(), který
+  // Milník 21 nahradil renderLeaderPrehled() níž. CSS třídy .stat-tile /
+  // .stat-row ZŮSTÁVAJÍ: používá je dál tipařova "Moje síť"
+  // (#networkStats ve fetchMyNetworkTable) i jiné obrazovky.
+
+  // =========================================================================
+  // Milník 21: PŘEHLED LÍDRA — kompletně přepracovaná domovská obrazovka
   //
-  // Milník 13: DRUHÁ oprava stejného klientova požadavku ("2x menší čísla,
-  // větší popisy") - hierarchie je teď OBRÁCENÁ oproti M12/M10: label je
-  // vizuálně dominantní (velký/tučný/nahoře), num podřízený (malý/lehčí/
-  // muted/pod labelem). DOM pořadí je záměrně label→num (ne num→label jako
-  // dřív) - bez prohození pořadí by prohození jen font-size nestačilo,
-  // protože flex-direction:column řadí vizuálně přesně podle pořadí v DOM.
-  // Barva zůstává REZERVOVANÁ (levý pruh/nádech pozadí/tečka), nikdy není
-  // barvou textu čísla/popisku - beze změny oproti M12.
-  // Kategorie: "neutral" (čistý počet, tenký modrý akcent, žádný nádech
-  // pozadí) / "info" (modrý nádech, "právě se to děje") / "ok" (zelená) /
-  // "warn" (jantarová) / "serious" (korálová, závažnější než warn) /
-  // "critical" (červená, nejzávažnější - PO TERMÍNU).
-  function statTileHtml(num, label, clickTab, category) {
-    var catClass = category ? (" stat-tile-" + category) : "";
-    var inner = '<div class="stat-label">' + (category ? '<span class="stat-label-dot"></span>' : '') + escapeHtml(label) + '</div>' +
-      '<div class="stat-num">' + escapeHtml(String(num != null ? num : 0)) + '</div>';
-    return clickTab
-      ? '<button type="button" class="stat-tile' + catClass + '" data-goto-tab="' + escapeHtml(clickTab) + '">' + inner + '</button>'
-      : '<div class="stat-tile' + catClass + '">' + inner + '</div>';
+  // Nahrazuje dřívější renderLeaderDashboardStats() (řady stat-dlaždic z
+  // Milníku 9/12/13) i renderLeaderSitPoUrovnich() (pyramida z Milníku 12).
+  // Obě funkce jsou tímto ZRUŠENÉ; RPC leader_dashboard_stats() a
+  // leader_sit_po_urovnich() zůstávají v DB nedotčené (nic je nevolá), aby
+  // se tenhle milník nedotýkal ničeho mimo popsaný rozsah.
+  //
+  // VŠECHNA data přicházejí z JEDNÉ SECURITY DEFINER RPC
+  // leader_dashboard_prehled() — jeden okamžik, jedno vyhodnocení
+  // oprávnění, žádný dopočet počtů na klientovi (sekce A a R zadání).
+  // Jediná druhá RPC je leader_nove_prodane_tipy() pro panel „Nově prodáno",
+  // protože ta počítá částku k výplatě TOUŽ SQL funkcí, jakou použije
+  // skutečné odeslání (poslat_tip_k_vyplate) — viz Milník 17.
+  //
+  // Pořadí panelů odpovídá sekci P zadání DOSLOVA a je dané pořadím v DOM,
+  // takže na mobilu (kde .ld-duo padá na jeden sloupec) zůstává stejné.
+  // =========================================================================
+
+  var leaderPrehled = null;      // poslední načtený jsonb (pro přepínače období)
+  var ldObdobiTipy = "3m";       // sekce H: 30 dní / 3 měsíce / 12 měsíců
+  var ldObdobiSit = "3m";        // sekce L: totéž pro růst sítě
+  var ldFrontaVse = false;       // „Celá fronta →" rozbalí celý seznam
+  var LD_FRONTA_NAHLED = 5;      // kolik položek fronty je vidět na první pohled
+
+  var LD_OBDOBI_LABELS = { "30d": "30 dní", "3m": "3 měsíce", "12m": "12 měsíců" };
+
+  // Sekce Q, poslední odrážka (přístupnost): ke každé barvě naléhavosti
+  // patří VŽDY i text a znak — barva nikdy nenese informaci sama.
+  var LD_NALEHAVOST = {
+    po_terminu: { label: "Po termínu", cls: "late", znak: "!" },
+    dnes: { label: "Vyřídit dnes", cls: "today", znak: "•" },
+    bezna: { label: "Běžná priorita", cls: "normal", znak: "•" }
+  };
+
+  function ldNum(v) { return Number(v || 0); }
+
+  function ldSklonDny(n) { return n === 1 ? "den" : (n < 5 ? "dny" : "dní"); }
+  function ldSklonHodiny(n) { return n === 1 ? "hodinu" : (n < 5 ? "hodiny" : "hodin"); }
+
+  // Doba čekání se POČÍTÁ NA SERVERU z uložených událostí (tip_status_history
+  // / vlozeno_kdy) — sem přichází hotový počet hodin (sekce R: nikdy
+  // klientský odhad). Tady se jen formátuje do češtiny.
+  function ldCekaText(hodin) {
+    var h = ldNum(hodin);
+    if (h < 1) return "Čeká méně než hodinu";
+    if (h < 48) return "Čeká " + h + " " + ldSklonHodiny(h);
+    var d = Math.round(h / 24);
+    return "Čeká " + d + " " + ldSklonDny(d);
   }
 
-  async function renderLeaderDashboardStats() {
+  function ldZmenaText(ted, drive) {
+    var a = ldNum(ted), b = ldNum(drive);
+    if (b === 0) return a === 0 ? "beze změny za 30 dní" : ("+" + a + " za 30 dní");
+    var pct = Math.round(((a - b) / b) * 100);
+    if (pct === 0) return "beze změny za 30 dní";
+    return (pct > 0 ? "↑ " : "↓ ") + Math.abs(pct) + " % za 30 dní";
+  }
+
+  // ---------------------------------------------------------------- grafy
+  //
+  // Vědomě BEZ grafové knihovny: appka je jeden self-contained soubor bez
+  // externích závislostí (CDN je v produkci i v testovacím kontejneru
+  // blokované) a oba grafy zadání jsou prostá spojnice/plocha, na kterou
+  // stačí jedno <svg>. Stejná úvaha jako u pruhů v Milníku 12.
+  function ldAreaChartSvg(body, opts) {
+    opts = opts || {};
+    var pts = (body || []).map(function (b) { return ldNum(b.pocet); });
+    // Sekce S, scénář 8: při nedostatku dat se NESMÍ nic rozbít ani vypadat
+    // rozbitě — místo prázdného/pokřiveného grafu je čitelná věta.
+    if (pts.length < 2) {
+      return '<p class="dt-muted" style="margin:24px 0;">Zatím není dost dat na graf. Objeví se, jakmile budou k dispozici alespoň dva týdny.</p>';
+    }
+    var W = 620, H = 168, PAD = 8;
+    var max = Math.max.apply(null, pts);
+    if (max <= 0) max = 1;
+    var stepX = (W - PAD * 2) / (pts.length - 1);
+    var coords = pts.map(function (v, i) {
+      return [PAD + i * stepX, PAD + (H - PAD * 2) * (1 - v / max)];
+    });
+    var line = coords.map(function (c, i) { return (i ? "L" : "M") + c[0].toFixed(1) + " " + c[1].toFixed(1); }).join(" ");
+    var area = line + " L" + (W - PAD).toFixed(1) + " " + (H - PAD).toFixed(1) +
+      " L" + PAD.toFixed(1) + " " + (H - PAD).toFixed(1) + " Z";
+    var last = coords[coords.length - 1];
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' +
+        escapeHtml(opts.popis || "Vývoj v čase") + '" preserveAspectRatio="none">' +
+      '<path d="' + area + '" fill="var(--accent-soft)"></path>' +
+      '<path d="' + line + '" fill="none" stroke="var(--accent)" stroke-width="2.5" ' +
+        'stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>' +
+      (opts.tecka === false ? '' :
+        '<circle cx="' + last[0].toFixed(1) + '" cy="' + last[1].toFixed(1) + '" r="4" fill="var(--surface)" stroke="var(--accent)" stroke-width="2.5"></circle>') +
+      '</svg>';
+  }
+
+  function ldMesicPopisek(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    var m = ["leden", "únor", "březen", "duben", "květen", "červen",
+             "červenec", "srpen", "září", "říjen", "listopad", "prosinec"];
+    return m[d.getMonth()];
+  }
+
+  function ldOsaHtml(body) {
+    if (!body || body.length < 2) return "";
+    var first = ldMesicPopisek(body[0].od);
+    var mid = ldMesicPopisek(body[Math.floor(body.length / 2)].od);
+    var last = ldMesicPopisek(body[body.length - 1].od);
+    return '<div class="ld-chart-axis"><span>' + escapeHtml(first) + '</span>' +
+      (mid !== first && mid !== last ? '<span>' + escapeHtml(mid) + '</span>' : '<span></span>') +
+      '<span>' + escapeHtml(last) + '</span></div>';
+  }
+
+  function ldSwitchHtml(kod, aktivni) {
+    return '<div class="ld-switch" role="group" aria-label="Období">' +
+      ["30d", "3m", "12m"].map(function (o) {
+        return '<button type="button" data-ld-switch="' + kod + '" data-ld-obdobi="' + o + '"' +
+          ' aria-pressed="' + (o === aktivni ? "true" : "false") + '">' + escapeHtml(LD_OBDOBI_LABELS[o]) + '</button>';
+      }).join("") + '</div>';
+  }
+
+  // ---------------------------------------------------------------- render
+  async function renderLeaderPrehled() {
     var wrap = el("leaderDashboardWrap");
     if (!wrap) return;
-    var g = authGen; // Milník 15 (bod 4.5)
-    var result = await sb.rpc("leader_dashboard_stats");
-    if (g !== authGen) return; // identita se během dotazu změnila - nic nevykreslovat
+    var g = authGen; // Milník 15 (bod 4.5) — identita se během awaitu může změnit
+    wrap.innerHTML = '<p class="dt-muted">Načítání přehledu…</p>';
+
+    var result = await sb.rpc("leader_dashboard_prehled");
+    if (g !== authGen) return; // identita se změnila — nic nevykreslovat
     if (result.error) {
-      console.error("Chyba při načítání přehledu leadra:", result.error);
-      wrap.innerHTML = '<div class="banner banner-error">Rozšířený přehled se nepodařilo načíst.</div>';
+      console.error("Chyba při načítání Přehledu lídra:", result.error);
+      wrap.innerHTML = '<div class="banner banner-error">Přehled lídra se nepodařilo načíst. Zkuste to prosím znovu.</div>';
       return;
     }
-    var s = (result.data && result.data[0]) || {};
-    var tile = statTileHtml;
-    wrap.innerHTML =
-      // Milník 17 (bod 5c): "Nově prodáno" je ÚPLNĚ NAHOŘE, nad dlaždicemi
-      // i pyramidou. Je to jediná sekce celého přehledu, která po leaderovi
-      // něco CHCE (odbavit prodej k výplatě) - všechno ostatní jsou čísla
-      // ke čtení. Plní se vlastní RPC až po vykreslení skořápky, stejný
-      // vzor jako #leaderLevelsWrap z Milníku 12.
-      '<div id="leaderNoveProdanoWrap"></div>' +
-      '<div class="stat-section">' +
-        '<div class="stat-row-heading">Tipy</div>' +
-        '<div class="stat-row">' +
-          tile(s.tipy_ceka_na_overeni, "čeká na ověření", "tipy", "warn") +
-          tile(s.tipy_v_procesu_rk, "v procesu u RK", "tipy", "info") +
-          tile(s.tipy_celkem, "celkem tipů", "tipy", "neutral") +
-          tile(s.tipy_uspesne, "úspěšných (podepsaná smlouva a dál)", "tipy", "ok") +
-        '</div>' +
-      '</div>' +
-      '<div class="stat-section">' +
-        '<div class="stat-row-heading">Síť (' + escapeHtml(String(s.uzivatelu_v_siti || 0)) + ' uživatelů)</div>' +
-        '<div class="stat-row">' +
-          tile(s.stav_email_neoveren, "e-mail neověřen", "users", "warn") +
-          // Milník 17 (bod 19c): fáze nově znamená "chybí adresa NEBO datum
-          // narození" - popisek musí odpovídat tomu, co server skutečně počítá.
-          tile(s.stav_email_overen, "e-mail ověřen, chybí adresa nebo datum narození", "users", "warn") +
-          tile(s.stav_vyplneny_udaje, "adresa vyplněná, čeká KYC", "users", "info") +
-          tile(s.stav_autentizovano, "plně autentizováno", "users", "ok") +
-        '</div>' +
-      '</div>' +
-      '<div class="stat-section stat-section-attention">' +
-        '<div class="stat-row-heading">Vyžaduje pozornost</div>' +
-        '<div class="stat-row">' +
-          tile(s.kyc_ceka_na_overeni, "čeká na ověření totožnosti", "kyc", "warn") +
-          tile(s.vyplaty_ceka_na_schvaleni, "výplat čeká na schválení", "vyplaty", "serious") +
-          tile(s.adresa_po_terminu, "uživatelů PO TERMÍNU (adresa)", "users", "critical") +
-        '</div>' +
-      '</div>' +
-      '<div class="stat-section">' +
-        '<div class="stat-row-heading">Síť po úrovních</div>' +
-        '<div id="leaderLevelsWrap"></div>' +
-      '</div>';
-
-    wrap.querySelectorAll("[data-goto-tab]").forEach(function (btn) {
-      btn.addEventListener("click", function () { setActiveTab(btn.getAttribute("data-goto-tab")); });
-    });
-
+    leaderPrehled = result.data || {};
+    ldFrontaVse = false;
+    ldRenderAll();
+    if (g !== authGen) return;
     await renderLeaderNoveProdano();
-    if (g !== authGen) return; // Milník 15 (bod 4.5) - renderLeaderSitPoUrovnich() píše do DOM
-    await renderLeaderSitPoUrovnich();
   }
 
-  // ---------------- Milník 17 (bod 5c): "Nově prodáno" ----------------
+  function ldRenderAll() {
+    var wrap = el("leaderDashboardWrap");
+    if (!wrap || !leaderPrehled) return;
+    var d = leaderPrehled;
+
+    wrap.innerHTML =
+      '<div class="ld">' +
+        ldHeadHtml(d) +           // P1 — záhlaví + Přidat nový tip
+        ldQueueHtml(d) +          // P2 — pracovní fronta (přes celou šířku)
+        ldKpisHtml(d) +           // P3 — čtyři kompaktní ukazatele
+        ldFazeHtml(d) +           // P4 — Tipy v procesu (přes celou šířku)
+        '<div class="ld-duo">' + ldTipyVCaseHtml(d) + ldTrychtyrHtml(d) + '</div>' +   // P5
+        '<div class="ld-duo">' + ldRkHtml(d) + ldRustHtml(d) + '</div>' +              // P6
+        '<div class="ld-duo">' + ldUrovneHtml(d) + ldPozornostHtml(d) + '</div>' +     // P7
+        '<div id="leaderNoveProdanoWrap"></div>' +                                      // P8
+      '</div>';
+
+    ldWire(wrap);
+  }
+
+  // ------------------------------------------------------ P1: záhlaví (B)
+  function ldHeadHtml(d) {
+    var pocet = ldNum(d.fronta_souhrn && d.fronta_souhrn.celkem);
+    var veta = pocet === 0
+      ? "Dnes nemáte žádný úkol, který by vyžadoval pozornost."
+      : "Dnes máte <strong>" + pocet + " " + (pocet === 1 ? "úkol" : (pocet < 5 ? "úkoly" : "úkolů")) +
+        "</strong>, které vyžadují pozornost.";
+    // Pozn.: pozvánkový odkaz ani technické údaje do záhlaví NEPATŘÍ
+    // (sekce B) — odkaz je níž, v panelu „Moje síť podle úrovní".
+    return '<div class="ld-head">' +
+        '<div>' +
+          '<p class="ld-eyebrow">Řízení sítě</p>' +
+          '<h2 class="ld-title">Přehled lídra</h2>' +
+          '<p class="ld-sub">' + veta + '</p>' +
+        '</div>' +
+        '<div class="ld-head-action">' +
+          '<button type="button" class="btn-primary" id="ldAddTipBtn">Přidat nový tip</button>' +
+        '</div>' +
+      '</div>';
+  }
+
+  // ------------------------------ P2: pracovní fronta (C) — nejvýraznější
+  function ldQueueHtml(d) {
+    var s = d.fronta_souhrn || {};
+    var vse = d.fronta || [];
+    var polozky = ldFrontaVse ? vse : vse.slice(0, LD_FRONTA_NAHLED);
+
+    var chips =
+      '<div class="ld-queue-chips">' +
+        '<div class="ld-chip ld-chip-late"><div class="ld-chip-num">' + ldNum(s.po_terminu) + '</div><div class="ld-chip-label">po termínu</div></div>' +
+        '<div class="ld-chip ld-chip-today"><div class="ld-chip-num">' + ldNum(s.dnes) + '</div><div class="ld-chip-label">vyřídit dnes</div></div>' +
+        '<div class="ld-chip ld-chip-normal"><div class="ld-chip-num">' + ldNum(s.bezna) + '</div><div class="ld-chip-label">běžná priorita</div></div>' +
+      '</div>';
+
+    var telo;
+    if (!vse.length) {
+      // Sekce S, scénář 1: prázdný stav fronty musí vypadat jako ÚSPĚCH,
+      // ne jako chyba nebo prázdná tabulka.
+      telo = '<p class="ld-empty">Hotovo — teď vás nic nečeká.' +
+        '<span class="ld-empty-sub">Nové tipy i požadavky se objeví tady, hned jak přijdou.</span></p>';
+    } else {
+      // Zvýrazněné (tmavě zelené) je ZÁMĚRNĚ jen tlačítko PRVNÍHO řádku -
+      // „co mám udělat teď hned". Kdyby bylo primární víc tlačítek, fronta
+      // by zase nesdělovala pořadí (sekce C: seřazeno podle naléhavosti).
+      telo = '<div class="ld-queue">' + polozky.map(function (p, i) {
+        return ldQueueRowHtml(p, i === 0);
+      }).join("") + '</div>';
+    }
+
+    var odkaz = vse.length > LD_FRONTA_NAHLED
+      ? '<button type="button" class="ld-panel-link" id="ldFrontaToggle">' +
+          (ldFrontaVse ? "Jen nejbližší ↑" : "Celá fronta (" + vse.length + ") →") + '</button>'
+      : '';
+
+    return '<section class="ld-panel" aria-labelledby="ldQueueTitle">' +
+        '<p class="ld-eyebrow">První na řadě</p>' +
+        '<div class="ld-panel-head">' +
+          '<div>' +
+            '<h3 class="ld-panel-title" id="ldQueueTitle">Co musím dnes vyřídit' +
+              '<span class="ld-count-badge' + (ldNum(s.po_terminu) ? '' : ' ld-count-badge-quiet') + '">' + ldNum(s.celkem) + '</span></h3>' +
+            '<p class="ld-panel-sub">Konkrétní případy seřazené podle naléhavosti a délky čekání.</p>' +
+          '</div>' + odkaz +
+        '</div>' + chips + telo +
+      '</section>';
+  }
+
+  function ldQueueRowHtml(p, jePrimarni) {
+    var n = LD_NALEHAVOST[p.nalehavost] || LD_NALEHAVOST.bezna;
+    // Řádek 1 vpravo: u opožděných doslova „Po termínu", jinak doba čekání.
+    var hlavni = (p.nalehavost === "po_terminu") ? "Po termínu" : ldCekaText(p.ceka_hodin);
+    var casCls = p.nalehavost === "po_terminu" ? " ld-time-late" : (p.nalehavost === "dnes" ? " ld-time-today" : "");
+    var podnadpis = [p.jmeno, p.nemovitost].filter(Boolean).join(" · ");
+
+    return '<div class="ld-queue-row">' +
+        // Tečka je čistě dekorace — informaci nese text vedle ní i napravo.
+        '<span class="ld-dot ld-dot-' + n.cls + '" aria-hidden="true"></span>' +
+        '<div class="ld-queue-main">' +
+          '<div class="ld-queue-nadpis">' + escapeHtml(p.nadpis || "") + '</div>' +
+          '<div class="ld-queue-meta">' + escapeHtml(podnadpis || "—") + '</div>' +
+        '</div>' +
+        '<div class="ld-queue-time">' +
+          '<div class="ld-queue-time-strong' + casCls + '">' + escapeHtml(hlavni) + '</div>' +
+          '<div class="ld-queue-time-note">' + escapeHtml(p.popis || p.stav_text || "") + '</div>' +
+          '<span class="sr-only">' + escapeHtml(n.label) + '</span>' +
+        '</div>' +
+        '<button type="button" class="ld-queue-btn' + (jePrimarni ? " ld-queue-btn-primary" : "") + '"' +
+          ' data-ld-akce="' + escapeHtml(p.akce_kod || "") + '"' +
+          ' data-ld-cil-typ="' + escapeHtml(p.cil_typ || "") + '"' +
+          ' data-ld-cil-id="' + escapeHtml(p.cil_id || "") + '">' +
+          escapeHtml(p.akce_label || "Otevřít") + '</button>' +
+      '</div>';
+  }
+
+  // ------------------------------------- P3: čtyři souhrnné ukazatele (D)
+  function ldKpisHtml(d) {
+    var u = d.ukazatele || {};
+    var at = u.aktivni_tipy || {}, rk = u.tipy_u_rk || {}, li = u.lide_v_siti || {}, ti = u.aktivni_tipari || {};
+    var prahRk = ldNum(d.sla && d.sla.rk_bez_aktualizace_dni);
+
+    function kpi(label, num, noteHtml) {
+      return '<div class="ld-kpi"><div class="ld-kpi-label">' + escapeHtml(label) + '</div>' +
+        '<div class="ld-kpi-num">' + escapeHtml(String(ldNum(num))) + '</div>' +
+        '<div class="ld-kpi-note">' + noteHtml + '</div></div>';
+    }
+
+    return '<div class="ld-kpis">' +
+      kpi("Aktivní tipy", at.hodnota,
+        '<span class="ld-kpi-note-up">' + escapeHtml(ldZmenaText(at.novych_30, at.novych_predchozich_30)) + '</span>') +
+      kpi("Tipy u realitních kanceláří", rk.hodnota,
+        ldNum(rk.bez_aktualizace)
+          ? '<span class="ld-kpi-note-warn">' + ldNum(rk.bez_aktualizace) + ' bez aktualizace déle než ' + prahRk + ' dní</span>'
+          : 'všechny aktualizované včas') +
+      kpi("Lidé v celé síti", li.hodnota,
+        '<span class="ld-kpi-note-up">+' + ldNum(li.novych_30) + ' za 30 dní</span>') +
+      kpi("Aktivní tipaři", ti.hodnota,
+        escapeHtml(ldNum(ti.podil_pct) + " % celé sítě")) +
+    '</div>';
+  }
+
+  // --------------------------------------------- P4: Tipy v procesu (E)
+  function ldFazeHtml(d) {
+    var faze = d.faze || [];
+    var karty = faze.map(function (f) {
+      // Klíčový milník (fáze 6 = uzavřená ZS) je jediná tmavě zelená karta.
+      var cls = "ld-faze-card";
+      if (f.klicovy) cls += " ld-faze-key";
+      else if (f.poradi <= 2) cls += " ld-faze-early";
+      else if (f.poradi === 7) cls += " ld-faze-done";
+      else cls += " ld-faze-rk";
+
+      var pozn = "";
+      if (f.klicovy) pozn = "Klíčový milník";
+      else if (ldNum(f.vyzaduje_zasah)) pozn = ldNum(f.vyzaduje_zasah) + " vyžaduje zásah";
+      else if (ldNum(f.bez_aktualizace)) pozn = ldNum(f.bez_aktualizace) + " bez aktualizace";
+
+      // Hodnota filtru je fáze, ne surový stav - viz `statusOptions`
+      // v renderTipyTable() (skupina "faze:*"). Pole `filtr` z RPC zůstává
+      // v datech jako doplňková informace pro případné jiné pohledy.
+      return '<button type="button" class="' + cls + '" data-ld-faze-filtr="faze:' + escapeHtml(f.kod || "") + '"' +
+          ' title="Otevřít Tipy s filtrem „' + escapeHtml(f.label || "") + '“">' +
+          '<span class="ld-faze-num">' + ldNum(f.pocet) + '</span>' +
+          '<span class="ld-faze-label">' + escapeHtml(f.label || "") + '</span>' +
+          (pozn ? '<span class="ld-faze-note">' + escapeHtml(pozn) + '</span>' : '') +
+        '</button>';
+    }).join("");
+
+    return '<section class="ld-panel" aria-labelledby="ldFazeTitle">' +
+        '<div class="ld-panel-head">' +
+          '<div>' +
+            '<h3 class="ld-panel-title" id="ldFazeTitle">Tipy v procesu</h3>' +
+            '<p class="ld-panel-sub">Aktuální živé případy – od prvního ověření po prodej.</p>' +
+          '</div>' +
+          '<button type="button" class="ld-panel-link" data-ld-goto="tipy">Přehled tipů →</button>' +
+        '</div>' +
+        '<div class="ld-faze">' + karty + '</div>' +
+      '</section>';
+  }
+
+  // ---------------------------------------- P5a: Nové tipy v čase (H)
+  function ldTipyVCaseHtml(d) {
+    var vse = d.nove_tipy_v_case || {};
+    var rada = vse[ldObdobiTipy] || {};
+    var body = rada.body || [];
+    var celkem = ldNum(rada.celkem), predchozi = ldNum(rada.predchozi_celkem);
+    var rozdil = celkem - predchozi;
+    var srovnani = predchozi === 0
+      ? (celkem === 0 ? "ve srovnatelném předchozím období také nic" : "v předchozím stejně dlouhém období 0")
+      : ((rozdil >= 0 ? "+" : "") + rozdil + " oproti předchozímu období (" + predchozi + ")");
+
+    return '<section class="ld-panel" aria-labelledby="ldTipyCasTitle">' +
+        '<div class="ld-panel-head">' +
+          '<div>' +
+            '<h3 class="ld-panel-title" id="ldTipyCasTitle">Nové tipy v čase</h3>' +
+            '<p class="ld-panel-sub">Posledních ' + body.length + ' týdnů · celkem ' + celkem + ' ' +
+              (celkem === 1 ? "tip" : (celkem < 5 ? "tipy" : "tipů")) + ' · ' + escapeHtml(srovnani) + '</p>' +
+          '</div>' + ldSwitchHtml("tipy", ldObdobiTipy) +
+        '</div>' +
+        '<div class="ld-chart">' + ldAreaChartSvg(body, { popis: "Nové tipy po týdnech" }) + '</div>' +
+        ldOsaHtml(body) +
+      '</section>';
+  }
+
+  // ------------------------------------- P5b: Cesta všech tipů (I)
+  function ldTrychtyrHtml(d) {
+    var t = d.trychtyr || {};
+    var faze = t.faze || [];
+    var kohorta = ldNum(t.kohorta_velikost);
+
+    if (!kohorta) {
+      // Scénář 8: bez dostatečně staré kohorty nemá trychtýř co počítat —
+      // říct to rovnou a vysvětlit proč, ne kreslit samé nuly.
+      return '<section class="ld-panel">' +
+          '<h3 class="ld-panel-title">Cesta všech tipů</h3>' +
+          '<p class="ld-panel-sub">Kde případy pokračují a kde jejich cesta končí.</p>' +
+          '<p class="dt-muted" style="margin:24px 0;">Zatím není dost uzavřených dat. Do trychtýře se počítají jen tipy starší než ' +
+            ldNum(t.kohorta_dni) + ' dní, aby čerstvé živé případy nevypadaly jako neúspěch.</p>' +
+        '</section>';
+    }
+
+    var radky = faze.map(function (f) {
+      var pct = ldNum(f.pct);
+      var sirka = Math.max(6, pct);
+      var titulek = ldNum(f.ukonceno_do_dalsi)
+        ? ("Mezi touto a následující fází skončilo " + ldNum(f.ukonceno_do_dalsi) + " tipů")
+        : "Žádný tip mezi touto a následující fází neskončil";
+      return '<div class="ld-funnel-row" title="' + escapeHtml(titulek) + '">' +
+          '<div class="ld-funnel-label">' + escapeHtml(f.label || "") + '</div>' +
+          '<div class="ld-funnel-track"><div class="ld-funnel-bar" style="width:' + sirka + '%;">' + ldNum(f.pocet) + '</div></div>' +
+          '<div class="ld-funnel-pct">' + pct + ' %</div>' +
+        '</div>';
+    }).join("");
+
+    var souhrny = (t.souhrny || []).map(function (s) {
+      return '<div class="ld-summary-item"><b>' + ldNum(s.pocet) + '</b>' + escapeHtml(s.label || "") + '</div>';
+    }).join("");
+
+    return '<section class="ld-panel" aria-labelledby="ldTrychtyrTitle">' +
+        '<h3 class="ld-panel-title" id="ldTrychtyrTitle">Cesta všech tipů</h3>' +
+        '<p class="ld-panel-sub">Kde případy pokračují a kde jejich cesta končí. Kohorta: ' + kohorta +
+          ' tipů starších než ' + ldNum(t.kohorta_dni) + ' dní.</p>' +
+        '<div class="ld-funnel">' + radky + '</div>' +
+        '<p class="ld-funnel-note"><strong>Klíčový milník: uzavřená zprostředkovatelská smlouva.</strong><br>' +
+          'Od této chvíle je tip skutečně v prodeji. Předání realitní kanceláři je jen mezikrok.</p>' +
+        '<div class="ld-summary">' + souhrny + '</div>' +
+      '</section>';
+  }
+
+  // ------------------------------ P6a: Případy u realitních kanceláří (K)
+  function ldRkHtml(d) {
+    var r = d.rk || {};
+    var kancelare = r.kancelare || [];
+    var prah = ldNum(r.prah_dni);
+
+    var radky = kancelare.length
+      ? kancelare.map(function (k) {
+          var pozn;
+          if (ldNum(k.bez_aktualizace)) {
+            pozn = '<div class="ld-row-note ld-row-note-warn">' + ldNum(k.bez_aktualizace) +
+              ' případ' + (ldNum(k.bez_aktualizace) === 1 ? "" : (ldNum(k.bez_aktualizace) < 5 ? "y" : "ů")) +
+              ' bez aktualizace déle než ' + prah + ' dní</div>';
+          } else if (k.posledni_aktualizace) {
+            pozn = '<div class="ld-row-note">Poslední aktualizace ' + escapeHtml(formatDatumZCasu(k.posledni_aktualizace) || "—") + '</div>';
+          } else {
+            pozn = '<div class="ld-row-note">Zatím žádný živý případ · prodáno ' + ldNum(k.prodano) + '</div>';
+          }
+          return '<div class="ld-row">' +
+              '<div class="ld-row-main"><div class="ld-row-name">' + escapeHtml(k.nazev || "—") + '</div>' + pozn + '</div>' +
+              '<div class="ld-row-right">' +
+                '<div class="ld-row-val">' + ldNum(k.aktivnich) + ' aktivních</div>' +
+                (k.prumer_dni != null ? '<div class="ld-row-sub">průměrně ' + ldNum(k.prumer_dni) + ' dní · nejstarší ' + ldNum(k.nejstarsi_dni) + '</div>' : '') +
+              '</div>' +
+            '</div>';
+        }).join("")
+      : '<p class="dt-muted" style="margin:18px 0;">Zatím žádný případ u realitní kanceláře.</p>';
+
+    var stari = (r.stari || []).filter(function (s) { return ldNum(s.pocet) > 0; })
+      .map(function (s) { return escapeHtml(s.label) + ": " + ldNum(s.pocet); }).join(" · ");
+
+    return '<section class="ld-panel" aria-labelledby="ldRkTitle">' +
+        '<h3 class="ld-panel-title" id="ldRkTitle">Případy u realitních kanceláří</h3>' +
+        '<p class="ld-panel-sub">' + ldNum(r.celkem_aktivnich) + ' aktivních případů · ' +
+          ldNum(r.vyzaduje_kontrolu) + ' vyžaduje kontrolu.' +
+          (stari ? ' Stáří od předání – ' + stari + '.' : '') + '</p>' +
+        '<div class="ld-rows">' + radky + '</div>' +
+      '</section>';
+  }
+
+  // ----------------------------------------- P6b: Růst celé sítě (L)
+  function ldRustHtml(d) {
+    var s = d.sit_rust || {};
+    var body = (s.rady && s.rady[ldObdobiSit]) || [];
+    var celkem = ldNum(s.celkem);
+    return '<section class="ld-panel" aria-labelledby="ldRustTitle">' +
+        '<div class="ld-panel-head">' +
+          '<div>' +
+            '<h3 class="ld-panel-title" id="ldRustTitle">Růst celé sítě</h3>' +
+            '<p class="ld-panel-sub">' + celkem + ' lidí · +' + ldNum(s.novych_7) + ' za 7 dní · +' +
+              ldNum(s.novych_30) + ' za 30 dní · ' + ldNum(s.aktivni_tipari) + ' aktivních tipařů · ' +
+              ldNum(s.bez_aktivity) + ' členů bez aktivity</p>' +
+          '</div>' + ldSwitchHtml("sit", ldObdobiSit) +
+        '</div>' +
+        '<div class="ld-chart-peak">' + celkem + ' lidí</div>' +
+        '<div class="ld-chart">' + ldAreaChartSvg(body, { popis: "Růst sítě v čase" }) + '</div>' +
+        ldOsaHtml(body) +
+      '</section>';
+  }
+
+  // ------------------------------------ P7a: Moje síť podle úrovní (L)
+  function ldUrovneHtml(d) {
+    var urovne = d.sit_urovne || [];
+    var max = urovne.reduce(function (m, u) { return Math.max(m, ldNum(u.pocet)); }, 1);
+    var radky = urovne.length
+      ? urovne.map(function (u) {
+          var pct = Math.max(4, Math.round((ldNum(u.pocet) / max) * 100));
+          return '<div class="ld-level">' +
+              '<div class="ld-level-label">' + ldNum(u.uroven) + '. úroveň</div>' +
+              '<div class="ld-level-track"><div class="ld-level-bar" style="width:' + pct + '%;"></div></div>' +
+              '<div class="ld-level-val">' + ldNum(u.pocet) + ' · ' + ldNum(u.aktivnich) + ' aktivních · +' +
+                ldNum(u.novych_30) + ' za 30 dní · ' + ldNum(u.tipu) + ' tipů</div>' +
+            '</div>';
+        }).join("")
+      : '<p class="dt-muted" style="margin:18px 0;">Zatím nemáte v síti nikoho pod sebou.</p>';
+
+    // Sekce L: detailní genealogický strom na dashboard NEPATŘÍ — jen odkaz.
+    // Sekce B: pozvánkový odkaz smí být dostupný právě tady, méně výrazně.
+    return '<section class="ld-panel" aria-labelledby="ldUrovneTitle">' +
+        '<div class="ld-panel-head">' +
+          '<div>' +
+            '<h3 class="ld-panel-title" id="ldUrovneTitle">Moje síť podle úrovní</h3>' +
+            '<p class="ld-panel-sub">Struktura, aktivita a přínos jednotlivých pater.</p>' +
+          '</div>' +
+          '<button type="button" class="ld-panel-link" data-ld-goto="users">Celý seznam lidí →</button>' +
+        '</div>' +
+        '<div class="ld-levels">' + radky + '</div>' +
+        '<div class="ld-row" style="margin-top:16px;border-top:1px solid var(--border);">' +
+          '<div class="ld-row-main"><div class="ld-row-note">Pozvánkový odkaz</div>' +
+            '<code id="ldInviteText" style="font-size:12.5px;word-break:break-all;">' +
+              escapeHtml(ldInviteUrl()) + '</code></div>' +
+          '<div class="ld-row-right"><button type="button" class="btn-small" id="ldInviteCopyBtn">Zkopírovat</button></div>' +
+        '</div>' +
+      '</section>';
+  }
+
+  function ldInviteUrl() {
+    return location.origin + location.pathname + "?ref=" + ((currentUser && currentUser.invite_code) || "");
+  }
+
+  // ------------------------------- P7b: Síť potřebuje pozornost (M)
+  function ldPozornostHtml(d) {
+    var polozky = d.sit_pozornost || [];
+    var radky = polozky.map(function (p) {
+      var chybi = p.chybi_datovy_bod === true;
+      return '<button type="button" class="ld-linkrow"' +
+          (chybi ? ' disabled title="Systém zatím neeviduje samostatné požadavky na změnu profilu."' :
+                   ' data-ld-sit-filtr="' + escapeHtml(p.filtr || "") + '"') + '>' +
+          '<span>' + escapeHtml(p.label || "") +
+            (chybi ? ' <span class="ld-gap-note">(zatím se neeviduje)</span>' : '') + '</span>' +
+          '<span class="ld-linkrow-val">' + ldNum(p.pocet) + (chybi ? '' : ' →') + '</span>' +
+        '</button>';
+    }).join("");
+
+    return '<section class="ld-panel ld-panel-soft" aria-labelledby="ldPozornostTitle">' +
+        '<p class="ld-eyebrow">Rozvoj lidí</p>' +
+        '<h3 class="ld-panel-title" id="ldPozornostTitle">Síť potřebuje pozornost</h3>' +
+        '<div style="margin-top:8px;">' + radky + '</div>' +
+      '</section>';
+  }
+
+  // ---------------------------------------------------------------- wiring
+  function ldWire(wrap) {
+    var addBtn = el("ldAddTipBtn");
+    if (addBtn) addBtn.addEventListener("click", function () { setActiveTab("new"); });
+
+    var toggle = el("ldFrontaToggle");
+    if (toggle) toggle.addEventListener("click", function () { ldFrontaVse = !ldFrontaVse; ldRenderAll(); });
+
+    var copyBtn = el("ldInviteCopyBtn");
+    if (copyBtn) copyBtn.addEventListener("click", function () { ldCopyInvite(); });
+
+    // Přepínače období (sekce H a L) — přepočet je čistě nad už načtenými
+    // předpočítanými řadami, na server se znovu nechodí.
+    wrap.querySelectorAll("[data-ld-switch]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var kod = btn.getAttribute("data-ld-switch");
+        var obdobi = btn.getAttribute("data-ld-obdobi");
+        if (kod === "tipy") ldObdobiTipy = obdobi; else ldObdobiSit = obdobi;
+        ldRenderAll();
+      });
+    });
+
+    // Sekce R: každý pracovní úkol odkazuje PŘÍMO na konkrétní tip /
+    // uživatele / výplatu, nikdy na obecný seznam.
+    wrap.querySelectorAll("[data-ld-akce]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        ldSpustitAkci(btn.getAttribute("data-ld-akce"),
+                      btn.getAttribute("data-ld-cil-typ"),
+                      btn.getAttribute("data-ld-cil-id"), btn);
+      });
+    });
+
+    // Sekce E/R: klik na fázi otevře „Tipy" s odpovídajícím filtrem.
+    wrap.querySelectorAll("[data-ld-faze-filtr]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        pendingTipyFilter = btn.getAttribute("data-ld-faze-filtr") || "";
+        setActiveTab("tipy");
+      });
+    });
+
+    // Sekce M/R: klik na řádek „Síť potřebuje pozornost" otevře filtrovaný
+    // seznam lidí (Uživatelé), u KYC rovnou záložku Ověření totožnosti.
+    wrap.querySelectorAll("[data-ld-sit-filtr]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var f = btn.getAttribute("data-ld-sit-filtr");
+        if (f === "ceka_kyc") { setActiveTab("kyc"); return; }
+        pendingUsersFilter = f;
+        setActiveTab("users");
+      });
+    });
+
+    wrap.querySelectorAll("[data-ld-goto]").forEach(function (btn) {
+      btn.addEventListener("click", function () { setActiveTab(btn.getAttribute("data-ld-goto")); });
+    });
+  }
+
+  function ldCopyInvite() {
+    var text = ldInviteUrl();
+    if (!navigator.clipboard || !navigator.clipboard.writeText) {
+      showBanner(el("networkBanner"), "error", "Zkopírování se nepodařilo, zkopírujte odkaz prosím ručně.");
+      return;
+    }
+    navigator.clipboard.writeText(text).then(function () {
+      showBanner(el("networkBanner"), "ok", "Odkaz zkopírován do schránky.");
+      setTimeout(function () { showBanner(el("networkBanner"), null, null); }, 3000);
+    }).catch(function (e) {
+      console.error("Kopírování pozvánkového odkazu selhalo:", e);
+      showBanner(el("networkBanner"), "error", "Zkopírování se nepodařilo, zkopírujte odkaz prosím ručně.");
+    });
+  }
+
+  async function ldSpustitAkci(akce, cilTyp, cilId, btn) {
+    if (akce === "zaznamenat_pokus") {
+      // Jediná akce fronty, která se provádí PŘÍMO odsud (tlačítko v návrhu
+      // klienta říká „Zaznamenat další pokus"). Zápis dělá server
+      // (zaznamenat_pokus_o_kontakt) — razítko času i počítadlo pokusů,
+      // ze kterých se pak počítá doba čekání v téhle frontě.
+      var g = authGen;
+      if (btn) btn.disabled = true;
+      var res = await sb.rpc("zaznamenat_pokus_o_kontakt", { p_tip_id: cilId, p_poznamka: null });
+      if (g !== authGen) return;
+      if (btn) btn.disabled = false;
+      if (res.error) {
+        console.error("Chyba při zápisu pokusu o kontakt:", res.error);
+        showBanner(el("networkBanner"), "error", stavZmenaErrorMessage(res.error));
+        return;
+      }
+      var poradi = res.data;
+      showBanner(el("networkBanner"), "ok", "Zaznamenán pokus o kontakt č. " + poradi +
+        (poradi >= ldNum(leaderPrehled && leaderPrehled.sla && leaderPrehled.sla.max_pokusu)
+          ? " — tip už jde ukončit pro nezastižení." : "."));
+      setTimeout(function () { showBanner(el("networkBanner"), null, null); }, 5000);
+      await renderLeaderPrehled();
+      return;
+    }
+    if (cilTyp === "tip" && cilId) { openTipDetail(cilId, "network"); return; }
+    if (akce === "overit_totoznost") { setActiveTab("kyc"); return; }
+    if (akce === "schvalit_vyplatu") { setActiveTab("vyplaty"); return; }
+    if (cilTyp === "uzivatel") { pendingUsersFilter = "nedokoncena_registrace"; setActiveTab("users"); return; }
+    setActiveTab("tipy");
+  }
+
+  // ------------------------------------------ P8: „Nově prodáno" (N)
   //
-  // Seznam nových, ještě neodbavených prodejů: tip má rk_stav='prodano',
-  // vyplněné datum prodeje i kupní cenu a NEEXISTUJE pro něj žádný řádek ve
-  // `vyplaty` - tedy přesně podmínka `muzeKVyplate` z renderTipDetail(), jen
-  // napříč celou sítí. Data i omezení na podstrom řeší RPC
-  // leader_nove_prodane_tipy() (SECURITY DEFINER, gate je_leader_nebo_admin),
-  // částku počítá sdílená SQL funkce vypocitat_vyplatu_pro_tip() - tedy TÁŽ
-  // funkce, kterou při skutečném odeslání použije poslat_tip_k_vyplate().
-  // Číslo na dashboardu se proto nemůže rozejít s tím, co se skutečně vyplatí.
-  //
-  // Kontejner #leaderNoveProdanoWrap vzniká UVNITŘ #leaderDashboardWrap,
-  // který je v ROLE_SPECIFIC_CONTAINER_IDS i v TAB_PRECLEAR.network - úklid
-  // při změně identity i při vstupu na záložku je tedy pokrytý bez dalšího
-  // záznamu v seznamu (stejně jako #leaderLevelsWrap od Milníku 12).
+  // Milník 17 (bod 5c) → Milník 21 (sekce N): panel zůstává, jen se
+  // přesouvá na KONEC stránky (sekce P, bod 8) a dostává vizuál z návrhu
+  // (teplá béžová „Dokončení obchodního případu"). Data i výpočet částky
+  // beze změny: leader_nove_prodane_tipy() + sdílená vypocitat_vyplatu_pro_tip().
   async function renderLeaderNoveProdano() {
     var wrap = el("leaderNoveProdanoWrap");
     if (!wrap) return;
     var g = authGen; // Milník 15 (bod 4.5)
     var result = await sb.rpc("leader_nove_prodane_tipy");
-    if (g !== authGen) return; // identita se během dotazu změnila - nic nevykreslovat
+    if (g !== authGen) return;
     if (result.error) {
       console.error("Chyba při načítání nově prodaných tipů:", result.error);
       wrap.innerHTML = '<div class="banner banner-error">Přehled nových prodejů se nepodařilo načíst.</div>';
@@ -11657,92 +12904,66 @@
 
     if (!rows.length) {
       wrap.innerHTML =
-        '<div class="np-section">' +
-          '<div class="stat-row-heading">Nově prodáno</div>' +
-          '<p class="np-empty">Žádné nové prodeje k odbavení.</p>' +
-        '</div>';
+        '<section class="ld-panel">' +
+          '<p class="ld-eyebrow">Dokončení obchodního případu</p>' +
+          '<h3 class="ld-panel-title">Nově prodáno</h3>' +
+          '<p class="ld-panel-sub">Žádný prodaný případ nečeká na odeslání k výplatě.</p>' +
+        '</section>';
       return;
     }
 
     var itemsHtml = rows.map(function (r) {
+      var castkaHtml;
+      if (r.vypoctena_castka_k_vyplate != null) {
+        castkaHtml = '<div class="ld-sold-val">' + escapeHtml(formatCena(r.vypoctena_castka_k_vyplate)) + '</div>';
+      } else {
+        // Sekce N: když výpočet NELZE provést, ukázat PŘESNÝ důvod a
+        // nápravnou akci — ne obecnou chybu ani zavádějící „0 Kč".
+        var duvod, naprava;
+        if (r.rk_marze_typ == null || r.rk_marze_hodnota == null) {
+          duvod = "Chybí marže realitní kanceláře";
+          naprava = "Marži doplní přiřazená RK ve svém portálu u tohoto tipu.";
+        } else {
+          duvod = "Tip nemá přiřazené provizní schéma";
+          naprava = "Otevřete detail tipu – provizní schéma se přiřazuje při vložení tipu.";
+        }
+        castkaHtml = '<div class="ld-sold-blocked">' + escapeHtml(duvod) + '</div>' +
+          '<div class="ld-sold-fix">' + escapeHtml(naprava) + '</div>';
+      }
       var marze = r.rk_marze_typ
         ? (r.rk_marze_typ === "procento"
             ? (r.rk_marze_hodnota != null ? String(r.rk_marze_hodnota) + " %" : "—")
             : formatCena(r.rk_marze_hodnota))
         : "—";
-      // vypoctena_castka_k_vyplate je NULL, když ještě nejde spočítat
-      // (typicky tip bez snapshotovaného provizního schématu nebo bez
-      // marže RK) - to se NESMÍ zobrazit jako "0 Kč".
-      var castkaHtml = r.vypoctena_castka_k_vyplate != null
-        ? '<span class="np-castka">' + escapeHtml(formatCena(r.vypoctena_castka_k_vyplate)) + '</span>'
-        : '<span class="np-castka np-castka-nelze" title="Chybí provizní schéma a/nebo marže RK - částku zatím nelze spočítat">nelze spočítat</span>';
 
-      return '<div class="np-row">' +
-          '<div class="np-main">' +
-            '<div class="np-klient">' + escapeHtml(r.jmeno_klienta || "(bez jména klienta)") + '</div>' +
-            '<div class="np-sub">' + escapeHtml(tipNemovitostLokalita(r) || "—") + '</div>' +
-          '</div>' +
-          '<div class="np-cell"><span class="np-label">Realitní kancelář</span><span class="np-val">' + escapeHtml(r.rk_nazev || "—") + '</span></div>' +
-          '<div class="np-cell"><span class="np-label">Prodejní cena</span><span class="np-val">' + escapeHtml(formatCena(r.kupni_cena)) + '</span></div>' +
-          '<div class="np-cell"><span class="np-label">Marže RK</span><span class="np-val">' + escapeHtml(marze) + '</span></div>' +
-          '<div class="np-cell np-cell-castka"><span class="np-label">K výplatě celkem</span><span class="np-val">' + castkaHtml + '</span></div>' +
-          // Sekce je informativní, ale odbavení prodeje se dělá v Detailu
-          // tipu (tlačítko "Odeslat k výplatě") - bez odkazu by leader
-          // musel tip hledat ručně v tabulce Tipy. Tlačítko tedy jen
-          // naviguje, žádnou vlastní finanční akci nedělá.
-          '<div class="np-cell np-cell-akce">' +
-            '<button type="button" class="btn-small btn-small-ghost np-detail-btn" data-tip-id="' + escapeHtml(r.tip_id) + '">Detail tipu</button>' +
-          '</div>' +
+      return '<div class="ld-sold-row">' +
+          '<div><div class="ld-sold-label">Prodávající a nemovitost</div>' +
+            '<div class="ld-sold-val">' + escapeHtml(r.jmeno_klienta || "(bez jména)") + '</div>' +
+            '<div class="ld-sold-fix">' + escapeHtml(tipNemovitostLokalita(r) || "—") + '</div></div>' +
+          '<div><div class="ld-sold-label">Realitní kancelář</div>' +
+            '<div class="ld-sold-val">' + escapeHtml(r.rk_nazev || "—") + '</div>' +
+            '<div class="ld-sold-fix">marže ' + escapeHtml(marze) + '</div></div>' +
+          '<div><div class="ld-sold-label">Prodejní cena · k výplatě</div>' +
+            '<div class="ld-sold-val">' + escapeHtml(formatCena(r.kupni_cena)) + '</div>' +
+            castkaHtml + '</div>' +
+          '<div><button type="button" class="btn-primary ld-sold-btn" style="width:auto;" data-tip-id="' +
+            escapeHtml(r.tip_id) + '">Zkontrolovat a odeslat</button></div>' +
         '</div>';
     }).join("");
 
     wrap.innerHTML =
-      '<div class="np-section">' +
-        '<div class="stat-row-heading">Nově prodáno <span class="np-count">' + rows.length + '</span></div>' +
-        '<p class="np-hint">Prodeje, které ještě nebyly odeslány k výplatě. Částka je spočítaná stejným vzorcem, jakým se výplaty skutečně vytvoří.</p>' +
+      '<section class="ld-panel ld-panel-beige" aria-labelledby="ldSoldTitle">' +
+        '<p class="ld-eyebrow">Dokončení obchodního případu</p>' +
+        '<h3 class="ld-panel-title" id="ldSoldTitle">Nově prodáno' +
+          '<span class="ld-count-badge">' + rows.length + '</span></h3>' +
+        '<p class="ld-panel-sub">Prodané případy, které ještě nebyly zkontrolovány a odeslány k výplatě. ' +
+          'Částka je spočítaná stejným vzorcem, jakým se výplaty skutečně vytvoří.</p>' +
         itemsHtml +
-      '</div>';
+      '</section>';
 
-    wrap.querySelectorAll(".np-detail-btn").forEach(function (btn) {
+    wrap.querySelectorAll(".ld-sold-btn").forEach(function (btn) {
       btn.addEventListener("click", function () { openTipDetail(btn.getAttribute("data-tip-id"), "network"); });
     });
-  }
-
-  // Milník 12 (bod 10): žebříčkový/pyramidový přehled sítě po úrovních -
-  // pro každou úroveň (moje_sit()/moje_sit_tipy() uroven) řádek s číslem
-  // úrovně, počtem lidí a vodorovným pruhem, jehož šířka je proporční k
-  // počtu lidí v dané úrovni vůči NEJVĚTŠÍ úrovni (čistě CSS width:%, žádná
-  // JS grafová knihovna). Data z vlastní malé RPC leader_sit_po_urovnich()
-  // (jen role leader) - viz migrace m12_rpc_leader_sit_po_urovnich.
-  async function renderLeaderSitPoUrovnich() {
-    var wrap = el("leaderLevelsWrap");
-    if (!wrap) return;
-    var g = authGen; // Milník 15 (bod 4.5)
-    var result = await sb.rpc("leader_sit_po_urovnich");
-    if (g !== authGen) return; // identita se během dotazu změnila - nic nevykreslovat
-    if (result.error) {
-      console.error("Chyba při načítání sítě po úrovních:", result.error);
-      wrap.innerHTML = '<div class="banner banner-error">Přehled sítě po úrovních se nepodařilo načíst.</div>';
-      return;
-    }
-    var rows = result.data || [];
-    if (!rows.length) {
-      wrap.innerHTML = '<p class="lvl-empty">Zatím nemáte v síti nikoho pod sebou.</p>';
-      return;
-    }
-    var maxPocet = rows.reduce(function (m, r) { return Math.max(m, Number(r.pocet) || 0); }, 1);
-    var html = '<div class="lvl-pyramid">';
-    rows.forEach(function (r) {
-      var pocet = Number(r.pocet) || 0;
-      var pct = Math.max(3, Math.round((pocet / maxPocet) * 100));
-      html += '<div class="lvl-row">' +
-        '<div class="lvl-row-label">Úroveň ' + escapeHtml(String(r.uroven)) + '</div>' +
-        '<div class="lvl-row-track"><div class="lvl-row-bar" style="width:' + pct + '%;"></div></div>' +
-        '<div class="lvl-row-count">' + escapeHtml(String(pocet)) + '</div>' +
-      '</div>';
-    });
-    html += '</div>';
-    wrap.innerHTML = html;
   }
 
   // ---------------- wiring ----------------
