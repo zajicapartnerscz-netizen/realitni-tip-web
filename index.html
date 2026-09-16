@@ -2701,6 +2701,245 @@
     .verejna-stranka-wrap h1 { font-size: 27px; }
   }
 
+  /* ======================================================================
+     MILNÍK 26 — VEŘEJNÁ ČÁST WEBU MÁ VLASTNÍ VIZUÁLNÍ JAZYK (bod 5)
+     ----------------------------------------------------------------------
+     ⚠ TOHLE JE ZÁMĚRNÁ ODLIŠNOST, NE NEDŮSLEDNOST. ⚠
+
+     Veřejný web (nepřihlášený návštěvník) = HRANATÝ, bílý, marketingový.
+     Přihlášená aplikace (dashboardy, tabulky, formuláře) = ZAOBLENÁ,
+     přesně taková, jaká byla do Milníku 25 — nemění se ani o pixel.
+
+     Technicky to drží JEDINÁ třída `body.verejny-rezim`, kterou nasazuje
+     a sundává showVerejneMenu() v JS. Je zapnutá PRÁVĚ TEHDY, když je
+     vidět veřejné menu, tedy právě na nepřihlášených obrazovkách.
+     Kdo bude v budoucnu ladit vzhled appky, ať se sem NEPŘIDÁVÁ nic, co
+     má platit i po přihlášení — patří to do sekcí výše.
+
+     Bílé pozadí i v tmavém režimu: veřejný web je značková plocha se
+     stabilním vzhledem (klient: „bílé pozadí"), takže se tu přepíšou
+     barevné tokeny zpátky na světlé hodnoty z :root. Uvnitř appky tmavý
+     režim funguje dál beze změny.
+     ====================================================================== */
+  body.verejny-rezim {
+    --bg:#FFFFFF; --surface:#FFFFFF; --surface-2:#F2F6F3; --border:#DCE5DF;
+    --text:#111C19; --text-muted:#51655B;
+    --accent:#1F6F5C; --accent-hover:#195A4A; --accent-contrast:#FFFFFF; --accent-soft:#DCEEE6;
+    --ok:#2E7D46; --ok-soft:#E3F3E7; --warn:#B8791A; --warn-soft:#FBEEDC;
+    --danger:#B93B3B; --danger-soft:#FBE6E6; --info:#3B6FB9; --info-soft:#E6EEFB;
+    --shadow-card: 0 1px 0 rgba(17,28,25,0.06);
+    background: #FFFFFF;
+  }
+  /* Hranatost. Radši jedno široké pravidlo nad veřejnými obrazovkami než
+     dvacet bodových výjimek, které se při příštím milníku rozejdou. */
+  body.verejny-rezim .verejne-menu,
+  body.verejny-rezim .verejne-menu *,
+  body.verejny-rezim #verejnyHeroScreen,
+  body.verejny-rezim #verejnyHeroScreen *,
+  body.verejny-rezim #authScreen,
+  body.verejny-rezim #authScreen *,
+  body.verejny-rezim #verejnaStrankaScreen,
+  body.verejny-rezim #verejnaStrankaScreen *,
+  body.verejny-rezim #rekrutaceScreen,
+  body.verejny-rezim #rekrutaceScreen *,
+  body.verejny-rezim .verejna-paticka,
+  body.verejny-rezim .verejna-paticka * { border-radius: 0 !important; }
+
+  /* ---- Plovoucí (sticky) menu + zvětšené logo (bod 1 a 5) */
+  body.verejny-rezim .verejne-menu {
+    position: sticky; top: 0; z-index: 40;
+    background: #FFFFFF;
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 1px 0 rgba(17,28,25,0.04);
+  }
+  .verejne-menu-inner { min-height: 72px; }
+  /* Logo je od Milníku 26 TLAČÍTKO (bod 1) - vede na hlavní stránku. */
+  .verejne-menu-brand-btn {
+    appearance: none; background: transparent; border: 0; padding: 4px 2px;
+    font-family: var(--font-display); font-size: 27px; line-height: 1.1;
+    color: var(--text); cursor: pointer; margin-right: 10px; letter-spacing: -0.01em;
+  }
+  .verejne-menu-brand-btn em { font-style: italic; color: var(--accent); }
+  .verejne-menu-brand-btn:hover em { color: var(--accent-hover); }
+  .verejne-menu-brand-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  body.verejny-rezim .verejne-menu-link {
+    font-size: 14.5px; padding: 8px 11px; border: 1px solid transparent;
+    text-transform: none; letter-spacing: 0; white-space: nowrap;
+  }
+  /* Bez `flex-basis: 0` by si mezera brala vlastní šířku a tlačítko
+     „Přihlásit se" by se při širším menu zlomilo na druhý řádek. */
+  body.verejny-rezim .verejne-menu-spacer { flex: 1 1 0; min-width: 0; }
+  /* MILNÍK 26 (bod 5): na hlavní stránce je nad přihlašovací kartou velký
+     banner, takže karta už nemá být vertikálně centrovaná přes celou výšku
+     okna - vznikala by mezi bannerem a kartou obrovská prázdná plocha. */
+  body.verejny-rezim .auth-wrap { min-height: 0; padding: 36px 16px 8px; align-items: flex-start; }
+  body.verejny-rezim .verejne-menu-link[aria-current="page"] {
+    background: transparent; color: var(--accent); border-color: transparent;
+    border-bottom: 2px solid var(--accent); font-weight: 600;
+  }
+  body.verejny-rezim #verejneMenuPrihlasitBtn {
+    background: var(--accent); color: var(--accent-contrast); border-color: var(--accent);
+    font-weight: 600;
+  }
+  body.verejny-rezim #verejneMenuPrihlasitBtn:hover { background: var(--accent-hover); color: #fff; }
+
+  /* ---- Uvítací banner na hlavní stránce (bod 5) */
+  .v-hero {
+    background: linear-gradient(120deg, #123F35 0%, #1F6F5C 55%, #2E9078 100%);
+    color: #FFFFFF;
+    padding: 64px 20px 58px;
+    border-bottom: 4px solid #0E312A;
+  }
+  .v-hero-inner { max-width: 1100px; margin: 0 auto; }
+  .v-hero-eyebrow {
+    font-size: 12.5px; letter-spacing: 0.16em; text-transform: uppercase;
+    opacity: 0.85; margin: 0 0 14px;
+  }
+  .v-hero h1 {
+    font-family: var(--font-display); font-size: 46px; line-height: 1.08;
+    margin: 0 0 16px; max-width: 18ch;
+  }
+  .v-hero p.v-hero-lead { font-size: 19px; line-height: 1.55; margin: 0; max-width: 62ch; opacity: 0.95; }
+  .v-hero-cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+  .v-hero-btn {
+    appearance: none; font: inherit; font-size: 15px; font-weight: 600;
+    padding: 13px 26px; cursor: pointer; border: 2px solid #FFFFFF;
+    background: #FFFFFF; color: #123F35;
+  }
+  .v-hero-btn-ghost { background: transparent; color: #FFFFFF; }
+  .v-hero-btn:hover { opacity: 0.9; }
+  .v-hero-fakta { display: flex; gap: 34px; flex-wrap: wrap; margin-top: 34px; }
+  .v-hero-fakt strong { display: block; font-family: var(--font-display); font-size: 25px; }
+  .v-hero-fakt span { font-size: 13px; opacity: 0.85; }
+  .v-hero-obsah { max-width: 1100px; margin: 0 auto; padding: 40px 20px 8px; }
+
+  /* ---- Patička (bod 7) */
+  .verejna-paticka {
+    background: #0E1B17; color: #D8E5DF;
+    margin-top: 56px; padding: 44px 20px 30px;
+  }
+  .verejna-paticka-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; gap: 40px; flex-wrap: wrap; justify-content: space-between;
+  }
+  .verejna-paticka-text { flex: 1 1 340px; min-width: 260px; }
+  .verejna-paticka-znacka { font-family: var(--font-display); font-size: 23px; color: #FFFFFF; margin: 0 0 12px; }
+  .verejna-paticka-text .rt-odstavec { font-size: 13.5px; line-height: 1.65; color: #B9CCC4; margin: 0 0 10px; }
+  .verejna-paticka-text .rt-h1, .verejna-paticka-text .rt-h2, .verejna-paticka-text .rt-h3,
+  .verejna-paticka-text .rt-h4, .verejna-paticka-text .rt-h5 { color: #FFFFFF; font-size: 16px; margin: 0 0 8px; }
+  .verejna-paticka-odkazy { flex: 0 1 auto; display: flex; flex-direction: column; gap: 10px; }
+  .verejna-paticka-odkazy h4 {
+    font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: #7E958B; margin: 0 0 4px; font-weight: 600;
+  }
+  .verejna-paticka-odkaz {
+    appearance: none; background: none; border: 0; padding: 0; text-align: left;
+    font: inherit; font-size: 14px; color: #D8E5DF; cursor: pointer;
+  }
+  .verejna-paticka-odkaz:hover { color: #FFFFFF; text-decoration: underline; }
+  .verejna-paticka-spodek {
+    max-width: 1100px; margin: 30px auto 0; padding-top: 18px;
+    border-top: 1px solid #22332C; font-size: 12px; color: #7E958B;
+  }
+  .verejna-paticka a { color: #D8E5DF; }
+
+  /* ======================================================================
+     MILNÍK 26 (bod 2) — VYKRESLENÍ STRUKTUROVANÉHO TEXTU
+     Třídy používá JAK veřejná stránka, TAK náhled v administraci, aby
+     administrátor viděl přesně to, co uvidí návštěvník.
+     ====================================================================== */
+  .rt-obsah > *:first-child { margin-top: 0; }
+  .rt-h1 { font-family: var(--font-display); font-size: 34px; line-height: 1.15; margin: 30px 0 12px; color: var(--text); }
+  .rt-h2 { font-family: var(--font-display); font-size: 27px; line-height: 1.2; margin: 26px 0 10px; color: var(--text); }
+  .rt-h3 { font-family: var(--font-display); font-size: 22px; line-height: 1.25; margin: 22px 0 9px; color: var(--text); }
+  .rt-h4 { font-size: 18px; font-weight: 700; margin: 20px 0 8px; color: var(--text); }
+  .rt-h5 { font-size: 15px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; margin: 18px 0 7px; color: var(--text-muted); }
+  .rt-odstavec { font-size: 15.5px; line-height: 1.7; color: var(--text); margin: 0 0 14px; white-space: pre-line; }
+  .rt-seznam { margin: 0 0 16px; padding-left: 22px; }
+  .rt-seznam li { font-size: 15.5px; line-height: 1.7; color: var(--text); margin-bottom: 6px; }
+  .rt-vlevo { text-align: left; }
+  .rt-na-stred { text-align: center; }
+  .rt-vpravo { text-align: right; }
+  .rt-do-bloku { text-align: justify; }
+  ul.rt-na-stred, ul.rt-vpravo { list-style-position: inside; padding-left: 0; }
+  .rt-odkaz { color: var(--accent); text-decoration: underline; }
+  .rt-prazdno { font-size: 13.5px; color: var(--text-muted); font-style: italic; }
+
+  /* ======================================================================
+     MILNÍK 26 (body 2 a 8) — EDITOR VE „SPRÁVA WEBU" (jen administrátor)
+     Blokový editor: každý blok má vlastní typ, zarovnání a textové pole.
+     ZÁMĚRNĚ to NENÍ `contenteditable` - viz dokumentace, rozhodnutí R2-RICH.
+     ====================================================================== */
+  .rte-wrap { border: 1px solid var(--border); border-radius: var(--radius-m); background: var(--surface-2); padding: 10px; }
+  .rte-blok {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-s); padding: 10px; margin-bottom: 10px;
+  }
+  .rte-blok:last-child { margin-bottom: 0; }
+  .rte-lista { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
+  .rte-lista select {
+    font: inherit; font-size: 12.5px; padding: 4px 6px; height: auto;
+    border: 1px solid var(--border); border-radius: var(--radius-s);
+    background: var(--surface); color: var(--text);
+  }
+  .rte-btn {
+    appearance: none; font: inherit; font-size: 12.5px; line-height: 1;
+    padding: 6px 9px; min-width: 30px; cursor: pointer;
+    border: 1px solid var(--border); border-radius: var(--radius-s);
+    background: var(--surface); color: var(--text-muted);
+  }
+  .rte-btn:hover { background: var(--surface-2); color: var(--text); }
+  .rte-btn[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); border-color: var(--accent-soft); font-weight: 700; }
+  .rte-btn-tucne { font-weight: 800; }
+  .rte-btn-kurziva { font-style: italic; }
+  .rte-btn-smazat { color: var(--danger); }
+  .rte-mezera { flex: 1 1 auto; }
+  .rte-blok textarea {
+    width: 100%; min-height: 64px; resize: vertical;
+    font: inherit; font-size: 14px; line-height: 1.6;
+    padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius-s);
+    background: var(--surface); color: var(--text);
+  }
+  .rte-napoveda { font-size: 11.5px; color: var(--text-muted); margin: 6px 0 0; line-height: 1.5; }
+  .rte-pridat { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .rte-nahled {
+    border: 2px dashed var(--accent-soft); border-radius: var(--radius-m);
+    padding: 18px; background: var(--surface); margin-top: 12px;
+  }
+  .rte-nahled-label {
+    font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 12px; font-weight: 700;
+  }
+  .web-stav-pill { font-size: 11.5px; padding: 3px 8px; border-radius: 999px; font-weight: 600; white-space: nowrap; }
+  .web-stav-publikovano { background: var(--ok-soft); color: var(--ok); }
+  .web-stav-koncept { background: var(--warn-soft); color: var(--warn); }
+  .web-stav-skryto { background: var(--danger-soft); color: var(--danger); }
+  .web-odkazy-radek { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+  .web-odkazy-radek select, .web-odkazy-radek input { height: auto; padding: 7px 9px; font-size: 13.5px; }
+  /* Jednořádkový zaškrtávací přepínač (Milník 26). Existující .field-checkbox
+     je karta s rámečkem a odsazením - tady je potřeba prostý řádek. */
+  .checkbox-line { display: inline-flex; align-items: center; gap: 9px; font-size: 13.5px; color: var(--text); cursor: pointer; }
+  .checkbox-line input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); }
+  .btn-danger-ghost { color: var(--danger); border-color: var(--danger-soft); }
+  .btn-danger-ghost:hover { background: var(--danger-soft); color: var(--danger); }
+
+  /* Milník 26 (bod 4): hlášení o duplicitě při registraci. */
+  .reg-kolize { margin: 10px 0 0; }
+  .reg-kolize-akce { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+
+  /* Milník 26 (bod 3): sloupec IP adresa v Historii akcí. */
+  .audit-ip { font-family: var(--font-mono); font-size: 12px; }
+  .audit-ip-neznama { color: var(--text-muted); }
+
+  @media (max-width: 720px) {
+    .v-hero { padding: 40px 18px 36px; }
+    .v-hero h1 { font-size: 31px; }
+    .v-hero p.v-hero-lead { font-size: 16px; }
+    .verejne-menu-brand-btn { font-size: 22px; }
+    .verejne-menu-inner { min-height: 60px; }
+    .verejna-paticka-inner { gap: 26px; }
+  }
+
 </style>
 </head>
 <body>
@@ -2718,7 +2957,12 @@
        (showVerejneMenu) - po přihlášení pruh mizí. -->
   <nav class="verejne-menu" id="verejneMenu" aria-label="Veřejné stránky" hidden>
     <div class="verejne-menu-inner">
-      <span class="verejne-menu-brand">Realitní <em>tip</em></span>
+      <!-- MILNÍK 26 (bod 1): logo je TLAČÍTKO a vede zpět na hlavní stránku.
+           Do Milníku 25 to byl obyčejný <span>. Je to <button>, ne <a>,
+           protože veřejná navigace appky nejde přes odkazy, ale přes
+           navigateVerejna() + history.pushState (viz R7-ROUTING v M25). -->
+      <button type="button" class="verejne-menu-brand-btn" id="verejneMenuBrandBtn"
+              aria-label="Realitní tip — zpět na hlavní stránku" title="Zpět na hlavní stránku">Realitní <em>tip</em></button>
       <div class="verejne-menu-nav" id="verejneMenuNav"></div>
       <span class="verejne-menu-spacer"></span>
       <button class="verejne-menu-link" id="verejneMenuPrihlasitBtn" type="button">Přihlásit se</button>
@@ -2840,6 +3084,27 @@
   </div>
 
   <main>
+    <!-- ============== MILNÍK 26 (bod 5): UVÍTACÍ BANNER HLAVNÍ STRÁNKY ==============
+         Velký grafický banner přes celou šířku NAD přihlašovací kartou.
+         Zobrazuje se VÝHRADNĚ na hlavní stránce (verejnaRouta === null)
+         nepřihlášenému návštěvníkovi - řídí renderVerejnaRouta().
+
+         ⚠ Obsah NENÍ natvrdo v HTML. Nadpis a podnadpis přicházejí z řádku
+         `hlavni` tabulky `webove_stranky` (anon RPC verejna_stranka), takže
+         si je administrátor přepíše ve „Správa webu". Texty níže v JS
+         (V_HERO_FALLBACK) jsou jen záchranná síť pro případ, že server
+         neodpoví - appka nikdy nesmí skončit prázdným bílým pruhem.
+
+         Tím se zároveň napravuje otevřený bod R6-CMS z Milníku 25: řádek
+         `hlavni` měl titulek/podnadpis/text, které se nikde nevykreslovaly.
+         Od tohohle milníku se vykreslují. -->
+    <section id="verejnyHeroScreen" hidden>
+      <div class="v-hero">
+        <div class="v-hero-inner" id="verejnyHeroInner"></div>
+      </div>
+      <div class="v-hero-obsah" id="verejnyHeroObsah"></div>
+    </section>
+
     <!-- ============== AUTH SCREEN ============== -->
     <section id="authScreen">
       <div class="auth-wrap">
@@ -2961,7 +3226,27 @@
               <button class="btn-primary" id="loginSubmitBtn" type="submit">Přihlásit se</button>
             </form>
 
+            <!-- MILNÍK 26 (bod 4): „Zapomenuté heslo?" - do tohohle milníku
+                 appka žádnou obnovu hesla neměla, takže odkaz z hlášky
+                 o duplicitě by neměl kam vést. -->
             <p class="switch-line">Nemáte účet? <button type="button" id="goRegisterBtn">Zaregistrujte se</button></p>
+            <p class="switch-line"><button type="button" id="goResetBtn">Zapomenuté heslo?</button></p>
+          </div>
+
+          <!-- OBNOVA HESLA (MILNÍK 26, bod 4) -->
+          <div id="resetView" hidden>
+            <p class="dt-muted" style="font-size:13.5px;line-height:1.6;margin-top:0;">
+              Zadejte e-mail, se kterým jste se registrovali. Pošleme na něj odkaz, kterým si nastavíte nové heslo.
+            </p>
+            <form id="resetForm" novalidate>
+              <div class="field" id="resetEmailField">
+                <label for="resetEmail">E-mail</label>
+                <input type="email" id="resetEmail" autocomplete="email" placeholder="vas@email.cz">
+                <span class="error-msg">Zadejte prosím platný e-mail.</span>
+              </div>
+              <button class="btn-primary" id="resetSubmitBtn" type="submit">Poslat odkaz pro obnovu hesla</button>
+            </form>
+            <p class="switch-line"><button type="button" id="resetBackBtn">Zpět na přihlášení</button></p>
           </div>
 
           <!-- REGISTER VIEW -->
@@ -3003,6 +3288,12 @@
               </div>
               <button class="btn-primary" id="registerSubmitBtn" type="submit">Vytvořit účet</button>
             </form>
+
+            <!-- MILNÍK 26 (bod 4): sem se vykresluje hláška o tom, že e-mail
+                 NEBO telefon už v systému je - záměrně BEZ prozrazení, který
+                 z těch dvou to byl (viz RPC registrace_udaj_obsazen), plus
+                 dvě tlačítka: přihlásit se / obnovit heslo. -->
+            <div class="reg-kolize" id="regKolizeWrap" hidden></div>
 
             <p class="switch-line">Už máte účet? <button type="button" id="goLoginBtn">Přihlaste se</button></p>
           </div>
@@ -3110,7 +3401,7 @@
       <div class="auth-wrap">
         <div class="auth-card">
           <div class="auth-brand"><span class="brand" style="font-size:26px;">Realitní <em>tip</em></span></div>
-          <p class="auth-sub">Váš účet byl založen s dočasným heslem — než budete pokračovat, nastavte si prosím vlastní.</p>
+          <p class="auth-sub" id="forcedPasswordSub">Váš účet byl založen s dočasným heslem — než budete pokračovat, nastavte si prosím vlastní.</p>
           <div id="forcedPasswordBanner"></div>
           <form id="forcedPasswordForm" novalidate>
             <div class="field" id="fpNewField">
@@ -3948,6 +4239,11 @@
         <p>Přehled důležitých změn v systému — úpravy uživatelů, ověření totožnosti, provizní schémata, výplaty.</p>
       </div>
 
+      <!-- MILNÍK 26 (bod 3): pravdivé vysvětlení sloupce „IP adresa *".
+           Text plní JS z AUDIT_IP_HINT, ať se nemůže rozejít s tím, co
+           se ukazuje v `title` jednotlivých buněk. -->
+      <p class="dt-muted" id="auditIpHint" style="font-size:12.5px;line-height:1.55;margin:-4px 0 14px;"></p>
+
       <div id="auditTableWrap"></div>
     </section>
 
@@ -4349,10 +4645,15 @@
     <section id="webScreen" class="page" hidden>
       <div class="section-head">
         <h2>Správa webu</h2>
-        <p>Obsah a metadata veřejných stránek, které vidí i nepřihlášený návštěvník. Každá úprava se zapisuje do Historie akcí.</p>
+        <!-- MILNÍK 26 (body 2 a 8): popis musí být PRAVDIVÝ - zvlášť věta
+             o tom, že uložení NEZVEŘEJŇUJE. Kdyby to appka tvrdila obráceně,
+             administrátor by se domníval, že rozepsaný text je skrytý,
+             zatímco by byl veřejný. -->
+        <p>Obsah veřejných stránek i patičky, které vidí nepřihlášený návštěvník. Uložení vytvoří <strong>koncept viditelný jen tady</strong> — veřejně se změna objeví teprve po stisku „Publikovat“. Každý krok se zapisuje do Historie akcí.</p>
       </div>
 
       <div id="webBanner"></div>
+      <div id="webNovaStrankaWrap"></div>
       <div id="webDetailWrap"></div>
       <div id="webTableWrap"></div>
     </section>
@@ -4387,6 +4688,25 @@
     </section>
 
   </main>
+
+  <!-- ============== MILNÍK 26 (bod 7): PATIČKA VEŘEJNÉHO WEBU ==============
+       Vykresluje se pod KAŽDOU veřejnou obrazovkou (hlavní/přihlašovací,
+       obsahové stránky i rekrutační stránky) a po přihlášení mizí - stejně
+       jako veřejné menu, řídí to showVerejneMenu().
+
+       ⚠ Obsah NENÍ hardcoded (bod 8). Je to samostatná editovatelná entita:
+       řádek `paticka` (typ = 'paticka') v tabulce `webove_stranky`, který
+       má vlastní strukturovaný text A vlastní seznam odkazů. Administrátor
+       ho upravuje týmž editorem a týmž draft/publish workflow jako
+       kteroukoli stránku. Anon ho čte přes RPC verejna_paticka(), která
+       vydá jen PUBLIKOVANOU patičku a jen odkazy na PUBLIKOVANÉ stránky. -->
+  <footer class="verejna-paticka" id="verejnaPaticka" hidden>
+    <div class="verejna-paticka-inner">
+      <div class="verejna-paticka-text" id="verejnaPatickaText"></div>
+      <nav class="verejna-paticka-odkazy" id="verejnaPatickaOdkazy" aria-label="Odkazy v patičce"></nav>
+    </div>
+    <div class="verejna-paticka-spodek" id="verejnaPatickaSpodek"></div>
+  </footer>
 </div>
 
 <!-- ============== PŘIDAT UŽIVATELE (Milník 9, bod 6) ==============
@@ -4460,7 +4780,7 @@
   // Milník 14: číslo aktuální verze aplikace - MUSÍ odpovídat nejnovější položce
   // pole APP_CHANGELOG níže (položka na indexu 0). Při každém příštím milníku
   // se zvyšuje ROVNOU TADY i v APP_CHANGELOG - jsou to dvě navzájem závislá místa.
-  var APP_VERSION = "25.0";
+  var APP_VERSION = "26.0";
 
   // Milník 14 (bod 4): obsah panelu "Historie verzí" na přihlašovací
   // obrazovce - zrekonstruováno z reálné historie projektu (STAV.md,
@@ -4469,6 +4789,23 @@
   // pod tímto polem). Vykresluje se generickou šablonou renderAuthVersionAndChangelog()
   // - při dalším milníku se sem jen přidá nová položka na začátek pole.
   var APP_CHANGELOG = [
+    // MILNÍK 26. ⚠ Každá věta tady musí být PRAVDIVÁ (poučení z nálezu O6
+    // Milníku 24). Zvlášť u IP adresy: nesmí tu stát „zaznamenáváme, odkud
+    // se kdo přihlásil", protože zaznamenaná hodnota je orientační údaj
+    // z hlavičky požadavku, ne ověřená identifikace.
+    { verze: "26.0", datum: "16. 9. 2026", body: [
+      "Veřejná část webu má nový vzhled: hranaté (pravoúhlé) prvky, bílé pozadí, zvětšené logo a hlavní menu, které zůstává viditelné i při scrollování. Přihlášená část aplikace se vzhledově NEMĚNÍ — zaoblený vizuální jazyk dashboardů zůstává, jak byl",
+      "Hlavní stránka má nově uvítací banner přes celou šířku; jeho nadpis i text si administrátor edituje sám",
+      "Logo „Realitní tip“ v záhlaví veřejných stránek je proklikávací a vede zpět na hlavní stránku",
+      "Nové veřejné stránky „Pro majitele“ a „Pro tipaře“; „O nás“ a „Kontakty“ se přesunuly na konec menu",
+      "Patička na všech veřejných stránkách s odkazy na nové stránky GDPR, Obchodní podmínky a Etický kodex (jejich text je zatím návrh k doplnění, ne právně přezkoumaný dokument)",
+      "Správa webu (administrátor) je plnohodnotný editor: nadpisy H1–H5, tučné, kurzíva, odkaz, odrážky a zarovnání textu",
+      "Změnu stránky jde uložit jako rozpracovaný koncept, který vidí jen administrátor; veřejně se objeví teprve po stisku „Publikovat“. Tlačítko „Náhled“ ukáže výsledek ještě před uložením",
+      "Administrátor může zakládat vlastní nové stránky s libovolnou adresou, u každé zaškrtnout „V hlavním menu“, stránku skrýt i smazat — a upravovat obsah i odkazy patičky",
+      "Historie akcí (lídr a administrátor) má nový sloupec „IP adresa“. Je to ORIENTAČNÍ údaj z hlavičky požadavku, ne ověřená identifikace — u záznamů starších než tato verze zůstává prázdný",
+      "Registrace kontroluje, jestli e-mail nebo telefon už v systému není, a rovnou nabídne přihlášení nebo obnovu hesla",
+      "Přihlašovací obrazovka má nově „Zapomenuté heslo?“ — aplikace pošle odkaz pro nastavení nového hesla"
+    ] },
     { verze: "25.0", datum: "16. 9. 2026", body: [
       "Aplikace má poprvé VEŘEJNÉ stránky dostupné bez přihlášení: vodorovné menu „Hlavní stránka / O nás / Kontakty / Ukázková rekrutační stránka“",
       "Nové obsahové stránky „O nás“ a „Kontakty“; přihlašovací obrazovka zůstává vzhledem beze změny",
@@ -7103,6 +7440,7 @@
     // (bod 8), rozepsaný obsah veřejné stránky (bod 10), read-only
     // zobrazení vlastního kódu a rekrutační stránky (body 4 a 5).
     "marketingObsah", "marketingBanner", "webTableWrap", "webDetailWrap", "webBanner",
+    "webNovaStrankaWrap",   // MILNÍK 26 (bod 8)
     "pozvankovyKodReadonlyBody", "pozvankovyKodBanner",
     "rekrutReadonlyBody", "rekrutPreviewBody", "rekrutBanner"
   ];
@@ -7151,7 +7489,7 @@
     // MILNÍK 25 (body 8 a 10): obě nové obrazovky se plní dynamicky a nesou
     // údaje konkrétní identity (rekrutační odkaz / rozepsaný obsah stránky).
     marketing: ["marketingObsah", "marketingBanner"],
-    web: ["webTableWrap", "webDetailWrap", "webBanner"]
+    web: ["webTableWrap", "webDetailWrap", "webBanner", "webNovaStrankaWrap"]
   };
 
   // Instance initDataTable drží vlastní config.rows z PŘEDCHOZÍHO
@@ -7428,7 +7766,14 @@
     if (tab === "tipy") tipyTable = null;
     if (tab === "users") usersTable = null;
     // MILNÍK 25 (bod 10): instance tabulky stránek + rozepsaný detail.
-    if (tab === "web") { webTable = null; webDetailSlug = null; webEditMode = false; }
+    // MILNÍK 26 (body 2 a 8): navíc rozepsaný OBSAH editoru, otevřený
+    // náhled a formulář nové stránky - to všechno je stav v JS proměnných,
+    // kam `innerHTML = ""` nad obaly nedosáhne. Kdyby tu nebyl, viděl by
+    // administrátor po přepnutí identity rozepsaný text předchozího účtu.
+    if (tab === "web") {
+      webTable = null; webDetailSlug = null; webEditMode = false;
+      webEditor = null; webNahledOtevren = false; webNovaOtevrena = false;
+    }
     if (tab === "rk") {
       rkTable = null;
       // MILNÍK 24 (bod 1): rozepsaný Detail RK je stav v JS proměnných, kam
@@ -7556,6 +7901,15 @@
   function showForcedPasswordScreen() {
     el("topbar").hidden = true;
     el("tabsWrap").hidden = true;
+    // MILNÍK 26 (bod 4): tatáž obrazovka slouží i pro obnovu hesla
+    // z e-mailu. Podtitulek se proto mění podle toho, PROČ tu uživatel je -
+    // „účet byl založen s dočasným heslem" by pro něj byla lež.
+    var podtitulek = el("forcedPasswordSub");
+    if (podtitulek) {
+      podtitulek.textContent = passwordRecoveryMode
+        ? "Otevřeli jste odkaz pro obnovu hesla — nastavte si prosím nové."
+        : "Váš účet byl založen s dočasným heslem — než budete pokračovat, nastavte si prosím vlastní.";
+    }
     // MILNÍK 25: uživatel je přihlášený - veřejná část webu se schová.
     verejnaRouta = null;
     hideVerejneScreens();
@@ -7972,6 +8326,8 @@
     el("loginView").hidden = false;
     el("registerView").hidden = true;
     el("checkEmailView").hidden = true;
+    el("resetView").hidden = true;          // MILNÍK 26 (bod 4)
+    renderRegKolize(false);
     // Milník 18 (bod 4): dřív se tu přepínala i viditelnost #authFootnote
     // (technický popis Supabase Auth/RLS). Odstavec je z HTML pryč, takže
     // by el("authFootnote") vrátilo null a `.hidden = false` shodilo celé
@@ -7985,6 +8341,8 @@
     el("loginView").hidden = true;
     el("registerView").hidden = false;
     el("checkEmailView").hidden = true;
+    el("resetView").hidden = true;          // MILNÍK 26 (bod 4)
+    renderRegKolize(false);
     // Milník 18 (bod 4): viz showLoginView - #authFootnote už neexistuje.
     el("authSubtitle").hidden = false;
     el("authSubtitle").textContent = "Založte si nový účet tipaře";
@@ -8003,8 +8361,23 @@
     el("loginView").hidden = true;
     el("registerView").hidden = true;
     el("checkEmailView").hidden = false;
+    el("resetView").hidden = true;          // MILNÍK 26 (bod 4)
+    renderRegKolize(false);
     el("authSubtitle").hidden = true;
     el("checkEmailAddress").textContent = email || "";
+    showBanner(el("authBanner"), null, null);
+  }
+
+  // MILNÍK 26 (bod 4): pohled „Zapomenuté heslo". Sdílí přihlašovací kartu
+  // se všemi ostatními pohledy - karta se vzhledově nemění.
+  function showResetView() {
+    el("loginView").hidden = true;
+    el("registerView").hidden = true;
+    el("checkEmailView").hidden = true;
+    el("resetView").hidden = false;
+    renderRegKolize(false);
+    el("authSubtitle").hidden = false;
+    el("authSubtitle").textContent = "Obnova hesla";
     showBanner(el("authBanner"), null, null);
   }
 
@@ -8203,6 +8576,98 @@
   // Teď se tlačítko OKAMŽITĚ (synchronně, před voláním signUp) znepřístupní
   // A změní text na jasný loading stav, v try/finally se vrátí do
   // původního stavu vždy (úspěch, chyba i neočekávaná výjimka).
+  // =========================================================================
+  // MILNÍK 26 (bod 4) — KONTROLA DUPLICITY E-MAILU **I** TELEFONU
+  //
+  // ⚠ Hláška ZÁMĚRNĚ neříká, KTERÝ z obou údajů je obsazený. ⚠
+  // Kdyby říkala „tenhle telefon už registrovaný je", stačilo by projet
+  // seznam čísel a zjistit, kdo v systému je. Server proto vrací jediný
+  // boolean (RPC registrace_udaj_obsazen) a appka o nic víc nežádá.
+  //
+  // Není to bezpečnostní hradba - jediný bit informace vydá i samotný
+  // pokus o registraci. Je to ochrana proti HROMADNÉMU zjišťování
+  // a hlavně slušnost k uživateli, který si nepamatuje, že už účet má.
+  // =========================================================================
+  function renderRegKolize(zobrazit) {
+    var wrap = el("regKolizeWrap");
+    if (!wrap) return;
+    if (!zobrazit) { wrap.hidden = true; wrap.innerHTML = ""; return; }
+    wrap.hidden = false;
+    wrap.innerHTML =
+      '<div class="banner banner-error" role="alert">' +
+        '<p style="margin:0 0 4px;"><strong>Tento telefon nebo e-mail je už v systému registrovaný.</strong></p>' +
+        '<p style="margin:0;font-size:13px;">Účet už nejspíš máte. Přihlaste se k němu, nebo si nechte poslat odkaz pro nastavení nového hesla.</p>' +
+        '<div class="reg-kolize-akce">' +
+          '<button type="button" class="btn-small" id="regKolizeLoginBtn">Přihlásit se</button>' +
+          '<button type="button" class="btn-small btn-small-ghost" id="regKolizeResetBtn">Zapomenuté heslo</button>' +
+        '</div>' +
+      '</div>';
+    var prihlasit = el("regKolizeLoginBtn");
+    if (prihlasit) {
+      prihlasit.addEventListener("click", function () {
+        var email = el("regEmail").value.trim();
+        showLoginView();
+        if (email) el("loginEmail").value = email;
+        el("loginPassword").focus();
+      });
+    }
+    var reset = el("regKolizeResetBtn");
+    if (reset) {
+      reset.addEventListener("click", function () {
+        var email = el("regEmail").value.trim();
+        showResetView();
+        if (email) el("resetEmail").value = email;
+      });
+    }
+  }
+
+  // Vrací true = pokračovat v registraci, false = kolize (registrace se
+  // NEODESÍLÁ). Když kontrola selže (výpadek sítě), registrace se pustí
+  // dál - unikátní index v databázi je nezávislá poslední pojistka a bylo
+  // by špatně kvůli výpadku kontroly zablokovat legitimní registraci.
+  async function zkontrolujDuplicituRegistrace(email, telefon) {
+    if (!sb) return true;
+    try {
+      var res = await sb.rpc("registrace_udaj_obsazen", { p_email: email, p_telefon: telefon || null });
+      if (res.error) {
+        console.error("Kontrola duplicity se nezdařila:", res.error);
+        return true;
+      }
+      return !(res.data && res.data.kolize === true);
+    } catch (e) {
+      console.error("Kontrola duplicity vyhodila výjimku:", e);
+      return true;
+    }
+  }
+
+  // ------------------------------- MILNÍK 26 (bod 4): obnova hesla
+  //
+  // Do tohohle milníku appka obnovu hesla neměla vůbec, takže hláška
+  // o duplicitě by neměla kam odkázat. Formulář ZÁMĚRNĚ hlásí totéž
+  // v obou případech („pokud u nás e-mail je…"), aby ani tudy nešlo
+  // zjišťovat, kdo je registrovaný.
+  async function doResetPassword(email, bannerEl, submitBtn) {
+    var puvodni = submitBtn ? submitBtn.textContent : "";
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Odesíláme…"; }
+    showBanner(bannerEl, null, null);
+    try {
+      var res = await sb.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + window.location.pathname
+      });
+      if (res && res.error) {
+        console.error("Chyba při žádosti o obnovu hesla:", res.error);
+      }
+      // Stejná hláška při úspěchu i neúspěchu - viz komentář výše.
+      showBanner(bannerEl, "ok",
+        "Pokud je tento e-mail u nás registrovaný, poslali jsme na něj odkaz pro nastavení nového hesla. Zkontrolujte prosím i složku Spam.");
+    } catch (e) {
+      console.error("Neočekávaná chyba při obnově hesla:", e);
+      showBanner(bannerEl, "error", "Nastala neočekávaná chyba. Zkontrolujte prosím připojení k internetu a zkuste to znovu.");
+    } finally {
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = puvodni || "Poslat odkaz pro obnovu hesla"; }
+    }
+  }
+
   async function doRegister(jmeno, prijmeni, telefon, email, password, inviteCode, bannerEl, submitBtn) {
     var puvodniText = submitBtn ? submitBtn.textContent : "";
     if (submitBtn) {
@@ -8383,7 +8848,11 @@
 
     // Milník 9 (bod 6.3): dočasné heslo z "Přidat uživatele" MUSÍ být
     // změněno dřív, než uživatel uvidí cokoliv jiného z appky.
-    if (currentUser.vyzadovat_zmenu_hesla) {
+    // MILNÍK 26 (bod 4): týmž kanálem prochází i uživatel, který přišel
+    // z e-mailu „Zapomenuté heslo" - Supabase ho přihlásí a pošle událost
+    // PASSWORD_RECOVERY. Nechat ho rovnou do appky by znamenalo, že si
+    // nové heslo nenastaví a příště se zase nepřihlásí.
+    if (currentUser.vyzadovat_zmenu_hesla || passwordRecoveryMode) {
       showForcedPasswordScreen();
       return;
     }
@@ -10981,8 +11450,60 @@
     // MILNÍK 25 (body 2, 4 a 10).
     tvrde_smazani_uzivatele: "Trvalé smazání uživatele",
     zmena_pozvankoveho_kodu: "Změna pozvánkového kódu",
-    uprava_webove_stranky: "Úprava veřejné stránky"
+    uprava_webove_stranky: "Úprava veřejné stránky",
+    // MILNÍK 26 (body 2 a 8) - kroky nového CMS workflow.
+    ulozeni_konceptu_stranky: "Uložení konceptu stránky",
+    publikace_webove_stranky: "Publikace veřejné stránky",
+    zahozeni_konceptu_stranky: "Zahození konceptu stránky",
+    skryti_webove_stranky: "Skrytí veřejné stránky",
+    zalozeni_webove_stranky: "Založení veřejné stránky",
+    smazani_webove_stranky: "Smazání veřejné stránky"
   };
+
+  // =========================================================================
+  // MILNÍK 26 (bod 3) — SLOUPEC „IP ADRESA" V HISTORII AKCÍ
+  //
+  // ⚠ PRAVDIVOST TEXTŮ JE TU STEJNĚ DŮLEŽITÁ JAKO SAMA FUNKCE. ⚠
+  // Zaznamenaná adresa NENÍ ověřená identifikace. Vzniká serverově
+  // z hlavičky `x-forwarded-for`, kterou dodává síťová infrastruktura -
+  // je to text, do kterého může klient přidat vlastní údaj před ten
+  // skutečný, a uživatel za VPN, mobilní sítí nebo firemní proxy stejně
+  // vystupuje pod cizí či sdílenou adresou. Appka to nesmí prezentovat
+  // jako důkaz, kdo odkud jednal. Proto:
+  //   * sloupec má nápovědu AUDIT_IP_HINT přímo v záhlaví tabulky,
+  //   * záznamy starší než verze 26.0 ukazují „nezaznamenáno" (ne pomlčku,
+  //     která by vypadala jako „přišel odnikud"),
+  //   * když hlavička nedorazila, ukazuje se „nedostupné",
+  //   * celý řetězec proxy je v `title` buňky, aby šlo poznat podvržení.
+  // Je to přímé pokračování disciplíny z nálezu O6 Milníku 24.
+  // =========================================================================
+  var AUDIT_IP_HINT =
+    "IP adresa je ORIENTAČNÍ údaj z hlavičky síťového požadavku (x-forwarded-for), ne ověřená identifikace. " +
+    "Uživatel za VPN, mobilní sítí nebo firemní proxy vystupuje pod sdílenou nebo cizí adresou a hodnotu lze v některých případech ovlivnit. " +
+    "Neslouží jako bezpečnostní kontrola. U záznamů z doby před verzí 26.0 se IP nezaznamenávala.";
+
+  function auditIpText(r) {
+    if (!r) return "—";
+    // Sloupec `ip_zdroj` je NULL u záznamů starších než tenhle milník.
+    if (!r.ip_zdroj) return "nezaznamenáno";
+    if (!r.ip_adresa) return "nedostupné";
+    // Postgres typ `inet` posílá jednotlivou adresu i s maskou (/32, /128) -
+    // uživateli je maska k ničemu.
+    return String(r.ip_adresa).replace(/\/(32|128)$/, "");
+  }
+
+  function auditIpHtml(r) {
+    var text = auditIpText(r);
+    var znama = r && r.ip_zdroj && r.ip_adresa;
+    var titulek = znama
+      ? ("Orientační údaj z hlavičky požadavku, ne ověřená identifikace." +
+         (r.ip_retezec ? "\nCelý řetězec: " + r.ip_retezec : ""))
+      : (r && r.ip_zdroj
+          ? "Požadavek nenesl použitelnou hlavičku s adresou."
+          : "Záznam vznikl dřív, než aplikace IP adresy zaznamenávala (před verzí 26.0).");
+    return '<span class="audit-ip' + (znama ? '' : ' audit-ip-neznama') + '" title="' +
+      escapeHtml(titulek) + '">' + escapeHtml(text) + '</span>';
+  }
 
   function auditActionLabel(action) {
     return AUDIT_ACTION_LABELS[action] || action || "?";
@@ -11094,6 +11615,10 @@
   var auditTable = null;
 
   function renderAuditTable(rows) {
+    // MILNÍK 26 (bod 3): nápověda pod nadpisem. Vyplňuje se z téže
+    // konstanty jako `title` buněk, ať se ty dva texty nikdy nerozejdou.
+    var hint = el("auditIpHint");
+    if (hint) hint.textContent = "* " + AUDIT_IP_HINT;
     var columns = [
       { key: "created_at", label: "Datum", get: function (r) { return r.created_at ? new Date(r.created_at).getTime() : 0; },
         render: function (r) { return escapeHtml(formatDateTime(r.created_at)); } },
@@ -11112,6 +11637,10 @@
           }
           return escapeHtml(jm);
         } },
+      // MILNÍK 26 (bod 3). Popisek sloupce nese hvězdičku a `title`
+      // s pravdivým vysvětlením - viz AUDIT_IP_HINT.
+      { key: "ip", label: "IP adresa *", get: function (r) { return auditIpText(r); },
+        render: function (r) { return auditIpHtml(r); } },
       { key: "zmeny", label: "Změny", sortable: false, className: "dt-wrap", get: function () { return ""; },
         render: function (r) { return auditDiffHtml(r); } },
       { key: "reason", label: "Důvod", className: "dt-wrap", get: function (r) { return r.reason || ""; }, render: function (r) { return escapeHtml(r.reason || "—"); } }
@@ -13235,6 +13764,7 @@
     }
 
     currentUser.vyzadovat_zmenu_hesla = false;
+    passwordRecoveryMode = false;   // MILNÍK 26 (bod 4)
     // Milník 9 (bod 6.3): stejný vzor jako zbytek appky (Pravidlo 6) -
     // čerstvý re-fetch, ne jen lokální patch. handleSignedIn() zopakuje
     // celý načtení profilu a tentokrát už projde dál na showAppScreen().
@@ -16575,9 +17105,41 @@
       setFieldError(el("regPasswordField"), !passwordValid);
       if (!passwordValid) ok = false;
 
+      // MILNÍK 26 (bod 4): kontrola duplicity e-mailu I telefonu proběhne
+      // ještě PŘED signUp(). Vypnutí tlačítka a jeho vrácení do původního
+      // stavu je tu vlastní, protože doRegister() se v případě kolize
+      // vůbec nezavolá.
+      renderRegKolize(false);
       if (!ok) return;
       var inviteCode = el("regInviteCode").value.trim();
-      doRegister(jmeno, prijmeni, telefon, email, password, inviteCode, el("authBanner"), el("registerSubmitBtn"));
+      var submitBtn = el("registerSubmitBtn");
+      var puvodniText = submitBtn ? submitBtn.textContent : "";
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Ověřujeme údaje…"; }
+      zkontrolujDuplicituRegistrace(email, telefon).then(function (volne) {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = puvodniText || "Vytvořit účet"; }
+        if (!volne) {
+          renderRegKolize(true);
+          try { el("regKolizeWrap").scrollIntoView({ behavior: "smooth", block: "nearest" }); } catch (e2) { /* nepodstatné */ }
+          return;
+        }
+        doRegister(jmeno, prijmeni, telefon, email, password, inviteCode, el("authBanner"), submitBtn);
+      });
+    });
+
+    // MILNÍK 26 (bod 4): „Zapomenuté heslo?" a obnova hesla.
+    el("goResetBtn").addEventListener("click", function () {
+      var email = el("loginEmail").value.trim();
+      showResetView();
+      if (email) el("resetEmail").value = email;
+    });
+    el("resetBackBtn").addEventListener("click", showLoginView);
+    el("resetForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var email = el("resetEmail").value.trim();
+      var platny = email && isValidEmail(email);
+      setFieldError(el("resetEmailField"), !platny);
+      if (!platny) return;
+      doResetPassword(email, el("authBanner"), el("resetSubmitBtn"));
     });
 
     el("logoutBtn").addEventListener("click", doLogout);
@@ -16664,6 +17226,15 @@
       applyPendingInviteCodeToForm();
       navigateVerejna(null, null);
       showLoginView();
+    });
+
+    // MILNÍK 26 (bod 1): proklikávací logo v záhlaví VŠECH veřejných
+    // stránek. Vede na hlavní stránku (routa `null` = bez query parametrů),
+    // tedy i z rekrutační stránky a z libovolné obsahové stránky.
+    // `pendingInviteCode` se ZÁMĚRNĚ nemaže: kdo přišel s pozvánkou
+    // `?ref=`, nemá o sponzora přijít jen proto, že si prohlédl web.
+    el("verejneMenuBrandBtn").addEventListener("click", function () {
+      navigateVerejna(null, null);
     });
 
     // Bod 4: vlastní pozvánkový kód.
@@ -16824,11 +17395,34 @@
   var ukazkovyRekrutacniKod = null;
   var verejneMenuNacteno = false;
 
+  // MILNÍK 26 (bod 8): ⚠ TOHLE NENÍ SEZNAM, PODLE KTERÉHO SE ROUTUJE. ⚠
+  // Routování veřejných stránek je od začátku obecné - `?stranka=<cokoli>`
+  // se pošle do RPC verejna_stranka() a ta rozhodne. Nově založená stránka
+  // s libovolným slugem se tedy zobrazí, aniž by se tady cokoli měnilo
+  // (ověřeno testem „dynamicky založený slug se zobrazí").
+  // Tohle pole je POUZE záchranná síť pro vykreslení MENU, když server
+  // neodpoví - bez něj by nepřihlášený návštěvník při výpadku RPC viděl
+  // prázdný pruh. Skutečné položky menu vždycky přicházejí z verejne_stranky().
   var VEREJNE_MENU_FALLBACK = [
     { slug: "hlavni", nazev: "Hlavní stránka" },
+    { slug: "pro-majitele", nazev: "Pro majitele" },
+    { slug: "pro-tipare", nazev: "Pro tipaře" },
     { slug: "o-nas", nazev: "O nás" },
     { slug: "kontakty", nazev: "Kontakty" }
   ];
+
+  // MILNÍK 26 (bod 5): záchranný obsah uvítacího banneru. Skutečný text
+  // přichází z řádku `hlavni` tabulky `webove_stranky` (edituje ho
+  // administrátor ve „Správa webu"); tohle se použije jen tehdy, když
+  // RPC neodpoví - banner nikdy nesmí zůstat prázdný bílý pruh.
+  var V_HERO_FALLBACK = {
+    titulek: "Vítejte v Realitním tipu",
+    podnadpis: "První MLM systém na realitní tipy. Vydělávejte na tom, co stejně víte, vzdělávejte se a budujte vlastní síť tipařů."
+  };
+
+  // Patička (bod 7). `null` = ještě se nenačetla.
+  var verejnaPatickaData = null;
+  var verejnaPatickaNactena = false;
 
   function setDocumentTitle(suffix) {
     // Základ „DEMO – Realitní tip" (bod 3) zůstává VŽDY na začátku, ať je
@@ -16877,13 +17471,27 @@
   function hideVerejneScreens() {
     var a = el("verejnaStrankaScreen");
     var b = el("rekrutaceScreen");
+    var c = el("verejnyHeroScreen");   // MILNÍK 26 (bod 5)
     if (a) a.hidden = true;
     if (b) b.hidden = true;
+    if (c) c.hidden = true;
   }
 
   function showVerejneMenu(on) {
     var m = el("verejneMenu");
     if (m) m.hidden = !on;
+    // MILNÍK 26 (bod 7): patička patří k veřejnému webu, mizí spolu s menu.
+    var p = el("verejnaPaticka");
+    if (p) p.hidden = !on;
+    // MILNÍK 26 (bod 5): jediný přepínač mezi dvěma vizuálními jazyky
+    // appky - hranatý bílý veřejný web vs. zaoblená přihlášená aplikace.
+    // Viz komentář u `body.verejny-rezim` v CSS.
+    try {
+      document.body.classList.toggle("verejny-rezim", !!on);
+    } catch (e) {
+      console.error("Nepodařilo se přepnout vizuální režim veřejné části:", e);
+    }
+    if (on) nactiVerejnouPaticku();
   }
 
   // Vykreslí PRÁVĚ JEDNU z veřejných obrazovek podle `verejnaRouta`.
@@ -16906,9 +17514,166 @@
       return;
     }
     if (auth) auth.hidden = false;
+    // MILNÍK 26 (bod 5): hlavní stránka = uvítací banner NAD přihlašovací
+    // kartou. Banner je samostatná obrazovka, přihlašovací karta se nemění.
+    var hero = el("verejnyHeroScreen");
+    if (hero) hero.hidden = false;
+    renderVerejnyHero();
     oznacVerejneMenu("hlavni");
     setDocumentTitle(null);
     setMetaPopis(null);
+  }
+
+  // ------------------------------------- MILNÍK 26 (bod 5): uvítací banner
+  var verejnyHeroData = null;
+  var verejnyHeroNacten = false;
+
+  function renderVerejnyHero() {
+    var inner = el("verejnyHeroInner");
+    if (!inner) return;
+    var d = verejnyHeroData || {};
+    var titulek = d.titulek || V_HERO_FALLBACK.titulek;
+    var podnadpis = d.podnadpis || V_HERO_FALLBACK.podnadpis;
+
+    while (inner.firstChild) inner.removeChild(inner.firstChild);
+
+    var eyebrow = document.createElement("p");
+    eyebrow.className = "v-hero-eyebrow";
+    eyebrow.textContent = "Realitní tip";
+    inner.appendChild(eyebrow);
+
+    var h1 = document.createElement("h1");
+    h1.textContent = titulek;                 // textContent, ne innerHTML
+    inner.appendChild(h1);
+
+    var lead = document.createElement("p");
+    lead.className = "v-hero-lead";
+    lead.textContent = podnadpis;
+    inner.appendChild(lead);
+
+    var cta = document.createElement("div");
+    cta.className = "v-hero-cta";
+    var b1 = document.createElement("button");
+    b1.type = "button";
+    b1.className = "v-hero-btn";
+    b1.id = "heroRegistrovatBtn";
+    b1.textContent = "Chci se registrovat";
+    b1.addEventListener("click", function () {
+      showRegisterView();
+      try {
+        var karta = el("authScreen");
+        if (karta && karta.scrollIntoView) karta.scrollIntoView({ behavior: "smooth", block: "start" });
+      } catch (e) { /* nepodstatné */ }
+    });
+    var b2 = document.createElement("button");
+    b2.type = "button";
+    b2.className = "v-hero-btn v-hero-btn-ghost";
+    b2.id = "heroProTipareBtn";
+    b2.textContent = "Jak to funguje";
+    b2.addEventListener("click", function () { navigateVerejna("stranka", "pro-tipare"); });
+    cta.appendChild(b1);
+    cta.appendChild(b2);
+    inner.appendChild(cta);
+
+    // Tři krátká sdělení. ⚠ Žádné číslo, které by appka nemohla doložit -
+    // proto tu nejsou „1 200 tipařů" ani „98 % spokojenost", ale fakta
+    // o tom, jak systém funguje.
+    var fakta = document.createElement("div");
+    fakta.className = "v-hero-fakta";
+    [
+      ["Vydělávejte", "Podíl z provize za každý tip, který skončí prodejem"],
+      ["Vzdělávejte se", "Celý průběh obchodu vidíte v aplikaci krok po kroku"],
+      ["Rosťte", "Přiveďte další tipaře a mějte podíl i z jejich obchodů"]
+    ].forEach(function (f) {
+      var box = document.createElement("div");
+      box.className = "v-hero-fakt";
+      var s = document.createElement("strong");
+      s.textContent = f[0];
+      var sp = document.createElement("span");
+      sp.textContent = f[1];
+      box.appendChild(s);
+      box.appendChild(sp);
+      fakta.appendChild(box);
+    });
+    inner.appendChild(fakta);
+
+    // Text hlavní stránky (bloky) pod přihlašovací kartou. Do Milníku 25
+    // se text řádku `hlavni` nevykresloval vůbec (viz R6-CMS M25).
+    var obsah = el("verejnyHeroObsah");
+    if (obsah) {
+      renderBlokyDo(obsah, (d.obsah_bloky || []), null);
+      var maObsah = obsah.childNodes.length > 0;
+      obsah.hidden = !maObsah;
+    }
+  }
+
+  async function nactiVerejnyHero() {
+    if (verejnyHeroNacten || !sb) return;
+    verejnyHeroNacten = true;
+    var res = await sb.rpc("verejna_stranka", { p_slug: "hlavni" });
+    if (res.error) {
+      console.error("Nepodařilo se načíst obsah hlavní stránky:", res.error);
+      return;
+    }
+    if (res.data && res.data.nalezeno) {
+      verejnyHeroData = res.data;
+      renderVerejnyHero();
+    }
+  }
+
+  // ------------------------------------------- MILNÍK 26 (bod 7): patička
+  async function nactiVerejnouPaticku() {
+    if (verejnaPatickaNactena) { renderVerejnouPaticku(); return; }
+    if (!sb) { renderVerejnouPaticku(); return; }
+    verejnaPatickaNactena = true;
+    var res = await sb.rpc("verejna_paticka");
+    if (res.error) {
+      console.error("Nepodařilo se načíst patičku:", res.error);
+      renderVerejnouPaticku();
+      return;
+    }
+    verejnaPatickaData = res.data || null;
+    renderVerejnouPaticku();
+  }
+
+  function renderVerejnouPaticku() {
+    var textWrap = el("verejnaPatickaText");
+    var odkazyWrap = el("verejnaPatickaOdkazy");
+    var spodek = el("verejnaPatickaSpodek");
+    if (!textWrap || !odkazyWrap || !spodek) return;
+    var d = verejnaPatickaData || {};
+
+    while (textWrap.firstChild) textWrap.removeChild(textWrap.firstChild);
+    var znacka = document.createElement("p");
+    znacka.className = "verejna-paticka-znacka";
+    znacka.textContent = d.titulek || "Realitní tip";
+    textWrap.appendChild(znacka);
+    var telo = document.createElement("div");
+    renderBlokyDo(telo, d.obsah_bloky || [], null);
+    textWrap.appendChild(telo);
+
+    while (odkazyWrap.firstChild) odkazyWrap.removeChild(odkazyWrap.firstChild);
+    var odkazy = Array.isArray(d.odkazy) ? d.odkazy : [];
+    if (odkazy.length) {
+      var nadpis = document.createElement("h4");
+      nadpis.textContent = "Dokumenty";
+      odkazyWrap.appendChild(nadpis);
+      odkazy.forEach(function (o) {
+        if (!o || !o.slug) return;
+        var slug = String(o.slug);
+        if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) return;   // pojistka na klientovi
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "verejna-paticka-odkaz";
+        b.setAttribute("data-paticka-slug", slug);
+        b.textContent = String(o.popisek || slug);
+        b.addEventListener("click", function () { navigateVerejna("stranka", slug); });
+        odkazyWrap.appendChild(b);
+      });
+    }
+
+    spodek.textContent = "© " + new Date().getFullYear() +
+      " Realitní tip — demonstrační verze aplikace. Uvedené údaje jsou ukázkové.";
   }
 
   function navigateVerejna(typ, hodnota, opts) {
@@ -16977,6 +17742,176 @@
     }
     if (!davka[1].error && davka[1].data) ukazkovyRekrutacniKod = String(davka[1].data);
     renderVerejneMenu();
+    // MILNÍK 26 (body 5 a 7): obsah banneru i patičky se tahá jednou,
+    // nezávisle na tom, na které veřejné obrazovce návštěvník přistál.
+    nactiVerejnyHero();
+    nactiVerejnouPaticku();
+  }
+
+  // =========================================================================
+  // MILNÍK 26 (bod 2) — VYKRESLENÍ STRUKTUROVANÉHO OBSAHU STRÁNKY
+  //
+  // ⚠⚠ TOHLE JE NEJCITLIVĚJŠÍ KUS KÓDU V CELÉ APLIKACI. ⚠⚠
+  //
+  // Vstup: pole bloků z databáze (viz migrace m26_01). Text v něm píše
+  // administrátor a výsledek čte NEPŘIHLÁŠENÝ návštěvník internetu. Kdyby
+  // se sem dostalo HTML, byl by to uložený XSS na nejexponovanějším místě
+  // appky.
+  //
+  // Proto tady NENÍ ANI JEDEN `innerHTML`. Všechno se skládá přes
+  // document.createElement() a textContent, takže je fyzicky nemožné, aby
+  // se z uloženého textu stal kód: `<script>alert(1)<\/script>` se vykreslí
+  // (zpětné lomítko je tu proto, aby tenhle komentář sám neukončil
+  // blok <script> v HTML - jinak by se appka vůbec nespustila)
+  // jako viditelný řetězec znaků.
+  //
+  // Je to DRUHÁ nezávislá vrstva obrany. První je serverový allow-list
+  // validátor `overit_webove_bloky()`, který nepovolený typ bloku ani
+  // nebezpečné schéma odkazu vůbec nepustí do databáze. Ani jedna z vrstev
+  // se nespoléhá na tu druhou.
+  //
+  // Pozor při jakékoli budoucí úpravě: NIKDY tu nepřepisovat skládání DOM
+  // na řetězec HTML, ani „jen pro jeden malý případ".
+  // =========================================================================
+
+  var RT_TAG_PODLE_TYPU = {
+    h1: "h1", h2: "h2", h3: "h3", h4: "h4", h5: "h5",
+    odstavec: "p", seznam: "ul"
+  };
+  var RT_TRIDA_PODLE_TYPU = {
+    h1: "rt-h1", h2: "rt-h2", h3: "rt-h3", h4: "rt-h4", h5: "rt-h5",
+    odstavec: "rt-odstavec", seznam: "rt-seznam"
+  };
+  var RT_TRIDA_ZAROVNANI = {
+    vlevo: "rt-vlevo", "na-stred": "rt-na-stred",
+    vpravo: "rt-vpravo", "do-bloku": "rt-do-bloku"
+  };
+
+  // Allow-list schémat odkazu na KLIENTOVI. Tentýž seznam hlídá i server
+  // (overit_webove_useky), ale opakuje se tu schválně - kdyby se někdy
+  // obsah do DB dostal jinou cestou (ruční SQL, import, budoucí API),
+  // renderer nesmí `javascript:` pustit do DOM ani tak.
+  // Vrací null = odkaz se NEVYKRESLÍ (text zůstane obyčejným textem).
+  function bezpecnyOdkaz(raw) {
+    var s = String(raw === null || raw === undefined ? "" : raw).trim();
+    if (!s || s.length > 300) return null;
+    if (/^https?:\/\/[^\s<>"'\\]+$/i.test(s)) return { href: s, externi: true };
+    if (/^mailto:[^\s<>"'\\]+$/i.test(s)) return { href: s, externi: true };
+    var m = /^\?stranka=([a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(s);
+    if (m) return { slug: m[1], externi: false };
+    return null;
+  }
+
+  // Úseky jednoho bloku -> DOM uzly. `text` jde VŽDY přes createTextNode.
+  function rtUsekyDoUzlu(useky) {
+    var frag = document.createDocumentFragment();
+    if (!Array.isArray(useky)) return frag;
+    useky.forEach(function (u) {
+      if (!u || typeof u !== "object") return;
+      var text = String(u.text === null || u.text === undefined ? "" : u.text);
+      if (!text) return;
+
+      var uzel = document.createTextNode(text);
+      if (u.kurziva === true) {
+        var em = document.createElement("em");
+        em.appendChild(uzel);
+        uzel = em;
+      }
+      if (u.tucne === true) {
+        var st = document.createElement("strong");
+        st.appendChild(uzel);
+        uzel = st;
+      }
+      var odkaz = bezpecnyOdkaz(u.odkaz);
+      if (odkaz) {
+        var a = document.createElement("a");
+        a.className = "rt-odkaz";
+        if (odkaz.externi) {
+          a.setAttribute("href", odkaz.href);
+          a.setAttribute("target", "_blank");
+          // Bez tohohle má otevřená stránka přístup na window.opener.
+          a.setAttribute("rel", "noopener noreferrer");
+        } else {
+          // Vnitřní odkaz jede přes týž router jako menu (query parametry).
+          a.setAttribute("href", location.pathname + "?stranka=" + encodeURIComponent(odkaz.slug));
+          a.addEventListener("click", function (e) {
+            e.preventDefault();
+            navigateVerejna("stranka", odkaz.slug);
+          });
+        }
+        a.appendChild(uzel);
+        uzel = a;
+      }
+      frag.appendChild(uzel);
+    });
+    return frag;
+  }
+
+  // Vykreslí bloky do `cil`. Cíl se nejdřív VYPRÁZDNÍ (textContent = "",
+  // ne innerHTML = "" - výsledek je stejný, ale konzistentně se tu nikde
+  // nesahá na innerHTML).
+  function renderBlokyDo(cil, bloky, prazdnyText) {
+    if (!cil) return;
+    while (cil.firstChild) cil.removeChild(cil.firstChild);
+    var pole = Array.isArray(bloky) ? bloky : [];
+    var vykresleno = 0;
+
+    pole.forEach(function (b) {
+      if (!b || typeof b !== "object") return;
+      var typ = String(b.typ || "").toLowerCase();
+      var tag = RT_TAG_PODLE_TYPU[typ];
+      if (!tag) return;                       // neznámý typ se TIŠE zahodí
+      var zarov = RT_TRIDA_ZAROVNANI[String(b.zarovnani || "vlevo").toLowerCase()] || "rt-vlevo";
+
+      var prvek = document.createElement(tag);
+      prvek.className = RT_TRIDA_PODLE_TYPU[typ] + " " + zarov;
+
+      if (typ === "seznam") {
+        var polozky = Array.isArray(b.polozky) ? b.polozky : [];
+        var maPolozku = false;
+        polozky.forEach(function (p) {
+          if (!Array.isArray(p)) return;
+          var li = document.createElement("li");
+          var obsah = rtUsekyDoUzlu(p);
+          if (!obsah.childNodes.length) return;
+          li.appendChild(obsah);
+          prvek.appendChild(li);
+          maPolozku = true;
+        });
+        if (!maPolozku) return;
+      } else {
+        var obsahB = rtUsekyDoUzlu(b.useky);
+        if (!obsahB.childNodes.length) return;
+        prvek.appendChild(obsahB);
+      }
+      cil.appendChild(prvek);
+      vykresleno++;
+    });
+
+    if (!vykresleno && prazdnyText) {
+      var p = document.createElement("p");
+      p.className = "rt-prazdno";
+      p.textContent = prazdnyText;
+      cil.appendChild(p);
+    }
+    return vykresleno;
+  }
+
+  // Bloky -> prostý text (pro meta popis a náhledy). Bez jediného tagu.
+  function blokyNaText(bloky) {
+    var kusy = [];
+    (Array.isArray(bloky) ? bloky : []).forEach(function (b) {
+      if (!b || typeof b !== "object") return;
+      if (Array.isArray(b.useky)) {
+        b.useky.forEach(function (u) { if (u && u.text) kusy.push(String(u.text)); });
+      }
+      if (Array.isArray(b.polozky)) {
+        b.polozky.forEach(function (p) {
+          (Array.isArray(p) ? p : []).forEach(function (u) { if (u && u.text) kusy.push(String(u.text)); });
+        });
+      }
+    });
+    return kusy.join(" ").replace(/\s+/g, " ").trim();
   }
 
   // Odstavce z prostého textu. Prázdný řádek = nový odstavec; uvnitř
@@ -17014,11 +17949,36 @@
       return;
     }
     setDocumentTitle(d.meta_titulek || d.nazev || null);
-    setMetaPopis(d.meta_popis || null);
-    wrap.innerHTML =
-      '<h1>' + escapeHtml(d.titulek || d.nazev || "") + '</h1>' +
-      (d.podnadpis ? '<p class="verejna-stranka-lead">' + escapeHtml(d.podnadpis) + '</p>' : '') +
-      '<div class="verejna-stranka-telo">' + odstavceHtml(d.obsah) + '</div>';
+    setMetaPopis(d.meta_popis || blokyNaText(d.obsah_bloky).slice(0, 200) || null);
+
+    // MILNÍK 26 (bod 2): obsah se od tohohle milníku skládá ze
+    // STRUKTUROVANÝCH BLOKŮ přes createElement/textContent, ne z řetězce
+    // HTML. `innerHTML` se tu používá už jen na nadpis a podnadpis, a i ty
+    // jdou přes escapeHtml() - viz renderBlokyDo() pro zdůvodnění.
+    while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
+
+    var h1 = document.createElement("h1");
+    h1.textContent = d.titulek || d.nazev || "";
+    wrap.appendChild(h1);
+
+    if (d.podnadpis) {
+      var lead = document.createElement("p");
+      lead.className = "verejna-stranka-lead";
+      lead.textContent = d.podnadpis;
+      wrap.appendChild(lead);
+    }
+
+    var telo = document.createElement("div");
+    telo.className = "verejna-stranka-telo rt-obsah";
+    var bloky = Array.isArray(d.obsah_bloky) ? d.obsah_bloky : [];
+    if (bloky.length) {
+      renderBlokyDo(telo, bloky, null);
+    } else if (d.obsah) {
+      // Záložní cesta pro stránku, která má ještě jen starý prostý text
+      // z Milníku 25 (migrace ho převádí, tohle je pojistka).
+      telo.innerHTML = odstavceHtml(d.obsah);
+    }
+    wrap.appendChild(telo);
   }
 
   // ------------------------------------------- bod 7: rekrutační stránka
@@ -17707,12 +18667,45 @@
   }
 
   // =========================================================================
-  // BOD 10 — SPRÁVA WEBU (výhradně administrátor)
+  // MILNÍK 25 (bod 10) → MILNÍK 26 (body 2 a 8) — SPRÁVA WEBU
+  // (výhradně administrátor)
+  //
+  // Z jednoduchého „Detail → Upravit → Uložit" z Milníku 25 je lehký CMS:
+  //   * blokový RICH-TEXT editor (H1–H5, odstavec, odrážky, tučné, kurzíva,
+  //     odkaz, zarovnání),
+  //   * NÁHLED před uložením - vykreslený TOUTÉŽ funkcí renderBlokyDo(),
+  //     jakou používá živá veřejná stránka, takže je zaručeně stejný,
+  //   * DRAFT/PUBLISH: „Uložit koncept" (vidí jen administrátor) a
+  //     samostatné „Publikovat" (teprve to jde ven k návštěvníkům),
+  //   * zakládání a mazání vlastních stránek s libovolným slugem,
+  //   * přepínač „V hlavním menu",
+  //   * editace PATIČKY (řádek typu `paticka`) týmž editorem.
+  //
+  // ⚠ ROZHODNUTÍ R2-RICH (viz dokumentace milníku) ⚠
+  // Editor ZÁMĚRNĚ NENÍ `contenteditable`. Kdyby byl, ukládalo by se HTML
+  // vyrobené prohlížečem a appka by ho musela na veřejné stránce
+  // sanitizovat - tedy spoléhat na to, že její blacklist je chytřejší než
+  // útočník. Místo toho se ukládá STRUKTURA (pole bloků s úseky textu
+  // a příznaky tučné/kurzíva/odkaz) a veřejná stránka si z ní staví DOM
+  // sama přes createElement/textContent. Do DOM se tak nikdy nedostane
+  // řetězec, který by prohlížeč mohl vyložit jako značku.
+  //
+  // Formátování se v textovém poli zapisuje jednoduchou značkou, kterou
+  // vkládají tlačítka lišty (uživatel ji psát nemusí):
+  //     **tučné**      _kurzíva_      [text odkazu](https://adresa)
+  // Parser je náš vlastní (rteParseInline) a jeho výstup jsou VŽDY jen
+  // objekty {text, tucne, kurziva, odkaz}. I kdyby se v něm skrývala chyba,
+  // nejhorší možný důsledek je špatně naformátovaný text - ne spuštěný kód.
   // =========================================================================
   var webTable = null;
   var webRows = [];
   var webDetailSlug = null;
   var webEditMode = false;
+  var webNahledOtevren = false;
+  var webNovaOtevrena = false;
+  // Rozpracovaný stav editoru. Existuje jen po dobu editace a nikdy se
+  // nemíchá s daty ze serveru (`webRows`).
+  var webEditor = null;
 
   async function fetchWebStranky() {
     if (!currentUser) return;
@@ -17729,6 +18722,7 @@
       return;
     }
     webRows = res.data || [];
+    renderWebNovaStranka();
     renderWebTable(webRows);
   }
 
@@ -17737,17 +18731,42 @@
     return null;
   }
 
+  // Stav stránky pro tabulku i detail. ⚠ Tři různé věci, které se nesmí
+  // slévat: publikovaná (venku), publikovaná s rozpracovaným konceptem
+  // (venku je STARÁ verze), a skrytá (venku není vůbec).
+  function webStavPill(r) {
+    if (!r.publikovano) return '<span class="web-stav-pill web-stav-skryto">Nepublikováno</span>';
+    if (r.ma_koncept) return '<span class="web-stav-pill web-stav-koncept">Koncept čeká</span>';
+    return '<span class="web-stav-pill web-stav-publikovano">Publikováno</span>';
+  }
+
+  function webStavPopis(r) {
+    if (!r.publikovano) return "Stránka není veřejně dostupná — na její adrese návštěvník uvidí „Stránka nenalezena“.";
+    if (r.ma_koncept) return "Veřejně je pořád STARÁ verze. Rozpracovaný koncept uvidíte jen vy, dokud nestisknete „Publikovat“.";
+    return "Aktuální obsah je veřejně dostupný.";
+  }
+
   function renderWebTable(rows) {
     var columns = [
       { key: "nazev", label: "Stránka", className: "dt-col-name", get: function (r) { return r.nazev || ""; },
-        render: function (r) { return '<span class="dt-strong">' + escapeHtml(r.nazev || "—") + '</span>'; } },
+        render: function (r) {
+          return '<span class="dt-strong">' + escapeHtml(r.nazev || "—") + '</span>' +
+            (r.typ === "paticka" ? ' <span class="dt-muted">(patička)</span>' : '');
+        } },
       { key: "adresa", label: "Adresa", get: function (r) { return r.slug || ""; },
         render: function (r) {
-          return '<code style="font-size:12px;">' +
-            escapeHtml(r.slug === "hlavni" ? "(přihlašovací obrazovka)" : "?stranka=" + r.slug) + '</code>';
+          var t = r.typ === "paticka" ? "(patička všech stránek)"
+            : (r.slug === "hlavni" ? "(hlavní stránka)" : "?stranka=" + r.slug);
+          return '<code style="font-size:12px;">' + escapeHtml(t) + '</code>';
         } },
-      { key: "titulek", label: "Nadpis", className: "dt-wrap", get: function (r) { return r.titulek || ""; },
-        render: function (r) { return escapeHtml(r.titulek || "—"); } },
+      { key: "stav", label: "Stav", get: function (r) {
+          return (!r.publikovano ? "1" : (r.ma_koncept ? "2" : "3")); },
+        render: function (r) { return webStavPill(r); } },
+      { key: "vmenu", label: "V menu", get: function (r) { return r.v_menu ? 1 : 0; },
+        render: function (r) {
+          if (r.typ === "paticka") return '<span class="dt-muted">—</span>';
+          return r.v_menu ? "Ano" : '<span class="dt-muted">Ne</span>';
+        } },
       { key: "upraveno", label: "Naposledy upraveno", get: function (r) { return r.upraveno_kdy ? new Date(r.upraveno_kdy).getTime() : 0; },
         render: function (r) {
           return escapeHtml(formatDateTime(r.upraveno_kdy) + (r.upravil_jmeno ? " — " + r.upravil_jmeno : ""));
@@ -17779,10 +18798,125 @@
     }
   }
 
+  // ------------------------------------------- MILNÍK 26 (bod 8): nová stránka
+  function renderWebNovaStranka() {
+    var wrap = el("webNovaStrankaWrap");
+    if (!wrap) return;
+    if (!webNovaOtevrena) {
+      wrap.innerHTML = '<div class="form-actions" style="margin-top:0;">' +
+        '<button class="btn-primary" type="button" id="webNovaOpenBtn" style="width:auto;">+ Přidat novou stránku</button>' +
+        '</div>';
+      el("webNovaOpenBtn").addEventListener("click", function () {
+        webNovaOtevrena = true;
+        closeWebDetail();
+        renderWebNovaStranka();
+      });
+      return;
+    }
+    wrap.innerHTML =
+      '<div class="card detail-card">' +
+        '<h3 class="detail-section-title" style="margin-top:0;">Nová stránka</h3>' +
+        '<p class="dt-muted" style="font-size:12.5px;margin:0 0 14px;">Stránka vznikne jako <strong>nepublikovaná</strong> — veřejně se objeví teprve tehdy, až jí napíšete obsah a stisknete „Publikovat“.</p>' +
+        '<form id="webNovaForm" novalidate>' +
+          '<div class="form-grid">' +
+            '<div class="field"><label for="wnNazev">Název stránky *</label>' +
+              '<input type="text" id="wnNazev" maxlength="40" placeholder="např. Časté dotazy"></div>' +
+            '<div class="field"><label for="wnSlug">Adresa (slug) *</label>' +
+              '<input type="text" id="wnSlug" maxlength="40" placeholder="např. caste-dotazy" autocomplete="off">' +
+              '<span class="hint">Malá písmena bez diakritiky, číslice a spojovník. Výsledná adresa bude <code>?stranka=&lt;adresa&gt;</code>.</span></div>' +
+            '<div class="field col-span-2">' +
+              '<label class="checkbox-line"><input type="checkbox" id="wnVMenu"> <span>Zobrazovat v hlavním menu</span></label>' +
+            '</div>' +
+          '</div>' +
+          '<div class="form-actions">' +
+            '<button class="btn-primary" type="submit" id="webNovaSaveBtn" style="width:auto;">Založit stránku</button>' +
+            '<button class="btn-ghost" type="button" id="webNovaCancelBtn">Zrušit</button>' +
+          '</div>' +
+        '</form>' +
+      '</div>';
+
+    el("webNovaCancelBtn").addEventListener("click", function () {
+      webNovaOtevrena = false;
+      renderWebNovaStranka();
+    });
+    // Návrh slugu z názvu, dokud si ho uživatel sám nepřepsal.
+    var slugRucne = false;
+    el("wnSlug").addEventListener("input", function () { slugRucne = true; });
+    el("wnNazev").addEventListener("input", function () {
+      if (slugRucne) return;
+      el("wnSlug").value = navrhniSlug(el("wnNazev").value);
+    });
+    el("webNovaForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      submitWebNovaStranka();
+    });
+  }
+
+  // Diakritika pryč, mezery na spojovník. Jen pomůcka - server si tvar
+  // hlídá sám (vytvorit_webovou_stranku).
+  function navrhniSlug(text) {
+    var s = String(text || "");
+    try { s = s.normalize("NFD").replace(/[̀-ͯ]/g, ""); } catch (e) { /* starý prohlížeč */ }
+    return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40);
+  }
+
+  async function submitWebNovaStranka() {
+    var banner = el("webBanner");
+    var nazev = el("wnNazev").value.trim();
+    var slug = el("wnSlug").value.trim().toLowerCase();
+    if (!nazev) { showBanner(banner, "error", "Název stránky je povinný."); return; }
+    if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug) || slug.length < 3) {
+      showBanner(banner, "error", "Adresa musí mít alespoň 3 znaky a smí obsahovat jen malá písmena bez diakritiky, číslice a spojovník.");
+      return;
+    }
+    var btn = el("webNovaSaveBtn");
+    if (btn) btn.disabled = true;
+    var g = authGen;
+    var res = await sb.rpc("vytvorit_webovou_stranku", {
+      p_slug: slug, p_nazev: nazev, p_v_menu: el("wnVMenu").checked
+    });
+    if (g !== authGen) return;
+    if (btn) btn.disabled = false;
+    if (res.error) {
+      console.error("Chyba při zakládání stránky:", res.error);
+      showBanner(banner, "error", webChybaText(res.error, "Stránku se nepodařilo založit."));
+      return;
+    }
+    webRows = res.data || webRows;
+    webNovaOtevrena = false;
+    zneplatniVerejneMenu();
+    renderWebNovaStranka();
+    renderWebTable(webRows);
+    showBanner(banner, "ok", "Stránka založená. Napište jí obsah a pak ji publikujte — do té doby veřejně není.");
+    openWebDetail(slug);
+  }
+
+  function webChybaText(error, vychozi) {
+    if (!error) return vychozi;
+    if (error.code === "42501") return "Správa webu je vyhrazena administrátorovi.";
+    if (error.code === "23505") return "Stránka s touto adresou už existuje (nebo se adresa sráží s pozvánkovým kódem uživatele).";
+    // 22023 / P0001 nesou konkrétní a srozumitelnou hlášku ze serveru.
+    if (error.code === "22023" || error.code === "P0001") {
+      return (error.message || vychozi);
+    }
+    return vychozi;
+  }
+
+  function zneplatniVerejneMenu() {
+    // Menu, banner i patička se tahají jednou při startu - po změně obsahu
+    // by do odhlášení ukazovaly starý stav.
+    verejneMenuNacteno = false;
+    verejneMenuPolozky = null;
+    verejnyHeroNacten = false;
+    verejnaPatickaNactena = false;
+  }
+
   function openWebDetail(slug) {
     if (!webRowBySlug(slug)) return;
     webDetailSlug = slug;
     webEditMode = false;
+    webNahledOtevren = false;
+    webEditor = null;
     renderWebDetail();
     el("webDetailWrap").scrollIntoView({ behavior: "smooth", block: "start" });
   }
@@ -17790,124 +18924,817 @@
   function closeWebDetail() {
     webDetailSlug = null;
     webEditMode = false;
+    webEditor = null;
+    webNahledOtevren = false;
     var w = el("webDetailWrap");
     if (w) w.innerHTML = "";
   }
 
+  // =========================================================================
+  // BLOKOVÝ EDITOR — datový model a převod na/z textové značky
+  // =========================================================================
+  var RTE_TYPY_POPISKY = [
+    ["odstavec", "Odstavec"], ["h1", "Nadpis H1"], ["h2", "Nadpis H2"],
+    ["h3", "Nadpis H3"], ["h4", "Nadpis H4"], ["h5", "Nadpis H5"],
+    ["seznam", "Odrážky"]
+  ];
+  var RTE_ZAROVNANI = [
+    ["vlevo", "⯇", "Zarovnat vlevo"], ["na-stred", "≡", "Zarovnat na střed"],
+    ["vpravo", "⯈", "Zarovnat vpravo"], ["do-bloku", "☰", "Zarovnat do bloku"]
+  ];
+
+  // Text se značkou -> pole úseků. VÝSTUP JSOU VŽDY JEN DATA, nikdy HTML.
+  function rteParseInline(text, base) {
+    base = base || {};
+    var out = [];
+    var s = String(text === null || text === undefined ? "" : text);
+    var re = /\*\*([\s\S]+?)\*\*|_([^_\n]+)_|\[([^\]\n]+)\]\(([^)\s]+)\)/g;
+    var last = 0;
+    var m;
+    while ((m = re.exec(s)) !== null) {
+      if (m.index > last) {
+        out.push({ text: s.slice(last, m.index), tucne: !!base.tucne, kurziva: !!base.kurziva, odkaz: base.odkaz || null });
+      }
+      if (m[1] !== undefined) {
+        // Rekurze, ať funguje i **_tučná kurzíva_**.
+        out = out.concat(rteParseInline(m[1], { tucne: true, kurziva: !!base.kurziva, odkaz: base.odkaz || null }));
+      } else if (m[2] !== undefined) {
+        out = out.concat(rteParseInline(m[2], { tucne: !!base.tucne, kurziva: true, odkaz: base.odkaz || null }));
+      } else {
+        out.push({ text: m[3], tucne: !!base.tucne, kurziva: !!base.kurziva, odkaz: m[4] });
+      }
+      last = re.lastIndex;
+    }
+    if (last < s.length) {
+      out.push({ text: s.slice(last), tucne: !!base.tucne, kurziva: !!base.kurziva, odkaz: base.odkaz || null });
+    }
+    return out.filter(function (u) { return u.text !== ""; });
+  }
+
+  // Pole úseků -> text se značkou (pro naplnění textového pole).
+  function rteSerializeInline(useky) {
+    return (Array.isArray(useky) ? useky : []).map(function (u) {
+      var t = String(u && u.text ? u.text : "");
+      if (!t) return "";
+      if (u.kurziva) t = "_" + t + "_";
+      if (u.tucne) t = "**" + t + "**";
+      if (u.odkaz) t = "[" + t + "](" + u.odkaz + ")";
+      return t;
+    }).join("");
+  }
+
+  function rteBlokNaText(b) {
+    if (!b) return "";
+    if (b.typ === "seznam") {
+      return (Array.isArray(b.polozky) ? b.polozky : []).map(function (p) {
+        return rteSerializeInline(p);
+      }).join("\n");
+    }
+    return rteSerializeInline(b.useky);
+  }
+
+  function rteTextNaBlok(typ, zarovnani, text) {
+    if (typ === "seznam") {
+      var polozky = String(text || "").split(/\n/).map(function (radek) {
+        return rteParseInline(radek.trim());
+      }).filter(function (p) { return p.length > 0; });
+      return { typ: "seznam", zarovnani: zarovnani || "vlevo", polozky: polozky };
+    }
+    return { typ: typ, zarovnani: zarovnani || "vlevo", useky: rteParseInline(text) };
+  }
+
+  // Editor -> payload pro server. Prázdné bloky se zahazují už tady
+  // (server je zahodí taky, tohle je jen pro čistý náhled).
+  function rteEditorNaBloky() {
+    if (!webEditor) return [];
+    return (webEditor.bloky || []).map(function (b) {
+      return rteTextNaBlok(b.typ, b.zarovnani, b.text);
+    }).filter(function (b) {
+      if (b.typ === "seznam") return b.polozky.length > 0;
+      return b.useky.length > 0;
+    });
+  }
+
+  function rteNovyBlok(typ) {
+    return { typ: typ || "odstavec", zarovnani: "vlevo", text: "" };
+  }
+
+  // Server -> editor.
+  function rteBlokyDoEditoru(bloky) {
+    var pole = (Array.isArray(bloky) ? bloky : []).map(function (b) {
+      return {
+        typ: RTE_TYPY_POPISKY.some(function (t) { return t[0] === b.typ; }) ? b.typ : "odstavec",
+        zarovnani: b.zarovnani || "vlevo",
+        text: rteBlokNaText(b)
+      };
+    });
+    return pole.length ? pole : [rteNovyBlok("odstavec")];
+  }
+
+  // =========================================================================
+  // DETAIL STRÁNKY (prohlížení / editace)
+  // =========================================================================
   function renderWebDetail() {
     var wrap = el("webDetailWrap");
     if (!wrap) return;
     var r = webRowBySlug(webDetailSlug);
     if (!r) { wrap.innerHTML = ""; return; }
+    var jePaticka = r.typ === "paticka";
 
-    var telo;
-    if (!webEditMode) {
-      telo =
-        '<div class="detail-grid">' +
-          detailItemHtml("Název v menu", r.nazev) +
-          detailItemHtml("Adresa", r.slug === "hlavni" ? "(přihlašovací obrazovka)" : "?stranka=" + r.slug) +
-          detailItemHtml("Nadpis (H1)", r.titulek) +
-          detailItemHtml("Podnadpis", r.podnadpis) +
-          detailItemHtml("Titulek v prohlížeči", r.meta_titulek) +
-          detailItemHtml("Meta popis", r.meta_popis) +
-        '</div>' +
-        (r.obsah ? '<div class="rekrut-preview"><p class="rekrut-preview-label">Text stránky</p>' +
-                   '<div class="rekrut-preview-telo">' + odstavceHtml(r.obsah) + '</div></div>' : '') +
-        '<div class="form-actions">' +
-          '<button class="btn-primary" type="button" id="webEditBtn" style="width:auto;">Upravit</button>' +
-          (r.slug === "hlavni" ? '' : '<button class="btn-ghost" type="button" id="webOpenBtn">Otevřít veřejnou stránku</button>') +
-          '<button class="btn-ghost" type="button" id="webCloseBtn">Zavřít</button>' +
-        '</div>';
-    } else {
-      telo =
-        '<form id="webForm" novalidate>' +
-          '<div class="form-grid">' +
-            '<div class="field col-span-2"><label for="wfNazev">Název v menu *</label>' +
-              '<input type="text" id="wfNazev" maxlength="40" value="' + escapeHtml(r.nazev || "") + '"></div>' +
-            '<div class="field col-span-2"><label for="wfTitulek">Nadpis stránky (H1)</label>' +
-              '<input type="text" id="wfTitulek" value="' + escapeHtml(r.titulek || "") + '"></div>' +
-            '<div class="field col-span-2"><label for="wfPodnadpis">Podnadpis</label>' +
-              '<input type="text" id="wfPodnadpis" value="' + escapeHtml(r.podnadpis || "") + '"></div>' +
-            '<div class="field col-span-2"><label for="wfObsah">Text stránky</label>' +
-              '<textarea id="wfObsah" rows="12" placeholder="Prázdný řádek odděluje odstavce.">' + escapeHtml(r.obsah || "") + '</textarea></div>' +
-            '<div class="field col-span-2"><label for="wfMetaTitulek">Titulek v prohlížeči (meta title)</label>' +
-              '<input type="text" id="wfMetaTitulek" value="' + escapeHtml(r.meta_titulek || "") + '"></div>' +
-            '<div class="field col-span-2"><label for="wfMetaPopis">Meta popis (pro vyhledávače)</label>' +
-              '<input type="text" id="wfMetaPopis" maxlength="300" value="' + escapeHtml(r.meta_popis || "") + '"></div>' +
-          '</div>' +
-          '<p class="dt-muted" style="font-size:12px;margin:4px 0 0;">Metadata se ukládají do databáze a titulek se propíše do záložky prohlížeče. Aplikace zatím nemá vykreslování na serveru, takže vyhledávače tyhle údaje spolehlivě nepřečtou — je to příprava do budoucna, ne hotové SEO.</p>' +
-          '<div class="form-actions">' +
-            '<button class="btn-primary" type="submit" id="webSaveBtn" style="width:auto;">Uložit</button>' +
-            '<button class="btn-ghost" type="button" id="webCancelBtn">Zrušit</button>' +
-          '</div>' +
-        '</form>';
+    var karta = document.createElement("div");
+    karta.className = "card detail-card";
+
+    var h3 = document.createElement("h3");
+    h3.className = "detail-section-title";
+    h3.style.marginTop = "0";
+    h3.textContent = r.nazev || r.slug;
+    karta.appendChild(h3);
+
+    var stavRadek = document.createElement("p");
+    stavRadek.style.margin = "0 0 10px";
+    stavRadek.innerHTML = webStavPill(r) + ' <span class="dt-muted" style="font-size:12.5px;">' +
+      escapeHtml(webStavPopis(r)) + '</span>';
+    karta.appendChild(stavRadek);
+
+    if (r.poznamka_pro_spravce) {
+      var pozn = document.createElement("p");
+      pozn.className = "dt-muted";
+      pozn.style.cssText = "font-size:12.5px;margin:0 0 14px;";
+      pozn.textContent = r.poznamka_pro_spravce;
+      karta.appendChild(pozn);
     }
 
-    wrap.innerHTML =
-      '<div class="card detail-card">' +
-        '<h3 class="detail-section-title" style="margin-top:0;">' + escapeHtml(r.nazev || r.slug) + '</h3>' +
-        (r.poznamka_pro_spravce
-          ? '<p class="dt-muted" style="font-size:12.5px;margin:0 0 14px;">' + escapeHtml(r.poznamka_pro_spravce) + '</p>'
-          : '') +
-        telo +
-      '</div>';
+    var telo = document.createElement("div");
+    karta.appendChild(telo);
+    wrap.innerHTML = "";
+    wrap.appendChild(karta);
 
-    if (!webEditMode) {
-      el("webEditBtn").addEventListener("click", function () { webEditMode = true; renderWebDetail(); });
-      el("webCloseBtn").addEventListener("click", closeWebDetail);
-      var openBtn = el("webOpenBtn");
-      if (openBtn) {
-        openBtn.addEventListener("click", function () {
-          window.open(location.origin + location.pathname + "?stranka=" + encodeURIComponent(r.slug), "_blank", "noopener,noreferrer");
-        });
+    if (!webEditMode) renderWebDetailReadonly(telo, r, jePaticka);
+    else renderWebDetailEditor(telo, r, jePaticka);
+  }
+
+  function renderWebDetailReadonly(telo, r, jePaticka) {
+    var gridHtml = '<div class="detail-grid">' +
+      detailItemHtml(jePaticka ? "Název (jen pro správu)" : "Název v menu", r.nazev) +
+      detailItemHtml("Adresa", jePaticka ? "(patička všech veřejných stránek)"
+        : (r.slug === "hlavni" ? "(hlavní stránka — uvítací banner)" : "?stranka=" + r.slug)) +
+      detailItemHtml(jePaticka ? "Nadpis patičky" : "Nadpis (H1)", r.titulek) +
+      (jePaticka ? "" : detailItemHtml("Podnadpis", r.podnadpis)) +
+      (jePaticka ? "" : detailItemHtml("V hlavním menu", r.v_menu ? "Ano" : "Ne")) +
+      (jePaticka ? "" : detailItemHtml("Titulek v prohlížeči", r.meta_titulek)) +
+      (jePaticka ? "" : detailItemHtml("Meta popis", r.meta_popis)) +
+      detailItemHtml("Naposledy publikováno", r.publikovano_kdy ? formatDateTime(r.publikovano_kdy) : "—") +
+      '</div>';
+    var grid = document.createElement("div");
+    grid.innerHTML = gridHtml;
+    telo.appendChild(grid);
+
+    if (jePaticka) {
+      var oW = document.createElement("div");
+      oW.className = "rekrut-preview";
+      var oL = document.createElement("p");
+      oL.className = "rekrut-preview-label";
+      oL.textContent = "Odkazy v patičce";
+      oW.appendChild(oL);
+      var ul = document.createElement("ul");
+      ul.className = "rt-seznam";
+      (Array.isArray(r.odkazy) ? r.odkazy : []).forEach(function (o) {
+        var li = document.createElement("li");
+        li.textContent = (o.popisek || o.slug) + "  →  ?stranka=" + o.slug;
+        ul.appendChild(li);
+      });
+      if (!ul.childNodes.length) {
+        var pEmpty = document.createElement("p");
+        pEmpty.className = "rt-prazdno";
+        pEmpty.textContent = "Patička zatím nemá žádné odkazy.";
+        oW.appendChild(pEmpty);
+      } else {
+        oW.appendChild(ul);
       }
-    } else {
-      el("webCancelBtn").addEventListener("click", function () { webEditMode = false; renderWebDetail(); });
-      el("webForm").addEventListener("submit", function (e) { e.preventDefault(); submitWebStranka(); });
+      telo.appendChild(oW);
+    }
+
+    // Publikovaný obsah — vykreslený TOUTÉŽ funkcí jako veřejná stránka.
+    var pW = document.createElement("div");
+    pW.className = "rekrut-preview";
+    var pL = document.createElement("p");
+    pL.className = "rekrut-preview-label";
+    pL.textContent = "Publikovaný obsah";
+    pW.appendChild(pL);
+    var pT = document.createElement("div");
+    pT.className = "rt-obsah";
+    renderBlokyDo(pT, r.obsah_bloky || [], "Stránka zatím nemá žádný obsah.");
+    pW.appendChild(pT);
+    telo.appendChild(pW);
+
+    // Rozpracovaný koncept — jen tady, nikdy venku.
+    if (r.ma_koncept && r.koncept) {
+      var kW = document.createElement("div");
+      kW.className = "rte-nahled";
+      var kL = document.createElement("p");
+      kL.className = "rte-nahled-label";
+      kL.textContent = "Rozpracovaný koncept (veřejně NENÍ vidět)" +
+        (r.koncept_kdy ? " — uloženo " + formatDateTime(r.koncept_kdy) : "");
+      kW.appendChild(kL);
+      var kNadpis = document.createElement("p");
+      kNadpis.className = "dt-muted";
+      kNadpis.style.cssText = "font-size:12.5px;margin:0 0 10px;";
+      kNadpis.textContent = "Nadpis: " + (r.koncept.titulek || "—") +
+        (jePaticka ? "" : "  ·  V menu: " + (r.koncept.v_menu ? "ano" : "ne"));
+      kW.appendChild(kNadpis);
+      var kT = document.createElement("div");
+      kT.className = "rt-obsah";
+      renderBlokyDo(kT, r.koncept.obsah_bloky || [], "Koncept nemá žádný obsah.");
+      kW.appendChild(kT);
+      telo.appendChild(kW);
+    }
+
+    var akce = document.createElement("div");
+    akce.className = "form-actions";
+    akce.innerHTML =
+      '<button class="btn-primary" type="button" id="webEditBtn" style="width:auto;">Upravit</button>' +
+      (r.ma_koncept || !r.publikovano
+        ? '<button class="btn-primary" type="button" id="webPublishBtn" style="width:auto;">Publikovat</button>' : '') +
+      (r.ma_koncept ? '<button class="btn-ghost" type="button" id="webDropDraftBtn">Zahodit koncept</button>' : '') +
+      (!jePaticka && r.slug !== "hlavni" && r.publikovano && !r.systemova
+        ? '<button class="btn-ghost" type="button" id="webHideBtn">Skrýt z webu</button>' : '') +
+      (!jePaticka && r.slug !== "hlavni" && r.publikovano
+        ? '<button class="btn-ghost" type="button" id="webOpenBtn">Otevřít veřejnou stránku</button>' : '') +
+      (r.systemova ? '' : '<button class="btn-ghost btn-danger-ghost" type="button" id="webDeleteBtn">Smazat stránku</button>') +
+      '<button class="btn-ghost" type="button" id="webCloseBtn">Zavřít</button>';
+    telo.appendChild(akce);
+
+    el("webEditBtn").addEventListener("click", function () {
+      webEditor = {
+        nazev: r.koncept ? (r.koncept.nazev || r.nazev) : r.nazev,
+        titulek: r.koncept ? (r.koncept.titulek || "") : (r.titulek || ""),
+        podnadpis: r.koncept ? (r.koncept.podnadpis || "") : (r.podnadpis || ""),
+        meta_titulek: r.koncept ? (r.koncept.meta_titulek || "") : (r.meta_titulek || ""),
+        meta_popis: r.koncept ? (r.koncept.meta_popis || "") : (r.meta_popis || ""),
+        v_menu: r.koncept && typeof r.koncept.v_menu === "boolean" ? r.koncept.v_menu : !!r.v_menu,
+        odkazy: (r.koncept && Array.isArray(r.koncept.odkazy) && r.koncept.odkazy.length
+                  ? r.koncept.odkazy : (r.odkazy || [])).map(function (o) {
+                    return { popisek: o.popisek || "", slug: o.slug || "" };
+                  }),
+        bloky: rteBlokyDoEditoru(r.koncept ? r.koncept.obsah_bloky : r.obsah_bloky)
+      };
+      webEditMode = true;
+      webNahledOtevren = false;
+      renderWebDetail();
+    });
+    el("webCloseBtn").addEventListener("click", closeWebDetail);
+    var pubBtn = el("webPublishBtn");
+    if (pubBtn) pubBtn.addEventListener("click", function () { publikovatWebStranku(r.slug); });
+    var dropBtn = el("webDropDraftBtn");
+    if (dropBtn) dropBtn.addEventListener("click", function () { zahoditKoncept(r.slug); });
+    var hideBtn = el("webHideBtn");
+    if (hideBtn) hideBtn.addEventListener("click", function () { skrytWebStranku(r.slug); });
+    var delBtn = el("webDeleteBtn");
+    if (delBtn) delBtn.addEventListener("click", function () { smazatWebStranku(r); });
+    var openBtn = el("webOpenBtn");
+    if (openBtn) {
+      openBtn.addEventListener("click", function () {
+        window.open(location.origin + location.pathname + "?stranka=" + encodeURIComponent(r.slug), "_blank", "noopener,noreferrer");
+      });
     }
   }
 
-  async function submitWebStranka() {
-    var r = webRowBySlug(webDetailSlug);
-    if (!r) return;
-    var banner = el("webBanner");
-    var nazev = el("wfNazev").value.trim();
-    if (!nazev) { showBanner(banner, "error", "Název stránky v menu je povinný."); return; }
+  function renderWebDetailEditor(telo, r, jePaticka) {
+    var form = document.createElement("form");
+    form.id = "webForm";
+    form.setAttribute("novalidate", "novalidate");
 
-    var btn = el("webSaveBtn");
+    var grid = document.createElement("div");
+    grid.className = "form-grid";
+    grid.innerHTML =
+      '<div class="field col-span-2"><label for="wfNazev">' +
+        (jePaticka ? "Název (jen pro správu) *" : "Název v menu *") + '</label>' +
+        '<input type="text" id="wfNazev" maxlength="40" value="' + escapeHtml(webEditor.nazev || "") + '"></div>' +
+      '<div class="field col-span-2"><label for="wfTitulek">' +
+        (jePaticka ? "Nadpis patičky" : "Nadpis stránky (H1)") + '</label>' +
+        '<input type="text" id="wfTitulek" value="' + escapeHtml(webEditor.titulek || "") + '"></div>' +
+      (jePaticka ? '' :
+        '<div class="field col-span-2"><label for="wfPodnadpis">Podnadpis</label>' +
+        '<input type="text" id="wfPodnadpis" value="' + escapeHtml(webEditor.podnadpis || "") + '"></div>') +
+      (jePaticka || r.slug === "hlavni" ? '' :
+        '<div class="field col-span-2"><label class="checkbox-line">' +
+        '<input type="checkbox" id="wfVMenu"' + (webEditor.v_menu ? ' checked' : '') + '> ' +
+        '<span>V hlavním menu</span></label>' +
+        '<span class="hint">Odškrtnuté stránky zůstávají dostupné na své adrese a dají se na ně odkazovat z patičky nebo z textu.</span></div>') +
+      (jePaticka ? '' :
+        '<div class="field col-span-2"><label for="wfMetaTitulek">Titulek v prohlížeči (meta title)</label>' +
+        '<input type="text" id="wfMetaTitulek" value="' + escapeHtml(webEditor.meta_titulek || "") + '"></div>' +
+        '<div class="field col-span-2"><label for="wfMetaPopis">Meta popis (pro vyhledávače)</label>' +
+        '<input type="text" id="wfMetaPopis" maxlength="300" value="' + escapeHtml(webEditor.meta_popis || "") + '"></div>');
+    form.appendChild(grid);
+
+    // ---- rich-text editor
+    var label = document.createElement("label");
+    label.style.cssText = "display:block;font-size:13px;font-weight:600;margin:14px 0 6px;";
+    label.textContent = jePaticka ? "Text patičky" : "Text stránky";
+    form.appendChild(label);
+
+    var editorWrap = document.createElement("div");
+    editorWrap.className = "rte-wrap";
+    editorWrap.id = "webRteWrap";
+    form.appendChild(editorWrap);
+
+    var napoveda = document.createElement("p");
+    napoveda.className = "rte-napoveda";
+    napoveda.textContent = "Formátování vkládají tlačítka B (tučné), I (kurzíva) a 🔗 (odkaz) — označte text a klikněte. " +
+      "V poli se pak zobrazí jako **tučné**, _kurzíva_ a [text odkazu](https://adresa). " +
+      "U odrážek je každý řádek jedna odrážka. Odkaz smí vést jen na http(s)://, mailto: nebo na jinou stránku tohoto webu ve tvaru ?stranka=adresa.";
+    form.appendChild(napoveda);
+
+    // ---- odkazy patičky
+    if (jePaticka) {
+      var oLabel = document.createElement("label");
+      oLabel.style.cssText = "display:block;font-size:13px;font-weight:600;margin:16px 0 6px;";
+      oLabel.textContent = "Odkazy v patičce";
+      form.appendChild(oLabel);
+      var oWrap = document.createElement("div");
+      oWrap.id = "webOdkazyWrap";
+      form.appendChild(oWrap);
+      var oNap = document.createElement("p");
+      oNap.className = "rte-napoveda";
+      oNap.textContent = "Odkaz smí mířit jen na stránku tohoto webu — patička se tak nedá použít jako rozcestník na cizí weby. Nepublikovaná stránka se v patičce návštěvníkovi nezobrazí, ani když ji tu vyberete.";
+      form.appendChild(oNap);
+    }
+
+    var akce = document.createElement("div");
+    akce.className = "form-actions";
+    akce.innerHTML =
+      '<button class="btn-primary" type="submit" id="webSaveBtn" style="width:auto;">Uložit koncept</button>' +
+      '<button class="btn-primary" type="button" id="webSavePublishBtn" style="width:auto;">Uložit a publikovat</button>' +
+      '<button class="btn-ghost" type="button" id="webPreviewBtn">Náhled</button>' +
+      '<button class="btn-ghost" type="button" id="webCancelBtn">Zrušit</button>';
+    form.appendChild(akce);
+
+    var pozn = document.createElement("p");
+    pozn.className = "dt-muted";
+    pozn.style.cssText = "font-size:12px;margin:4px 0 0;";
+    pozn.textContent = "„Uložit koncept“ uloží změnu tak, že ji vidíte jen vy. Veřejná stránka se změní teprve po „Publikovat“. " +
+      "Metadata se ukládají do databáze a titulek se propíše do záložky prohlížeče; aplikace zatím nemá vykreslování na serveru, takže vyhledávače tyhle údaje spolehlivě nepřečtou — je to příprava do budoucna, ne hotové SEO.";
+    form.appendChild(pozn);
+
+    var nahled = document.createElement("div");
+    nahled.id = "webNahledWrap";
+    form.appendChild(nahled);
+
+    telo.appendChild(form);
+
+    renderRteEditor();
+    if (jePaticka) renderWebOdkazyEditor();
+    renderWebNahled();
+
+    el("webCancelBtn").addEventListener("click", function () {
+      webEditMode = false;
+      webEditor = null;
+      webNahledOtevren = false;
+      renderWebDetail();
+    });
+    el("webPreviewBtn").addEventListener("click", function () {
+      webNahledOtevren = !webNahledOtevren;
+      ulozStavEditoruZFormulare();
+      renderWebNahled();
+    });
+    el("webSavePublishBtn").addEventListener("click", function () { submitWebStranka(true); });
+    form.addEventListener("submit", function (e) { e.preventDefault(); submitWebStranka(false); });
+  }
+
+  // Přečte hlavičková pole formuláře do `webEditor` (bloky si drží editor
+  // sám při každé změně textového pole).
+  function ulozStavEditoruZFormulare() {
+    if (!webEditor) return;
+    var f = function (id) { var e = el(id); return e ? e.value : undefined; };
+    if (f("wfNazev") !== undefined) webEditor.nazev = el("wfNazev").value.trim();
+    if (f("wfTitulek") !== undefined) webEditor.titulek = el("wfTitulek").value.trim();
+    if (f("wfPodnadpis") !== undefined) webEditor.podnadpis = el("wfPodnadpis").value.trim();
+    if (f("wfMetaTitulek") !== undefined) webEditor.meta_titulek = el("wfMetaTitulek").value.trim();
+    if (f("wfMetaPopis") !== undefined) webEditor.meta_popis = el("wfMetaPopis").value.trim();
+    var vm = el("wfVMenu");
+    if (vm) webEditor.v_menu = vm.checked;
+  }
+
+  function renderRteEditor() {
+    var wrap = el("webRteWrap");
+    if (!wrap || !webEditor) return;
+    wrap.innerHTML = "";
+
+    webEditor.bloky.forEach(function (b, idx) {
+      var box = document.createElement("div");
+      box.className = "rte-blok";
+
+      var lista = document.createElement("div");
+      lista.className = "rte-lista";
+
+      var sel = document.createElement("select");
+      sel.setAttribute("aria-label", "Typ bloku");
+      sel.className = "rte-typ";
+      RTE_TYPY_POPISKY.forEach(function (t) {
+        var o = document.createElement("option");
+        o.value = t[0];
+        o.textContent = t[1];
+        if (t[0] === b.typ) o.selected = true;
+        sel.appendChild(o);
+      });
+      sel.addEventListener("change", function () {
+        ulozStavEditoruZFormulare();
+        rteNactiTextyZPoli();
+        webEditor.bloky[idx].typ = sel.value;
+        renderRteEditor();
+        renderWebNahled();
+      });
+      lista.appendChild(sel);
+
+      RTE_ZAROVNANI.forEach(function (z) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "rte-btn rte-btn-zarovnani";
+        btn.textContent = z[1];
+        btn.title = z[2];
+        btn.setAttribute("aria-label", z[2]);
+        btn.setAttribute("data-zarovnani", z[0]);
+        btn.setAttribute("aria-pressed", (b.zarovnani || "vlevo") === z[0] ? "true" : "false");
+        btn.addEventListener("click", function () {
+          rteNactiTextyZPoli();
+          webEditor.bloky[idx].zarovnani = z[0];
+          renderRteEditor();
+          renderWebNahled();
+        });
+        lista.appendChild(btn);
+      });
+
+      var ta = document.createElement("textarea");
+      ta.className = "rte-text";
+      ta.setAttribute("data-blok-index", String(idx));
+      ta.setAttribute("aria-label", "Text bloku");
+      ta.rows = b.typ === "seznam" ? 4 : 3;
+      ta.placeholder = b.typ === "seznam"
+        ? "Každý řádek = jedna odrážka"
+        : (b.typ === "odstavec" ? "Text odstavce" : "Text nadpisu");
+      ta.value = b.text || "";
+      ta.addEventListener("input", function () {
+        webEditor.bloky[idx].text = ta.value;
+        if (webNahledOtevren) renderWebNahled();
+      });
+
+      [["B", "rte-btn-tucne", "**", "**", "tučný text"],
+       ["I", "rte-btn-kurziva", "_", "_", "kurzíva"]].forEach(function (t) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "rte-btn " + t[1];
+        btn.textContent = t[0];
+        btn.title = t[4];
+        btn.setAttribute("aria-label", t[4]);
+        btn.addEventListener("click", function () { rteObalSelekci(ta, t[2], t[3], t[4]); });
+        lista.appendChild(btn);
+      });
+
+      var btnOdkaz = document.createElement("button");
+      btnOdkaz.type = "button";
+      btnOdkaz.className = "rte-btn rte-btn-odkaz";
+      btnOdkaz.textContent = "🔗";
+      btnOdkaz.title = "Vložit odkaz";
+      btnOdkaz.setAttribute("aria-label", "Vložit odkaz");
+      btnOdkaz.addEventListener("click", function () { rteVlozOdkaz(ta, idx); });
+      lista.appendChild(btnOdkaz);
+
+      var mezera = document.createElement("span");
+      mezera.className = "rte-mezera";
+      lista.appendChild(mezera);
+
+      [["↑", "Posunout nahoru", -1], ["↓", "Posunout dolů", 1]].forEach(function (p) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "rte-btn rte-btn-posun";
+        btn.textContent = p[0];
+        btn.title = p[1];
+        btn.setAttribute("aria-label", p[1]);
+        btn.disabled = (p[2] === -1 && idx === 0) || (p[2] === 1 && idx === webEditor.bloky.length - 1);
+        btn.addEventListener("click", function () {
+          rteNactiTextyZPoli();
+          var cil = idx + p[2];
+          var tmp = webEditor.bloky[idx];
+          webEditor.bloky[idx] = webEditor.bloky[cil];
+          webEditor.bloky[cil] = tmp;
+          renderRteEditor();
+          renderWebNahled();
+        });
+        lista.appendChild(btn);
+      });
+
+      var btnSmazat = document.createElement("button");
+      btnSmazat.type = "button";
+      btnSmazat.className = "rte-btn rte-btn-smazat";
+      btnSmazat.textContent = "✕";
+      btnSmazat.title = "Smazat blok";
+      btnSmazat.setAttribute("aria-label", "Smazat blok");
+      btnSmazat.addEventListener("click", function () {
+        rteNactiTextyZPoli();
+        webEditor.bloky.splice(idx, 1);
+        if (!webEditor.bloky.length) webEditor.bloky.push(rteNovyBlok("odstavec"));
+        renderRteEditor();
+        renderWebNahled();
+      });
+      lista.appendChild(btnSmazat);
+
+      box.appendChild(lista);
+      box.appendChild(ta);
+      wrap.appendChild(box);
+    });
+
+    var pridat = document.createElement("div");
+    pridat.className = "rte-pridat";
+    [["odstavec", "+ Odstavec"], ["h2", "+ Nadpis"], ["seznam", "+ Odrážky"]].forEach(function (p) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "btn-small btn-small-ghost rte-pridat-btn";
+      b.setAttribute("data-pridat-typ", p[0]);
+      b.textContent = p[1];
+      b.addEventListener("click", function () {
+        rteNactiTextyZPoli();
+        webEditor.bloky.push(rteNovyBlok(p[0]));
+        renderRteEditor();
+        renderWebNahled();
+      });
+      pridat.appendChild(b);
+    });
+    wrap.appendChild(pridat);
+  }
+
+  // Textová pole jsou zdrojem pravdy, dokud se editor nepřekreslí.
+  function rteNactiTextyZPoli() {
+    if (!webEditor) return;
+    var pole = document.querySelectorAll("#webRteWrap .rte-text");
+    pole.forEach(function (ta) {
+      var i = parseInt(ta.getAttribute("data-blok-index"), 10);
+      if (!isNaN(i) && webEditor.bloky[i]) webEditor.bloky[i].text = ta.value;
+    });
+  }
+
+  function rteObalSelekci(ta, pred, za, popis) {
+    var start = ta.selectionStart;
+    var end = ta.selectionEnd;
+    var text = ta.value;
+    var vybrano = text.slice(start, end) || popis;
+    ta.value = text.slice(0, start) + pred + vybrano + za + text.slice(end);
+    var novyStart = start + pred.length;
+    ta.focus();
+    ta.setSelectionRange(novyStart, novyStart + vybrano.length);
+    var i = parseInt(ta.getAttribute("data-blok-index"), 10);
+    if (!isNaN(i) && webEditor && webEditor.bloky[i]) webEditor.bloky[i].text = ta.value;
+    if (webNahledOtevren) renderWebNahled();
+  }
+
+  function rteVlozOdkaz(ta, idx) {
+    var start = ta.selectionStart;
+    var end = ta.selectionEnd;
+    var vybrano = ta.value.slice(start, end) || "text odkazu";
+    var adresa = window.prompt(
+      "Kam má odkaz vést?\n\nPovolené tvary:\n  https://www.priklad.cz\n  mailto:info@realitni-tip.cz\n  ?stranka=gdpr  (jiná stránka tohoto webu)",
+      "https://");
+    if (adresa === null) return;
+    adresa = String(adresa).trim();
+    // Kontrola na klientovi je jen laskavost k uživateli - stejnou
+    // podmínku vynucuje nezávisle server (overit_webove_useky).
+    if (!bezpecnyOdkaz(adresa)) {
+      showBanner(el("webBanner"), "error",
+        "Tuhle adresu odkazu aplikace nepřijme. Povolené jsou jen http://, https://, mailto: a ?stranka=adresa.");
+      return;
+    }
+    var text = ta.value;
+    ta.value = text.slice(0, start) + "[" + vybrano + "](" + adresa + ")" + text.slice(end);
+    if (webEditor && webEditor.bloky[idx]) webEditor.bloky[idx].text = ta.value;
+    ta.focus();
+    renderWebNahled();
+  }
+
+  function renderWebOdkazyEditor() {
+    var wrap = el("webOdkazyWrap");
+    if (!wrap || !webEditor) return;
+    wrap.innerHTML = "";
+    var stranky = webRows.filter(function (r) { return r.typ === "stranka"; });
+
+    webEditor.odkazy.forEach(function (o, idx) {
+      var radek = document.createElement("div");
+      radek.className = "web-odkazy-radek";
+
+      var inp = document.createElement("input");
+      inp.type = "text";
+      inp.className = "web-odkaz-popisek";
+      inp.maxLength = 40;
+      inp.placeholder = "Popisek";
+      inp.value = o.popisek || "";
+      inp.addEventListener("input", function () { webEditor.odkazy[idx].popisek = inp.value; });
+      radek.appendChild(inp);
+
+      var sel = document.createElement("select");
+      sel.className = "web-odkaz-slug";
+      stranky.forEach(function (s) {
+        var op = document.createElement("option");
+        op.value = s.slug;
+        op.textContent = s.nazev + " (?stranka=" + s.slug + ")" + (s.publikovano ? "" : " — nepublikovaná");
+        if (s.slug === o.slug) op.selected = true;
+        sel.appendChild(op);
+      });
+      sel.addEventListener("change", function () { webEditor.odkazy[idx].slug = sel.value; });
+      radek.appendChild(sel);
+
+      var del = document.createElement("button");
+      del.type = "button";
+      del.className = "rte-btn rte-btn-smazat";
+      del.textContent = "✕";
+      del.title = "Odebrat odkaz";
+      del.setAttribute("aria-label", "Odebrat odkaz");
+      del.addEventListener("click", function () {
+        webEditor.odkazy.splice(idx, 1);
+        renderWebOdkazyEditor();
+      });
+      radek.appendChild(del);
+
+      wrap.appendChild(radek);
+    });
+
+    var pridat = document.createElement("button");
+    pridat.type = "button";
+    pridat.className = "btn-small btn-small-ghost";
+    pridat.id = "webOdkazPridatBtn";
+    pridat.textContent = "+ Přidat odkaz";
+    pridat.addEventListener("click", function () {
+      var prvni = stranky.length ? stranky[0] : null;
+      webEditor.odkazy.push({ popisek: prvni ? prvni.nazev : "", slug: prvni ? prvni.slug : "" });
+      renderWebOdkazyEditor();
+    });
+    wrap.appendChild(pridat);
+  }
+
+  // NÁHLED (bod 2). Vykresluje se TOUTÉŽ funkcí renderBlokyDo(), jakou
+  // používá živá veřejná stránka - proto je zaručeně shodný a nemůže se
+  // s ní rozejít při příští úpravě.
+  function renderWebNahled() {
+    var wrap = el("webNahledWrap");
+    if (!wrap || !webEditor) return;
+    if (!webNahledOtevren) { wrap.innerHTML = ""; return; }
+    rteNactiTextyZPoli();
+    ulozStavEditoruZFormulare();
+
+    wrap.innerHTML = "";
+    var box = document.createElement("div");
+    box.className = "rte-nahled";
+    var label = document.createElement("p");
+    label.className = "rte-nahled-label";
+    label.textContent = "Náhled — takhle to uvidí návštěvník (zatím NEULOŽENO)";
+    box.appendChild(label);
+
+    if (webEditor.titulek) {
+      var h1 = document.createElement("h1");
+      h1.className = "rt-h1";
+      h1.textContent = webEditor.titulek;
+      box.appendChild(h1);
+    }
+    if (webEditor.podnadpis) {
+      var lead = document.createElement("p");
+      lead.className = "verejna-stranka-lead";
+      lead.textContent = webEditor.podnadpis;
+      box.appendChild(lead);
+    }
+    var telo = document.createElement("div");
+    telo.className = "rt-obsah";
+    renderBlokyDo(telo, rteEditorNaBloky(), "Zatím tu není žádný text.");
+    box.appendChild(telo);
+    wrap.appendChild(box);
+  }
+
+  // =========================================================================
+  // ZÁPISOVÉ AKCE
+  // =========================================================================
+  async function submitWebStranka(rovnouPublikovat) {
+    var r = webRowBySlug(webDetailSlug);
+    if (!r || !webEditor) return;
+    var banner = el("webBanner");
+    rteNactiTextyZPoli();
+    ulozStavEditoruZFormulare();
+
+    if (!webEditor.nazev) { showBanner(banner, "error", "Název stránky je povinný."); return; }
+
+    var btn = el(rovnouPublikovat ? "webSavePublishBtn" : "webSaveBtn");
     if (btn) btn.disabled = true;
     showBanner(banner, null, null);
     var g = authGen;
 
-    var res = await sb.rpc("upravit_webovou_stranku", {
+    var res = await sb.rpc("ulozit_koncept_webove_stranky", {
       p_slug: r.slug,
-      p_nazev: nazev,
-      p_titulek: el("wfTitulek").value.trim(),
-      p_podnadpis: el("wfPodnadpis").value.trim(),
-      p_obsah: el("wfObsah").value,
-      p_meta_titulek: el("wfMetaTitulek").value.trim(),
-      p_meta_popis: el("wfMetaPopis").value.trim()
+      p_nazev: webEditor.nazev,
+      p_titulek: webEditor.titulek || "",
+      p_podnadpis: webEditor.podnadpis || "",
+      p_bloky: rteEditorNaBloky(),
+      p_meta_titulek: webEditor.meta_titulek || "",
+      p_meta_popis: webEditor.meta_popis || "",
+      p_v_menu: webEditor.v_menu === true,
+      p_odkazy: webEditor.odkazy || []
     });
     if (g !== authGen) return;
     if (btn) btn.disabled = false;
     if (res.error) {
-      console.error("Chyba při ukládání veřejné stránky:", res.error);
-      showBanner(banner, "error", res.error.code === "42501"
-        ? "Správa webu je vyhrazena administrátorovi."
-        : "Stránku se nepodařilo uložit. Zkontrolujte prosím délku vyplněných polí.");
+      console.error("Chyba při ukládání konceptu stránky:", res.error);
+      showBanner(banner, "error", webChybaText(res.error, "Koncept se nepodařilo uložit. Zkontrolujte prosím délku vyplněných polí."));
       return;
     }
 
     webRows = res.data || webRows;
+    zneplatniVerejneMenu();
+    if (rovnouPublikovat) {
+      await publikovatWebStranku(r.slug);
+      return;
+    }
     webEditMode = false;
+    webEditor = null;
+    webNahledOtevren = false;
     renderWebTable(webRows);
     renderWebDetail();
-    // Menu čte názvy z RPC jednou při startu - po přejmenování stránky by
-    // do odhlášení ukazovalo starý název.
-    verejneMenuNacteno = false;
-    verejneMenuPolozky = null;
-    showBanner(banner, "ok", "Stránka uložena. Změna je vidět okamžitě na veřejné adrese.");
+    showBanner(banner, "ok", "Uloženo jako koncept. Veřejně se změna objeví teprve po stisku „Publikovat“.");
+  }
+
+  async function publikovatWebStranku(slug) {
+    var banner = el("webBanner");
+    var g = authGen;
+    var res = await sb.rpc("publikovat_webovou_stranku", { p_slug: slug });
+    if (g !== authGen) return;
+    if (res.error) {
+      console.error("Chyba při publikování stránky:", res.error);
+      showBanner(banner, "error", webChybaText(res.error, "Stránku se nepodařilo publikovat."));
+      return;
+    }
+    webRows = res.data || webRows;
+    webEditMode = false;
+    webEditor = null;
+    webNahledOtevren = false;
+    zneplatniVerejneMenu();
+    renderWebTable(webRows);
+    renderWebDetail();
+    showBanner(banner, "ok", "Publikováno. Od téhle chvíle to vidí i nepřihlášený návštěvník.");
     setTimeout(function () { showBanner(banner, null, null); }, 5000);
+  }
+
+  async function zahoditKoncept(slug) {
+    var banner = el("webBanner");
+    if (!window.confirm("Opravdu zahodit rozpracovaný koncept? Vrátíte se k tomu, co je teď publikované. Tenhle krok nejde vzít zpět.")) return;
+    var g = authGen;
+    var res = await sb.rpc("zahodit_koncept_webove_stranky", { p_slug: slug });
+    if (g !== authGen) return;
+    if (res.error) {
+      console.error("Chyba při zahazování konceptu:", res.error);
+      showBanner(banner, "error", webChybaText(res.error, "Koncept se nepodařilo zahodit."));
+      return;
+    }
+    webRows = res.data || webRows;
+    renderWebTable(webRows);
+    renderWebDetail();
+    showBanner(banner, "ok", "Koncept zahozen. Veřejná stránka se nezměnila.");
+  }
+
+  async function skrytWebStranku(slug) {
+    var banner = el("webBanner");
+    if (!window.confirm("Skrýt stránku z webu? Zůstane v seznamu i s obsahem, ale návštěvník na její adrese uvidí „Stránka nenalezena“ a zmizí i z menu a z patičky.")) return;
+    var g = authGen;
+    var res = await sb.rpc("skryt_webovou_stranku", { p_slug: slug });
+    if (g !== authGen) return;
+    if (res.error) {
+      console.error("Chyba při skrývání stránky:", res.error);
+      showBanner(banner, "error", webChybaText(res.error, "Stránku se nepodařilo skrýt."));
+      return;
+    }
+    webRows = res.data || webRows;
+    zneplatniVerejneMenu();
+    renderWebTable(webRows);
+    renderWebDetail();
+    showBanner(banner, "ok", "Stránka je skrytá. Publikovat ji můžete kdykoli zpátky.");
+  }
+
+  async function smazatWebStranku(r) {
+    var banner = el("webBanner");
+    // ⚠ Text musí být PRAVDIVÝ (poučení z nálezu O6 Milníku 24): mazání je
+    // nevratné, obsah se nikam nezálohuje mimo Historii akcí a odkazy
+    // v patičce na tuhle stránku zmizí.
+    if (!window.confirm(
+      "Trvale smazat stránku „" + (r.nazev || r.slug) + "“?\n\n" +
+      "Stránka i její text zmizí nenávratně, adresa ?stranka=" + r.slug + " přestane fungovat " +
+      "a zmizí i odkaz na ni v patičce. Obsah zůstane dohledatelný už jen v Historii akcí.\n\n" +
+      "Pokud ji chcete jen dočasně schovat, použijte místo toho „Skrýt z webu“.")) return;
+    var g = authGen;
+    var res = await sb.rpc("smazat_webovou_stranku", { p_slug: r.slug });
+    if (g !== authGen) return;
+    if (res.error) {
+      console.error("Chyba při mazání stránky:", res.error);
+      showBanner(banner, "error", webChybaText(res.error, "Stránku se nepodařilo smazat."));
+      return;
+    }
+    webRows = res.data || webRows;
+    zneplatniVerejneMenu();
+    closeWebDetail();
+    renderWebTable(webRows);
+    showBanner(banner, "ok", "Stránka smazána.");
   }
 
   // =========================================================================
@@ -18104,6 +19931,11 @@
     }
   }
 
+  // MILNÍK 26 (bod 4): true, jakmile Supabase ohlásí PASSWORD_RECOVERY
+  // (uživatel klikl na odkaz z e-mailu „Zapomenuté heslo"). Vypíná se až
+  // po úspěšném nastavení nového hesla.
+  var passwordRecoveryMode = false;
+
   function boot() {
     readInviteCodeFromUrl();
     // MILNÍK 25 (body 6 a 7): veřejná routa se čte ze STEJNÉ adresy jako
@@ -18150,11 +19982,18 @@
     // Tento posluchač se při registraci zavolá i hned po připojení
     // s aktuálním stavem (existující session, nebo žádná).
     sb.auth.onAuthStateChange(function (event, session) {
+      // MILNÍK 26 (bod 4): událost přijde dřív než handleSignedIn(), takže
+      // se příznak stihne nastavit a obrazovka se ukáže hned napoprvé.
+      if (event === "PASSWORD_RECOVERY") passwordRecoveryMode = true;
       if (session && session.user) {
         // Ignorujeme opakované události pro stejného už přihlášeného
         // uživatele (např. TOKEN_REFRESHED), ať zbytečně neděláme znovu
         // fetch profilu a nepřezakládáme realtime kanál.
-        if (currentUserId === session.user.id && event !== "SIGNED_IN") {
+        // MILNÍK 26 (bod 4): PASSWORD_RECOVERY se sem musí dostat vždycky,
+        // i když Supabase těsně předtím poslal SIGNED_IN pro tutéž identitu -
+        // jinak by uživatel z e-mailu skončil rovnou v aplikaci a obrazovku
+        // pro nastavení nového hesla by vůbec neuviděl.
+        if (currentUserId === session.user.id && event !== "SIGNED_IN" && event !== "PASSWORD_RECOVERY") {
           return;
         }
         handleSignedIn(session);
