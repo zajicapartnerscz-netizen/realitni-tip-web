@@ -3,7 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Realitní tip</title>
+<!-- MILNÍK 25 (bod 3): titulek záložky prohlížeče výslovně označuje, že jde
+     o DEMO verzi - klient chtěl, aby se to poznalo v přepínači záložek.
+     Na veřejných stránkách (body 6 a 7) ho JS dočasně rozšiřuje o název
+     konkrétní stránky (viz setDocumentTitle); základ „DEMO – Realitní tip"
+     zůstává vždy na začátku. -->
+<title>DEMO – Realitní tip</title>
 <!-- Milník 18, bod 1 — FAVICON "RT".
      Do Milníku 17 appka žádnou ikonu neměla a záložka prohlížeče ukazovala
      prázdný/obecný list papíru. Ikona je INLINE SVG v data URI (žádný
@@ -2558,11 +2563,168 @@
   .tdash-team-note { font-size: 12px; line-height: 1.55; color: var(--text-muted); margin: 14px 0 0; }
 
   [hidden] { display: none !important; }
+  /* ======================================================================
+     MILNÍK 25 — VEŘEJNÉ (nepřihlášené) STRÁNKY
+     Body 6 a 7. Všechny barvy, rádiusy i stíny jsou EXISTUJÍCÍ tokeny
+     z :root - nezavádí se ani jedna nová proměnná, aby veřejná část webu
+     vypadala jako zbytek appky i po případné změně barevného schématu.
+     ====================================================================== */
+
+  /* Vodorovné menu (bod 6). Viditelné VÝHRADNĚ nepřihlášenému návštěvníkovi
+     (řídí JS přes `hidden`, viz showVerejneMenu). */
+  .verejne-menu {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+  }
+  .verejne-menu-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+    min-height: 56px;
+  }
+  .verejne-menu-brand { font-family: var(--font-display); font-size: 19px; color: var(--text); margin-right: 6px; }
+  .verejne-menu-brand em { font-style: italic; color: var(--accent); }
+  .verejne-menu-nav { display: flex; gap: 4px; flex-wrap: wrap; }
+  .verejne-menu-link {
+    appearance: none; background: transparent; border: 1px solid transparent;
+    font: inherit; font-size: 14px; color: var(--text-muted);
+    padding: 7px 12px; border-radius: var(--radius-s); cursor: pointer;
+  }
+  .verejne-menu-link:hover { background: var(--surface-2); color: var(--text); }
+  .verejne-menu-link[aria-current="page"] {
+    background: var(--accent-soft); color: var(--accent); border-color: var(--accent-soft); font-weight: 600;
+  }
+  .verejne-menu-spacer { flex: 1 1 auto; }
+
+  /* Obsahová stránka (O nás / Kontakty) */
+  .verejna-stranka-wrap { max-width: 760px; margin: 0 auto; padding: 32px 20px 56px; }
+  .verejna-stranka-wrap h1 { font-family: var(--font-display); font-size: 34px; margin: 0 0 6px; color: var(--text); }
+  .verejna-stranka-lead { font-size: 17px; color: var(--text-muted); margin: 0 0 22px; }
+  .verejna-stranka-telo p { font-size: 15.5px; line-height: 1.7; color: var(--text); margin: 0 0 14px; white-space: pre-line; }
+
+  /* Rekrutační stránka (bod 7) */
+  .rekrut-wrap { max-width: 880px; margin: 0 auto; padding: 0 20px 56px; }
+  .rekrut-hero {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+    color: var(--accent-contrast);
+    border-radius: var(--radius-l); padding: 34px 28px; margin-top: 28px;
+    display: flex; gap: 26px; align-items: center; flex-wrap: wrap;
+  }
+  .rekrut-hero-text { flex: 1 1 320px; min-width: 260px; }
+  .rekrut-eyebrow {
+    font-size: 12px; letter-spacing: 0.10em; text-transform: uppercase;
+    opacity: 0.85; margin: 0 0 8px;
+  }
+  .rekrut-hero h1 { font-family: var(--font-display); font-size: 32px; line-height: 1.15; margin: 0 0 10px; }
+  .rekrut-hero-kdo { font-size: 14.5px; opacity: 0.9; margin: 0; }
+  .rekrut-foto {
+    width: 148px; height: 148px; border-radius: 50%; object-fit: cover;
+    border: 4px solid rgba(255,255,255,0.55); flex: 0 0 auto; background: var(--surface-2);
+  }
+  .rekrut-foto-empty {
+    width: 148px; height: 148px; border-radius: 50%; flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-size: 46px;
+    background: rgba(255,255,255,0.18); border: 4px solid rgba(255,255,255,0.35);
+  }
+  .rekrut-popis { margin: 24px 0 0; }
+  .rekrut-popis p { font-size: 16px; line-height: 1.7; margin: 0 0 14px; color: var(--text); white-space: pre-line; }
+  .rekrut-cta {
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    margin: 26px 0 0; padding: 22px; border-radius: var(--radius-l);
+    background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-card);
+  }
+  .rekrut-cta-text { flex: 1 1 260px; }
+  .rekrut-cta-text strong { display: block; font-size: 17px; margin-bottom: 3px; }
+  .rekrut-cta-text span { font-size: 13.5px; color: var(--text-muted); }
+  .rekrut-bannery { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin-top: 26px; }
+  .rekrut-banner {
+    border-radius: var(--radius-l); padding: 22px 20px; min-height: 128px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .rekrut-banner strong { display: block; font-family: var(--font-display); font-size: 21px; line-height: 1.2; margin-bottom: 6px; }
+  .rekrut-banner span { font-size: 13.5px; opacity: 0.92; }
+  .rekrut-banner-a { background: var(--accent-soft); color: var(--accent); }
+  .rekrut-banner-b { background: var(--warn-soft); color: var(--warn); }
+  .rekrut-banner-c { background: var(--info-soft); color: var(--info); }
+  .rekrut-poznamka { font-size: 12.5px; color: var(--text-muted); margin-top: 26px; }
+
+  /* ---------------- MILNÍK 25 (body 5 a 8): náhled a bannery v appce */
+  .rekrut-preview {
+    border: 1px dashed var(--border); border-radius: var(--radius-m);
+    padding: 16px; background: var(--surface-2); margin-top: 6px;
+  }
+  .rekrut-preview-label { font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 10px; }
+  .rekrut-preview-hero {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+    color: var(--accent-contrast); border-radius: var(--radius-m);
+    padding: 18px; display: flex; gap: 14px; align-items: center;
+  }
+  .rekrut-preview-hero h4 { font-family: var(--font-display); font-size: 19px; margin: 0 0 4px; line-height: 1.2; }
+  .rekrut-preview-hero p { margin: 0; font-size: 12.5px; opacity: 0.9; }
+  .rekrut-preview-foto { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; flex: 0 0 auto; border: 2px solid rgba(255,255,255,0.5); }
+  .rekrut-preview-foto-empty {
+    width: 64px; height: 64px; border-radius: 50%; flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: center; font-size: 22px;
+    background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.35);
+  }
+  .rekrut-preview-telo p { font-size: 13px; line-height: 1.6; margin: 10px 0 0; color: var(--text); white-space: pre-line; }
+
+  .kod-stav { font-size: 13px; margin: 6px 0 0; min-height: 18px; }
+  .kod-stav-ok { color: var(--ok); }
+  .kod-stav-chyba { color: var(--danger); }
+  .kod-stav-ceka { color: var(--text-muted); }
+
+  .mkt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  .mkt-karta { border: 1px solid var(--border); border-radius: var(--radius-l); background: var(--surface); overflow: hidden; }
+  .mkt-nahled { padding: 24px 20px; min-height: 150px; display: flex; flex-direction: column; justify-content: center; }
+  .mkt-nahled strong { display: block; font-family: var(--font-display); font-size: 23px; line-height: 1.15; margin-bottom: 6px; }
+  .mkt-nahled span { font-size: 13.5px; opacity: 0.92; }
+  .mkt-nahled-a { background: var(--accent-soft); color: var(--accent); }
+  .mkt-nahled-b { background: var(--warn-soft); color: var(--warn); }
+  .mkt-nahled-c { background: var(--info-soft); color: var(--info); }
+  .mkt-nahled-ctverec { min-height: 210px; }
+  .mkt-telo { padding: 14px 16px 16px; }
+  .mkt-rozmer { font-size: 11.5px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 8px; }
+  .mkt-text {
+    font-size: 13px; line-height: 1.55; color: var(--text); background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: var(--radius-s);
+    padding: 10px; white-space: pre-line; margin: 0 0 10px;
+  }
+  .mkt-akce { display: flex; gap: 8px; flex-wrap: wrap; }
+  .sdileni-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+  .sdileni-row .btn-small { text-decoration: none; }
+
+  @media (max-width: 640px) {
+    .rekrut-hero { padding: 24px 18px; }
+    .rekrut-hero h1 { font-size: 26px; }
+    .rekrut-foto, .rekrut-foto-empty { width: 108px; height: 108px; }
+    .verejna-stranka-wrap h1 { font-size: 27px; }
+  }
+
 </style>
 </head>
 <body>
 
 <div class="app-shell">
+  <!-- ============== MILNÍK 25 (bod 6): VEŘEJNÉ MENU ==============
+       Vodorovná navigace nad VŠEMI veřejnými (nepřihlášenými) obrazovkami -
+       tedy nad přihlašovací obrazovkou, nad obsahovými stránkami i nad
+       rekrutační stránkou. Přihlašovací obrazovka sama se NIJAK nemění
+       (klient výslovně: „hlavní stránka zůstává vizuálně jak je"), menu je
+       samostatný pruh NAD ní.
+       Položky se vykreslují z RPC verejne_stranky() (tabulka webove_stranky,
+       administrátor je edituje ve „Správa webu", bod 10) + jedna pevná
+       položka „Ukázková rekrutační stránka". Viditelnost řídí JS
+       (showVerejneMenu) - po přihlášení pruh mizí. -->
+  <nav class="verejne-menu" id="verejneMenu" aria-label="Veřejné stránky" hidden>
+    <div class="verejne-menu-inner">
+      <span class="verejne-menu-brand">Realitní <em>tip</em></span>
+      <div class="verejne-menu-nav" id="verejneMenuNav"></div>
+      <span class="verejne-menu-spacer"></span>
+      <button class="verejne-menu-link" id="verejneMenuPrihlasitBtn" type="button">Přihlásit se</button>
+    </div>
+  </nav>
+
   <div class="db-banner" id="dbBanner" hidden>Nepodařilo se připojit k přihlašovací službě. Zkontrolujte prosím připojení k internetu a načtěte stránku znovu.</div>
 
   <header class="topbar" id="topbar" hidden>
@@ -2667,6 +2829,13 @@
       <button class="tab" id="tabRkPortalBtn" role="tab" type="button" aria-selected="false" hidden>Předané tipy</button>
       <button class="tab" id="tabRkProfileBtn" role="tab" type="button" aria-selected="false" hidden>Profil realitní kanceláře</button>
       <button class="tab" id="tabRkProvizeBtn" role="tab" type="button" aria-selected="false" hidden>Provizní schéma</button>
+      <!-- MILNÍK 25 (bod 8): „Marketing" - tipař a lídr. Bannery a texty
+           s VLASTNÍM rekrutačním odkazem přihlášeného uživatele.
+           MILNÍK 25 (bod 10): „Správa webu" - výhradně administrátor.
+           Skutečné pořadí a viditelnost řídí applyNavForRole() přes
+           ROLE_TAB_ORDER, pozice v DOM je jen neutrální výchozí stav. -->
+      <button class="tab" id="tabMarketingBtn" role="tab" type="button" aria-selected="false" hidden>Marketing</button>
+      <button class="tab" id="tabWebBtn" role="tab" type="button" aria-selected="false" hidden>Správa webu</button>
     </nav>
   </div>
 
@@ -3120,6 +3289,14 @@
         <button class="btn-small" id="copyInviteBtn" type="button">Zkopírovat odkaz</button>
       </div>
 
+      <!-- MILNÍK 25 (bod 9): rozeslání odkazu na vlastní rekrutační stránku.
+           Klient sám napsal, že kopírování „už tam je" - proto se tlačítko
+           „Zkopírovat odkaz" výš NEDUPLIKUJE a zůstává jediné. Tahle řádka
+           přidává jen to, co chybělo: sociální sítě a e-mail. Plní ji
+           renderNetworkSdileni(); viditelnost řídí fetchMyNetworkTable()
+           (lídr má totéž v záložce „Marketing", kde má i bannery). -->
+      <div id="networkSdileniWrap" hidden></div>
+
       <div class="stat-row" id="networkStats"></div>
 
       <!-- Milník 15 (bod 4): NEUTRÁLNÍ (rolí nepodmíněný) placeholder, který
@@ -3251,6 +3428,10 @@
         <button class="btn-small btn-small-danger" id="usersDemoResetBtn" type="button">⚠️ Resetovat testovací účty A–C</button>
       </div>
 
+      <!-- MILNÍK 25 (bod 2): sem (do #usersFormWrap) vykresluje
+           openTvrdeSmazani() kartu trvalého smazání uživatele - tedy do
+           TÉHOŽ obalu, kde žije Detail uživatele. Je to schválně: obojí se
+           otevírá z jednoho řádku tabulky a nikdy nemá být vidět současně. -->
       <div id="usersFormWrap"></div>
 
       <div id="usersTableWrap"></div>
@@ -3955,6 +4136,104 @@
         </div>
       </div>
 
+      <!-- ====== MILNÍK 25 (bod 4): VLASTNÍ POZVÁNKOVÝ KÓD ======
+           Jen tipař a lídr (administrátor a RK ne - nejsou součástí
+           náborového stromu a rekrutační stránku nemají). Viditelnost řídí
+           fetchPozvankovyKod(); skutečné oprávnění vynucuje serverová RPC
+           upravit_muj_pozvankovy_kod() (42501 pro ostatní role).
+           Stejný dvourežimový vzor jako ostatní karty této obrazovky. -->
+      <div class="card detail-card" id="pozvankovyKodCard" hidden>
+        <h3 class="detail-section-title" style="margin-top:0;">Pozvánkový kód</h3>
+        <p class="dt-muted" style="margin-top:-6px;">Kód je součástí vašeho pozvánkového odkazu i adresy vaší veřejné rekrutační stránky. Můžete si ho přepsat na vlastní slovo, pokud ho ještě nikdo nemá.</p>
+
+        <div id="pozvankovyKodBanner"></div>
+
+        <div id="pozvankovyKodReadonlyWrap">
+          <div class="detail-grid" id="pozvankovyKodReadonlyBody"></div>
+          <div class="form-actions">
+            <button class="btn-primary" type="button" id="pozvankovyKodEditBtn" style="width:auto;">Upravit</button>
+          </div>
+        </div>
+
+        <div id="pozvankovyKodFormWrap" hidden>
+          <form id="pozvankovyKodForm" novalidate>
+            <div class="form-grid">
+              <div class="field col-span-2">
+                <label for="pkodInput">Vlastní pozvánkový kód</label>
+                <input type="text" id="pkodInput" autocomplete="off" spellcheck="false" placeholder="např. tipuj" maxlength="24">
+                <p class="dt-muted" style="font-size:12px;margin:4px 0 0;">3–24 znaků, jen malá písmena bez diakritiky, číslice a spojovník. Velká písmena se automaticky převedou na malá.</p>
+                <p class="kod-stav" id="pkodStav" role="status" aria-live="polite"></p>
+              </div>
+            </div>
+            <p class="dt-muted" style="font-size:12px;margin:2px 0 0;">Změnou kódu přestanou fungovat dříve rozeslané odkazy se starým kódem.</p>
+            <div class="form-actions">
+              <button class="btn-primary" type="submit" id="pozvankovyKodSaveBtn" style="width:auto;">Uložit</button>
+              <button class="btn-ghost" type="button" id="pozvankovyKodCancelBtn">Zrušit</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ====== MILNÍK 25 (bod 5): REKRUTAČNÍ STRÁNKA ======
+           Titulek, text a fotka veřejné rekrutační stránky (bod 7) + ŽIVÝ
+           NÁHLED, který se překresluje za psaní. Jen tipař a lídr.
+           Fotka je ZÁMĚRNĚ jiný soubor než profilová: profilová leží
+           v privátním bucketu a u dobrovolného panelu výš appka uživateli
+           slibuje „Fotku vidíte jen vy". Tahle jde do VEŘEJNÉHO bucketu a
+           uvidí ji kdokoli na internetu - proto se nahrává zvlášť. -->
+      <div class="card detail-card" id="rekrutCard" hidden>
+        <h3 class="detail-section-title" style="margin-top:0;">Rekrutační stránka</h3>
+        <p class="dt-muted" style="margin-top:-6px;">Vaše vlastní veřejná stránka, na kterou můžete zvát nové tipaře. <strong>Je dostupná komukoli na internetu bez přihlášení</strong> — píšete ji tedy pro veřejnost.</p>
+
+        <div id="rekrutBanner"></div>
+
+        <div id="rekrutReadonlyWrap">
+          <div id="rekrutReadonlyBody"></div>
+          <div class="form-actions">
+            <button class="btn-primary" type="button" id="rekrutEditBtn" style="width:auto;">Upravit</button>
+          </div>
+        </div>
+
+        <div id="rekrutFormWrap" hidden>
+          <form id="rekrutForm" novalidate>
+            <div class="form-grid">
+              <div class="field col-span-2">
+                <label for="rekTitulek">Titulek (nadpis stránky)</label>
+                <input type="text" id="rekTitulek" maxlength="120" placeholder="např. Tipni nemovitost a vydělej s námi">
+              </div>
+              <div class="field col-span-2">
+                <label for="rekPopis">Text stránky</label>
+                <textarea id="rekPopis" rows="7" maxlength="2000" placeholder="Napište pár odstavců o tom, proč se vyplatí posílat tipy. Prázdný řádek oddělí odstavce."></textarea>
+              </div>
+              <div class="field col-span-2">
+                <label for="rekFoto">Fotografie na rekrutační stránku (nepovinné)</label>
+                <input type="file" id="rekFoto" accept="image/jpeg,image/png,image/webp">
+                <p class="dt-muted" style="font-size:12px;margin:4px 0 0;">JPG, PNG nebo WebP, nejvýše 3 MB. <strong>Tato fotka bude veřejně viditelná</strong> — je to jiný soubor než profilová fotka v panelu „Něco o vás“, která zůstává soukromá. Když žádnou nevyberete, stávající zůstane beze změny.</p>
+                <div class="form-actions" style="margin-top:8px;">
+                  <button class="btn-ghost" type="button" id="rekFotoRemoveBtn" hidden>Odstranit fotku</button>
+                </div>
+              </div>
+              <div class="field col-span-2">
+                <div class="field-checkbox">
+                  <input type="checkbox" id="rekPublikovano">
+                  <label for="rekPublikovano">Stránku zveřejnit (bez zaškrtnutí je uložená jen jako koncept a nikdo ji neuvidí)</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="rekrut-preview" id="rekrutPreviewWrap" aria-live="off">
+              <p class="rekrut-preview-label">Živý náhled veřejné stránky</p>
+              <div id="rekrutPreviewBody"></div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn-primary" type="submit" id="rekrutSaveBtn" style="width:auto;">Uložit</button>
+              <button class="btn-ghost" type="button" id="rekrutCancelBtn">Zrušit</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
       <!-- ====== Milník 22 (bod 2): NASTAVENÍ PANELU ======
            Naléhavostní prahy pracovní fronty na Přehledu lídra, PRO KAŽDÝ TYP
            ÚKOLU ZVLÁŠŤ. Do Milníku 21 byly natvrdo v SQL (m21_sla); teď si je
@@ -4044,6 +4323,69 @@
         </div>
       </div>
     </section>
+    <!-- ============== MARKETING (tipař + lídr) ==============
+         MILNÍK 25 (bod 8). Klient: „pod leadera a uživatele přidej stránku
+         marketing, kde bude možné kopírovat předpřipravené grafické bannery
+         s odkazy, které může dávat na sociální sítě."
+         Obsah je CELÝ odvozený z přihlášeného uživatele (jeho rekrutační
+         odkaz) - žádná nová serverová data, žádná nová RPC. Role RK a
+         administrátor záložku nemají: nejsou součástí náborového stromu a
+         vlastní rekrutační stránku (bod 7) nemají z čeho postavit. -->
+    <section id="marketingScreen" class="page" hidden>
+      <div class="section-head">
+        <h2>Marketing</h2>
+        <p>Hotové bannery a texty s vaším vlastním odkazem. Zkopírujte a vložte na sociální sítě, do e-mailu nebo do zprávy.</p>
+      </div>
+
+      <div id="marketingBanner"></div>
+      <div id="marketingObsah"></div>
+    </section>
+
+    <!-- ============== SPRÁVA WEBU (administrátor) ==============
+         MILNÍK 25 (bod 10). Seznam veřejných stránek → Detail → Upravit,
+         stejný dvourežimový vzor jako Detail RK (M24) a Detail uživatele
+         (M16). Data i zápis jdou přes RPC webove_stranky_pro_spravu() a
+         upravit_webovou_stranku(), obě VÝHRADNĚ pro administrátora. -->
+    <section id="webScreen" class="page" hidden>
+      <div class="section-head">
+        <h2>Správa webu</h2>
+        <p>Obsah a metadata veřejných stránek, které vidí i nepřihlášený návštěvník. Každá úprava se zapisuje do Historie akcí.</p>
+      </div>
+
+      <div id="webBanner"></div>
+      <div id="webDetailWrap"></div>
+      <div id="webTableWrap"></div>
+    </section>
+
+    <!-- ============== MILNÍK 25 (bod 6): OBSAHOVÁ VEŘEJNÁ STRÁNKA ==============
+         Jedna sdílená obrazovka pro VŠECHNY stránky z tabulky `webove_stranky`
+         (dnes „O nás" a „Kontakty"). Obsah dodává anonymně volatelná RPC
+         verejna_stranka(slug) - vrací VÝHRADNĚ nazev/titulek/podnadpis/obsah/
+         meta_*, nic o tom, kdo a kdy stránku upravoval.
+         Text se vkládá VÝHRADNĚ přes escapeHtml() - do veřejné stránky se
+         nikdy nevkládá HTML z databáze. -->
+    <section id="verejnaStrankaScreen" hidden>
+      <div class="verejna-stranka-wrap">
+        <div id="verejnaStrankaBanner"></div>
+        <div id="verejnaStrankaObsah"></div>
+      </div>
+    </section>
+
+    <!-- ============== MILNÍK 25 (bod 7): VEŘEJNÁ REKRUTAČNÍ STRÁNKA ==============
+         Adresa `?r=<pozvánkový kód>`. Obsah dodává anonymně volatelná RPC
+         verejna_rekrutacni_stranka(kod), která vrací jen jméno, (u
+         publikované stránky) příjmení, titulek, text a cestu k fotce ve
+         VEŘEJNÉM bucketu. Nikdy telefon, e-mail ani cokoli citlivého.
+         Tlačítko „Registrovat" vede na `?ref=<kód>` - tedy na PŘESNĚ TENTÝŽ
+         mechanismus pozvánkového odkazu, jaký zavedl Milník 2; tahle
+         obrazovka je jen hezčí rozcestník před ním, ne nová cesta do DB. -->
+    <section id="rekrutaceScreen" hidden>
+      <div class="rekrut-wrap">
+        <div id="rekrutaceBanner"></div>
+        <div id="rekrutaceObsah"></div>
+      </div>
+    </section>
+
   </main>
 </div>
 
@@ -4118,7 +4460,7 @@
   // Milník 14: číslo aktuální verze aplikace - MUSÍ odpovídat nejnovější položce
   // pole APP_CHANGELOG níže (položka na indexu 0). Při každém příštím milníku
   // se zvyšuje ROVNOU TADY i v APP_CHANGELOG - jsou to dvě navzájem závislá místa.
-  var APP_VERSION = "24.0";
+  var APP_VERSION = "25.0";
 
   // Milník 14 (bod 4): obsah panelu "Historie verzí" na přihlašovací
   // obrazovce - zrekonstruováno z reálné historie projektu (STAV.md,
@@ -4127,6 +4469,16 @@
   // pod tímto polem). Vykresluje se generickou šablonou renderAuthVersionAndChangelog()
   // - při dalším milníku se sem jen přidá nová položka na začátek pole.
   var APP_CHANGELOG = [
+    { verze: "25.0", datum: "16. 9. 2026", body: [
+      "Aplikace má poprvé VEŘEJNÉ stránky dostupné bez přihlášení: vodorovné menu „Hlavní stránka / O nás / Kontakty / Ukázková rekrutační stránka“",
+      "Nové obsahové stránky „O nás“ a „Kontakty“; přihlašovací obrazovka zůstává vzhledem beze změny",
+      "Každý tipař a lídr má vlastní veřejnou rekrutační stránku s vlastním titulkem, textem a fotkou – nastavuje si ji v „Můj profil“ a při psaní vidí živý náhled",
+      "Tipař a lídr si mohou přepsat číselný pozvánkový kód na vlastní slovo (například „tipuj“); appka během psaní hlásí, jestli je obsazené",
+      "Nová záložka „Marketing“ (tipař i lídr): hotové bannery a texty s vlastním odkazem, připravené ke zkopírování na sociální sítě",
+      "Odkaz na vlastní rekrutační stránku jde z aplikace rovnou sdílet na Facebook, X, LinkedIn a WhatsApp, poslat e-mailem nebo zkopírovat",
+      "Administrátor má novou záložku „Správa webu“: obsah a metadata veřejných stránek jde upravit přímo v aplikaci",
+      "Lídr i administrátor mohou v „Uživatelé“ TRVALE a NEVRATNĚ smazat uživatele – jen tipaře bez jediného tipu, výplaty nebo vlastní stopy v Historii akcí; jeho podřízení se přeřadí pod sponzora smazaného a účet i přihlášení zanikají"
+    ] },
     { verze: "24.0", datum: "14. 9. 2026", body: [
       "Realitní kanceláře (lídr i administrátor): místo „Upravit“ je u každé kanceláře „Detail“ – karta se nejdřív jen prohlíží a teprve tlačítko „Upravit“ ji odemkne",
       "V detailu kanceláře jde upravit úplně vše, i to, co si dosud měnila jen kancelář sama: kontaktní osoba, její telefon a funkce, a logo kanceláře",
@@ -6601,7 +6953,11 @@
     "usersScreen", "rkScreen", "provizeScreen", "vyplatyScreen", "obsahScreen", "auditScreen",
     // Milník 19 (body 7 a 8): dvě nové obrazovky role RK.
     "rkPortalScreen", "rkProfileScreen", "rkProvizeScreen",
-    "profileScreen", "kycScreen", "myKycScreen", "dashboardScreen"
+    "profileScreen", "kycScreen", "myKycScreen", "dashboardScreen",
+    // MILNÍK 25 (body 8 a 10). Veřejné obrazovky (#verejnaStrankaScreen,
+    // #rekrutaceScreen) tu ZÁMĚRNĚ NEJSOU - žijí mimo systém záložek,
+    // stejně jako #authScreen, a řídí je hideVerejneScreens().
+    "marketingScreen", "webScreen"
   ];
   var TAB_SCREEN = {
     "new": "newTipScreen", list: "listScreen", network: "networkScreen", tipy: "tipyScreen",
@@ -6618,7 +6974,9 @@
     // Milník 12 (bod 11): "dashboard" - dosažitelná JEN klikem na logo
     // (viz logoNavigateHome), záměrně bez vlastního tlačítka v TAB_BUTTON/
     // tabsWrap.
-    dashboard: "dashboardScreen"
+    dashboard: "dashboardScreen",
+    // MILNÍK 25 (body 8 a 10)
+    marketing: "marketingScreen", web: "webScreen"
   };
   var TAB_BUTTON = {
     "new": "tabNewBtn", list: "tabListBtn", network: "tabNetworkBtn", tipy: "tabTipyBtn",
@@ -6633,7 +6991,9 @@
     // Milník 17 (bod 16): "dashboard" má nově vlastní tlačítko v navigaci.
     // Do Milníku 16 tady záměrně nebylo (obrazovka byla dosažitelná jen
     // klikem na logo) - viz komentář u TAB_SCREEN.dashboard výš.
-    dashboard: "tabDashboardBtn"
+    dashboard: "tabDashboardBtn",
+    // MILNÍK 25 (body 8 a 10)
+    marketing: "tabMarketingBtn", web: "tabWebBtn"
   };
 
   function hideAllScreens() {
@@ -6738,7 +7098,13 @@
     // preventivně - viz komentář nad seznamem.
     "tipFormBanner", "listBanner", "tipyBanner", "detailBanner", "usersBanner",
     "rkBanner", "provizeBanner", "vyplatyBanner", "rkPortalBanner",
-    "profileBanner", "kycListBanner", "myKycBanner", "kycRejectBanner"
+    "profileBanner", "kycListBanner", "myKycBanner", "kycRejectBanner",
+    // MILNÍK 25: rekrutační odkaz a bannery s kódem PŘEDCHOZÍHO uživatele
+    // (bod 8), rozepsaný obsah veřejné stránky (bod 10), read-only
+    // zobrazení vlastního kódu a rekrutační stránky (body 4 a 5).
+    "marketingObsah", "marketingBanner", "webTableWrap", "webDetailWrap", "webBanner",
+    "pozvankovyKodReadonlyBody", "pozvankovyKodBanner",
+    "rekrutReadonlyBody", "rekrutPreviewBody", "rekrutBanner"
   ];
 
   // Které kontejnery vyprázdnit SYNCHRONNĚ hned při vstupu na danou
@@ -6769,13 +7135,23 @@
     rkprofile: ["rkProfileWrap", "rkProfileBanner"],
     rkprovize: ["rkProvizeTableWrap", "rkProvizeBanner"],
     // Milník 22 (bod 2): + „Nastavení panelu" (prahy fronty leadera).
+    // MILNÍK 25 (body 4 a 5): + vlastní pozvánkový kód a rekrutační stránka.
+    // Obojí nese údaje konkrétní identity (kód v odkazu, text a fotka
+    // veřejné stránky), takže se musí uklidit SYNCHRONNĚ, ještě před
+    // awaitem ve fetchProfileScreen().
     profile: ["profileRegistraceStavWrap", "profileRegSummaryWrap", "profileBanner", "addressReadonlyGrid", "dobrovolnyReadonlyBody",
-              "panelNastaveniReadonlyBody", "panelNastaveniFormBody", "panelNastaveniBanner"],
+              "panelNastaveniReadonlyBody", "panelNastaveniFormBody", "panelNastaveniBanner",
+              "pozvankovyKodReadonlyBody", "pozvankovyKodBanner",
+              "rekrutReadonlyBody", "rekrutPreviewBody", "rekrutBanner"],
     mykyc: ["kycStatusWrap", "kycDocsWrap", "kycMissingWrap", "myKycBanner"],
     // MILNÍK 23 (bod 6): administrátorův „Dashboard" už není statický
     // zástupný box, ale dynamicky plněný přehled — musí se tedy při vstupu
     // na záložku vyprázdnit dřív, než doběhne jeho fetch.
-    dashboard: ["dashboardAdminPrehledWrap"]
+    dashboard: ["dashboardAdminPrehledWrap"],
+    // MILNÍK 25 (body 8 a 10): obě nové obrazovky se plní dynamicky a nesou
+    // údaje konkrétní identity (rekrutační odkaz / rozepsaný obsah stránky).
+    marketing: ["marketingObsah", "marketingBanner"],
+    web: ["webTableWrap", "webDetailWrap", "webBanner"]
   };
 
   // Instance initDataTable drží vlastní config.rows z PŘEDCHOZÍHO
@@ -7051,6 +7427,8 @@
     if (tab === "list") mojeTipyTable = null;
     if (tab === "tipy") tipyTable = null;
     if (tab === "users") usersTable = null;
+    // MILNÍK 25 (bod 10): instance tabulky stránek + rozepsaný detail.
+    if (tab === "web") { webTable = null; webDetailSlug = null; webEditMode = false; }
     if (tab === "rk") {
       rkTable = null;
       // MILNÍK 24 (bod 1): rozepsaný Detail RK je stav v JS proměnných, kam
@@ -7113,6 +7491,16 @@
       rkProvizeDraft = null;
     }
     if (tab === "profile") {
+      // MILNÍK 25 (body 4 a 5): obě nové karty se skrývají SYNCHRONNĚ ze
+      // stejného důvodu jako #profileRegSummaryCard níž - u role, která je
+      // mít nemá (administrátor), by jinak na okamžik problikl kód a text
+      // předchozího tipaře.
+      var kodCard = el("pozvankovyKodCard");
+      if (kodCard) kodCard.hidden = true;
+      var rekCard = el("rekrutCard");
+      if (rekCard) rekCard.hidden = true;
+      resetPozvankovyKodForm();
+      resetRekrutForm();
       // #profileRegSummaryCard se dřív (ne)skrýval až PO awaitu v
       // fetchProfileScreen() - u leadera/administrátora tak mohla na
       // okamžik problikout registrační karta předchozího tipaře i s jeho
@@ -7144,13 +7532,21 @@
   function showAuthScreen() {
     el("topbar").hidden = true;
     el("tabsWrap").hidden = true;
+    // MILNÍK 25 (bod 6): nad VŠEMI nepřihlášenými obrazovkami je veřejné menu.
+    showVerejneMenu(true);
+    nactiVerejneMenu();
     // Milník 15 (bod 4.7, nález 5): hideStateBanner() = innerHTML = "" PŘED
     // hidden = true (starý důvod zamítnutí KYC nesmí zůstat viset v DOM).
     hideStateBanner(el("addressDeadlineBanner"));
     hideStateBanner(el("kycRejectedBanner"));
-    el("authScreen").hidden = false;
     el("forcedPasswordScreen").hidden = true;
     hideAllScreens();
+    // MILNÍK 25 (bod 6/7): která z nepřihlášených obrazovek je vidět
+    // (#authScreen / #verejnaStrankaScreen / #rekrutaceScreen) rozhoduje
+    // VÝHRADNĚ renderVerejnaRouta() podle `verejnaRouta`. Bez toho by
+    // odhlášení (které volá showAuthScreen) shodilo návštěvníka z veřejné
+    // stránky zpátky na přihlašovací formulář.
+    renderVerejnaRouta();
   }
 
   // Milník 9 (bod 6.3): vynucená obrazovka změny hesla - schválně MIMO
@@ -7160,6 +7556,10 @@
   function showForcedPasswordScreen() {
     el("topbar").hidden = true;
     el("tabsWrap").hidden = true;
+    // MILNÍK 25: uživatel je přihlášený - veřejná část webu se schová.
+    verejnaRouta = null;
+    hideVerejneScreens();
+    showVerejneMenu(false);
     // Milník 15 (bod 4.7, nález 5): hideStateBanner() = innerHTML = "" PŘED
     // hidden = true (starý důvod zamítnutí KYC nesmí zůstat viset v DOM).
     hideStateBanner(el("addressDeadlineBanner"));
@@ -7177,6 +7577,13 @@
     el("tabsWrap").hidden = false;
     el("authScreen").hidden = true;
     el("forcedPasswordScreen").hidden = true;
+    // MILNÍK 25 (bod 6): po přihlášení veřejné menu i veřejné obrazovky mizí
+    // a titulek se vrací na základní tvar.
+    verejnaRouta = null;
+    hideVerejneScreens();
+    showVerejneMenu(false);
+    setDocumentTitle(null);
+    setMetaPopis(null);
     // Milník 10 (bod 6): první záložka po přihlášení NAHRAZUJE (replaceState),
     // nikdy nepushuje novou historii - fresh load/přihlášení se má chovat
     // přesně jako dnes (žádná "umělá" položka navíc před první skutečnou
@@ -7252,6 +7659,8 @@
     if (tab === "rkprofile") fetchRkProfile();
     if (tab === "rkprovize") fetchRkProvize();
     if (tab === "profile") fetchProfileScreen();
+    if (tab === "marketing") renderMarketingScreen(); // MILNÍK 25 (bod 8)
+    if (tab === "web") fetchWebStranky();              // MILNÍK 25 (bod 10)
     if (tab === "kyc") fetchKycScreen();
     if (tab === "mykyc") fetchMyKycScreen();
     // Milník 17 (bod 16): "dashboard" je nově DOSAŽITELNÝ TLAČÍTKEM v
@@ -7272,6 +7681,23 @@
   // přepnutím účtu), radši se nic nestane, než aby appka spadla na
   // chybějící DOM element.
   window.addEventListener("popstate", function (e) {
+    // MILNÍK 25 (body 6 a 7): NEPŘIHLÁŠENÁ část má vlastní routování přes
+    // query parametry (?stranka= / ?r= / ?ref=). Zpět/Vpřed se tu musí
+    // chovat stejně přirozeně jako mezi záložkami uvnitř appky, takže se
+    // routa přečte znovu z adresy a obrazovka překreslí.
+    if (!currentUser) {
+      var params = null;
+      try { params = new URLSearchParams(location.search); } catch (e2) { params = null; }
+      var ref = params ? (params.get("ref") || "").trim() : "";
+      readVerejnouRoutuZUrl();
+      pendingInviteCode = ref;
+      applyPendingInviteCodeToForm();
+      renderVerejnaRouta();
+      if (!verejnaRouta) {
+        if (ref) showRegisterView(); else showLoginView();
+      }
+      return;
+    }
     if (el("tabsWrap").hidden) return;
     if (!currentUser) return;
     var state = e.state;
@@ -7329,7 +7755,13 @@
     //     znamenalo ukázat mu prázdnou obrazovku, protože
     //     showDashboardVariant() pro roli leader neukazuje ani jeden ze
     //     dvou obalů (#dashboardTiparWrap / #dashboardAdminWrap).
-    tipar: ["dashboard", "new", "list", "network", "profile", "mykyc"],
+    // MILNÍK 25 (bod 8): „marketing" dostává tipař i lídr. Klient napsal
+    // „pod leadera a uživatele" - tedy lídr a běžný tipař. Administrátor
+    // ani RK ji nemají: obsah záložky je CELÝ postavený na vlastním
+    // rekrutačním odkazu (bod 7), který ani jedna z těch rolí nemá
+    // (verejna_rekrutacni_stranka() vrací „nenalezeno" pro roli
+    // administrator i rk, ať už kód zná kdokoli).
+    tipar: ["dashboard", "new", "list", "network", "marketing", "profile", "mykyc"],
     // Milník 15 (bod 3): pořadí záložek Leadera přesně podle výčtu klienta -
     // Přehled lídra, Tipy, Uživatelé, Obsah, Výplaty, Provizní schéma,
     // Realitní kanceláře, Historie akcí, Můj profil. Dvě položky, které
@@ -7340,8 +7772,13 @@
     // MILNÍK 24 (bod 5): „sitstrom" (Struktura sítě) přibývá OBĚMA rolím.
     // U lídra hned za Přehledem (obojí je pohled na síť), u administrátora
     // za Uživatele (tam se na lidi taky dívá).
-    leader: ["network", "sitstrom", "tipy", "users", "obsah", "vyplaty", "provize", "rk", "audit", "profile", "new", "kyc"],
-    administrator: ["tipy", "users", "sitstrom", "kyc", "rk", "provize", "vyplaty", "obsah", "audit", "profile", "dashboard"],
+    leader: ["network", "sitstrom", "tipy", "users", "marketing", "obsah", "vyplaty", "provize", "rk", "audit", "profile", "new", "kyc"],
+    // MILNÍK 25 (bod 10): „web" (Správa webu) VÝHRADNĚ administrátorovi -
+    // klient mluvil o administrátorském účtu a obsah těch stránek je
+    // jediné, co appka ukazuje nepřihlášenému světu, takže okruh lidí,
+    // kteří ho mohou přepsat, má být co nejužší. Serverová RPC
+    // upravit_webovou_stranku() to vynucuje nezávisle na tomhle poli.
+    administrator: ["tipy", "users", "sitstrom", "kyc", "rk", "provize", "vyplaty", "obsah", "web", "audit", "profile", "dashboard"],
     // Milník 7 (Část I/1): role RK viděla VÝHRADNĚ jednu obrazovku.
     // Milník 19 (body 7 a 8): přibývají "rkprofile" (Profil realitní
     // kanceláře) a "rkprovize" (Provizní schéma), v tomhle pořadí za
@@ -7441,7 +7878,10 @@
     profile:   '<circle cx="12" cy="8.5" r="3.3"/><path d="M5 20a7 7 0 0 1 14 0"/>',
     rkportal:  '<path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="M12 12v9"/><path d="m4 7.5 8 4.5 8-4.5"/>',
     rkprofile: '<path d="M4 20V9.5L12 4l8 5.5V20"/><path d="M9.5 20v-5h5v5"/><path d="M4 20h16"/>',
-    rkprovize: '<path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16V11"/><path d="M12 16V8"/><path d="M16 16v-3"/>'
+    rkprovize: '<path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16V11"/><path d="M12 16V8"/><path d="M16 16v-3"/>',
+    // MILNÍK 25 (bod 8): megafon. (bod 10): zeměkoule.
+    marketing: '<path d="M4 9.5v5h3.5l6 3.5V6l-6 3.5z"/><path d="M17 9.2a4 4 0 0 1 0 5.6"/><path d="M19.4 6.8a7.5 7.5 0 0 1 0 10.4"/>',
+    web:       '<circle cx="12" cy="12" r="8.4"/><path d="M3.6 12h16.8"/><path d="M12 3.6c2.2 2.3 3.3 5.2 3.3 8.4s-1.1 6.1-3.3 8.4c-2.2-2.3-3.3-5.2-3.3-8.4S9.8 5.9 12 3.6z"/>'
   };
 
   // Bod 9: klient výslovně zmínil jen lídra, ostatní role se zatím nemění.
@@ -8421,6 +8861,15 @@
     if (networkLoading) networkLoading.hidden = false;
 
     el("inviteLinkText").textContent = location.origin + location.pathname + "?ref=" + (currentUser.invite_code || "");
+    // MILNÍK 25 (bod 9): řádka sdílení pod pozvánkovým odkazem. Lídr má
+    // pozvánkový box skrytý (viz applyNavForRole), takže tenhle obal
+    // dostává jen tipař - lídr má totéž i s bannery v záložce „Marketing".
+    var sdileniWrap = el("networkSdileniWrap");
+    if (sdileniWrap) {
+      var jeTipar = currentUser.role === "tipar";
+      sdileniWrap.hidden = !jeTipar;
+      if (jeTipar) renderNetworkSdileni(); else sdileniWrap.innerHTML = "";
+    }
 
     // ------------------------------------------------------------------
     // MILNÍK 23 (bod 5, diagnostika zpomalení): LÍDR UŽ `moje_sit()` NEVOLÁ.
@@ -9798,9 +10247,23 @@
       // otevírá READ-ONLY kartu (openUserDetail) - k editaci se uživatel
       // dostane až tlačítkem "Upravit" na té kartě. className zůstává
       // `users-edit-btn`, aby se nemusel měnit wireExtra selektor.
+      // MILNÍK 25 (bod 2): vedle „Detail" přibývá malý křížek pro TRVALÉ
+      // smazání uživatele. Vizuálně se přebírá `.btn-icon-danger` z M17/M24
+      // (malá, nenápadná, červená ikona) - PŘEBÍRÁ SE JEN VZHLED, ne
+      // význam: tady nejde o testovací pomůcku, ale o nevratný zásah,
+      // a `title` to říká přesně (USER_HARD_DELETE_HINT).
+      // Křížek se nekreslí tam, kde by nemohl uspět - u sebe sama a u role
+      // jiné než `tipar`. Serverová RPC to vynucuje nezávisle (viz
+      // smazat_uzivatele_kontrola), tohle je jen to, aby uživatel nemačkal
+      // tlačítko, které vždy skončí odmítnutím.
       { key: "akce", label: "Akce", sortable: false, get: function () { return ""; },
         render: function (r) {
-          return '<button type="button" class="btn-small btn-small-ghost users-edit-btn" data-user-id="' + escapeHtml(r.id) + '">Detail</button>';
+          var muzeSmazat = r.role === "tipar" && currentUser && r.id !== currentUser.id;
+          return '<button type="button" class="btn-small btn-small-ghost users-edit-btn" data-user-id="' + escapeHtml(r.id) + '">Detail</button>' +
+            (muzeSmazat
+              ? ' <button type="button" class="btn-icon-danger users-hard-delete-btn" data-user-id="' + escapeHtml(r.id) + '"' +
+                ' title="' + escapeHtml(USER_HARD_DELETE_HINT) + '" aria-label="Trvale smazat uživatele — ' + escapeHtml(USER_HARD_DELETE_HINT) + '">✕</button>'
+              : '');
         } }
     ];
 
@@ -9861,6 +10324,10 @@
         wireExtra: function (container) {
           container.querySelectorAll(".users-edit-btn").forEach(function (btn) {
             btn.addEventListener("click", function () { openUserDetail(btn.getAttribute("data-user-id")); });
+          });
+          // MILNÍK 25 (bod 2)
+          container.querySelectorAll(".users-hard-delete-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () { openTvrdeSmazani(btn.getAttribute("data-user-id")); });
           });
         }
       });
@@ -9985,6 +10452,9 @@
   function openUserDetail(targetId) {
     var target = usersById[targetId];
     if (!target) return;
+    // MILNÍK 25 (bod 2): Detail a karta trvalého smazání sdílejí
+    // #usersFormWrap - otevřením Detailu se rozepsané mazání zahazuje.
+    hardDeleteTargetId = null;
     userFormTargetId = targetId;
     userPanelEditMode = false;
     userSponsorEditMode = false;
@@ -10507,11 +10977,27 @@
     // Milník 16 (bod 5) - dočasná testovací akce administrátora.
     reset_demo_uctu: "Reset testovacích demo účtů A–C",
     // Milník 17 (bod 8) - dočasná testovací akce leadera/administrátora.
-    smazani_tipu: "Smazání tipu"
+    smazani_tipu: "Smazání tipu",
+    // MILNÍK 25 (body 2, 4 a 10).
+    tvrde_smazani_uzivatele: "Trvalé smazání uživatele",
+    zmena_pozvankoveho_kodu: "Změna pozvánkového kódu",
+    uprava_webove_stranky: "Úprava veřejné stránky"
   };
 
   function auditActionLabel(action) {
     return AUDIT_ACTION_LABELS[action] || action || "?";
+  }
+
+  // MILNÍK 25 (bod 2): jméno cíle auditního záznamu. Nejdřív živý profil,
+  // pak snapshot po trvalém smazání, teprve nakonec „—".
+  function auditCilJmeno(r) {
+    if (r && r.target_user_id) return jmenoUzivatele(r.target_user_id);
+    var snap = r && r.target_user_snapshot;
+    if (snap) {
+      var jm = String((snap.jmeno || "") + " " + (snap.prijmeni || "")).trim();
+      return jm || snap.email || snap.id || "—";
+    }
+    return "—";
   }
 
   function jmenoUzivatele(id) {
@@ -10613,7 +11099,19 @@
         render: function (r) { return escapeHtml(formatDateTime(r.created_at)); } },
       { key: "action", label: "Akce", get: function (r) { return auditActionLabel(r.action); } },
       { key: "actor", label: "Provedl", get: function (r) { return jmenoUzivatele(r.actor_id); } },
-      { key: "target", label: "Týká se", get: function (r) { return jmenoUzivatele(r.target_user_id); } },
+      // MILNÍK 25 (bod 2): u trvale smazaného uživatele je `target_user_id`
+      // NULL (FK by jinak smazání zablokoval) a identita cíle žije ve
+      // sloupci `target_user_snapshot`. Bez téhle větve by u všech jeho
+      // starých záznamů stálo v auditu jen „—" a stopa by se fakticky
+      // ztratila - přesně to, čemu má auditní log bránit.
+      { key: "target", label: "Týká se", get: function (r) { return auditCilJmeno(r); },
+        render: function (r) {
+          var jm = auditCilJmeno(r);
+          if (!r.target_user_id && r.target_user_snapshot) {
+            return escapeHtml(jm) + ' <span class="dt-muted">(smazaný účet)</span>';
+          }
+          return escapeHtml(jm);
+        } },
       { key: "zmeny", label: "Změny", sortable: false, className: "dt-wrap", get: function () { return ""; },
         render: function (r) { return auditDiffHtml(r); } },
       { key: "reason", label: "Důvod", className: "dt-wrap", get: function (r) { return r.reason || ""; }, render: function (r) { return escapeHtml(r.reason || "—"); } }
@@ -12920,10 +13418,19 @@
     setDobrovolnyEditMode(false);
     renderDobrovolnyReadonly();
 
+    // MILNÍK 25 (bod 4): vlastní pozvánkový kód - jen tipař a lídr.
+    // Nepotřebuje vlastní dotaz (kód je v currentUser), takže není async.
+    fetchPozvankovyKod();
+
     // Milník 22 (bod 2): karta „Nastavení panelu" - jen leader/administrátor.
     // Funkce si sama schová kartu ostatním rolím a má vlastní generační
     // pojistku, takže se dá volat bez další podmínky.
     await fetchPanelNastaveni();
+    if (g !== authGen) return;
+
+    // MILNÍK 25 (bod 5): rekrutační stránka - jen tipař a lídr. Vlastní
+    // generační pojistka uvnitř, karta se ostatním rolím sama skryje.
+    await fetchRekrutacniStranku();
   }
 
   // ---------------- Milník 19 (bod 2): kontaktní údaje na "Můj profil" ----------------
@@ -16149,6 +16656,75 @@
       submitDobrovolnyForm();
     });
 
+    // ================= MILNÍK 25 =================
+    // Bod 6: tlačítko „Přihlásit se" ve veřejném menu vede zpátky na
+    // přihlašovací obrazovku (tedy na hlavní stránku bez query parametrů).
+    el("verejneMenuPrihlasitBtn").addEventListener("click", function () {
+      pendingInviteCode = "";
+      applyPendingInviteCodeToForm();
+      navigateVerejna(null, null);
+      showLoginView();
+    });
+
+    // Bod 4: vlastní pozvánkový kód.
+    el("pozvankovyKodEditBtn").addEventListener("click", function () {
+      fillPozvankovyKodForm();
+      showBanner(el("pozvankovyKodBanner"), null, null);
+      setPozvankovyKodEditMode(true);
+    });
+    el("pozvankovyKodCancelBtn").addEventListener("click", function () {
+      fillPozvankovyKodForm();
+      showBanner(el("pozvankovyKodBanner"), null, null);
+      setPozvankovyKodEditMode(false);
+    });
+    el("pozvankovyKodForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      submitPozvankovyKod();
+    });
+    // Živá (debouncovaná) kontrola obsazenosti - `input` pokrývá i vložení
+    // ze schránky a autofill, na které by `keyup` nestačil.
+    el("pkodInput").addEventListener("input", naplanujKontroluKodu);
+
+    // Bod 5: rekrutační stránka + živý náhled.
+    el("rekrutEditBtn").addEventListener("click", function () {
+      fillRekrutFormFromData();
+      showBanner(el("rekrutBanner"), null, null);
+      setRekrutEditMode(true);
+    });
+    el("rekrutCancelBtn").addEventListener("click", function () {
+      fillRekrutFormFromData();
+      showBanner(el("rekrutBanner"), null, null);
+      setRekrutEditMode(false);
+    });
+    el("rekrutForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      submitRekrutForm();
+    });
+    el("rekTitulek").addEventListener("input", renderRekrutPreview);
+    el("rekPopis").addEventListener("input", renderRekrutPreview);
+    el("rekFoto").addEventListener("change", function () {
+      // Náhled ukazuje PRÁVĚ VYBRANÝ soubor, ne ten uložený - jinak by
+      // uživatel po výběru fotky viděl v náhledu pořád tu starou.
+      uvolniRekrutNahledUrl();
+      var f = (this.files && this.files[0]) || null;
+      if (f) {
+        rekrutOdstranitFotku = false;
+        try { rekrutNovaFotkaUrl = URL.createObjectURL(f); } catch (e2) { rekrutNovaFotkaUrl = null; }
+      }
+      var rm = el("rekFotoRemoveBtn");
+      if (rm) rm.hidden = !(f || (rekrutData && rekrutData.foto_cesta));
+      renderRekrutPreview();
+    });
+    el("rekFotoRemoveBtn").addEventListener("click", function () {
+      rekrutOdstranitFotku = true;
+      uvolniRekrutNahledUrl();
+      var f = el("rekFoto");
+      if (f) f.value = "";
+      this.hidden = true;
+      renderRekrutPreview();
+      showBanner(el("rekrutBanner"), null, null);
+    });
+
     // Milník 22 (bod 2): „Nastavení panelu" (prahy pracovní fronty).
     el("panelNastaveniEditBtn").addEventListener("click", function () {
       renderPanelNastaveniForm();
@@ -16213,6 +16789,1309 @@
     // exportToXlsx() se NEODSTRAŇUJE, ten zbylý export ji používá.
   }
 
+  // =========================================================================
+  // MILNÍK 25 — VEŘEJNÁ ČÁST WEBU, REKRUTAČNÍ STRÁNKY, MARKETING, SPRÁVA WEBU
+  //
+  // Tohle je PRVNÍ blok kódu v appce, který se spouští i pro NEPŘIHLÁŠENÉHO
+  // návštěvníka a čte data ze serveru. Platí pro něj tři pravidla:
+  //
+  //  1) Data smí brát VÝHRADNĚ ze čtyř RPC, které jsou záměrně povolené roli
+  //     `anon` a vracejí ručně vypsaný, úzký seznam polí:
+  //        verejne_stranky()                 -> [{slug, nazev}]
+  //        verejna_stranka(slug)             -> nazev/titulek/podnadpis/obsah/meta_*
+  //        verejna_rekrutacni_stranka(kod)   -> jmeno[/prijmeni/titulek/popis/foto]
+  //        ukazkova_rekrutacni_stranka()     -> jeden kód lídra
+  //        je_pozvankovy_kod_volny(kod)      -> {kod, platny, volny, chyba}
+  //     Žádné `sb.from(...)` nad tabulkami; anon na ně stejně nemá grant.
+  //  2) Do DOM se z databáze vkládá VŽDY přes escapeHtml(). Veřejné stránky
+  //     píše administrátor a rekrutační texty píší uživatelé - kdyby se
+  //     vkládalo jako HTML, byl by to uložený XSS na nejexponovanějším místě
+  //     celé appky.
+  //  3) Appka musí fungovat i bez sítě/serveru: každý fetch má statický
+  //     fallback, aby se z chyby RPC nestala prázdná bílá stránka.
+  // =========================================================================
+
+  // Kam vede veřejná navigace. `null` = přihlašovací obrazovka (hlavní
+  // stránka). Routuje se přes QUERY PARAMETRY, ne přes hash - appka hash
+  // (`#tab`) už používá pro záložky PŘIHLÁŠENÉ části a mísit obojí by
+  // znamenalo dva routery nad jedním úložištěm. Query parametr `?ref=`
+  // navíc appka používá od Milníku 2, takže je to zavedená konvence.
+  //   ?stranka=o-nas   -> obsahová stránka z tabulky webove_stranky
+  //   ?r=<kod>         -> veřejná rekrutační stránka uživatele
+  //   ?ref=<kod>       -> BEZE ZMĚNY z Milníku 2: rovnou registrační formulář
+  var verejnaRouta = null;
+  var verejneMenuPolozky = null;   // [{slug, nazev}] z RPC, nebo fallback
+  var ukazkovyRekrutacniKod = null;
+  var verejneMenuNacteno = false;
+
+  var VEREJNE_MENU_FALLBACK = [
+    { slug: "hlavni", nazev: "Hlavní stránka" },
+    { slug: "o-nas", nazev: "O nás" },
+    { slug: "kontakty", nazev: "Kontakty" }
+  ];
+
+  function setDocumentTitle(suffix) {
+    // Základ „DEMO – Realitní tip" (bod 3) zůstává VŽDY na začátku, ať je
+    // z přepínače záložek na první pohled poznat, že jde o demo.
+    document.title = "DEMO – Realitní tip" + (suffix ? " · " + suffix : "");
+  }
+
+  function setMetaPopis(text) {
+    // Appka je single-file SPA bez server-side renderingu, takže tohle
+    // vyhledávače spolehlivě nepřečtou - je to příprava, ne SEO řešení.
+    // Říká to i nápověda ve „Správa webu" (bod 10).
+    try {
+      var m = document.querySelector('meta[name="description"]');
+      if (!text) { if (m) m.parentNode.removeChild(m); return; }
+      if (!m) {
+        m = document.createElement("meta");
+        m.setAttribute("name", "description");
+        document.head.appendChild(m);
+      }
+      m.setAttribute("content", text);
+    } catch (e) {
+      console.error("Nepodařilo se nastavit meta popis:", e);
+    }
+  }
+
+  function readVerejnouRoutuZUrl() {
+    try {
+      var params = new URLSearchParams(location.search);
+      var r = (params.get("r") || "").trim();
+      if (r) { verejnaRouta = { typ: "rekrutace", hodnota: r }; return; }
+      var st = (params.get("stranka") || "").trim().toLowerCase();
+      if (st && st !== "hlavni") { verejnaRouta = { typ: "stranka", hodnota: st }; return; }
+      verejnaRouta = null;
+    } catch (e) {
+      verejnaRouta = null;
+    }
+  }
+
+  function verejnaUrl(routa) {
+    var base = location.origin + location.pathname;
+    if (!routa) return base;
+    if (routa.typ === "rekrutace") return base + "?r=" + encodeURIComponent(routa.hodnota);
+    return base + "?stranka=" + encodeURIComponent(routa.hodnota);
+  }
+
+  function hideVerejneScreens() {
+    var a = el("verejnaStrankaScreen");
+    var b = el("rekrutaceScreen");
+    if (a) a.hidden = true;
+    if (b) b.hidden = true;
+  }
+
+  function showVerejneMenu(on) {
+    var m = el("verejneMenu");
+    if (m) m.hidden = !on;
+  }
+
+  // Vykreslí PRÁVĚ JEDNU z veřejných obrazovek podle `verejnaRouta`.
+  // Volá se jak z showAuthScreen(), tak z navigace a z popstate.
+  function renderVerejnaRouta() {
+    hideVerejneScreens();
+    var auth = el("authScreen");
+    if (auth) auth.hidden = true;
+
+    if (verejnaRouta && verejnaRouta.typ === "rekrutace") {
+      el("rekrutaceScreen").hidden = false;
+      oznacVerejneMenu("__rekrutace");
+      fetchVerejnouRekrutaci(verejnaRouta.hodnota);
+      return;
+    }
+    if (verejnaRouta && verejnaRouta.typ === "stranka") {
+      el("verejnaStrankaScreen").hidden = false;
+      oznacVerejneMenu(verejnaRouta.hodnota);
+      fetchVerejnouStranku(verejnaRouta.hodnota);
+      return;
+    }
+    if (auth) auth.hidden = false;
+    oznacVerejneMenu("hlavni");
+    setDocumentTitle(null);
+    setMetaPopis(null);
+  }
+
+  function navigateVerejna(typ, hodnota, opts) {
+    opts = opts || {};
+    verejnaRouta = (typ && hodnota) ? { typ: typ, hodnota: hodnota } : null;
+    if (!opts.skipHistory) {
+      try {
+        history.pushState({ verejna: verejnaRouta }, "", verejnaUrl(verejnaRouta));
+      } catch (e) {
+        // file:// a sandboxy - historie je jen vylepšení, appka musí jet i bez ní.
+        console.error("history.pushState pro veřejnou stránku selhalo:", e);
+      }
+    }
+    renderVerejnaRouta();
+    try { window.scrollTo(0, 0); } catch (e) { /* nepodstatné */ }
+  }
+
+  function oznacVerejneMenu(klic) {
+    var nav = el("verejneMenuNav");
+    if (!nav) return;
+    nav.querySelectorAll("[data-verejna-klic]").forEach(function (b) {
+      if (b.getAttribute("data-verejna-klic") === klic) b.setAttribute("aria-current", "page");
+      else b.removeAttribute("aria-current");
+    });
+  }
+
+  function renderVerejneMenu() {
+    var nav = el("verejneMenuNav");
+    if (!nav) return;
+    var polozky = verejneMenuPolozky || VEREJNE_MENU_FALLBACK;
+    var html = polozky.map(function (p) {
+      return '<button type="button" class="verejne-menu-link" data-verejna-klic="' +
+        escapeHtml(p.slug) + '">' + escapeHtml(p.nazev) + '</button>';
+    }).join("");
+    // Čtvrtá položka menu (bod 6) - odkaz na konkrétní ukázkovou rekrutační
+    // stránku (lídr). Nevykresluje se, dokud nevíme, že nějaká publikovaná
+    // existuje: mrtvý odkaz do prázdna je horší než chybějící položka.
+    if (ukazkovyRekrutacniKod) {
+      html += '<button type="button" class="verejne-menu-link" data-verejna-klic="__rekrutace">Ukázková rekrutační stránka</button>';
+    }
+    nav.innerHTML = html;
+    nav.querySelectorAll("[data-verejna-klic]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var klic = b.getAttribute("data-verejna-klic");
+        if (klic === "__rekrutace") { navigateVerejna("rekrutace", ukazkovyRekrutacniKod); return; }
+        if (klic === "hlavni") { navigateVerejna(null, null); return; }
+        navigateVerejna("stranka", klic);
+      });
+    });
+    oznacVerejneMenu(verejnaRouta ? (verejnaRouta.typ === "rekrutace" ? "__rekrutace" : verejnaRouta.hodnota) : "hlavni");
+  }
+
+  async function nactiVerejneMenu() {
+    if (verejneMenuNacteno) return;
+    verejneMenuNacteno = true;
+    if (!sb) { renderVerejneMenu(); return; }
+    // Obojí je nezávislé - jde to jedním kolečkem na server.
+    var davka = await Promise.all([
+      sb.rpc("verejne_stranky"),
+      sb.rpc("ukazkova_rekrutacni_stranka")
+    ]);
+    if (!davka[0].error && Array.isArray(davka[0].data) && davka[0].data.length) {
+      verejneMenuPolozky = davka[0].data;
+    } else if (davka[0].error) {
+      console.error("Nepodařilo se načíst veřejné menu:", davka[0].error);
+    }
+    if (!davka[1].error && davka[1].data) ukazkovyRekrutacniKod = String(davka[1].data);
+    renderVerejneMenu();
+  }
+
+  // Odstavce z prostého textu. Prázdný řádek = nový odstavec; uvnitř
+  // odstavce se řádkování zachová přes CSS `white-space: pre-line`.
+  function odstavceHtml(text, trida) {
+    var t = String(text || "").trim();
+    if (!t) return "";
+    return t.split(/\n\s*\n/).map(function (o) {
+      return '<p' + (trida ? ' class="' + trida + '"' : '') + '>' + escapeHtml(o.trim()) + "</p>";
+    }).join("");
+  }
+
+  // ------------------------------------------------ bod 6: obsahová stránka
+  async function fetchVerejnouStranku(slug) {
+    var wrap = el("verejnaStrankaObsah");
+    if (!wrap) return;
+    wrap.innerHTML = '<p class="dt-muted">Načítání…</p>';
+    showBanner(el("verejnaStrankaBanner"), null, null);
+    if (!sb) { wrap.innerHTML = '<p class="dt-muted">Obsah se nepodařilo načíst.</p>'; return; }
+
+    var res = await sb.rpc("verejna_stranka", { p_slug: slug });
+    // Uživatel mohl mezitím odkliknout jinam - nepřepisovat cizí obrazovku.
+    if (!verejnaRouta || verejnaRouta.typ !== "stranka" || verejnaRouta.hodnota !== slug) return;
+
+    if (res.error) {
+      console.error("Chyba při načítání veřejné stránky:", res.error);
+      wrap.innerHTML = '<p class="dt-muted">Obsah stránky se nepodařilo načíst. Zkuste to prosím znovu.</p>';
+      return;
+    }
+    var d = res.data || {};
+    if (!d.nalezeno) {
+      setDocumentTitle("Stránka nenalezena");
+      wrap.innerHTML = '<h1>Stránka nenalezena</h1>' +
+        '<p class="verejna-stranka-lead">Taková stránka tu není. Zkuste prosím některou z položek v menu nahoře.</p>';
+      return;
+    }
+    setDocumentTitle(d.meta_titulek || d.nazev || null);
+    setMetaPopis(d.meta_popis || null);
+    wrap.innerHTML =
+      '<h1>' + escapeHtml(d.titulek || d.nazev || "") + '</h1>' +
+      (d.podnadpis ? '<p class="verejna-stranka-lead">' + escapeHtml(d.podnadpis) + '</p>' : '') +
+      '<div class="verejna-stranka-telo">' + odstavceHtml(d.obsah) + '</div>';
+  }
+
+  // ------------------------------------------- bod 7: rekrutační stránka
+  //
+  // Veřejná URL fotky. Bucket `verejne-rekrutace` je ZÁMĚRNĚ veřejný -
+  // nepřihlášený návštěvník si podepsanou URL vyžádat neumí. Je to jediný
+  // veřejný bucket v projektu a leží v něm VÝHRADNĚ fotky, které si
+  // uživatel sám nahrál na svou veřejnou stránku; profilové fotky a doklady
+  // totožnosti zůstávají v privátních bucketech beze změny.
+  function verejnaFotoUrl(cesta) {
+    if (!cesta) return null;
+    try {
+      if (sb && sb.storage && sb.storage.from) {
+        var api = sb.storage.from("verejne-rekrutace");
+        if (api && typeof api.getPublicUrl === "function") {
+          var r = api.getPublicUrl(cesta);
+          if (r && r.data && r.data.publicUrl) return r.data.publicUrl;
+        }
+      }
+    } catch (e) {
+      console.error("getPublicUrl selhalo, skládám URL ručně:", e);
+    }
+    return SUPABASE_URL + "/storage/v1/object/public/verejne-rekrutace/" + encodeURI(cesta);
+  }
+
+  var REKRUT_VYCHOZI_TITULEK = "Tipni nemovitost a vydělej s námi";
+  var REKRUT_VYCHOZI_TEXT =
+    "Znáte někoho, kdo prodává byt, dům nebo pozemek? Řekněte nám o něm.\n\n" +
+    "Tip ověříme, předáme prověřené realitní kanceláři a hlídáme obchod až do podpisu. " +
+    "Z úspěšného prodeje vám náleží podíl na provizi.\n\n" +
+    "Registrace je zdarma a k ničemu vás nezavazuje.";
+
+  // Tři promo bannery ve firemním stylu (klient: „vymysli nějaké reklamní
+  // banery a grafiku"). Jsou to HTML/CSS bloky z existujících barevných
+  // tokenů - žádný obrázek, žádné externí CDN, takže se vykreslí i offline
+  // a přizpůsobí se tmavému režimu.
+  var PROMO_BANNERY = [
+    { trida: "rekrut-banner-a", nadpis: "Tipuj s námi", text: "Stačí vědět o někom, kdo prodává. Zbytek zařídíme." },
+    { trida: "rekrut-banner-b", nadpis: "Začni vydělávat ještě dnes", text: "Registrace zabere dvě minuty a nic nestojí." },
+    { trida: "rekrut-banner-c", nadpis: "Prodej hlídáme za vás", text: "Od ověření tipu přes kancelář až po výplatu provize." }
+  ];
+
+  function promoBanneryHtml() {
+    return '<div class="rekrut-bannery">' + PROMO_BANNERY.map(function (b) {
+      return '<div class="rekrut-banner ' + b.trida + '">' +
+        '<strong>' + escapeHtml(b.nadpis) + '</strong>' +
+        '<span>' + escapeHtml(b.text) + '</span></div>';
+    }).join("") + '</div>';
+  }
+
+  async function fetchVerejnouRekrutaci(kod) {
+    var wrap = el("rekrutaceObsah");
+    if (!wrap) return;
+    wrap.innerHTML = '<p class="dt-muted" style="padding-top:28px;">Načítání…</p>';
+    showBanner(el("rekrutaceBanner"), null, null);
+    if (!sb) { wrap.innerHTML = '<p class="dt-muted" style="padding-top:28px;">Stránku se nepodařilo načíst.</p>'; return; }
+
+    var res = await sb.rpc("verejna_rekrutacni_stranka", { p_kod: kod });
+    if (!verejnaRouta || verejnaRouta.typ !== "rekrutace" || verejnaRouta.hodnota !== kod) return;
+
+    if (res.error) {
+      console.error("Chyba při načítání rekrutační stránky:", res.error);
+      wrap.innerHTML = '<p class="dt-muted" style="padding-top:28px;">Stránku se nepodařilo načíst. Zkuste to prosím znovu.</p>';
+      return;
+    }
+    renderVerejnaRekrutace(res.data || {}, kod);
+  }
+
+  function renderVerejnaRekrutace(d, kod) {
+    var wrap = el("rekrutaceObsah");
+    if (!wrap) return;
+
+    if (!d.nalezeno) {
+      setDocumentTitle("Rekrutační stránka nenalezena");
+      setMetaPopis(null);
+      wrap.innerHTML =
+        '<div class="rekrut-hero"><div class="rekrut-hero-text">' +
+          '<p class="rekrut-eyebrow">Realitní tip</p>' +
+          '<h1>Tuhle pozvánku neznáme</h1>' +
+          '<p class="rekrut-hero-kdo">Odkaz je nejspíš překlepnutý nebo už neplatí. Zkuste prosím menu nahoře.</p>' +
+        '</div></div>';
+      return;
+    }
+
+    var maObsah = d.ma_obsah === true;
+    var jmenoKdo = String((d.jmeno || "") + " " + (maObsah ? (d.prijmeni || "") : "")).trim();
+    var titulek = maObsah && d.titulek ? d.titulek : REKRUT_VYCHOZI_TITULEK;
+    var popis = maObsah && d.popis ? d.popis : REKRUT_VYCHOZI_TEXT;
+    var fotoUrl = maObsah && d.foto_cesta ? verejnaFotoUrl(d.foto_cesta) : null;
+    var iniciala = (d.jmeno || "?").trim().charAt(0).toUpperCase() || "?";
+
+    setDocumentTitle(titulek);
+    setMetaPopis(String(popis).replace(/\s+/g, " ").slice(0, 200));
+
+    var fotoHtml = fotoUrl
+      ? '<img class="rekrut-foto" src="' + escapeHtml(fotoUrl) + '" alt="' + escapeHtml(jmenoKdo || "Fotografie") + '">'
+      : '<div class="rekrut-foto-empty" aria-hidden="true">' + escapeHtml(iniciala) + '</div>';
+
+    wrap.innerHTML =
+      '<div class="rekrut-hero">' +
+        fotoHtml +
+        '<div class="rekrut-hero-text">' +
+          '<p class="rekrut-eyebrow">Pozvánka do Realitního tipu</p>' +
+          '<h1>' + escapeHtml(titulek) + '</h1>' +
+          (jmenoKdo ? '<p class="rekrut-hero-kdo">Zve vás ' + escapeHtml(jmenoKdo) + '</p>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="rekrut-popis">' + odstavceHtml(popis) + '</div>' +
+      '<div class="rekrut-cta">' +
+        '<div class="rekrut-cta-text">' +
+          '<strong>Chcete to zkusit?</strong>' +
+          // Rodově neutrální formulace - jméno může patřit komukoli a
+          // „bude veden/vedena" by se u poloviny uživatelů četlo špatně.
+          '<span>Registrace je zdarma. Vaším sponzorem ' +
+            (jmenoKdo ? 'bude ' + escapeHtml(jmenoKdo) : 'bude ten, kdo vám poslal tenhle odkaz') +
+            '.</span>' +
+        '</div>' +
+        '<button class="btn-primary" type="button" id="rekrutRegistrovatBtn" style="width:auto;">Registrovat</button>' +
+      '</div>' +
+      promoBanneryHtml() +
+      '<p class="rekrut-poznamka">Realitní tip — demonstrační verze aplikace. Registrací souhlasíte s tím, že vás v síti povede ten, kdo vám poslal tenhle odkaz.</p>';
+
+    var btn = el("rekrutRegistrovatBtn");
+    if (btn) {
+      btn.addEventListener("click", function () {
+        // Tentýž mechanismus jako pozvánkový odkaz z Milníku 2 - kód se
+        // předvyplní a UZAMKNE, takže si návštěvník sponzora nevymyslí.
+        // Adresa se přepíše na `?ref=<kod>`, aby stránka po případném
+        // obnovení skončila na tomtéž místě.
+        pendingInviteCode = kod;
+        verejnaRouta = null;
+        try {
+          history.pushState({ ref: kod }, "", location.pathname + "?ref=" + encodeURIComponent(kod));
+        } catch (e) {
+          console.error("history.pushState pro ?ref= selhalo:", e);
+        }
+        hideVerejneScreens();
+        var auth = el("authScreen");
+        if (auth) auth.hidden = false;
+        oznacVerejneMenu("hlavni");
+        setDocumentTitle(null);
+        applyPendingInviteCodeToForm();
+        showRegisterView();
+        try { window.scrollTo(0, 0); } catch (e2) { /* nepodstatné */ }
+      });
+    }
+  }
+
+  // =========================================================================
+  // BOD 9 — SDÍLENÍ ODKAZU (sociální sítě, e-mail, schránka)
+  //
+  // Používají se STANDARDNÍ share-intent adresy jednotlivých sítí. Žádné API
+  // klíče, žádné SDK, žádný tracking - je to obyčejný odkaz, který otevře
+  // okno té sítě s předvyplněným textem. Kopírování do schránky se
+  // NEDUPLIKUJE: sdílí se tatáž funkce copyTextToClipboard(), na které stojí
+  // i tlačítko „Zkopírovat odkaz" z Milníku 2.
+  // =========================================================================
+  function mujRekrutacniOdkaz() {
+    return location.origin + location.pathname + "?r=" + ((currentUser && currentUser.invite_code) || "");
+  }
+
+  var SDILENI_VYCHOZI_TEXT = "Tipni nemovitost a vydělej s námi. Stačí vědět o někom, kdo prodává — zbytek zařídí Realitní tip.";
+
+  function sdileniOdkazyHtml(url, text, predmet) {
+    var u = encodeURIComponent(url);
+    var t = encodeURIComponent(text);
+    var site = [
+      { nazev: "Facebook", href: "https://www.facebook.com/sharer/sharer.php?u=" + u },
+      { nazev: "X", href: "https://twitter.com/intent/tweet?url=" + u + "&text=" + t },
+      { nazev: "LinkedIn", href: "https://www.linkedin.com/sharing/share-offsite/?url=" + u },
+      { nazev: "WhatsApp", href: "https://wa.me/?text=" + encodeURIComponent(text + " " + url) },
+      { nazev: "E-mailem", href: "mailto:?subject=" + encodeURIComponent(predmet || "Pozvánka do Realitního tipu") +
+          "&body=" + encodeURIComponent(text + "\n\n" + url) }
+    ];
+    return site.map(function (s) {
+      // `rel="noopener noreferrer"` u target="_blank" je povinnost, ne
+      // kosmetika - bez něj má otevřená stránka přístup na window.opener.
+      return '<a class="btn-small" href="' + escapeHtml(s.href) + '" target="_blank" rel="noopener noreferrer">' +
+        escapeHtml(s.nazev) + '</a>';
+    }).join("");
+  }
+
+  // Sdílená kopírovací funkce (bod 9c). copyInviteLink() i ldCopyInvite()
+  // existovaly už dřív, každá se svým bannerem - tahle je obecná a používají
+  // ji nová tlačítka v Marketingu i u pozvánkového odkazu.
+  function copyTextToClipboard(text, bannerEl, okText) {
+    if (!text) return;
+    var done = function () {
+      showBanner(bannerEl, "ok", okText || "Zkopírováno do schránky.");
+      setTimeout(function () { showBanner(bannerEl, null, null); }, 3000);
+    };
+    var fail = function () {
+      showBanner(bannerEl, "error", "Zkopírování se nepodařilo, zkopírujte prosím text ručně.");
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, fail);
+    } else {
+      fail();
+    }
+  }
+
+  function renderNetworkSdileni() {
+    var wrap = el("networkSdileniWrap");
+    if (!wrap || !currentUser) return;
+    // Sdílí se REKRUTAČNÍ stránka (?r=), ne holý registrační odkaz (?ref=) -
+    // příjemce tak nejdřív uvidí stránku s textem a fotkou a teprve z ní
+    // jde na registraci. Samotný `?ref=` odkaz zůstává beze změny nad tím.
+    var url = mujRekrutacniOdkaz();
+    wrap.innerHTML =
+      '<div class="sdileni-row">' +
+        '<span class="dt-muted" style="font-size:13px;">Sdílet rekrutační stránku:</span>' +
+        sdileniOdkazyHtml(url, SDILENI_VYCHOZI_TEXT, "Pozvánka do Realitního tipu") +
+        '<button type="button" class="btn-small" id="networkOpenRekrutBtn">Otevřít</button>' +
+      '</div>';
+    var openBtn = el("networkOpenRekrutBtn");
+    if (openBtn) {
+      openBtn.addEventListener("click", function () {
+        window.open(url, "_blank", "noopener,noreferrer");
+      });
+    }
+  }
+
+  // =========================================================================
+  // BOD 8 — ZÁLOŽKA MARKETING (tipař i lídr)
+  // =========================================================================
+  var MKT_BANNERY = [
+    { klic: "siroky", trida: "mkt-nahled-a", rozmer: "Široký formát — Facebook, LinkedIn (1200 × 630)",
+      nadpis: "Tipuj s námi", podnadpis: "Stačí vědět o někom, kdo prodává. Zbytek zařídíme.",
+      text: "Znáte někoho, kdo prodává byt, dům nebo pozemek? Řekněte mi o něm a já se postarám o zbytek — tip ověříme, předáme prověřené realitní kanceláři a z úspěšného prodeje vám náleží podíl na provizi. Registrace je zdarma:" },
+    { klic: "ctverec", trida: "mkt-nahled-b", ctverec: true, rozmer: "Čtverec — Instagram, Facebook (1080 × 1080)",
+      nadpis: "Začni vydělávat ještě dnes", podnadpis: "Registrace zabere dvě minuty a nic nestojí.",
+      text: "Začněte vydělávat na tom, co stejně víte. Pošlete tip na nemovitost, my ho ověříme a předáme realitní kanceláři. Když se prodej povede, dostanete podíl z provize. Nic neplatíte:" },
+    { klic: "uzky", trida: "mkt-nahled-c", rozmer: "Na výšku — stories, WhatsApp (1080 × 1350)",
+      nadpis: "Znáte někoho, kdo prodává?", podnadpis: "Od ověření tipu přes kancelář až po výplatu provize.",
+      text: "Soused prodává dům? Kamarádka se stěhuje? Stačí mi to říct. Tip ověříme, předáme realitní kanceláři a celý obchod hlídáme až do podpisu — vy jen sledujete, jak postupuje, a inkasujete podíl z provize:" }
+  ];
+
+  function renderMarketingScreen() {
+    var wrap = el("marketingObsah");
+    if (!wrap || !currentUser) return;
+    var url = mujRekrutacniOdkaz();
+    var kod = currentUser.invite_code || "";
+
+    var karty = MKT_BANNERY.map(function (b, i) {
+      var plnyText = b.text + " " + url;
+      return '<div class="mkt-karta">' +
+          '<div class="mkt-nahled ' + b.trida + (b.ctverec ? ' mkt-nahled-ctverec' : '') + '">' +
+            '<strong>' + escapeHtml(b.nadpis) + '</strong>' +
+            '<span>' + escapeHtml(b.podnadpis) + '</span>' +
+          '</div>' +
+          '<div class="mkt-telo">' +
+            '<p class="mkt-rozmer">' + escapeHtml(b.rozmer) + '</p>' +
+            '<p class="mkt-text" id="mktText' + i + '">' + escapeHtml(plnyText) + '</p>' +
+            '<div class="mkt-akce">' +
+              '<button type="button" class="btn-small" data-mkt-copy="' + i + '">Zkopírovat text s odkazem</button>' +
+            '</div>' +
+            '<div class="sdileni-row">' + sdileniOdkazyHtml(url, b.text, b.nadpis) + '</div>' +
+          '</div>' +
+        '</div>';
+    }).join("");
+
+    wrap.innerHTML =
+      '<div class="card detail-card">' +
+        '<h3 class="detail-section-title" style="margin-top:0;">Váš odkaz</h3>' +
+        '<p class="dt-muted" style="margin-top:-6px;">Všechny texty a tlačítka níž odkazují na <strong>vaši</strong> rekrutační stránku. Kdo se přes ně zaregistruje, bude veden pod vámi.</p>' +
+        '<div class="invite-box"><code id="mktOdkazText">' + escapeHtml(url) + '</code>' +
+          '<button class="btn-small" id="mktCopyOdkazBtn" type="button">Zkopírovat odkaz</button></div>' +
+        '<p class="dt-muted" style="font-size:12.5px;margin:10px 0 0;">Pozvánkový kód v odkazu: <strong>' + escapeHtml(kod || "—") + '</strong>. ' +
+          'Přepsat ho na vlastní slovo (třeba „tipuj“) můžete v „Můj profil“ → „Pozvánkový kód“.</p>' +
+        '<div class="sdileni-row">' +
+          '<span class="dt-muted" style="font-size:13px;">Sdílet:</span>' +
+          sdileniOdkazyHtml(url, SDILENI_VYCHOZI_TEXT, "Pozvánka do Realitního tipu") +
+          '<button type="button" class="btn-small" id="mktOpenBtn">Otevřít stránku</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="card detail-card">' +
+        '<h3 class="detail-section-title" style="margin-top:0;">Bannery k rozeslání</h3>' +
+        '<p class="dt-muted" style="margin-top:-6px;">Tři varianty pro různé sítě. <strong>Bannery jsou grafické návrhy vykreslené v aplikaci a hotové texty — stažení obrázkového souboru appka zatím neumí.</strong> Zkopírujte text s odkazem, nebo použijte tlačítka sítí (otevřou sdílecí okno s předvyplněným textem).</p>' +
+        '<div class="mkt-grid">' + karty + '</div>' +
+      '</div>';
+
+    var copyOdkaz = el("mktCopyOdkazBtn");
+    if (copyOdkaz) {
+      copyOdkaz.addEventListener("click", function () {
+        copyTextToClipboard(url, el("marketingBanner"), "Odkaz zkopírován do schránky.");
+      });
+    }
+    var openBtn = el("mktOpenBtn");
+    if (openBtn) {
+      openBtn.addEventListener("click", function () { window.open(url, "_blank", "noopener,noreferrer"); });
+    }
+    wrap.querySelectorAll("[data-mkt-copy]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var i = Number(b.getAttribute("data-mkt-copy"));
+        copyTextToClipboard(MKT_BANNERY[i].text + " " + url, el("marketingBanner"), "Text i s odkazem zkopírován do schránky.");
+      });
+    });
+  }
+
+  // =========================================================================
+  // BOD 4 — VLASTNÍ POZVÁNKOVÝ KÓD (Můj profil, jen tipař a lídr)
+  // =========================================================================
+  var pozvankovyKodEditMode = false;
+  var pozvankovyKodTimer = null;
+  var pozvankovyKodPoslendiOdpoved = null;  // {kod, platny, volny}
+
+  function maPozvankovyKodKartu() {
+    return !!currentUser && (currentUser.role === "tipar" || currentUser.role === "leader");
+  }
+
+  function resetPozvankovyKodForm() {
+    pozvankovyKodEditMode = false;
+    pozvankovyKodPoslendiOdpoved = null;
+    if (pozvankovyKodTimer) { clearTimeout(pozvankovyKodTimer); pozvankovyKodTimer = null; }
+    var inp = el("pkodInput");
+    if (inp) inp.value = "";
+    var st = el("pkodStav");
+    if (st) { st.textContent = ""; st.className = "kod-stav"; }
+    setPozvankovyKodEditMode(false);
+  }
+
+  function setPozvankovyKodEditMode(on) {
+    pozvankovyKodEditMode = !!on;
+    var ro = el("pozvankovyKodReadonlyWrap");
+    var fw = el("pozvankovyKodFormWrap");
+    if (ro) ro.hidden = pozvankovyKodEditMode;
+    if (fw) fw.hidden = !pozvankovyKodEditMode;
+  }
+
+  function renderPozvankovyKodReadonly() {
+    var wrap = el("pozvankovyKodReadonlyBody");
+    if (!wrap || !currentUser) return;
+    var kod = currentUser.invite_code || "";
+    wrap.innerHTML =
+      detailItemHtml("Pozvánkový kód", kod || "—") +
+      '<div class="detail-item"><div class="detail-label">Rekrutační stránka</div>' +
+        '<div class="detail-value" style="word-break:break-all;">' + escapeHtml(mujRekrutacniOdkaz()) + '</div></div>';
+  }
+
+  function fillPozvankovyKodForm() {
+    var inp = el("pkodInput");
+    if (inp && currentUser) inp.value = currentUser.invite_code || "";
+    zobrazStavKodu(null);
+  }
+
+  function zobrazStavKodu(stav) {
+    var st = el("pkodStav");
+    if (!st) return;
+    if (!stav) { st.textContent = ""; st.className = "kod-stav"; return; }
+    st.textContent = stav.text;
+    st.className = "kod-stav " + (stav.trida || "kod-stav-ceka");
+  }
+
+  // Živá (debouncovaná) kontrola obsazenosti. RPC je záměrně volatelná i
+  // anonymně a vrací JEN {kod, platny, volny, chyba} - nikdy nic o tom, kdo
+  // obsazený kód vlastní.
+  function naplanujKontroluKodu() {
+    if (pozvankovyKodTimer) clearTimeout(pozvankovyKodTimer);
+    var inp = el("pkodInput");
+    if (!inp) return;
+    var raw = inp.value.trim();
+    pozvankovyKodPoslendiOdpoved = null;
+
+    if (!raw) { zobrazStavKodu(null); return; }
+    if (currentUser && raw.toLowerCase() === (currentUser.invite_code || "")) {
+      zobrazStavKodu({ text: "Tohle je váš současný kód.", trida: "kod-stav-ceka" });
+      return;
+    }
+    zobrazStavKodu({ text: "Ověřuji…", trida: "kod-stav-ceka" });
+    pozvankovyKodTimer = setTimeout(function () { zkontrolujKod(raw); }, 350);
+  }
+
+  async function zkontrolujKod(raw) {
+    if (!sb) return;
+    var g = authGen;
+    var res = await sb.rpc("je_pozvankovy_kod_volny", { p_kod: raw });
+    if (g !== authGen) return;
+    // Mezitím se mohlo dopsat další písmeno - starší odpověď zahodit.
+    var inp = el("pkodInput");
+    if (!inp || inp.value.trim() !== raw) return;
+
+    if (res.error) {
+      console.error("Kontrola pozvánkového kódu selhala:", res.error);
+      zobrazStavKodu({ text: "Obsazenost se nepodařilo ověřit.", trida: "kod-stav-chyba" });
+      return;
+    }
+    var d = res.data || {};
+    pozvankovyKodPoslendiOdpoved = d;
+    if (!d.platny) {
+      zobrazStavKodu({ text: d.chyba || "Neplatný tvar kódu.", trida: "kod-stav-chyba" });
+      return;
+    }
+    if (!d.volny) {
+      zobrazStavKodu({ text: "Kód „" + d.kod + "“ už někdo používá. Zkuste jiný.", trida: "kod-stav-chyba" });
+      return;
+    }
+    var jinyTvar = d.kod !== raw;
+    zobrazStavKodu({
+      text: "Kód „" + d.kod + "“ je volný." + (jinyTvar ? " (Uloží se malými písmeny.)" : ""),
+      trida: "kod-stav-ok"
+    });
+  }
+
+  async function submitPozvankovyKod() {
+    if (!currentUser) return;
+    var inp = el("pkodInput");
+    var raw = inp ? inp.value.trim() : "";
+    var banner = el("pozvankovyKodBanner");
+
+    if (!raw) { showBanner(banner, "error", "Vyplňte prosím pozvánkový kód."); return; }
+    // Klientská kontrola je jen pohodlí - TOTÉŽ vynucuje server
+    // (upravit_muj_pozvankovy_kod + unikátní index profiles_invite_code_unique).
+    if (pozvankovyKodPoslendiOdpoved && pozvankovyKodPoslendiOdpoved.kod === raw.toLowerCase()
+        && pozvankovyKodPoslendiOdpoved.volny === false) {
+      showBanner(banner, "error", "Tenhle kód už někdo používá. Zvolte prosím jiný.");
+      return;
+    }
+
+    var btn = el("pozvankovyKodSaveBtn");
+    if (btn) btn.disabled = true;
+    showBanner(banner, null, null);
+
+    var g = authGen;
+    var res = await sb.rpc("upravit_muj_pozvankovy_kod", { p_kod: raw });
+    if (g !== authGen) return;
+    if (btn) btn.disabled = false;
+
+    if (res.error) {
+      console.error("Chyba při ukládání pozvánkového kódu:", res.error);
+      var kod = res.error.code;
+      var zprava = "Kód se nepodařilo uložit. Zkuste to prosím znovu.";
+      if (kod === "23505") zprava = "Tenhle kód už někdo používá. Zvolte prosím jiný.";
+      else if (kod === "22023") zprava = "Kód smí mít 3–24 znaků, jen malá písmena bez diakritiky, číslice a spojovník — a nesmí to být vyhrazené slovo (například „o-nas“).";
+      else if (kod === "42501") zprava = "Vlastní pozvánkový kód si může nastavit jen tipař nebo lídr.";
+      showBanner(banner, "error", zprava);
+      return;
+    }
+
+    var novy = (res.data && res.data.invite_code) || raw.toLowerCase();
+    currentUser.invite_code = novy;
+    renderPozvankovyKodReadonly();
+    fillPozvankovyKodForm();
+    setPozvankovyKodEditMode(false);
+    // Kód je součástí rekrutačního odkazu - náhled i odkaz v kartě
+    // „Rekrutační stránka" pod tím ho musí okamžitě převzít.
+    renderRekrutReadonly();
+    showBanner(banner, "ok", "Pozvánkový kód uložen. Vaše rekrutační stránka je teď na adrese " + mujRekrutacniOdkaz());
+  }
+
+  function fetchPozvankovyKod() {
+    var card = el("pozvankovyKodCard");
+    if (!card || !currentUser) return;
+    var ma = maPozvankovyKodKartu();
+    card.hidden = !ma;
+    if (!ma) return;
+    // Kód je v `currentUser` (refreshOwnProfile ho čte z profiles), takže
+    // tahle karta nepotřebuje žádné vlastní kolečko na server.
+    renderPozvankovyKodReadonly();
+    fillPozvankovyKodForm();
+    setPozvankovyKodEditMode(false);
+  }
+
+  // =========================================================================
+  // BOD 5 — PANEL „REKRUTAČNÍ STRÁNKA" NA PROFILU (tipař i lídr)
+  // =========================================================================
+  var rekrutEditMode = false;
+  var rekrutData = null;            // poslední načtený stav ze serveru
+  var rekrutNovaFotkaUrl = null;    // objectURL právě vybraného souboru (jen náhled)
+  var rekrutOdstranitFotku = false;
+
+  function maRekrutKartu() {
+    return !!currentUser && (currentUser.role === "tipar" || currentUser.role === "leader");
+  }
+
+  function resetRekrutForm() {
+    rekrutEditMode = false;
+    rekrutData = null;
+    rekrutOdstranitFotku = false;
+    uvolniRekrutNahledUrl();
+    var t = el("rekTitulek"); if (t) t.value = "";
+    var p = el("rekPopis"); if (p) p.value = "";
+    var pub = el("rekPublikovano"); if (pub) pub.checked = false;
+    var f = el("rekFoto"); if (f) f.value = "";
+    setRekrutEditMode(false);
+  }
+
+  function uvolniRekrutNahledUrl() {
+    if (rekrutNovaFotkaUrl) {
+      try { URL.revokeObjectURL(rekrutNovaFotkaUrl); } catch (e) { /* nepodstatné */ }
+      rekrutNovaFotkaUrl = null;
+    }
+  }
+
+  function setRekrutEditMode(on) {
+    rekrutEditMode = !!on;
+    var ro = el("rekrutReadonlyWrap");
+    var fw = el("rekrutFormWrap");
+    if (ro) ro.hidden = rekrutEditMode;
+    if (fw) fw.hidden = !rekrutEditMode;
+  }
+
+  function renderRekrutReadonly() {
+    var wrap = el("rekrutReadonlyBody");
+    if (!wrap || !currentUser) return;
+    var d = rekrutData || {};
+    var url = mujRekrutacniOdkaz();
+    var publikovano = d.publikovano === true && !!d.titulek;
+
+    wrap.innerHTML =
+      '<div class="detail-grid">' +
+        detailItemHtml("Stav", publikovano ? "Zveřejněná" : (d.titulek ? "Koncept (zatím nezveřejněná)" : "Zatím nevyplněná")) +
+        detailItemHtml("Titulek", d.titulek || "—") +
+        '<div class="detail-item"><div class="detail-label">Adresa stránky</div>' +
+          '<div class="detail-value" style="word-break:break-all;">' + escapeHtml(url) + '</div></div>' +
+        detailItemHtml("Fotografie", d.foto_cesta ? "Nahraná" : "Žádná") +
+      '</div>' +
+      (d.popis ? '<div class="rekrut-preview"><p class="rekrut-preview-label">Text stránky</p>' +
+                 '<div class="rekrut-preview-telo">' + odstavceHtml(d.popis) + '</div></div>' : '') +
+      (publikovano
+        ? '<p class="dt-muted" style="font-size:12.5px;margin:12px 0 0;">Stránku vidí kdokoli na internetu bez přihlášení.</p>'
+        : '<p class="dt-muted" style="font-size:12.5px;margin:12px 0 0;">Stránka zatím není zveřejněná. Na její adrese se návštěvníkovi ukáže obecná pozvánka s vaším křestním jménem — registrace pod vámi funguje i tak.</p>');
+  }
+
+  function fillRekrutFormFromData() {
+    var d = rekrutData || {};
+    var t = el("rekTitulek"); if (t) t.value = d.titulek || "";
+    var p = el("rekPopis"); if (p) p.value = d.popis || "";
+    var pub = el("rekPublikovano"); if (pub) pub.checked = d.publikovano === true;
+    var f = el("rekFoto"); if (f) f.value = "";
+    rekrutOdstranitFotku = false;
+    uvolniRekrutNahledUrl();
+    var rm = el("rekFotoRemoveBtn");
+    if (rm) rm.hidden = !d.foto_cesta;
+    renderRekrutPreview();
+  }
+
+  // ŽIVÝ NÁHLED (bod 5). Kreslí ZMENŠENOU, ale strukturně TOTOŽNOU podobu
+  // toho, co uvidí návštěvník veřejné stránky (renderVerejnaRekrutace) -
+  // tentýž hero, totéž pořadí, tytéž výchozí texty, když je pole prázdné.
+  function renderRekrutPreview() {
+    var wrap = el("rekrutPreviewBody");
+    if (!wrap || !currentUser) return;
+    var t = el("rekTitulek");
+    var p = el("rekPopis");
+    var titulek = (t && t.value.trim()) || REKRUT_VYCHOZI_TITULEK;
+    var popis = (p && p.value.trim()) || REKRUT_VYCHOZI_TEXT;
+    var jmeno = celeJmeno(currentUser) || "";
+
+    var fotoUrl = rekrutNovaFotkaUrl
+      || (!rekrutOdstranitFotku && rekrutData && rekrutData.foto_cesta ? verejnaFotoUrl(rekrutData.foto_cesta) : null);
+    var fotoHtml = fotoUrl
+      ? '<img class="rekrut-preview-foto" src="' + escapeHtml(fotoUrl) + '" alt="">'
+      : '<div class="rekrut-preview-foto-empty" aria-hidden="true">' + escapeHtml(inicialyUzivatele(currentUser)) + '</div>';
+
+    wrap.innerHTML =
+      '<div class="rekrut-preview-hero">' + fotoHtml +
+        '<div><h4>' + escapeHtml(titulek) + '</h4>' +
+        (jmeno ? '<p>Zve vás ' + escapeHtml(jmeno) + '</p>' : '') + '</div>' +
+      '</div>' +
+      '<div class="rekrut-preview-telo">' + odstavceHtml(popis) + '</div>';
+  }
+
+  async function fetchRekrutacniStranku() {
+    var card = el("rekrutCard");
+    if (!card || !currentUser) return;
+    var ma = maRekrutKartu();
+    card.hidden = !ma;
+    if (!ma) return;
+
+    var g = authGen;
+    var res = await sb.rpc("moje_rekrutacni_stranka");
+    if (g !== authGen) return;
+    if (res.error) {
+      console.error("Chyba při načítání rekrutační stránky:", res.error);
+      rekrutData = null;
+      el("rekrutReadonlyBody").innerHTML =
+        '<p class="dt-muted">Rekrutační stránku se nepodařilo načíst. Zkuste to prosím znovu.</p>';
+      return;
+    }
+    rekrutData = res.data || {};
+    renderRekrutReadonly();
+    fillRekrutFormFromData();
+    setRekrutEditMode(false);
+  }
+
+  var REKRUT_FOTO_MAX_B = 3 * 1024 * 1024;   // musí sedět s file_size_limit bucketu
+  var REKRUT_FOTO_MIME = ["image/jpeg", "image/png", "image/webp"];
+
+  async function submitRekrutForm() {
+    if (!currentUser) return;
+    var banner = el("rekrutBanner");
+    var titulek = el("rekTitulek").value.trim();
+    var popis = el("rekPopis").value.trim();
+    var publikovano = el("rekPublikovano").checked;
+    var fileInput = el("rekFoto");
+    var file = (fileInput && fileInput.files && fileInput.files[0]) || null;
+
+    if (publikovano && !titulek) {
+      showBanner(banner, "error", "Zveřejnit lze jen stránku s vyplněným titulkem.");
+      return;
+    }
+    if (file) {
+      if (REKRUT_FOTO_MIME.indexOf(file.type) === -1) {
+        showBanner(banner, "error", "Fotka musí být JPG, PNG nebo WebP.");
+        return;
+      }
+      if (file.size > REKRUT_FOTO_MAX_B) {
+        showBanner(banner, "error", "Fotka je větší než 3 MB.");
+        return;
+      }
+    }
+
+    var btn = el("rekrutSaveBtn");
+    if (btn) btn.disabled = true;
+    showBanner(banner, null, null);
+    var g = authGen;
+
+    // p_foto_cesta: null = NEMĚNIT, "" = smazat, jinak nová cesta.
+    var fotoCesta = null;
+    if (file) {
+      var extMatch = /\.([a-zA-Z0-9]+)$/.exec(file.name || "");
+      var ext = extMatch ? extMatch[1].toLowerCase() : (file.type === "image/png" ? "png" : (file.type === "image/webp" ? "webp" : "jpg"));
+      // Týž postup jako u profilové fotky (M23, bod 2): před nahráním se
+      // fotka zmenší na čtverec, ať se v kolečku nezobrazuje rozmazaný
+      // originál z fotoaparátu.
+      var nahravane = file;
+      var zmenseny = await ctvercovyBlobZeSouboru(file, AVATAR_CIL_PX, "cover");
+      if (g !== authGen) return;
+      if (zmenseny) { nahravane = zmenseny.blob; ext = zmenseny.pripona; }
+      fotoCesta = currentUser.id + "/foto." + ext;
+      var up = await sb.storage.from("verejne-rekrutace").upload(fotoCesta, nahravane, {
+        upsert: true,
+        contentType: (zmenseny ? zmenseny.typ : (file.type || undefined))
+      });
+      if (g !== authGen) return;
+      if (up.error) {
+        console.error("Chyba při nahrávání rekrutační fotky:", up.error);
+        if (btn) btn.disabled = false;
+        showBanner(banner, "error", "Fotku se nepodařilo nahrát. Zkuste to prosím znovu.");
+        return;
+      }
+      // Táž obrana proti duplicitám jako u profilové fotky: `upsert`
+      // přepíše jen objekt na STEJNÉ cestě, takže při změně přípony
+      // (foto.png -> foto.jpg) by starý soubor zůstal viset ve VEŘEJNÉM
+      // bucketu - tedy dál dostupný komukoli na internetu.
+      var listAfter = await sb.storage.from("verejne-rekrutace").list(currentUser.id, { limit: 100 });
+      if (g !== authGen) return;
+      if (!listAfter.error && listAfter.data) {
+        var stale = listAfter.data
+          .filter(function (f) { return f && f.name && f.name.indexOf("foto.") === 0 && f.name !== ("foto." + ext); })
+          .map(function (f) { return currentUser.id + "/" + f.name; });
+        if (stale.length) {
+          var rem = await sb.storage.from("verejne-rekrutace").remove(stale);
+          if (rem.error) console.error("Nepodařilo se smazat starou rekrutační fotku:", rem.error);
+        }
+      }
+    } else if (rekrutOdstranitFotku) {
+      fotoCesta = "";
+      if (rekrutData && rekrutData.foto_cesta) {
+        var remOld = await sb.storage.from("verejne-rekrutace").remove([rekrutData.foto_cesta]);
+        if (g !== authGen) return;
+        if (remOld.error) console.error("Nepodařilo se smazat rekrutační fotku:", remOld.error);
+      }
+    }
+
+    var res = await sb.rpc("upravit_moji_rekrutacni_stranku", {
+      p_titulek: titulek, p_popis: popis, p_foto_cesta: fotoCesta, p_publikovano: publikovano
+    });
+    if (g !== authGen) return;
+    if (btn) btn.disabled = false;
+    if (res.error) {
+      console.error("Chyba při ukládání rekrutační stránky:", res.error);
+      showBanner(banner, "error", res.error.code === "42501"
+        ? "Rekrutační stránku má jen tipař a lídr."
+        : "Stránku se nepodařilo uložit. Zkuste to prosím znovu.");
+      return;
+    }
+
+    rekrutData = res.data || rekrutData;
+    renderRekrutReadonly();
+    fillRekrutFormFromData();
+    setRekrutEditMode(false);
+    showBanner(banner, "ok", publikovano
+      ? "Uloženo a zveřejněno. Stránka je na adrese " + mujRekrutacniOdkaz()
+      : "Uloženo jako koncept. Zveřejníte ji zaškrtnutím „Stránku zveřejnit“.");
+  }
+
+  // =========================================================================
+  // BOD 10 — SPRÁVA WEBU (výhradně administrátor)
+  // =========================================================================
+  var webTable = null;
+  var webRows = [];
+  var webDetailSlug = null;
+  var webEditMode = false;
+
+  async function fetchWebStranky() {
+    if (!currentUser) return;
+    var g = authGen;
+    showBanner(el("webBanner"), null, null);
+    var res = await sb.rpc("webove_stranky_pro_spravu");
+    if (g !== authGen) return;
+    if (res.error) {
+      console.error("Chyba při načítání správy webu:", res.error);
+      webRows = [];
+      el("webTableWrap").innerHTML = res.error.code === "42501"
+        ? '<p class="dt-muted">Správa webu je vyhrazena administrátorovi.</p>'
+        : '<p class="dt-muted">Seznam stránek se nepodařilo načíst.</p>';
+      return;
+    }
+    webRows = res.data || [];
+    renderWebTable(webRows);
+  }
+
+  function webRowBySlug(slug) {
+    for (var i = 0; i < webRows.length; i++) if (webRows[i].slug === slug) return webRows[i];
+    return null;
+  }
+
+  function renderWebTable(rows) {
+    var columns = [
+      { key: "nazev", label: "Stránka", className: "dt-col-name", get: function (r) { return r.nazev || ""; },
+        render: function (r) { return '<span class="dt-strong">' + escapeHtml(r.nazev || "—") + '</span>'; } },
+      { key: "adresa", label: "Adresa", get: function (r) { return r.slug || ""; },
+        render: function (r) {
+          return '<code style="font-size:12px;">' +
+            escapeHtml(r.slug === "hlavni" ? "(přihlašovací obrazovka)" : "?stranka=" + r.slug) + '</code>';
+        } },
+      { key: "titulek", label: "Nadpis", className: "dt-wrap", get: function (r) { return r.titulek || ""; },
+        render: function (r) { return escapeHtml(r.titulek || "—"); } },
+      { key: "upraveno", label: "Naposledy upraveno", get: function (r) { return r.upraveno_kdy ? new Date(r.upraveno_kdy).getTime() : 0; },
+        render: function (r) {
+          return escapeHtml(formatDateTime(r.upraveno_kdy) + (r.upravil_jmeno ? " — " + r.upravil_jmeno : ""));
+        } },
+      { key: "akce", label: "Akce", sortable: false, get: function () { return ""; },
+        render: function (r) {
+          return '<button type="button" class="btn-small btn-small-ghost web-detail-btn" data-web-slug="' +
+            escapeHtml(r.slug) + '">Detail</button>';
+        } }
+    ];
+
+    if (webTable) {
+      webTable.setRows(rows);
+    } else {
+      webTable = initDataTable(el("webTableWrap"), {
+        columns: columns,
+        rows: rows,
+        rowId: function (r) { return r.slug; },
+        searchPlaceholder: "Hledat stránku…",
+        emptyMessage: "Žádné veřejné stránky.",
+        itemNoun: "stránek",
+        initialSortKey: "nazev",
+        wireExtra: function (container) {
+          container.querySelectorAll(".web-detail-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () { openWebDetail(btn.getAttribute("data-web-slug")); });
+          });
+        }
+      });
+    }
+  }
+
+  function openWebDetail(slug) {
+    if (!webRowBySlug(slug)) return;
+    webDetailSlug = slug;
+    webEditMode = false;
+    renderWebDetail();
+    el("webDetailWrap").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function closeWebDetail() {
+    webDetailSlug = null;
+    webEditMode = false;
+    var w = el("webDetailWrap");
+    if (w) w.innerHTML = "";
+  }
+
+  function renderWebDetail() {
+    var wrap = el("webDetailWrap");
+    if (!wrap) return;
+    var r = webRowBySlug(webDetailSlug);
+    if (!r) { wrap.innerHTML = ""; return; }
+
+    var telo;
+    if (!webEditMode) {
+      telo =
+        '<div class="detail-grid">' +
+          detailItemHtml("Název v menu", r.nazev) +
+          detailItemHtml("Adresa", r.slug === "hlavni" ? "(přihlašovací obrazovka)" : "?stranka=" + r.slug) +
+          detailItemHtml("Nadpis (H1)", r.titulek) +
+          detailItemHtml("Podnadpis", r.podnadpis) +
+          detailItemHtml("Titulek v prohlížeči", r.meta_titulek) +
+          detailItemHtml("Meta popis", r.meta_popis) +
+        '</div>' +
+        (r.obsah ? '<div class="rekrut-preview"><p class="rekrut-preview-label">Text stránky</p>' +
+                   '<div class="rekrut-preview-telo">' + odstavceHtml(r.obsah) + '</div></div>' : '') +
+        '<div class="form-actions">' +
+          '<button class="btn-primary" type="button" id="webEditBtn" style="width:auto;">Upravit</button>' +
+          (r.slug === "hlavni" ? '' : '<button class="btn-ghost" type="button" id="webOpenBtn">Otevřít veřejnou stránku</button>') +
+          '<button class="btn-ghost" type="button" id="webCloseBtn">Zavřít</button>' +
+        '</div>';
+    } else {
+      telo =
+        '<form id="webForm" novalidate>' +
+          '<div class="form-grid">' +
+            '<div class="field col-span-2"><label for="wfNazev">Název v menu *</label>' +
+              '<input type="text" id="wfNazev" maxlength="40" value="' + escapeHtml(r.nazev || "") + '"></div>' +
+            '<div class="field col-span-2"><label for="wfTitulek">Nadpis stránky (H1)</label>' +
+              '<input type="text" id="wfTitulek" value="' + escapeHtml(r.titulek || "") + '"></div>' +
+            '<div class="field col-span-2"><label for="wfPodnadpis">Podnadpis</label>' +
+              '<input type="text" id="wfPodnadpis" value="' + escapeHtml(r.podnadpis || "") + '"></div>' +
+            '<div class="field col-span-2"><label for="wfObsah">Text stránky</label>' +
+              '<textarea id="wfObsah" rows="12" placeholder="Prázdný řádek odděluje odstavce.">' + escapeHtml(r.obsah || "") + '</textarea></div>' +
+            '<div class="field col-span-2"><label for="wfMetaTitulek">Titulek v prohlížeči (meta title)</label>' +
+              '<input type="text" id="wfMetaTitulek" value="' + escapeHtml(r.meta_titulek || "") + '"></div>' +
+            '<div class="field col-span-2"><label for="wfMetaPopis">Meta popis (pro vyhledávače)</label>' +
+              '<input type="text" id="wfMetaPopis" maxlength="300" value="' + escapeHtml(r.meta_popis || "") + '"></div>' +
+          '</div>' +
+          '<p class="dt-muted" style="font-size:12px;margin:4px 0 0;">Metadata se ukládají do databáze a titulek se propíše do záložky prohlížeče. Aplikace zatím nemá vykreslování na serveru, takže vyhledávače tyhle údaje spolehlivě nepřečtou — je to příprava do budoucna, ne hotové SEO.</p>' +
+          '<div class="form-actions">' +
+            '<button class="btn-primary" type="submit" id="webSaveBtn" style="width:auto;">Uložit</button>' +
+            '<button class="btn-ghost" type="button" id="webCancelBtn">Zrušit</button>' +
+          '</div>' +
+        '</form>';
+    }
+
+    wrap.innerHTML =
+      '<div class="card detail-card">' +
+        '<h3 class="detail-section-title" style="margin-top:0;">' + escapeHtml(r.nazev || r.slug) + '</h3>' +
+        (r.poznamka_pro_spravce
+          ? '<p class="dt-muted" style="font-size:12.5px;margin:0 0 14px;">' + escapeHtml(r.poznamka_pro_spravce) + '</p>'
+          : '') +
+        telo +
+      '</div>';
+
+    if (!webEditMode) {
+      el("webEditBtn").addEventListener("click", function () { webEditMode = true; renderWebDetail(); });
+      el("webCloseBtn").addEventListener("click", closeWebDetail);
+      var openBtn = el("webOpenBtn");
+      if (openBtn) {
+        openBtn.addEventListener("click", function () {
+          window.open(location.origin + location.pathname + "?stranka=" + encodeURIComponent(r.slug), "_blank", "noopener,noreferrer");
+        });
+      }
+    } else {
+      el("webCancelBtn").addEventListener("click", function () { webEditMode = false; renderWebDetail(); });
+      el("webForm").addEventListener("submit", function (e) { e.preventDefault(); submitWebStranka(); });
+    }
+  }
+
+  async function submitWebStranka() {
+    var r = webRowBySlug(webDetailSlug);
+    if (!r) return;
+    var banner = el("webBanner");
+    var nazev = el("wfNazev").value.trim();
+    if (!nazev) { showBanner(banner, "error", "Název stránky v menu je povinný."); return; }
+
+    var btn = el("webSaveBtn");
+    if (btn) btn.disabled = true;
+    showBanner(banner, null, null);
+    var g = authGen;
+
+    var res = await sb.rpc("upravit_webovou_stranku", {
+      p_slug: r.slug,
+      p_nazev: nazev,
+      p_titulek: el("wfTitulek").value.trim(),
+      p_podnadpis: el("wfPodnadpis").value.trim(),
+      p_obsah: el("wfObsah").value,
+      p_meta_titulek: el("wfMetaTitulek").value.trim(),
+      p_meta_popis: el("wfMetaPopis").value.trim()
+    });
+    if (g !== authGen) return;
+    if (btn) btn.disabled = false;
+    if (res.error) {
+      console.error("Chyba při ukládání veřejné stránky:", res.error);
+      showBanner(banner, "error", res.error.code === "42501"
+        ? "Správa webu je vyhrazena administrátorovi."
+        : "Stránku se nepodařilo uložit. Zkontrolujte prosím délku vyplněných polí.");
+      return;
+    }
+
+    webRows = res.data || webRows;
+    webEditMode = false;
+    renderWebTable(webRows);
+    renderWebDetail();
+    // Menu čte názvy z RPC jednou při startu - po přejmenování stránky by
+    // do odhlášení ukazovalo starý název.
+    verejneMenuNacteno = false;
+    verejneMenuPolozky = null;
+    showBanner(banner, "ok", "Stránka uložena. Změna je vidět okamžitě na veřejné adrese.");
+    setTimeout(function () { showBanner(banner, null, null); }, 5000);
+  }
+
+  // =========================================================================
+  // BOD 2 — TVRDÉ (NEVRATNÉ) SMAZÁNÍ UŽIVATELE
+  //
+  // ⚠ TEXTY V TÉHLE SEKCI MUSÍ BÝT PRAVDIVÉ. Je to přímé poučení z nálezu O6
+  // Milníku 24, kde mazání RK tvrdilo, že jde „jen o dočasnou testovací
+  // funkci", zatímco ve skutečnosti zasahovalo do ostrých dat. Tady je
+  // dopad ještě větší (zaniká profil i přihlašovací účet), takže se
+  // slovo „testovací" nepoužívá vůbec a hláška vždycky jmenuje KONKRÉTNÍ
+  // následky - včetně těch, které se PODLE SERVERU stanou právě tomuhle
+  // uživateli (počet podřízených, jméno nového sponzora, počet auditních
+  // záznamů). Ty údaje dodává RPC smazat_uzivatele_kontrola().
+  // =========================================================================
+  var USER_HARD_DELETE_HINT =
+    "Trvalé a nevratné smazání uživatele: zanikne jeho profil i přihlašovací účet, " +
+    "jeho podřízení se přeřadí pod jeho sponzora a jeho nahrané soubory (profilová fotka, " +
+    "doklady totožnosti) přestanou být dostupné. Smazat lze jen tipaře, který nemá jediný tip, " +
+    "výplatu ani vlastní stopu v Historii akcí. Záznamy v Historii akcí, které se ho týkaly, " +
+    "zůstávají — jen se u nich místo odkazu na účet uloží jeho jméno.";
+
+  var SMAZANI_PREKAZKY_TEXT = {
+    neexistuje: "Uživatel už v databázi není.",
+    sam_sebe: "Nelze smazat sám sebe.",
+    role_leader: "Nelze smazat lídra — v systému smí být jen jeden a celá síť i výplaty na něm visí.",
+    role_administrator: "Nelze smazat administrátora.",
+    role_rk: "Nelze smazat přihlašovací účet realitní kanceláře.",
+    ma_tipy: "Má vložené tipy ({n}). Smazáním účtu by kaskádou zmizely i ty — a s nimi finanční a auditní stopa.",
+    ma_vyplaty: "Figuruje ve výplatách ({n}).",
+    ma_historii_tipu: "Má záznamy v historii tipů ({n}).",
+    je_aktorem_v_auditu: "Sám něco provedl a je zapsaný v Historii akcí ({n}) — auditní stopu aktéra nelze odpojit od jeho identity.",
+    overoval_totoznost: "Ověřoval totožnost jiných uživatelů ({n}).",
+    vytvoril_provizni_schema: "Založil verzi provizního schématu ({n})."
+  };
+
+  function prekazkaText(p) {
+    var sablona = SMAZANI_PREKAZKY_TEXT[p.kod];
+    if (!sablona) return p.kod;
+    return sablona.replace("{n}", String(p.pocet));
+  }
+
+  var hardDeleteTargetId = null;
+
+  async function openTvrdeSmazani(targetId) {
+    var target = usersById[targetId];
+    if (!target) return;
+    hardDeleteTargetId = targetId;
+    // Detail uživatele a karta mazání sdílejí obal - nikdy nemají být
+    // vidět současně (viz komentář u #usersFormWrap v HTML).
+    userFormTargetId = null;
+    var wrap = el("usersFormWrap");
+    wrap.innerHTML = '<div class="card detail-card"><p class="dt-muted">Ověřuji, co přesně se smazáním stane…</p></div>';
+    wrap.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    var g = authGen;
+    var res = await sb.rpc("smazat_uzivatele_kontrola", { p_target_user_id: targetId });
+    if (g !== authGen) return;
+    if (hardDeleteTargetId !== targetId) return;
+
+    if (res.error) {
+      console.error("Chyba při ověřování možnosti smazání:", res.error);
+      wrap.innerHTML = '<div class="card detail-card"><p class="dt-muted">Nepodařilo se ověřit, jestli jde uživatele smazat. Zkuste to prosím znovu.</p>' +
+        '<div class="form-actions"><button class="btn-ghost" type="button" id="hardDelCloseBtn">Zavřít</button></div></div>';
+      var cb = el("hardDelCloseBtn");
+      if (cb) cb.addEventListener("click", closeTvrdeSmazani);
+      return;
+    }
+    renderTvrdeSmazani(res.data || {}, target);
+  }
+
+  function closeTvrdeSmazani() {
+    hardDeleteTargetId = null;
+    var w = el("usersFormWrap");
+    if (w) w.innerHTML = "";
+  }
+
+  function renderTvrdeSmazani(k, target) {
+    var wrap = el("usersFormWrap");
+    if (!wrap) return;
+    var jmeno = k.jmeno || celeJmeno(target) || target.id;
+    var lze = k.lze_smazat === true;
+    var prekazky = k.prekazky || [];
+
+    var telo;
+    if (!lze) {
+      telo =
+        '<p style="margin:0 0 8px;"><strong>' + escapeHtml(jmeno) + '</strong> smazat nelze.</p>' +
+        '<ul style="margin:0 0 4px 18px;padding:0;">' +
+          prekazky.map(function (p) { return '<li style="margin-bottom:4px;">' + escapeHtml(prekazkaText(p)) + '</li>'; }).join("") +
+        '</ul>' +
+        '<p class="dt-muted" style="font-size:12.5px;margin:12px 0 0;">Pokud potřebujete účet vyřadit z provozu, použijte v jeho Detailu přepínač „Aktivní“ — uživatel se tím označí jako „Vymazán“, ale data i historie zůstanou.</p>' +
+        '<div class="form-actions"><button class="btn-ghost" type="button" id="hardDelCloseBtn">Zavřít</button></div>';
+    } else {
+      var nasledky = [
+        "Profil i přihlašovací účet uživatele <strong>" + escapeHtml(jmeno) + "</strong> zaniknou. Přihlásit se už nepůjde a obnovit to nelze.",
+        Number(k.podrizenych || 0) > 0
+          ? "Jeho podřízených v síti: <strong>" + Number(k.podrizenych) + "</strong> — přeřadí se pod <strong>" +
+            escapeHtml(k.novy_sponzor_jmeno || "jeho sponzora") + "</strong>."
+          : "V síti pod ním nikdo není, takže se nikomu sponzor nemění.",
+        Number(k.auditnich_zaznamu_k_odpojeni || 0) > 0
+          ? "Záznamů v Historii akcí, které se ho týkaly: <strong>" + Number(k.auditnich_zaznamu_k_odpojeni) +
+            "</strong> — <strong>nemažou se</strong>, jen se u nich místo odkazu na účet uloží jeho jméno a e-mail."
+          : "V Historii akcí se ho zatím netýká žádný záznam.",
+        "Jeho nahrané soubory (profilová fotka, doklady totožnosti, fotka rekrutační stránky) přestanou být dostupné.",
+        "O samotném smazání vznikne nový záznam v Historii akcí s vaším jménem a zadaným důvodem."
+      ];
+      telo =
+        '<p style="margin:0 0 10px;">Chystáte se <strong>trvale a nevratně</strong> smazat uživatele <strong>' + escapeHtml(jmeno) + '</strong>' +
+          (k.email ? ' (' + escapeHtml(k.email) + ')' : '') + '. Co přesně se stane:</p>' +
+        '<ul style="margin:0 0 4px 18px;padding:0;">' +
+          nasledky.map(function (t) { return '<li style="margin-bottom:5px;">' + t + '</li>'; }).join("") +
+        '</ul>' +
+        '<form id="hardDelForm" novalidate style="margin-top:14px;">' +
+          '<div class="form-grid">' +
+            '<div class="field col-span-2"><label for="hdDuvod">Důvod smazání * (alespoň 10 znaků)</label>' +
+              '<input type="text" id="hdDuvod" placeholder="Povinné zdůvodnění, zapíše se do Historie akcí"></div>' +
+            '<div class="field col-span-2"><label for="hdPotvrzeni">Potvrzení * — opište přesně <code>SMAZAT NATRVALO</code></label>' +
+              '<input type="text" id="hdPotvrzeni" autocomplete="off" spellcheck="false" placeholder="SMAZAT NATRVALO"></div>' +
+          '</div>' +
+          '<div class="form-actions">' +
+            '<button class="btn-small btn-small-danger" type="submit" id="hardDelSubmitBtn">Smazat natrvalo</button>' +
+            '<button class="btn-ghost" type="button" id="hardDelCloseBtn">Zrušit</button>' +
+          '</div>' +
+        '</form>';
+    }
+
+    wrap.innerHTML =
+      '<div class="card detail-card">' +
+        '<h3 class="detail-section-title" style="margin-top:0;color:var(--danger);">Trvalé smazání uživatele</h3>' +
+        '<p class="dt-muted" style="font-size:12.5px;margin:0 0 14px;">' + escapeHtml(USER_HARD_DELETE_HINT) + '</p>' +
+        telo +
+      '</div>';
+
+    var close = el("hardDelCloseBtn");
+    if (close) close.addEventListener("click", closeTvrdeSmazani);
+    var form = el("hardDelForm");
+    if (form) form.addEventListener("submit", function (e) { e.preventDefault(); submitTvrdeSmazani(); });
+  }
+
+  async function submitTvrdeSmazani() {
+    var targetId = hardDeleteTargetId;
+    if (!targetId) return;
+    var banner = el("usersBanner");
+    var duvod = el("hdDuvod").value.trim();
+    var potvrzeni = el("hdPotvrzeni").value.trim();
+
+    if (duvod.length < 10) {
+      showBanner(banner, "error", "Důvod smazání je povinný a musí mít alespoň 10 znaků.");
+      return;
+    }
+    if (potvrzeni !== "SMAZAT NATRVALO") {
+      showBanner(banner, "error", "Do pole potvrzení opište přesně SMAZAT NATRVALO (velkými písmeny).");
+      return;
+    }
+
+    var btn = el("hardDelSubmitBtn");
+    if (btn) btn.disabled = true;
+    showBanner(banner, null, null);
+    var g = authGen;
+
+    var res = await sb.rpc("smazat_uzivatele_natvrdo", {
+      p_target_user_id: targetId, p_duvod: duvod, p_potvrzeni: potvrzeni
+    });
+    if (g !== authGen) return;
+    if (btn) btn.disabled = false;
+
+    if (res.error) {
+      console.error("Chyba při trvalém smazání uživatele:", res.error);
+      showBanner(banner, "error", res.error.code === "42501"
+        ? "Trvale mazat uživatele smí jen lídr nebo administrátor."
+        : ("Uživatele se nepodařilo smazat. " + (res.error.message || "")));
+      return;
+    }
+
+    var d = res.data || {};
+    closeTvrdeSmazani();
+    showBanner(banner, "ok", "Uživatel " + (d.jmeno || "") + " byl trvale smazán." +
+      (Number(d.prevedeno_podrizenych || 0) > 0
+        ? " Jeho podřízených přeřazeno pod " + (d.novy_sponzor_jmeno || "sponzora") + ": " + Number(d.prevedeno_podrizenych) + "."
+        : ""));
+    await fetchUsersTable();
+  }
+
+
   // ---------------- boot ----------------
 
   function readInviteCodeFromUrl() {
@@ -16227,7 +18106,13 @@
 
   function boot() {
     readInviteCodeFromUrl();
+    // MILNÍK 25 (body 6 a 7): veřejná routa se čte ze STEJNÉ adresy jako
+    // `?ref=`. Pořadí je důležité - `?ref=` (registrace, Milník 2) má
+    // přednost před `?r=` i `?stranka=`, protože je to konkrétnější záměr.
+    readVerejnouRoutuZUrl();
+    if (pendingInviteCode) verejnaRouta = null;
     wireEvents();
+    renderVerejneMenu();
     renderAuthVersionAndChangelog();
     showAuthScreen();
     applyPendingInviteCodeToForm();
@@ -16249,6 +18134,16 @@
       setSupabaseUnavailable();
       return;
     }
+
+    // MILNÍK 25 (bod 6): teprve teď existuje `sb`, takže se dá načíst obsah
+    // veřejného menu i ukázkové rekrutační stránky. showAuthScreen() výš
+    // volal nactiVerejneMenu() ještě bez klienta (a ta se tiše vrátila),
+    // proto se tu pouští znovu.
+    verejneMenuNacteno = false;
+    nactiVerejneMenu();
+    // A pokud návštěvník přišel rovnou na veřejnou stránku, teď se dá
+    // stáhnout i její obsah - render při bootu proběhl bez `sb`.
+    if (verejnaRouta) renderVerejnaRouta();
 
     // Supabase si session persistuje sama (výchozí persistSession: true
     // v localStorage) - žádnou vlastní správu session tady nepotřebujeme.
