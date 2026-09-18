@@ -1320,21 +1320,35 @@
   .ld-queue-time-note { font-size: 13px; color: var(--text-muted); }
   .ld-time-late { color: var(--danger); }
   .ld-time-today { color: var(--warn); }
+  /* MILNÍK 27 (bod 4b): „po termínu" je nově PŘÍZNAK VEDLE doby čekání, ne
+     její náhrada. Do M27 se text „Po termínu" psal MÍSTO „Čeká 5 dní" a
+     informace o délce čekání se tím ztratila. */
+  .ld-queue-flag {
+    display: inline-block; margin-top: 3px;
+    font-size: 11.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 999px;
+    background: var(--danger-soft); color: var(--danger);
+    border: 1px solid color-mix(in srgb, var(--danger) 26%, transparent);
+  }
   /* Milník 22 (bod 2): VŠECHNA tlačítka ve frontě mají STEJNOU šířku. Referencí
      je nejdelší popisek „Ověřit tip" - odtud pevných 140 px (10 znaků při
      14px/600 ≈ 76 px textu + 2×20 px vnitřní odsazení + 2×1 px rámeček, se
      zaokrouhlením nahoru kvůli jiným fontovým fallbackům). Ostatní popisky
      server zkrátil tak, aby se do téhle šířky vešly (viz migrace m22_03),
      takže se tlačítko NIKDY nezvětšuje podle nejdelšího textu. */
+  /* MILNÍK 27 (bod 4a): VŠECHNA tlačítka fronty jsou nově ZELENÁ. Do M26 bylo
+     zelené jen tlačítko prvního řádku a zbytek bílý — klient chtěl jednotný
+     vzhled. Pořadí naléhavosti dál nese tečka vlevo, barevný čip nahoře,
+     příznak „po termínu" a samo pořadí řádků, takže se rozlišení neztrácí. */
   .ld-queue-btn {
     border-radius: var(--radius-m); padding: 10px 20px; font-size: 14px; font-weight: 600;
     cursor: pointer; white-space: nowrap;
     width: 140px; min-width: 140px; max-width: 140px;
     text-align: center; overflow: hidden; text-overflow: ellipsis;
-    background: var(--surface); color: var(--text); border: 1px solid var(--border);
+    background: var(--accent); color: var(--accent-contrast); border: 1px solid var(--accent);
   }
   .ld-queue-btn-primary { background: var(--accent); color: var(--accent-contrast); border-color: var(--accent); }
-  .ld-queue-btn:hover { border-color: var(--accent); }
+  .ld-queue-btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
   .ld-empty {
     margin: 18px 0 0; padding: 22px; text-align: center;
     background: var(--ok-soft); border-radius: var(--radius-m); color: var(--ok); font-weight: 600;
@@ -1561,7 +1575,41 @@
     background: var(--accent); color: var(--accent-contrast);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 45%, transparent), var(--shadow-card);
   }
-  .st-node-vetev .st-avatar { width: 54px; height: 54px; font-size: 15px; }
+  /* MILNÍK 27 (bod 6): uzly, které VEDOU VLASTNÍ TÝM (kořen i rozvětvené
+     uzly), dostávají SYTĚ ZELENOU výplň. Do M26 měly rozvětvené uzly jen
+     světlý `--accent-soft` a od listů se lišily hlavně velikostí, což na
+     hustém stromu splývalo. Nově je rozdíl v barvě, ne jen v průměru. */
+  .st-node-vetev .st-avatar {
+    width: 54px; height: 54px; font-size: 15px;
+    background: var(--accent); color: var(--accent-contrast);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 55%, transparent);
+  }
+  /* Kořen je ještě o odstín sytější, aby zůstal odlišitelný od větví. */
+  .st-node-koren .st-avatar { background: var(--accent-hover); }
+  /* Číslo místo iniciál se musí vejít i do nejmenšího kolečka. Iniciály jsou
+     dva znaky, „999 tis." je osm — listové kolečko se proto v hodnotovém
+     režimu zvětšuje z 38 na 52 px, jinak se částka ořízne (ověřeno na
+     screenshotu i regresním testem „částka se do kolečka vejde"). */
+  .st-avatar-hodnota { font-size: 12px; letter-spacing: -.02em; }
+  .st-node-koren .st-avatar-hodnota { font-size: 16px; }
+  .st-node-vetev .st-avatar-hodnota { font-size: 12.5px; }
+  .st-plocha-hodnoty .st-node-list .st-avatar {
+    width: 52px; height: 52px; font-size: 10.5px;
+  }
+  .st-plocha-hodnoty .st-shluk > .st-node { margin-right: -6px; }
+
+  .st-prepinac { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 12px; }
+  .st-prepinac-label { font-size: 13px; color: var(--text-muted); margin-right: 4px; }
+  .st-prepinac-btn {
+    appearance: none; font: inherit; font-size: 13px; font-weight: 600;
+    padding: 7px 13px; border-radius: 999px; cursor: pointer;
+    background: var(--surface); color: var(--text-muted); border: 1px solid var(--border);
+  }
+  .st-prepinac-btn:hover { border-color: var(--accent); color: var(--text); }
+  .st-prepinac-btn[aria-pressed="true"] {
+    background: var(--accent); color: var(--accent-contrast); border-color: var(--accent);
+  }
+  .st-prepinac-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .st-node-list .st-avatar {
     width: 38px; height: 38px; font-size: 12px;
     background: var(--surface-2); color: var(--text-muted);
@@ -1692,6 +1740,39 @@
     .ld-level-val { grid-column: 1 / -1; white-space: normal; }
     .ld-row { flex-wrap: wrap; }
     .ld-row-right { text-align: left; white-space: normal; }
+  }
+
+  /* ===== MILNÍK 27 (bod 5): MEZIKROK PRO TABLETY =====
+     Do M26 měl panel „Co musím vyřídit" jen dva stavy: desktopový čtyřsloupcový
+     řádek (> 860 px) a plně rozložený mobilní sloupec (<= 860 px). Na tabletu
+     (768–1024 px) se tím pádem všechno naskládalo pod sebe, přestože místa
+     na dva sloupce je dost — a panel působil roztaženě.
+     Tenhle blok vkládá mezistupeň: čipy zůstávají ve třech sloupcích, řádek
+     se skládá do DVOU řádků × tří sloupců (tečka | text / doba čekání |
+     tlačítko vpravo). Blok je ZÁMĚRNĚ až za blokem 860 px, aby ho v překryvu
+     640–860 px přebil (stejná specificita, rozhoduje pořadí).
+     Pod 640 px zůstává původní mobilní jednosloupcový režim beze změny. */
+  @media (min-width: 640px) and (max-width: 1080px) {
+    .ld-queue-chips { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .ld-chip { padding: 10px 12px; }
+    .ld-queue-row {
+      grid-template-columns: 14px minmax(0, 1fr) auto;
+      grid-template-areas: "tecka hlavni akce" ".     cas    akce";
+      align-items: center; row-gap: 6px; column-gap: 12px;
+    }
+    .ld-queue-row > .ld-dot { grid-area: tecka; align-self: start; margin-top: 6px; }
+    .ld-queue-row > .ld-queue-main { grid-area: hlavni; }
+    /* POZOR: `grid-area` je zkratka, která přepisuje i `grid-column`. Napsat
+       za ni `grid-column: auto` (jak to dělá mobilní blok výš) by pojmenované
+       umístění zrušilo a prvek by spadl do prvního volného sloupce — sloupec
+       s časem by se pak zúžil na 14 px. Proto se tady `grid-column` NEUVÁDÍ. */
+    .ld-queue-row > .ld-queue-time {
+      grid-area: cas; text-align: left; min-width: 0;
+    }
+    .ld-queue-row > .ld-queue-btn {
+      grid-area: akce; justify-self: end; align-self: center;
+      width: 132px; min-width: 132px; max-width: 132px;
+    }
   }
   @media (max-width: 560px) {
     .ld-kpis, .ld-faze { grid-template-columns: minmax(0, 1fr); }
@@ -2595,6 +2676,57 @@
   }
   .verejne-menu-spacer { flex: 1 1 auto; }
 
+  /* ---- MILNÍK 27 (bod 2): mobilní hamburger veřejného menu ----
+     Do M26 se položky menu na úzké šířce zalamovaly do několika řádků a
+     pruh se roztahoval přes půl obrazovky. Nově: pod 760 px je vidět jen
+     logo + hamburger, panel se rozbaluje pod lištu přes celou šířku. */
+  .verejne-menu-panel {
+    display: flex; align-items: center; gap: 18px; flex: 1 1 auto; min-width: 0;
+  }
+  .verejne-menu-hamburger {
+    display: none; appearance: none; background: transparent;
+    border: 1px solid var(--border); border-radius: var(--radius-s);
+    width: 42px; height: 38px; cursor: pointer; padding: 0;
+    flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+    margin-left: auto;
+  }
+  .verejne-menu-hamburger span {
+    display: block; width: 20px; height: 2px; border-radius: 2px;
+    background: var(--text); transition: transform .18s ease, opacity .18s ease;
+  }
+  .verejne-menu-hamburger:hover { background: var(--surface-2); }
+  .verejne-menu-hamburger:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .verejne-menu-hamburger[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .verejne-menu-hamburger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+  .verejne-menu-hamburger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  .verejne-menu-paticka { display: none; }
+
+  @media (max-width: 760px) {
+    .verejne-menu-inner { flex-wrap: wrap; gap: 10px; }
+    .verejne-menu-hamburger { display: flex; }
+    .verejne-menu-panel { display: none; }
+    .verejne-menu.verejne-menu-otevreno .verejne-menu-panel {
+      display: flex; flex-direction: column; align-items: stretch;
+      width: 100%; flex-basis: 100%; gap: 2px;
+      padding: 4px 0 12px; border-top: 1px solid var(--border);
+    }
+    .verejne-menu.verejne-menu-otevreno .verejne-menu-nav {
+      flex-direction: column; align-items: stretch; gap: 2px; flex-wrap: nowrap;
+    }
+    .verejne-menu.verejne-menu-otevreno .verejne-menu-link {
+      text-align: left; width: 100%; padding: 11px 12px; font-size: 15px;
+    }
+    .verejne-menu-spacer { display: none; }
+    .verejne-menu.verejne-menu-otevreno .verejne-menu-paticka {
+      display: flex; flex-direction: column; align-items: stretch; gap: 2px;
+      margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border);
+    }
+    .verejne-menu-paticka-nadpis {
+      font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--text-muted); margin: 0 0 2px; padding: 0 12px;
+    }
+  }
+
   /* Obsahová stránka (O nás / Kontakty) */
   .verejna-stranka-wrap { max-width: 760px; margin: 0 auto; padding: 32px 20px 56px; }
   .verejna-stranka-wrap h1 { font-family: var(--font-display); font-size: 34px; margin: 0 0 6px; color: var(--text); }
@@ -2693,6 +2825,56 @@
   .mkt-akce { display: flex; gap: 8px; flex-wrap: wrap; }
   .sdileni-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
   .sdileni-row .btn-small { text-decoration: none; }
+
+  /* ===== MILNÍK 27 (bod 7): kompaktní ikonové sdílení ===== */
+  .sdil-rada { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+  .sdil-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--surface-2); color: var(--text-muted);
+    border: 1px solid var(--border); cursor: pointer; text-decoration: none;
+    padding: 0; appearance: none;
+  }
+  .sdil-btn:hover { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+  .sdil-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .sdil-ikona {
+    width: 17px; height: 17px; display: block;
+    fill: none; stroke: currentColor; stroke-width: 1.7;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+  .sdil-radek-s-akci { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .sdil-radek-s-akci .sdil-rada { margin-top: 10px; }
+
+  /* ===== MILNÍK 27 (bod 7): obrázek / video / správa nabídek ===== */
+  .mkt-hlavicka { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .mkt-nadpis { font-family: var(--font-display); font-size: 17px; margin: 0 0 4px; color: var(--text); }
+  .mkt-nahled-foto { padding: 0; min-height: 0; }
+  .mkt-nahled-foto img { display: block; width: 100%; height: 190px; object-fit: cover; }
+  .mkt-video { background: #000; }
+  .mkt-video iframe, .mkt-video video { display: block; width: 100%; height: 190px; border: 0; }
+  .mkt-video-odkaz { background: var(--surface-2); padding: 18px; text-align: center; }
+  .mkt-karta-skryta { opacity: .72; border-style: dashed; }
+  .mkt-skryta-stitek {
+    margin: 0 0 8px; font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+    color: var(--warn);
+  }
+  .mkt-sprava { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  /* Mazání musí být čitelně odlišené od ostatních drobných tlačítek
+     (ta jsou v appce zelená), ale nesmí přebít primární akci. */
+  .btn-danger-small {
+    background: var(--surface); color: var(--danger);
+    border-color: color-mix(in srgb, var(--danger) 45%, var(--border));
+  }
+  .btn-danger-small:hover { background: var(--danger-soft); color: var(--danger); }
+  .mkt-form {
+    border-top: 1px solid var(--border); background: var(--surface-2);
+    padding: 14px 16px 16px;
+  }
+  .mkt-form h4 { margin: 0 0 10px; font-size: 14px; }
+  .mkt-form .field { margin-bottom: 10px; }
+  .mkt-check { display: flex; align-items: center; gap: 8px; font-size: 13.5px; margin: 8px 0; }
+  .mkt-check input { width: auto; margin: 0; }
+  .mkt-form-akce { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
 
   @media (max-width: 640px) {
     .rekrut-hero { padding: 24px 18px; }
@@ -2963,9 +3145,25 @@
            navigateVerejna() + history.pushState (viz R7-ROUTING v M25). -->
       <button type="button" class="verejne-menu-brand-btn" id="verejneMenuBrandBtn"
               aria-label="Realitní tip — zpět na hlavní stránku" title="Zpět na hlavní stránku">Realitní <em>tip</em></button>
-      <div class="verejne-menu-nav" id="verejneMenuNav"></div>
-      <span class="verejne-menu-spacer"></span>
-      <button class="verejne-menu-link" id="verejneMenuPrihlasitBtn" type="button">Přihlásit se</button>
+      <!-- MILNÍK 27 (bod 2): hamburger. Na úzkých šířkách se celý panel
+           (#verejneMenuPanel) schová a rozbaluje se tímhle tlačítkem; na
+           desktopu je tlačítko skryté a panel je pořád vidět. Ikona jsou
+           tři <span> (ne obrázek ani font) - škáluje se s textem a nemá
+           žádnou síťovou závislost. -->
+      <button type="button" class="verejne-menu-hamburger" id="verejneMenuHamburgerBtn"
+              aria-expanded="false" aria-controls="verejneMenuPanel"
+              aria-label="Otevřít menu" title="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="verejne-menu-panel" id="verejneMenuPanel">
+        <div class="verejne-menu-nav" id="verejneMenuNav"></div>
+        <span class="verejne-menu-spacer"></span>
+        <button class="verejne-menu-link" id="verejneMenuPrihlasitBtn" type="button">Přihlásit se</button>
+        <!-- MILNÍK 27 (bod 2): patičkové odkazy (M26 bod 7) se na mobilu
+             přidávají i sem, aby po sbalení menu zůstaly dosažitelné bez
+             scrollování na úplný konec stránky. Na desktopu skryté. -->
+        <div class="verejne-menu-paticka" id="verejneMenuPatickaOdkazy" hidden></div>
+      </div>
     </div>
   </nav>
 
@@ -4780,7 +4978,7 @@
   // Milník 14: číslo aktuální verze aplikace - MUSÍ odpovídat nejnovější položce
   // pole APP_CHANGELOG níže (položka na indexu 0). Při každém příštím milníku
   // se zvyšuje ROVNOU TADY i v APP_CHANGELOG - jsou to dvě navzájem závislá místa.
-  var APP_VERSION = "26.0";
+  var APP_VERSION = "27.0";
 
   // Milník 14 (bod 4): obsah panelu "Historie verzí" na přihlašovací
   // obrazovce - zrekonstruováno z reálné historie projektu (STAV.md,
@@ -4789,6 +4987,20 @@
   // pod tímto polem). Vykresluje se generickou šablonou renderAuthVersionAndChangelog()
   // - při dalším milníku se sem jen přidá nová položka na začátek pole.
   var APP_CHANGELOG = [
+    // MILNÍK 27. ⚠ Nejdůležitější položka je ta první: klient hlásil, že se
+    // do Historie akcí přestaly zapisovat některé akce. Skutečnost je horší
+    // i lepší zároveň — nepřestaly, ONY SE TAM NIKDY NEZAPISOVALY (změna
+    // stavu tipu nebyla auditovaná od začátku projektu). Text to musí říkat
+    // pravdivě, ne jako „opravili jsme chybu z minulé verze".
+    { verze: "27.0", datum: "18. 9. 2026", body: [
+      "Historie akcí nově zaznamenává i práci s tipy: ověření a každou změnu stavu tipu, změnu stavu realitní kanceláří (včetně prodeje, kupní ceny a data), pokus o kontakt s klientem, označení duplicity a úpravu loga RK. Tyhle akce se do Historie akcí nezapisovaly nikdy, ne až od minulé verze — časová osa v detailu tipu je měla vždy, ale Historie akcí ne",
+      "Veřejná část webu má na mobilu klasické menu pod ikonou tří čárek (hamburger); rozbalí se po klepnutí a obsahuje i odkazy z patičky",
+      "V záhlaví po přihlášení ubyl text „Přihlášen(a) jako“ a název role — zůstává jen jméno a fotka, obojí dál klikací do „Můj profil“",
+      "Panel „Co musím dnes vyřídit“: všechna tlačítka jsou zelená a u úkolu po termínu se nově vidí OBOJÍ — jak dlouho čeká i příznak „po termínu“ (dřív příznak dobu čekání přepsal)",
+      "Panel „Co musím dnes vyřídit“ má nové rozložení pro tablety — na šířkách kolem 768–1024 px se už neskládá do jednoho sloupce",
+      "Struktura sítě umí přepnout obsah koleček na počet tipů nebo na vyplacené provize; v obou režimech se uzly v každé úrovni řadí od nejvyšší hodnoty. Kdo vede vlastní tým, má sytě zelené kolečko",
+      "Záložka Marketing: každá nabídka má vlastní grafiku (nahraný banner, zástupná grafika nebo video), lídr a administrátor mohou nabídky přidávat, upravovat i mazat. Sdílení je nově kompaktní řada ikon bez popisků — stejná u nabídek i u panelu „Váš odkaz“"
+    ] },
     // MILNÍK 26. ⚠ Každá věta tady musí být PRAVDIVÁ (poučení z nálezu O6
     // Milníku 24). Zvlášť u IP adresy: nesmí tu stát „zaznamenáváme, odkud
     // se kdo přihlásil", protože zaznamenaná hodnota je orientační údaj
@@ -5377,7 +5589,7 @@
 
   function clearTopbarUserInfo() {
     var label = el("userNameLabel");
-    if (label) label.innerHTML = "";
+    if (label) { label.innerHTML = ""; label.removeAttribute("title"); } // MILNÍK 27 (bod 3)
     var slot = el("topbarAvatarSlot");
     if (slot) slot.innerHTML = "";
     // Milník 22 (bod 7): identita už není klikací, dokud se někdo nepřihlásí.
@@ -5405,9 +5617,14 @@
     var label = el("userNameLabel");
     if (!label) return;
     if (!currentUser) { clearTopbarUserInfo(); return; }
+    // MILNÍK 27 (bod 3): ze záhlaví mizí textové „Přihlášen(a) jako" i název
+    // role. Zůstává SAMOTNÉ JMÉNO — pořád klikací (tlačítko #topbarProfileBtn
+    // níže) a pořád vedle avataru, takže funkčnost z M19–M22 je nedotčená;
+    // ubyl jen doprovodný text. Role zůstává dostupná jako `title` (tooltip),
+    // aby se informace neztratila úplně, ale nezabírala místo v liště.
     var roleLabel = ROLE_LABELS[currentUser.role] || currentUser.role || "";
-    label.innerHTML =
-      "Přihlášen(a) jako <strong>" + escapeHtml(celeJmeno(currentUser) || currentUser.email || "") + "</strong> · " + escapeHtml(roleLabel);
+    label.innerHTML = "<strong>" + escapeHtml(celeJmeno(currentUser) || currentUser.email || "") + "</strong>";
+    label.setAttribute("title", roleLabel);
 
     // Milník 22 (bod 7): klik na jméno NEBO na fotku otevře „Můj profil".
     // Obojí je jedno tlačítko, takže obě „cesty" ze zadání vedou týmž kódem
@@ -8985,6 +9202,14 @@
 
     currentUser = null;
     currentUserId = null;
+    // MILNÍK 27 (bod 7): marketingové nabídky jsou nově data ze serveru,
+    // takže patří do stejného úklidu jako ostatní cache — jinak by je nová
+    // identita viděla ve stavu předchozí (včetně skrytých, které tipař vidět
+    // nemá).
+    marketingNabidky = null;
+    mktEditId = null;
+    // MILNÍK 27 (bod 6): i režim zobrazení stromu se vrací na výchozí.
+    stRezim = "jmeno";
     adminUsersById = {};
     allTipsById = {};
     rkAktivniList = [];
@@ -11457,7 +11682,20 @@
     zahozeni_konceptu_stranky: "Zahození konceptu stránky",
     skryti_webove_stranky: "Skrytí veřejné stránky",
     zalozeni_webove_stranky: "Založení veřejné stránky",
-    smazani_webove_stranky: "Smazání veřejné stránky"
+    smazani_webove_stranky: "Smazání veřejné stránky",
+    // MILNÍK 27 (bod 1) — akce, které se do Historie akcí NIKDY nezapisovaly.
+    // `zmena_tipu_po_prodeji` existovala v DB už od M24, ale popisek k ní
+    // nikdo nedoplnil, takže by se byla zobrazila jako holý kód akce.
+    zmena_stavu_tipu: "Změna stavu tipu",
+    zmena_tipu_po_prodeji: "Změna tipu po prodeji",
+    zmena_rk_stavu_tipu: "Změna stavu tipu realitní kanceláří",
+    pokus_o_kontakt: "Pokus o kontakt s klientem",
+    oznaceni_duplicity: "Označení tipu jako duplicity",
+    uprava_rk_loga: "Úprava loga RK",
+    // MILNÍK 27 (bod 7) — dynamická správa marketingových nabídek.
+    zalozeni_marketingove_nabidky: "Založení marketingové nabídky",
+    uprava_marketingove_nabidky: "Úprava marketingové nabídky",
+    smazani_marketingove_nabidky: "Smazání marketingové nabídky"
   };
 
   // =========================================================================
@@ -16103,6 +16341,66 @@
   var ST_SHLUK_MAX = 5;      // kolik koleček se ve shluku ukáže, než nastoupí „+N"
   var sitStromData = null;   // poslední načtený výsledek sit_strom()
 
+  // =========================================================================
+  // MILNÍK 27 (bod 6) — PŘEPÍNAČ ZOBRAZENÍ A ŘAZENÍ PODLE HODNOTY
+  // =========================================================================
+  // Klient: v bublinách uzlů chce místo jména vidět buď POČET TIPŮ, nebo
+  // VYPLACENÉ PROVIZE, a přepnutí má změnit i POŘADÍ uzlů v rámci úrovně —
+  // nejvyšší hodnota první.
+  //
+  // ROZHODNUTÍ R6-REZIMY: přepínač má TŘI polohy, ne dvě. Klient jmenoval
+  // dvě (tipy / provize), ale výchozí zobrazení z Milníku 24 (iniciály +
+  // jméno v bublině při najetí) je to, co dnes vidí — kdyby zmizelo, byla by
+  // to nevyžádaná ztráta. „Jméno" je proto výchozí poloha a obě klientem
+  // vyžádané polohy jsou vedle ní.
+  //
+  // ROZHODNUTÍ R6-PORADI: v hodnotových režimech se uzly v rámci každé
+  // úrovně řadí SESTUPNĚ podle zvolené veličiny. Shluk „listů" (M24,
+  // R5-SHLUK) se tím ale nesmí obejít: kdyby se v hodnotovém režimu
+  // rozpadl na jednotlivá kolečka, deset přímých listů by strom roztáhlo
+  // přes celou obrazovku — přesně to, čemu shluk předchází. Kompromis:
+  // v hodnotovém režimu se ze shluku VYTAHUJÍ ven všichni, kdo mají
+  // hodnotu > 0 (ti nesou informaci a patří do řazení), a ve shluku
+  // zůstávají jen ti s nulou. Ve výchozím režimu „Jméno" se chování
+  // z Milníku 24 nemění vůbec.
+  var ST_REZIMY = [
+    { kod: "jmeno",   label: "Jméno" },
+    { kod: "tipy",    label: "Počet tipů" },
+    { kod: "provize", label: "Vyplacené provize" }
+  ];
+  var stRezim = "jmeno";
+
+  function stJeHodnotovyRezim() { return stRezim === "tipy" || stRezim === "provize"; }
+
+  function stHodnota(u) {
+    if (stRezim === "tipy") return Number(u.pocet_tipu || 0);
+    if (stRezim === "provize") return Number(u.vyplacene_provize || 0);
+    return 0;
+  }
+
+  // Do kolečka o 38–74 px se „1 250 000 Kč" nevejde. Bublina při najetí
+  // myší proto nese PLNOU částku (viz stPopis) a v kolečku je zkrácený tvar.
+  function stKompaktniCastka(v) {
+    var n = Number(v || 0);
+    if (n >= 1000000) return String(Math.round(n / 100000) / 10).replace(".", ",") + " M";
+    if (n >= 1000) return String(Math.round(n / 1000)) + " tis.";
+    return String(Math.round(n));
+  }
+
+  function stBublinaText(u) {
+    if (stRezim === "tipy") return String(Number(u.pocet_tipu || 0));
+    if (stRezim === "provize") return stKompaktniCastka(u.vyplacene_provize);
+    return stIniciály(u);
+  }
+
+  // Sestupně podle hodnoty; při shodě zůstává abecední pořadí ze serveru
+  // (stabilní řazení - Array.prototype.sort je v ES2019+ stabilní a appka
+  // cílí na moderní prohlížeče, viz ostatní tabulky).
+  function stSeraditPodleHodnoty(pole) {
+    if (!stJeHodnotovyRezim()) return pole;
+    return pole.slice().sort(function (a, b) { return stHodnota(b) - stHodnota(a); });
+  }
+
   async function fetchSitStrom() {
     if (!currentUser) return;
     var g = authGen; // Milník 15 (bod 4.5)
@@ -16138,6 +16436,9 @@
     if (pod) radky.push(prim + " přímo · " + pod + " v celém týmu");
     else radky.push("nikoho pod sebou");
     radky.push(tipu + " " + (tipu === 1 ? "tip" : (tipu < 5 ? "tipy" : "tipů")));
+    // MILNÍK 27 (bod 6): plná částka patří do bubliny — v kolečku je jen
+    // zkrácený tvar („48 tis."), aby se do něj vešel.
+    radky.push("vyplacené provize " + formatCena(u.vyplacene_provize || 0));
     if (!u.aktivni) radky.push("označen jako vymazaný");
     return radky;
   }
@@ -16149,10 +16450,15 @@
   function stUzelHtml(u, varianta) {
     var radky = stPopis(u);
     var trida = "st-node st-node-" + varianta + (u.aktivni ? "" : " st-node-neaktivni");
+    // MILNÍK 27 (bod 6): v hodnotovém režimu se do kolečka místo iniciál
+    // píše číslo. Fotka se v tom režimu ZÁMĚRNĚ nedotahuje (viz
+    // nacistFotkyStromu) — číslo pod fotkou by nebylo vidět.
+    var hodnotovy = stJeHodnotovyRezim();
     return '<div class="' + trida + '" tabindex="0" data-st-id="' + escapeHtml(u.id) + '"' +
         ' aria-label="' + escapeHtml(radky.join(" — ")) + '">' +
-        '<div class="st-avatar" data-st-avatar="' + escapeHtml(u.id) + '">' +
-          '<span class="st-initials">' + escapeHtml(stIniciály(u)) + '</span>' +
+        '<div class="st-avatar' + (hodnotovy ? ' st-avatar-hodnota' : '') + '"' +
+          (hodnotovy ? '' : ' data-st-avatar="' + escapeHtml(u.id) + '"') + '>' +
+          '<span class="st-initials">' + escapeHtml(stBublinaText(u)) + '</span>' +
         '</div>' +
         '<div class="st-tip" role="tooltip">' +
           '<strong>' + escapeHtml(radky[0]) + '</strong>' +
@@ -16163,6 +16469,7 @@
 
   // Shluk listů: překrývající se kolečka + případné „+N".
   function stShlukHtml(listy) {
+    listy = stSeraditPodleHodnoty(listy);   // MILNÍK 27 (bod 6)
     var zobrazene = listy.slice(0, ST_SHLUK_MAX);
     var zbytek = listy.length - zobrazene.length;
     var souhrn = listy.map(function (u) { return celeJmeno(u) || "Bez jména"; }).join(", ");
@@ -16183,8 +16490,15 @@
     // Rozdělení podle toho, jestli uzel sám někoho vede — přesně jak to
     // klient popsal. Kritérium je `primych_podrizenych` ze serveru, ne
     // délka pole (je to totéž číslo, ale server je autorita).
-    var listy = potomci.filter(function (p) { return Number(p.primych_podrizenych || 0) === 0; });
-    var vetve = potomci.filter(function (p) { return Number(p.primych_podrizenych || 0) > 0; });
+    // MILNÍK 27 (bod 6), R6-PORADI: v hodnotovém režimu se ze shluku vytahují
+    // všichni, kdo mají nenulovou hodnotu — jinak by ten s nejvyšším počtem
+    // tipů mohl skončit schovaný pod „+N", přestože má být první.
+    var doShluku = function (p) {
+      if (Number(p.primych_podrizenych || 0) > 0) return false;
+      return stJeHodnotovyRezim() ? (stHodnota(p) <= 0) : true;
+    };
+    var listy = potomci.filter(doShluku);
+    var vetve = stSeraditPodleHodnoty(potomci.filter(function (p) { return !doShluku(p); }));
 
     var varianta = uroven === 0 ? "koren" : (Number(uzel.primych_podrizenych || 0) > 0 ? "vetev" : "list");
     var detiHtml = "";
@@ -16236,15 +16550,38 @@
             ' pod lídrem · ' + maxUroven + ' ' + (maxUroven === 1 ? "úroveň" : (maxUroven < 5 ? "úrovně" : "úrovní")) +
             ' do hloubky · ' + listu + ' zatím nikoho nepřivedlo</p>' +
         '</div></div>' +
+        // MILNÍK 27 (bod 6): přepínač obsahu bublin + řazení.
+        '<div class="st-prepinac" role="group" aria-label="Co se zobrazuje v kolečkách">' +
+          '<span class="st-prepinac-label">Zobrazit:</span>' +
+          ST_REZIMY.map(function (r) {
+            return '<button type="button" class="st-prepinac-btn" data-st-rezim="' + escapeHtml(r.kod) + '"' +
+              (stRezim === r.kod ? ' aria-pressed="true"' : ' aria-pressed="false"') + '>' +
+              escapeHtml(r.label) + '</button>';
+          }).join("") +
+        '</div>' +
+        (stJeHodnotovyRezim()
+          ? '<p class="dt-muted" style="font-size:12.5px;margin:8px 0 0;">Uzly jsou v každé úrovni seřazené sestupně podle zvolené hodnoty. Jméno, role i plná částka zůstávají v bublině po najetí myší.</p>'
+          : '') +
         '<div class="st-legenda">' +
           '<span><i class="st-legenda-vetev"></i> vede vlastní tým</span>' +
           '<span><i class="st-legenda-list"></i> zatím nikoho nepřivedl</span>' +
           '<span>šedivé kolečko = účet označený jako vymazaný</span>' +
         '</div>' +
-        '<div class="st-plocha">' + stPodstromHtml(koren, deti, 0) + '</div>' +
+        '<div class="st-plocha' + (stJeHodnotovyRezim() ? ' st-plocha-hodnoty' : '') + '">' +
+          stPodstromHtml(koren, deti, 0) + '</div>' +
       '</section>';
 
-    nacistFotkyStromu(rows);
+    wrap.querySelectorAll("[data-st-rezim]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var kod = b.getAttribute("data-st-rezim");
+        if (kod === stRezim) return;
+        stRezim = kod;
+        renderSitStrom();
+      });
+    });
+
+    // Fotky jen ve výchozím režimu — v hodnotovém by překryly číslo.
+    if (!stJeHodnotovyRezim()) nacistFotkyStromu(rows);
   }
 
   // Fotky: jedna podepsaná URL na uzel, „best effort". Selhání se NELOGUJE
@@ -16369,9 +16706,14 @@
 
   function ldQueueRowHtml(p, jePrimarni) {
     var n = LD_NALEHAVOST[p.nalehavost] || LD_NALEHAVOST.bezna;
-    // Řádek 1 vpravo: u opožděných doslova „Po termínu", jinak doba čekání.
-    var hlavni = (p.nalehavost === "po_terminu") ? "Po termínu" : ldCekaText(p.ceka_hodin);
-    var casCls = p.nalehavost === "po_terminu" ? " ld-time-late" : (p.nalehavost === "dnes" ? " ld-time-today" : "");
+    // MILNÍK 27 (bod 4b): doba čekání se zobrazuje VŽDY. Do M26 se u
+    // opožděných položek psalo „Po termínu" MÍSTO ní, takže se lídr u těch
+    // nejnaléhavějších případů — tedy přesně tam, kde to potřebuje nejvíc —
+    // nedozvěděl, JAK DLOUHO už požadavek visí. Nově je „po termínu" jen
+    // příznak pod dobou čekání.
+    var hlavni = ldCekaText(p.ceka_hodin);
+    var jePoTerminu = (p.nalehavost === "po_terminu");
+    var casCls = jePoTerminu ? " ld-time-late" : (p.nalehavost === "dnes" ? " ld-time-today" : "");
     var podnadpis = [p.jmeno, p.nemovitost].filter(Boolean).join(" · ");
 
     return '<div class="ld-queue-row">' +
@@ -16383,6 +16725,7 @@
         '</div>' +
         '<div class="ld-queue-time">' +
           '<div class="ld-queue-time-strong' + casCls + '">' + escapeHtml(hlavni) + '</div>' +
+          (jePoTerminu ? '<div><span class="ld-queue-flag">po termínu</span></div>' : '') +
           '<div class="ld-queue-time-note">' + escapeHtml(p.popis || p.stav_text || "") + '</div>' +
           '<span class="sr-only">' + escapeHtml(n.label) + '</span>' +
         '</div>' +
@@ -17222,6 +17565,7 @@
     // Bod 6: tlačítko „Přihlásit se" ve veřejném menu vede zpátky na
     // přihlašovací obrazovku (tedy na hlavní stránku bez query parametrů).
     el("verejneMenuPrihlasitBtn").addEventListener("click", function () {
+      zavriVerejneMenu();   // MILNÍK 27 (bod 2)
       pendingInviteCode = "";
       applyPendingInviteCodeToForm();
       navigateVerejna(null, null);
@@ -17235,6 +17579,22 @@
     // `?ref=`, nemá o sponzora přijít jen proto, že si prohlédl web.
     el("verejneMenuBrandBtn").addEventListener("click", function () {
       navigateVerejna(null, null);
+    });
+
+    // MILNÍK 27 (bod 2): hamburger. Zavírá se nejen tlačítkem, ale i po
+    // kliknutí kamkoli mimo menu a klávesou Esc - jinak by po přechodu na
+    // jinou stránku zůstal rozbalený a překrýval obsah.
+    el("verejneMenuHamburgerBtn").addEventListener("click", function () {
+      prepniVerejneMenu();
+    });
+    document.addEventListener("click", function (ev) {
+      var menu = el("verejneMenu");
+      if (!menu || !menu.classList.contains("verejne-menu-otevreno")) return;
+      if (menu.contains(ev.target)) return;
+      zavriVerejneMenu();
+    });
+    document.addEventListener("keydown", function (ev) {
+      if (ev.key === "Escape") zavriVerejneMenu();
     });
 
     // Bod 4: vlastní pozvánkový kód.
@@ -17480,6 +17840,7 @@
   function showVerejneMenu(on) {
     var m = el("verejneMenu");
     if (m) m.hidden = !on;
+    if (!on) zavriVerejneMenu();   // MILNÍK 27 (bod 2): ať se nevrátí rozbalené
     // MILNÍK 26 (bod 7): patička patří k veřejnému webu, mizí spolu s menu.
     var p = el("verejnaPaticka");
     if (p) p.hidden = !on;
@@ -17674,6 +18035,8 @@
 
     spodek.textContent = "© " + new Date().getFullYear() +
       " Realitní tip — demonstrační verze aplikace. Uvedené údaje jsou ukázkové.";
+
+    renderVerejneMenuPatickaOdkazy();   // MILNÍK 27 (bod 2)
   }
 
   function navigateVerejna(typ, hodnota, opts) {
@@ -17700,6 +18063,59 @@
     });
   }
 
+  // ---- MILNÍK 27 (bod 2): stav rozbaleného mobilního menu ----
+  function zavriVerejneMenu() {
+    var menu = el("verejneMenu");
+    var btn = el("verejneMenuHamburgerBtn");
+    if (menu) menu.classList.remove("verejne-menu-otevreno");
+    if (btn) {
+      btn.setAttribute("aria-expanded", "false");
+      btn.setAttribute("aria-label", "Otevřít menu");
+    }
+  }
+
+  function prepniVerejneMenu() {
+    var menu = el("verejneMenu");
+    var btn = el("verejneMenuHamburgerBtn");
+    if (!menu || !btn) return;
+    var otevreno = !menu.classList.contains("verejne-menu-otevreno");
+    menu.classList.toggle("verejne-menu-otevreno", otevreno);
+    btn.setAttribute("aria-expanded", otevreno ? "true" : "false");
+    btn.setAttribute("aria-label", otevreno ? "Zavřít menu" : "Otevřít menu");
+  }
+
+  // Patičkové odkazy (M26 bod 7) i do rozbaleného mobilního menu, ať jsou
+  // dosažitelné bez scrollování na konec stránky. Volá se z
+  // renderVerejnouPaticku(), tedy vždy, když se data patičky změní.
+  function renderVerejneMenuPatickaOdkazy() {
+    var wrap = el("verejneMenuPatickaOdkazy");
+    if (!wrap) return;
+    while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
+    var odkazy = (verejnaPatickaData && Array.isArray(verejnaPatickaData.odkazy))
+      ? verejnaPatickaData.odkazy : [];
+    var platne = odkazy.filter(function (o) {
+      return o && o.slug && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(String(o.slug));
+    });
+    wrap.hidden = !platne.length;
+    if (!platne.length) return;
+    var nadpis = document.createElement("p");
+    nadpis.className = "verejne-menu-paticka-nadpis";
+    nadpis.textContent = "Dokumenty";
+    wrap.appendChild(nadpis);
+    platne.forEach(function (o) {
+      var slug = String(o.slug);
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "verejne-menu-link";
+      b.textContent = String(o.popisek || slug);
+      b.addEventListener("click", function () {
+        zavriVerejneMenu();
+        navigateVerejna("stranka", slug);
+      });
+      wrap.appendChild(b);
+    });
+  }
+
   function renderVerejneMenu() {
     var nav = el("verejneMenuNav");
     if (!nav) return;
@@ -17718,6 +18134,7 @@
     nav.querySelectorAll("[data-verejna-klic]").forEach(function (b) {
       b.addEventListener("click", function () {
         var klic = b.getAttribute("data-verejna-klic");
+        zavriVerejneMenu();   // MILNÍK 27 (bod 2)
         if (klic === "__rekrutace") { navigateVerejna("rekrutace", ukazkovyRekrutacniKod); return; }
         if (klic === "hlavni") { navigateVerejna(null, null); return; }
         navigateVerejna("stranka", klic);
@@ -18161,6 +18578,81 @@
     }).join("");
   }
 
+  // =========================================================================
+  // MILNÍK 27 (bod 7) — KOMPAKTNÍ IKONOVÁ ŘADA SDÍLENÍ
+  // =========================================================================
+  // Do M26 bylo sdílení pět širokých tlačítek s texty („Facebook", „X",
+  // „LinkedIn", „WhatsApp", „E-mailem") plus šesté „Zkopírovat text s
+  // odkazem". Na kartě banneru zabírala ta řada víc místa než samotná
+  // nabídka, přestože je sdílení DOPLŇKOVÁ funkce. Nově je to jedna řada
+  // kruhových ikon bez popisků; význam nese `title` + `aria-label`.
+  //
+  // POZNÁMKA K ZADÁNÍ: klient psal „kopírování stejnou ikonou dva
+  // překrývající se čtverce, kterou appka již používá jinde". Prohledal jsem
+  // celý app.html — TAKOVÁ IKONA V APPCE NEEXISTUJE; kopírování bylo všude
+  // řešené textovým tlačítkem („Zkopírovat odkaz", „Zkopírovat text s
+  // odkazem"). Ikona je proto nová, ale nakreslená přesně ve stylu, který
+  // appka už má (viewBox 0 0 24 24, tenké linky, `stroke-width` z CSS —
+  // stejná sada jako TAB_IKONY z M25 bodu 9). Viz otevřený bod O7-IKONA.
+  var SDIL_IKONY = {
+    facebook: '<path fill="currentColor" stroke="none" d="M13.2 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.5 1.55-1.5h1.65V3.6c-.29-.04-1.27-.13-2.41-.13-2.38 0-4.01 1.45-4.01 4.12V9.9H7.3V13h2.67v8z"/>',
+    x:        '<path fill="currentColor" stroke="none" d="M17.3 3h3.05l-6.66 7.62L21.5 21h-6.13l-4.8-6.28L4.98 21H1.93l7.12-8.14L1.8 3h6.28l4.34 5.74zM16.23 19.18h1.69L7.14 4.73H5.33z"/>',
+    linkedin: '<path fill="currentColor" stroke="none" d="M6.94 8.6H3.9V21h3.04zM5.42 3.2a1.77 1.77 0 1 0 0 3.54 1.77 1.77 0 0 0 0-3.54M20.1 21v-6.8c0-3.42-1.83-5.01-4.26-5.01-1.97 0-2.85 1.08-3.34 1.84V8.6H9.46V21h3.04v-6.6c0-1.54.29-3.03 2.2-3.03 1.88 0 1.9 1.76 1.9 3.13V21z"/>',
+    whatsapp: '<path fill="currentColor" stroke="none" d="M12.04 2.4a9.5 9.5 0 0 0-8.2 14.3L2.4 21.6l5.04-1.4a9.5 9.5 0 1 0 4.6-17.8m0 1.8a7.7 7.7 0 1 1-3.9 14.34l-.3-.18-2.9.8.8-2.84-.2-.3A7.7 7.7 0 0 1 12.04 4.2m-3.5 3.5c-.18 0-.47.07-.72.34-.25.27-.95.93-.95 2.26s.98 2.62 1.11 2.8c.14.18 1.9 3.02 4.68 4.11 2.31.91 2.78.73 3.28.68.5-.04 1.62-.66 1.85-1.3s.23-1.18.16-1.3c-.07-.1-.25-.17-.53-.3-.27-.14-1.62-.8-1.87-.9-.25-.08-.43-.13-.61.14s-.7.9-.86 1.08c-.16.18-.32.2-.59.07-.27-.14-1.15-.43-2.2-1.36-.81-.72-1.36-1.62-1.52-1.89-.16-.27-.02-.42.12-.55.12-.12.27-.32.4-.48.14-.16.18-.27.27-.45.09-.18.05-.34-.02-.48-.07-.13-.6-1.48-.83-2.02-.2-.5-.4-.44-.55-.44z"/>',
+    mail:     '<rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="m3.6 7 8.4 6 8.4-6"/>',
+    // „Dva překrývající se čtverce" — klasická ikona kopírování.
+    kopirovat:'<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 6.2V5.6A1.6 1.6 0 0 0 13.4 4H5.6A1.6 1.6 0 0 0 4 5.6v7.8A1.6 1.6 0 0 0 5.6 15h.6"/>'
+  };
+
+  function sdilIkonaSvg(kod) {
+    var d = SDIL_IKONY[kod];
+    if (!d) return "";
+    return '<svg class="sdil-ikona" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + d + '</svg>';
+  }
+
+  // `copyId` (nepovinné) = klíč do `sdileniTextyKeKopii`, ze kterého si
+  // kopírovací tlačítko vezme text. Bez něj se ikona kopírování nevykreslí.
+  var sdileniTextyKeKopii = {};
+
+  function sdileniIkonyHtml(url, text, predmet, copyId, copyPopis) {
+    var u = encodeURIComponent(url);
+    var t = encodeURIComponent(text);
+    var site = [
+      { kod: "facebook", nazev: "Sdílet na Facebooku", href: "https://www.facebook.com/sharer/sharer.php?u=" + u },
+      { kod: "x",        nazev: "Sdílet na X",         href: "https://twitter.com/intent/tweet?url=" + u + "&text=" + t },
+      { kod: "linkedin", nazev: "Sdílet na LinkedInu", href: "https://www.linkedin.com/sharing/share-offsite/?url=" + u },
+      { kod: "whatsapp", nazev: "Poslat přes WhatsApp", href: "https://wa.me/?text=" + encodeURIComponent(text + " " + url) },
+      { kod: "mail",     nazev: "Poslat e-mailem",
+        href: "mailto:?subject=" + encodeURIComponent(predmet || "Pozvánka do Realitního tipu") +
+              "&body=" + encodeURIComponent(text + "\n\n" + url) }
+    ];
+    var html = site.map(function (s) {
+      // `rel="noopener noreferrer"` u target="_blank" je povinnost, ne
+      // kosmetika - bez něj má otevřená stránka přístup na window.opener.
+      return '<a class="sdil-btn" href="' + escapeHtml(s.href) + '" target="_blank" rel="noopener noreferrer"' +
+        ' title="' + escapeHtml(s.nazev) + '" aria-label="' + escapeHtml(s.nazev) + '">' +
+        sdilIkonaSvg(s.kod) + '</a>';
+    }).join("");
+    if (copyId) {
+      var popis = copyPopis || "Zkopírovat text s odkazem";
+      html += '<button type="button" class="sdil-btn" data-sdil-copy="' + escapeHtml(copyId) + '"' +
+        ' title="' + escapeHtml(popis) + '" aria-label="' + escapeHtml(popis) + '">' +
+        sdilIkonaSvg("kopirovat") + '</button>';
+    }
+    return '<div class="sdil-rada">' + html + '</div>';
+  }
+
+  // Jedno místo, které obsluhuje VŠECHNY kopírovací ikony v daném kontejneru.
+  function wireSdileniKopirovani(wrap, bannerEl) {
+    if (!wrap) return;
+    wrap.querySelectorAll("[data-sdil-copy]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var klic = b.getAttribute("data-sdil-copy");
+        copyTextToClipboard(sdileniTextyKeKopii[klic], bannerEl, "Zkopírováno do schránky.");
+      });
+    });
+  }
+
   // Sdílená kopírovací funkce (bod 9c). copyInviteLink() i ldCopyInvite()
   // existovaly už dřív, každá se svým bannerem - tahle je obecná a používají
   // ji nová tlačítka v Marketingu i u pozvánkového odkazu.
@@ -18202,41 +18694,137 @@
   }
 
   // =========================================================================
-  // BOD 8 — ZÁLOŽKA MARKETING (tipař i lídr)
+  // MILNÍK 25 (bod 8) → MILNÍK 27 (bod 7) — ZÁLOŽKA MARKETING
   // =========================================================================
-  var MKT_BANNERY = [
-    { klic: "siroky", trida: "mkt-nahled-a", rozmer: "Široký formát — Facebook, LinkedIn (1200 × 630)",
-      nadpis: "Tipuj s námi", podnadpis: "Stačí vědět o někom, kdo prodává. Zbytek zařídíme.",
-      text: "Znáte někoho, kdo prodává byt, dům nebo pozemek? Řekněte mi o něm a já se postarám o zbytek — tip ověříme, předáme prověřené realitní kanceláři a z úspěšného prodeje vám náleží podíl na provizi. Registrace je zdarma:" },
-    { klic: "ctverec", trida: "mkt-nahled-b", ctverec: true, rozmer: "Čtverec — Instagram, Facebook (1080 × 1080)",
-      nadpis: "Začni vydělávat ještě dnes", podnadpis: "Registrace zabere dvě minuty a nic nestojí.",
-      text: "Začněte vydělávat na tom, co stejně víte. Pošlete tip na nemovitost, my ho ověříme a předáme realitní kanceláři. Když se prodej povede, dostanete podíl z provize. Nic neplatíte:" },
-    { klic: "uzky", trida: "mkt-nahled-c", rozmer: "Na výšku — stories, WhatsApp (1080 × 1350)",
-      nadpis: "Znáte někoho, kdo prodává?", podnadpis: "Od ověření tipu přes kancelář až po výplatu provize.",
-      text: "Soused prodává dům? Kamarádka se stěhuje? Stačí mi to říct. Tip ověříme, předáme realitní kanceláři a celý obchod hlídáme až do podpisu — vy jen sledujete, jak postupuje, a inkasujete podíl z provize:" }
-  ];
+  // Co se v M27 změnilo:
+  //   1) Nabídky UŽ NEJSOU natvrdo v kódu. Čtou se z tabulky
+  //      `marketingove_nabidky` (migrace m27_04) přes RPC
+  //      `moje_marketingove_nabidky()`. Lídr a administrátor je smí zakládat,
+  //      upravovat i mazat přímo z téhle obrazovky.
+  //   2) Každá nabídka má GRAFIKU: buď nahraný obrázek (veřejný bucket,
+  //      prefix `marketing/`), nebo — když obrázek nemá — vykreslený
+  //      barevný banner (původní vzhled z M25, zachovaný jako zástupný).
+  //   3) Jedna nabídka smí mít místo obrázku VIDEO. Je to ODKAZ na hostované
+  //      video, ne nahraný soubor — zdůvodnění viz R7-VIDEO v m27_04.
+  //   4) Sdílení je nově kompaktní řada ikon bez popisků (sdileniIkonyHtml),
+  //      a to i v panelu „Váš odkaz" nahoře, aby byl na stránce JEDEN styl.
+  var marketingNabidky = null;      // pole z RPC, null = zatím nenačteno
+  var mktEditId = null;             // id právě editované nabídky, "__nova" = nová
+  var mktUploadBezi = false;
 
-  function renderMarketingScreen() {
+  function mktObrazekUrl(cesta) {
+    if (!cesta) return null;
+    return verejnaFotoUrl(cesta);   // tentýž veřejný bucket jako rekrutační fotky
+  }
+
+  // YouTube/Vimeo se vkládá jako iframe, přímý soubor jako <video>. Nic
+  // jiného se nevkládá — na neznámou adresu se jen odkáže tlačítkem, aby se
+  // do stránky nedostal cizí rámec, o kterém nic nevíme.
+  function mktVideoHtml(url) {
+    if (!url) return "";
+    var yt = url.match(/^https:\/\/(?:www\.)?youtube\.com\/watch\?v=([A-Za-z0-9_-]{6,20})/) ||
+             url.match(/^https:\/\/youtu\.be\/([A-Za-z0-9_-]{6,20})/);
+    if (yt) {
+      return '<div class="mkt-video"><iframe src="https://www.youtube-nocookie.com/embed/' + escapeHtml(yt[1]) +
+        '" title="Marketingové video" loading="lazy" allowfullscreen ' +
+        'referrerpolicy="strict-origin-when-cross-origin"></iframe></div>';
+    }
+    var vi = url.match(/^https:\/\/(?:www\.)?vimeo\.com\/(\d{5,})/);
+    if (vi) {
+      return '<div class="mkt-video"><iframe src="https://player.vimeo.com/video/' + escapeHtml(vi[1]) +
+        '" title="Marketingové video" loading="lazy" allowfullscreen ' +
+        'referrerpolicy="strict-origin-when-cross-origin"></iframe></div>';
+    }
+    if (/^https:\/\/[^\s"']+\.(mp4|webm)(\?[^\s"']*)?$/i.test(url)) {
+      return '<div class="mkt-video"><video src="' + escapeHtml(url) + '" controls preload="metadata"></video></div>';
+    }
+    return '<div class="mkt-video mkt-video-odkaz">' +
+      '<a class="btn-small" href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">Přehrát video</a>' +
+      '</div>';
+  }
+
+  function mktNahledHtml(n) {
+    if (n.video_url) return mktVideoHtml(n.video_url);
+    var url = mktObrazekUrl(n.obrazek_cesta);
+    if (url) {
+      return '<div class="mkt-nahled mkt-nahled-foto">' +
+        '<img src="' + escapeHtml(url) + '" alt="' + escapeHtml(n.nadpis || "Banner") + '" loading="lazy">' +
+        '</div>';
+    }
+    // Zástupná grafika — tytéž tři vzhledy jako v M25, jen řízené sloupcem.
+    return '<div class="mkt-nahled mkt-nahled-' + escapeHtml(n.vzhled || "a") +
+        (n.vzhled === "b" ? ' mkt-nahled-ctverec' : '') + '">' +
+        '<strong>' + escapeHtml(n.nadpis || "") + '</strong>' +
+        '<span>' + escapeHtml(n.podnadpis || "") + '</span>' +
+      '</div>';
+  }
+
+  function mktMuzeSpravovat() {
+    return !!currentUser && (currentUser.role === "leader" || currentUser.role === "administrator");
+  }
+
+  async function renderMarketingScreen() {
+    var wrap = el("marketingObsah");
+    if (!wrap || !currentUser) return;
+    if (marketingNabidky === null) {
+      wrap.innerHTML = '<p class="dt-muted">Načítám…</p>';
+      var g = authGen;
+      var res = await sb.rpc("moje_marketingove_nabidky");
+      if (g !== authGen) return;
+      if (res.error) {
+        console.error("Chyba při načítání marketingových nabídek:", res.error);
+        marketingNabidky = [];
+        showBanner(el("marketingBanner"), "error", "Marketingové nabídky se nepodařilo načíst.");
+      } else {
+        marketingNabidky = res.data || [];
+      }
+    }
+    mktVykreslit();
+  }
+
+  function mktVykreslit() {
     var wrap = el("marketingObsah");
     if (!wrap || !currentUser) return;
     var url = mujRekrutacniOdkaz();
     var kod = currentUser.invite_code || "";
+    var spravce = mktMuzeSpravovat();
 
-    var karty = MKT_BANNERY.map(function (b, i) {
-      var plnyText = b.text + " " + url;
-      return '<div class="mkt-karta">' +
-          '<div class="mkt-nahled ' + b.trida + (b.ctverec ? ' mkt-nahled-ctverec' : '') + '">' +
-            '<strong>' + escapeHtml(b.nadpis) + '</strong>' +
-            '<span>' + escapeHtml(b.podnadpis) + '</span>' +
-          '</div>' +
+    sdileniTextyKeKopii = {};
+    sdileniTextyKeKopii["odkaz"] = url;
+
+    var karty = (marketingNabidky || []).map(function (n, i) {
+      var klic = "nabidka" + i;
+      var plnyText = n.text_nabidky + " " + url + (n.video_url ? "\n" + n.video_url : "");
+      sdileniTextyKeKopii[klic] = plnyText;
+      return '<div class="mkt-karta' + (n.aktivni ? '' : ' mkt-karta-skryta') + '" data-mkt-id="' + escapeHtml(n.id) + '">' +
+          mktNahledHtml(n) +
           '<div class="mkt-telo">' +
-            '<p class="mkt-rozmer">' + escapeHtml(b.rozmer) + '</p>' +
-            '<p class="mkt-text" id="mktText' + i + '">' + escapeHtml(plnyText) + '</p>' +
-            '<div class="mkt-akce">' +
-              '<button type="button" class="btn-small" data-mkt-copy="' + i + '">Zkopírovat text s odkazem</button>' +
-            '</div>' +
-            '<div class="sdileni-row">' + sdileniOdkazyHtml(url, b.text, b.nadpis) + '</div>' +
+            (n.aktivni ? '' : '<p class="mkt-skryta-stitek">Skrytá — tipaři ji nevidí</p>') +
+            // MILNÍK 27 (bod 7): u nabídky s nahraným obrázkem nebo s videem
+            // je nadpis JEDINĚ tady — zástupná grafika, která ho jinak nese,
+            // se u nich nevykresluje a nadpis by zmizel úplně (odhaleno
+            // headless testem). U zástupné grafiky se ZÁMĚRNĚ neopakuje.
+            ((n.obrazek_cesta || n.video_url)
+              ? '<h4 class="mkt-nadpis">' + escapeHtml(n.nadpis || "") + '</h4>'
+              : '') +
+            '<p class="mkt-rozmer">' + escapeHtml(n.podnadpis || "") + '</p>' +
+            '<p class="mkt-text">' + escapeHtml(plnyText) + '</p>' +
+            sdileniIkonyHtml(url, n.text_nabidky, n.nadpis, klic, "Zkopírovat text s odkazem") +
+            // MILNÍK 27 (bod 7): nahraný banner je skutečný soubor na veřejné
+            // adrese, takže se dá otevřít a uložit. U zástupné grafiky takový
+            // odkaz ZÁMĚRNĚ není — neexistuje soubor, na který by vedl.
+            (n.obrazek_cesta
+              ? '<p style="margin:10px 0 0;"><a class="btn-small" href="' + escapeHtml(mktObrazekUrl(n.obrazek_cesta)) +
+                '" target="_blank" rel="noopener noreferrer" download>Stáhnout banner</a></p>'
+              : '') +
+            (spravce
+              ? '<div class="mkt-sprava">' +
+                  '<button type="button" class="btn-small" data-mkt-edit="' + escapeHtml(n.id) + '">Upravit</button>' +
+                  '<button type="button" class="btn-small btn-danger-small" data-mkt-del="' + escapeHtml(n.id) + '">Smazat</button>' +
+                '</div>'
+              : '') +
           '</div>' +
+          (mktEditId === n.id ? mktFormularHtml(n) : '') +
         '</div>';
     }).join("");
 
@@ -18248,34 +18836,188 @@
           '<button class="btn-small" id="mktCopyOdkazBtn" type="button">Zkopírovat odkaz</button></div>' +
         '<p class="dt-muted" style="font-size:12.5px;margin:10px 0 0;">Pozvánkový kód v odkazu: <strong>' + escapeHtml(kod || "—") + '</strong>. ' +
           'Přepsat ho na vlastní slovo (třeba „tipuj“) můžete v „Můj profil“ → „Pozvánkový kód“.</p>' +
-        '<div class="sdileni-row">' +
-          '<span class="dt-muted" style="font-size:13px;">Sdílet:</span>' +
-          sdileniOdkazyHtml(url, SDILENI_VYCHOZI_TEXT, "Pozvánka do Realitního tipu") +
+        // MILNÍK 27 (bod 7): stejná ikonová řada jako u nabídek — jeden styl
+        // sdílení na celé stránce, žádná druhá sada širokých tlačítek.
+        '<div class="sdil-radek-s-akci">' +
+          sdileniIkonyHtml(url, SDILENI_VYCHOZI_TEXT, "Pozvánka do Realitního tipu", "odkaz", "Zkopírovat odkaz") +
           '<button type="button" class="btn-small" id="mktOpenBtn">Otevřít stránku</button>' +
         '</div>' +
       '</div>' +
       '<div class="card detail-card">' +
-        '<h3 class="detail-section-title" style="margin-top:0;">Bannery k rozeslání</h3>' +
-        '<p class="dt-muted" style="margin-top:-6px;">Tři varianty pro různé sítě. <strong>Bannery jsou grafické návrhy vykreslené v aplikaci a hotové texty — stažení obrázkového souboru appka zatím neumí.</strong> Zkopírujte text s odkazem, nebo použijte tlačítka sítí (otevřou sdílecí okno s předvyplněným textem).</p>' +
-        '<div class="mkt-grid">' + karty + '</div>' +
+        '<div class="mkt-hlavicka">' +
+          '<div>' +
+            '<h3 class="detail-section-title" style="margin-top:0;">Bannery k rozeslání</h3>' +
+            // ⚠ PRAVDIVOST: v M25 tu stálo „stažení obrázkového souboru appka
+            // neumí". Po M27 to platí JEN pro nabídky bez nahraného banneru —
+            // ty mají pořád jen grafický návrh vykreslený v aplikaci. Text to
+            // musí rozlišit, ne mlčet ani slibovat víc, než appka umí.
+            '<p class="dt-muted" style="margin-top:-6px;">Hotové texty s vaším odkazem. Klikněte na ikonu sítě, nebo si text zkopírujte ikonou dvou čtverců. ' +
+              '<strong>U nabídek s nahraným bannerem jde obrázek otevřít a uložit odkazem „Stáhnout banner“. Nabídky bez nahraného obrázku mají jen grafický návrh vykreslený v aplikaci — ten se jako soubor stáhnout nedá.</strong></p>' +
+          '</div>' +
+          (spravce
+            ? '<button type="button" class="btn-small" id="mktNovaBtn">+ Přidat nabídku</button>'
+            : '') +
+        '</div>' +
+        (mktEditId === "__nova" ? mktFormularHtml(null) : '') +
+        (karty
+          ? '<div class="mkt-grid">' + karty + '</div>'
+          : '<div class="empty-state"><p>Zatím tu není žádná nabídka.' +
+            (spravce ? ' Přidejte první tlačítkem nahoře.' : '') + '</p></div>') +
       '</div>';
+
+    mktWire(wrap, url);
+  }
+
+  // Formulář správy jedné nabídky. `n` = null → nová.
+  function mktFormularHtml(n) {
+    n = n || {};
+    var novy = !n.id;
+    return '<div class="mkt-form">' +
+        '<h4>' + (novy ? "Nová nabídka" : "Úprava nabídky") + '</h4>' +
+        '<div class="field"><label for="mktFNadpis">Nadpis (max. 80 znaků)</label>' +
+          '<input type="text" id="mktFNadpis" maxlength="80" value="' + escapeHtml(n.nadpis || "") + '"></div>' +
+        '<div class="field"><label for="mktFPodnadpis">Podnadpis / formát (max. 120 znaků)</label>' +
+          '<input type="text" id="mktFPodnadpis" maxlength="120" value="' + escapeHtml(n.podnadpis || "") + '"></div>' +
+        '<div class="field"><label for="mktFText">Text ke sdílení (max. 1200 znaků)</label>' +
+          '<textarea id="mktFText" rows="4" maxlength="1200">' + escapeHtml(n.text_nabidky || "") + '</textarea></div>' +
+        '<div class="field"><label for="mktFVzhled">Zástupná grafika (když nahrajete obrázek, nepoužije se)</label>' +
+          '<select id="mktFVzhled">' +
+            ['a','b','c'].map(function (v) {
+              return '<option value="' + v + '"' + ((n.vzhled || "a") === v ? ' selected' : '') + '>' +
+                (v === "a" ? "Zelený široký" : v === "b" ? "Tmavý čtverec" : "Světlý na výšku") + '</option>';
+            }).join("") +
+          '</select></div>' +
+        '<div class="field"><label for="mktFObrazek">Obrázek banneru</label>' +
+          '<input type="file" id="mktFObrazek" accept="image/png,image/jpeg,image/webp">' +
+          '<p class="dt-muted" style="font-size:12.5px;margin:6px 0 0;">' +
+            (n.obrazek_cesta
+              ? 'Nahráno: <strong>' + escapeHtml(n.obrazek_cesta) + '</strong>. Nový soubor ho přepíše. '
+              : 'Zatím bez obrázku — použije se zástupná grafika. ') +
+            'Nejvýše 2 MB, formáty JPG / PNG / WebP.</p>' +
+          (n.obrazek_cesta ? '<label class="mkt-check"><input type="checkbox" id="mktFObrazekSmazat"> Odebrat obrázek</label>' : '') +
+        '</div>' +
+        '<div class="field"><label for="mktFVideo">Odkaz na video (nepovinné)</label>' +
+          '<input type="url" id="mktFVideo" placeholder="https://www.youtube.com/watch?v=…" value="' + escapeHtml(n.video_url || "") + '">' +
+          '<p class="dt-muted" style="font-size:12.5px;margin:6px 0 0;">Vyplněné video NAHRADÍ obrázek. Aplikace videosoubory nehostuje — vložte odkaz na YouTube, Vimeo nebo přímý .mp4 (viz dokumentace, rozhodnutí R7-VIDEO).</p>' +
+        '</div>' +
+        '<label class="mkt-check"><input type="checkbox" id="mktFAktivni"' + (n.aktivni === false ? '' : ' checked') + '> Zobrazit tipařům</label>' +
+        '<div class="mkt-form-akce">' +
+          '<button type="button" class="btn-primary" id="mktFUlozitBtn" style="width:auto;">Uložit</button>' +
+          '<button type="button" class="btn-small" id="mktFZrusitBtn">Zrušit</button>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function mktWire(wrap, url) {
+    var banner = el("marketingBanner");
+    wireSdileniKopirovani(wrap, banner);
 
     var copyOdkaz = el("mktCopyOdkazBtn");
     if (copyOdkaz) {
       copyOdkaz.addEventListener("click", function () {
-        copyTextToClipboard(url, el("marketingBanner"), "Odkaz zkopírován do schránky.");
+        copyTextToClipboard(url, banner, "Odkaz zkopírován do schránky.");
       });
     }
     var openBtn = el("mktOpenBtn");
     if (openBtn) {
       openBtn.addEventListener("click", function () { window.open(url, "_blank", "noopener,noreferrer"); });
     }
-    wrap.querySelectorAll("[data-mkt-copy]").forEach(function (b) {
+    var novaBtn = el("mktNovaBtn");
+    if (novaBtn) {
+      novaBtn.addEventListener("click", function () { mktEditId = "__nova"; mktVykreslit(); });
+    }
+    wrap.querySelectorAll("[data-mkt-edit]").forEach(function (b) {
       b.addEventListener("click", function () {
-        var i = Number(b.getAttribute("data-mkt-copy"));
-        copyTextToClipboard(MKT_BANNERY[i].text + " " + url, el("marketingBanner"), "Text i s odkazem zkopírován do schránky.");
+        mktEditId = b.getAttribute("data-mkt-edit");
+        mktVykreslit();
       });
     });
+    wrap.querySelectorAll("[data-mkt-del]").forEach(function (b) {
+      b.addEventListener("click", function () { mktSmazat(b.getAttribute("data-mkt-del")); });
+    });
+    var zrusit = el("mktFZrusitBtn");
+    if (zrusit) zrusit.addEventListener("click", function () { mktEditId = null; mktVykreslit(); });
+    var ulozit = el("mktFUlozitBtn");
+    if (ulozit) ulozit.addEventListener("click", mktUlozit);
+  }
+
+  async function mktSmazat(id) {
+    if (!id) return;
+    var n = (marketingNabidky || []).filter(function (x) { return x.id === id; })[0];
+    if (!window.confirm('Opravdu smazat nabídku „' + ((n && n.nadpis) || "") + '"? Tohle nejde vrátit.')) return;
+    var res = await sb.rpc("smazat_marketingovou_nabidku", { p_id: id });
+    if (res.error) {
+      console.error("Smazání marketingové nabídky selhalo:", res.error);
+      showBanner(el("marketingBanner"), "error", "Nabídku se nepodařilo smazat (" + escapeHtml(res.error.message || "") + ").");
+      return;
+    }
+    mktEditId = null;
+    marketingNabidky = null;
+    showBanner(el("marketingBanner"), "ok", "Nabídka byla smazána.");
+    renderMarketingScreen();
+  }
+
+  async function mktUlozit() {
+    if (mktUploadBezi) return;
+    var banner = el("marketingBanner");
+    var id = (mktEditId === "__nova") ? null : mktEditId;
+    var puvodni = id ? (marketingNabidky || []).filter(function (x) { return x.id === id; })[0] : null;
+
+    var nadpis = (el("mktFNadpis") && el("mktFNadpis").value || "").trim();
+    var text = (el("mktFText") && el("mktFText").value || "").trim();
+    if (!nadpis) { showBanner(banner, "error", "Vyplňte prosím nadpis nabídky."); return; }
+    if (!text) { showBanner(banner, "error", "Vyplňte prosím text ke sdílení."); return; }
+
+    var obrazekCesta = (puvodni && puvodni.obrazek_cesta) || null;
+    var smazatObrazek = el("mktFObrazekSmazat") && el("mktFObrazekSmazat").checked;
+    if (smazatObrazek) obrazekCesta = null;
+
+    var vstup = el("mktFObrazek");
+    var soubor = vstup && vstup.files && vstup.files[0];
+    if (soubor) {
+      if (soubor.size > 2 * 1024 * 1024) {
+        showBanner(banner, "error", "Obrázek je větší než 2 MB. Zmenšete ho prosím.");
+        return;
+      }
+      mktUploadBezi = true;
+      showBanner(banner, "info", "Nahrávám obrázek…");
+      // Přípona se bere z typu, ne z názvu souboru: název dodává uživatel.
+      var pripona = soubor.type === "image/png" ? "png" : (soubor.type === "image/webp" ? "webp" : "jpg");
+      var cesta = "marketing/" + (window.crypto && window.crypto.randomUUID
+        ? window.crypto.randomUUID()
+        : String(Date.now()) + "-" + Math.round(Math.random() * 1e9)) + "." + pripona;
+      var up = await sb.storage.from("verejne-rekrutace").upload(cesta, soubor, {
+        upsert: false, contentType: soubor.type || "image/jpeg"
+      });
+      mktUploadBezi = false;
+      if (up.error) {
+        console.error("Nahrání marketingového obrázku selhalo:", up.error);
+        showBanner(banner, "error", "Obrázek se nepodařilo nahrát (" + escapeHtml(up.error.message || "") + ").");
+        return;
+      }
+      obrazekCesta = cesta;
+    }
+
+    var res = await sb.rpc("ulozit_marketingovou_nabidku", {
+      p_id: id,
+      p_nadpis: nadpis,
+      p_podnadpis: (el("mktFPodnadpis") && el("mktFPodnadpis").value || "").trim() || null,
+      p_text: text,
+      p_vzhled: (el("mktFVzhled") && el("mktFVzhled").value) || "a",
+      p_obrazek_cesta: obrazekCesta,
+      p_video_url: (el("mktFVideo") && el("mktFVideo").value || "").trim() || null,
+      p_poradi: null,
+      p_aktivni: !(el("mktFAktivni") && !el("mktFAktivni").checked)
+    });
+    if (res.error) {
+      console.error("Uložení marketingové nabídky selhalo:", res.error);
+      showBanner(banner, "error", "Nabídku se nepodařilo uložit (" + escapeHtml(res.error.message || "") + ").");
+      return;
+    }
+    mktEditId = null;
+    marketingNabidky = null;
+    showBanner(banner, "ok", id ? "Nabídka byla upravena." : "Nabídka byla přidána.");
+    renderMarketingScreen();
   }
 
   // =========================================================================
