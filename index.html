@@ -5139,7 +5139,7 @@
   // Milník 14: číslo aktuální verze aplikace - MUSÍ odpovídat nejnovější položce
   // pole APP_CHANGELOG níže (položka na indexu 0). Při každém příštím milníku
   // se zvyšuje ROVNOU TADY i v APP_CHANGELOG - jsou to dvě navzájem závislá místa.
-  var APP_VERSION = "27.0";
+  var APP_VERSION = "28.0";
 
   // Milník 14 (bod 4): obsah panelu "Historie verzí" na přihlašovací
   // obrazovce - zrekonstruováno z reálné historie projektu (STAV.md,
@@ -5148,6 +5148,19 @@
   // pod tímto polem). Vykresluje se generickou šablonou renderAuthVersionAndChangelog()
   // - při dalším milníku se sem jen přidá nová položka na začátek pole.
   var APP_CHANGELOG = [
+    // ZADÁNÍ (28.0). Sedm bodů z jednoho zadání klienta - kotva u
+    // přihlášení, barva zápatí, odhlašovací tlačítko, přepracovaná
+    // Struktura sítě, pořadí admin tabů, funkční dashboard tipaře a nová
+    // Realitní akademie (viz komentáře „Zadání (bod N)" přímo u kódu).
+    { verze: "28.0", datum: "19. 9. 2026", body: [
+      "Tlačítko „Přihlásit se“ ve veřejné liště teď skočí rovnou na přihlašovací okno, ne jen na začátek stránky",
+      "Zápatí veřejných stránek má novou, světle šedivou barvu místo tmavě zelené",
+      "Tlačítko „Odhlásit se“ je pro všechny role nově jen malý bílý kroužek s křížkem, ať vizuálně neruší",
+      "Struktura sítě: filtry „Počet tipů“ a „Vyplacené provize“ už nepřepisují kolečko s fotkou - hodnota se ukazuje vedle něj a jméno/fotka zůstávají vždy vidět; přibyl filtr „Nejrychleji rostoucí síť“ (noví lidé v síti za posledních 30 dní); u lídra je opravená schovaná bublina nad kořenem stromu; kolečka s fotkou jsou proklikávací na detail tipaře",
+      "Záložky administrátora mají nové pořadí: Dashboard, Tipy, Uživatelé, Struktura sítě jako první čtyři",
+      "Dashboard tipaře je funkční: „Aktivní tipy“, „Možná odměna“ a „Vyplaceno“ i seznam „Co se děje s vašimi tipy“ teď čtou skutečná data, ne ukázková čísla",
+      "Nová Realitní akademie: karta na dashboardu se skutečným postupem, nová záložka „Realitní akademie“ (tipař i lídr) s okruhy, lekcemi, obsahem a jednoduchým opakovacím testem, a nová záložka „Obsah akademie“ pro administrátora se správou okruhů, lekcí a testových otázek. Dokončení akademie zatím nic v appce nepodmiňuje - budování vlastní sítě jde i bez ní"
+    ] },
     // MILNÍK 27. ⚠ Nejdůležitější položka je ta první: klient hlásil, že se
     // do Historie akcí přestaly zapisovat některé akce. Skutečnost je horší
     // i lepší zároveň — nepřestaly, ONY SE TAM NIKDY NEZAPISOVALY (změna
