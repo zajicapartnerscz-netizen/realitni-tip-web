@@ -189,6 +189,18 @@
   .btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
   .btn-ghost:disabled { opacity: .55; cursor: not-allowed; }
 
+  /* Zadání (bod 3): tlačítko Odhlásit se pro všechny role - bílé pozadí,
+     jen křížek, ať vizuálně nerušil vedle jména/role v horní liště. */
+  .logout-btn-x {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; flex: 0 0 auto;
+    background: #FFFFFF; border: 1px solid var(--border); border-radius: 50%;
+    color: var(--text-muted); font-size: 17px; line-height: 1; cursor: pointer;
+    transition: border-color .15s ease, color .15s ease;
+  }
+  .logout-btn-x:hover { border-color: #C0392B; color: #C0392B; }
+  .logout-btn-x:disabled { opacity: .55; cursor: not-allowed; }
+
   .tabs-wrap { background: var(--bg); border-bottom: 1px solid var(--border); }
   .tabs {
     max-width: 1320px;
@@ -1586,17 +1598,24 @@
   }
   /* Kořen je ještě o odstín sytější, aby zůstal odlišitelný od větví. */
   .st-node-koren .st-avatar { background: var(--accent-hover); }
-  /* Číslo místo iniciál se musí vejít i do nejmenšího kolečka. Iniciály jsou
-     dva znaky, „999 tis." je osm — listové kolečko se proto v hodnotovém
-     režimu zvětšuje z 38 na 52 px, jinak se částka ořízne (ověřeno na
-     screenshotu i regresním testem „částka se do kolečka vejde"). */
-  .st-avatar-hodnota { font-size: 12px; letter-spacing: -.02em; }
-  .st-node-koren .st-avatar-hodnota { font-size: 16px; }
-  .st-node-vetev .st-avatar-hodnota { font-size: 12.5px; }
-  .st-plocha-hodnoty .st-node-list .st-avatar {
-    width: 52px; height: 52px; font-size: 10.5px;
-  }
+  /* Zadání (bod 4): kolečko už NEPŘEPISUJE iniciály/fotku číslem (dřív
+     .st-avatar-hodnota) - hodnota filtru je teď ve .st-badge vedle
+     kolečka, viz níž. */
   .st-plocha-hodnoty .st-shluk > .st-node { margin-right: -6px; }
+  /* Štítek s hodnotou vybraného filtru, VEDLE kolečka (pod ním v rámci
+     sloupcového layoutu .st-node) - kolečko samo nese jen jméno/fotku. */
+  .st-badge {
+    margin-top: 4px; font-size: 10.5px; font-weight: 700; white-space: nowrap;
+    background: var(--accent-soft); color: var(--accent);
+    border-radius: 999px; padding: 1px 8px; line-height: 1.5;
+  }
+  .st-node-koren .st-badge { font-size: 11.5px; }
+  /* Kolečka jsou od zadání (bod 4) klikací -> Detail tipaře. */
+  .st-node-klikaci { cursor: pointer; }
+  .st-node-klikaci .st-avatar { transition: box-shadow .12s ease; }
+  .st-node-klikaci:hover .st-avatar, .st-node-klikaci:focus-visible .st-avatar {
+    box-shadow: 0 0 0 3px var(--accent);
+  }
 
   .st-prepinac { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 12px; }
   .st-prepinac-label { font-size: 13px; color: var(--text-muted); margin-right: 4px; }
@@ -1641,6 +1660,14 @@
   .st-tip strong { font-weight: 700; }
   .st-tip span { opacity: .8; }
   .st-node:hover > .st-tip, .st-node:focus-visible > .st-tip { display: flex; }
+  /* Zadání (bod 4): bublina kořenového uzlu (lídra) se u leadera/admina
+     schovávala - .st-plocha níž má overflow-x:auto, což podle CSS
+     specifikace nutí i overflow-y na "auto" (nejde mít jen jednu osu
+     "visible"), a kořen jako úplně první řádek stromu neměl nahoře dost
+     místa (jen 10px padding), aby se bublina vejít nahoru vešla. Řešení:
+     bublina kořene vyjíždí DOLŮ místo nahoru - tam je vždycky dost místa
+     (pod kořenem je celý zbytek stromu), takže se nikdy neořízne. */
+  .st-node-koren > .st-tip { bottom: auto; top: calc(100% + 8px); }
 
   .st-legenda { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 14px; font-size: 13px; color: var(--text-muted); }
   .st-legenda i { display: inline-block; width: 11px; height: 11px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
@@ -2354,6 +2381,11 @@
     padding: 40px 16px; overflow-y: auto;
   }
   .modal-box { width: 100%; max-width: 480px; }
+  /* Zadání (bod 7): širší varianta modalu pro editaci lekce akademie -
+     s obsahem lekce a stavitelem testových otázek se do 480px nevejde. */
+  .modal-box-wide { max-width: 720px; }
+  .akad-checkbox-label { display: flex; align-items: center; gap: 8px; font-weight: 500; cursor: pointer; }
+  .akad-checkbox-label input { width: auto; }
 
   /* =====================================================================
      Milník 18, bod 2 — STATICKÝ vizuální redesign dashboardu TIPAŘE
@@ -2541,6 +2573,15 @@
   }
   .tdash-chip-move { background: var(--accent-soft); color: var(--accent); border-color: var(--accent-soft); }
   .tdash-chip-rk { background: var(--info-soft); color: var(--info); border-color: var(--info-soft); }
+  /* Zadání (bod 6): dvě další varianty chipu pro skutečná data - úspěšně
+     uzavřený tip (prodáno) a zamítnutý/neúspěšně uzavřený tip. */
+  .tdash-chip-ok { background: var(--ok-soft); color: var(--ok); border-color: var(--ok-soft); }
+  .tdash-chip-zamitnuto { background: var(--danger-soft); color: var(--danger); border-color: var(--danger-soft); }
+  /* Řádky "Co se děje s vašimi tipy" jsou od zadání (bod 6) klikací -
+     otevírají Detail tipu, stejně jako řádek v tabulce "Moje tipy". */
+  .tdash-tip-row-click { cursor: pointer; border-radius: var(--radius-s); margin: 0 -8px; padding: 13px 8px; }
+  .tdash-tip-row-click:hover, .tdash-tip-row-click:focus-visible { background: var(--surface-2); }
+  .tdash-tip-row-click:last-of-type { padding-bottom: 13px; }
 
   /* --- články: dvě malé nefunkční karty --- */
   .tdash-articles { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -2600,12 +2641,14 @@
   }
   .tdash-lesson-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
   .tdash-lesson-title { font-weight: 600; font-size: 14px; line-height: 1.35; margin: 0; flex: 1 1 160px; }
-  /* Znovu jen vzhled tlačítka, bez posluchače. */
+  /* Zadání (bod 7): tlačítko je teď FUNKČNÍ (přepíná na záložku Realitní
+     akademie) - kurzor pointer místo dřívějšího "default" z čistě
+     vizuálního mockupu Milníku 18. */
   .tdash-lesson-btn {
     flex: 0 0 auto;
     background: var(--accent); border: 1px solid var(--accent); color: var(--accent-contrast);
     border-radius: var(--radius-s); padding: 9px 16px;
-    font-family: var(--font-ui); font-size: 13px; font-weight: 600; cursor: default;
+    font-family: var(--font-ui); font-size: 13px; font-weight: 600; cursor: pointer;
   }
   .tdash-lesson-note { color: var(--text-muted); font-size: 12px; margin: 10px 0 0; }
 
@@ -2621,6 +2664,121 @@
   .tdash-track-sub { color: var(--text-muted); }
   .tdash-track-locked .tdash-track-bar { background: var(--border); }
   .tdash-track-locked .tdash-track-name, .tdash-track-locked .tdash-track-sub { color: var(--text-muted); opacity: .7; }
+  /* Zadání (bod 7): dokončený okruh zvýrazněn zeleně místo "locked" šedi. */
+  .tdash-track-item-done .tdash-track-bar { background: var(--ok); }
+  .tdash-track-item-done .tdash-track-sub { color: var(--ok); }
+
+  /* =====================================================================
+     Zadání (bod 7) — REALITNÍ AKADEMIE
+     Záložka tipaře (#akademieWrap - fetchMojeAkademie/renderMojeAkademie)
+     i obsahová správa administrátora (#akademieSpravaWrap -
+     fetchAkademieSprava/renderAkademieSprava) sdílejí tenhle blok stylů.
+     ===================================================================== */
+
+  /* --- souhrnná karta nahoře na záložce tipaře --- */
+  .akad-summary-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 12px; }
+  .akad-summary-note { color: var(--text-muted); font-size: 13px; margin: 12px 0 0; }
+
+  /* --- "Zbývající lekce" - výslovný požadavek zadání --- */
+  .akad-remaining { margin-top: 18px; }
+  .akad-remaining-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+  .akad-remaining-row {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 9px 12px; background: var(--surface-2); border-radius: var(--radius-s); font-size: 13.5px;
+  }
+  .akad-remaining-name { font-weight: 600; flex: 1 1 200px; }
+  .akad-remaining-cat { color: var(--text-muted); font-size: 12px; flex: 0 0 auto; }
+  .akad-remaining-min { color: var(--text-muted); font-size: 12px; flex: 0 0 auto; white-space: nowrap; }
+  .akad-remaining-total { color: var(--text-muted); font-size: 13px; margin: 12px 0 0; text-align: right; }
+
+  /* --- karta okruhu (kategorie) --- */
+  .akad-cat { margin-top: 18px; }
+  .akad-cat-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+  .akad-cat-head-right { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+  .akad-cat-desc { color: var(--text-muted); font-size: 13px; margin: 4px 0 0; }
+  .akad-cat-pct { font-weight: 700; font-size: 14px; color: var(--accent); white-space: nowrap; }
+  .akad-cat-povinna {
+    font-size: 11px; font-weight: 600; color: var(--warn); background: var(--warn-soft);
+    border-radius: 999px; padding: 3px 9px; white-space: nowrap;
+  }
+
+  /* --- seznam lekcí (accordion) --- */
+  .akad-lekce-list { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+  .akad-lekce { border: 1px solid var(--border); border-radius: var(--radius-s); overflow: hidden; }
+  .akad-lekce-done { border-color: var(--ok-soft); }
+  .akad-lekce-head {
+    width: 100%; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    background: var(--surface); border: none; padding: 12px 14px; text-align: left; cursor: pointer;
+    font-family: var(--font-ui);
+  }
+  .akad-lekce-head:hover { background: var(--surface-2); }
+  .akad-lekce-title { font-weight: 600; font-size: 14px; flex: 1 1 200px; }
+  .akad-lekce-meta { color: var(--text-muted); font-size: 12px; white-space: nowrap; }
+  .akad-lekce-stav { font-size: 11.5px; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+  .akad-lekce-stav-ok { color: var(--ok); }
+  .akad-lekce-caret { color: var(--text-muted); font-size: 11px; }
+  .akad-lekce-body { padding: 4px 16px 18px; border-top: 1px solid var(--border); }
+  .akad-lekce-obsah p { font-size: 14px; line-height: 1.6; white-space: pre-line; }
+  .akad-lekce-hint { color: var(--text-muted); font-size: 12.5px; margin: 8px 0 0; }
+
+  /* --- jednoduchý opakovací test --- */
+  .akad-quiz { margin-top: 6px; }
+  .akad-quiz-otazka { margin-bottom: 16px; }
+  .akad-quiz-otazka-text { font-weight: 600; font-size: 13.5px; margin: 0 0 8px; }
+  .akad-quiz-moznost {
+    display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: var(--radius-s);
+    cursor: pointer; font-size: 13.5px;
+  }
+  .akad-quiz-moznost:hover { background: var(--surface-2); }
+  .akad-quiz-moznost input { width: auto; flex: 0 0 auto; }
+
+  /* --- obsah akademie: administrátorská správa --- */
+  .akad-sprava-head { margin-bottom: 16px; }
+  .akad-sprava-kat { margin-bottom: 12px; padding: 0; overflow: hidden; }
+  .akad-sprava-neaktivni { opacity: .62; }
+  .akad-sprava-kat-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 16px; }
+  .akad-sprava-kat-toggle {
+    display: flex; align-items: center; gap: 10px; background: none; border: none; cursor: pointer;
+    font-family: var(--font-ui); font-size: 15px; font-weight: 600; color: var(--text); padding: 0; text-align: left;
+  }
+  .akad-sprava-kat-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .akad-sprava-kat-body { padding: 0 16px 16px; border-top: 1px solid var(--border); }
+  .akad-sprava-lekce-list { display: flex; flex-direction: column; gap: 6px; margin: 12px 0; }
+  .akad-sprava-lekce-radek {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    background: var(--surface-2); border-radius: var(--radius-s); padding: 8px 12px; font-size: 13.5px;
+  }
+  .akad-sprava-lekce-poradi { color: var(--text-muted); font-variant-numeric: tabular-nums; flex: 0 0 auto; }
+  .akad-sprava-lekce-nazev { font-weight: 600; flex: 1 1 180px; display: flex; align-items: center; gap: 8px; }
+  .akad-sprava-lekce-actions { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
+  .akad-badge-neaktivni, .akad-badge-povinna {
+    font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .02em;
+    border-radius: 999px; padding: 2px 8px; white-space: nowrap;
+  }
+  .akad-badge-neaktivni { color: var(--text-muted); background: var(--surface-2); }
+  .akad-badge-povinna { color: var(--warn); background: var(--warn-soft); }
+
+  /* --- stavitel testových otázek uvnitř modalu editace lekce --- */
+  .akad-otazky-sekce { border-top: 1px solid var(--border); margin-top: 4px; padding-top: 16px; }
+  .akad-otazky-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+  .akad-otazka-blok { border: 1px solid var(--border); border-radius: var(--radius-s); padding: 12px; margin-top: 12px; }
+  .akad-otazka-head { border: none; padding: 0; margin: 0 0 10px; }
+  .akad-otazka-text {
+    flex: 1 1 auto; font-family: var(--font-ui); font-size: 13.5px; padding: 8px 10px;
+    border: 1px solid var(--border); border-radius: var(--radius-s);
+  }
+  .akad-moznosti-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+  .akad-moznost-radek { display: flex; align-items: center; gap: 8px; }
+  .akad-moznost-radek input[type="radio"] { flex: 0 0 auto; width: auto; }
+  .akad-moznost-text {
+    flex: 1 1 auto; font-family: var(--font-ui); font-size: 13px; padding: 6px 9px;
+    border: 1px solid var(--border); border-radius: var(--radius-s);
+  }
+  .akad-moznost-smazat {
+    flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--border);
+    background: #fff; color: var(--text-muted); cursor: pointer; font-size: 15px; line-height: 1;
+  }
+  .akad-moznost-smazat:hover { border-color: #C0392B; color: #C0392B; }
 
   /* --- panel "Váš budoucí tým" ---
      Jemně zelené pozadí místo bílého, ať je vidět, že jde o výhled do
@@ -2995,9 +3153,9 @@
   .v-hero-fakt span { font-size: 13px; opacity: 0.85; }
   .v-hero-obsah { max-width: 1100px; margin: 0 auto; padding: 40px 20px 8px; }
 
-  /* ---- Patička (bod 7) */
+  /* ---- Patička (bod 7) — zadání: jiná barva než zbytek stránky (světle šedá) */
   .verejna-paticka {
-    background: #0E1B17; color: #D8E5DF;
+    background: #EEF0ED; color: #4A524D;
     margin-top: 56px; padding: 44px 20px 30px;
   }
   .verejna-paticka-inner {
@@ -3005,25 +3163,25 @@
     display: flex; gap: 40px; flex-wrap: wrap; justify-content: space-between;
   }
   .verejna-paticka-text { flex: 1 1 340px; min-width: 260px; }
-  .verejna-paticka-znacka { font-family: var(--font-display); font-size: 23px; color: #FFFFFF; margin: 0 0 12px; }
-  .verejna-paticka-text .rt-odstavec { font-size: 13.5px; line-height: 1.65; color: #B9CCC4; margin: 0 0 10px; }
+  .verejna-paticka-znacka { font-family: var(--font-display); font-size: 23px; color: #1F6F5C; margin: 0 0 12px; }
+  .verejna-paticka-text .rt-odstavec { font-size: 13.5px; line-height: 1.65; color: #5B645F; margin: 0 0 10px; }
   .verejna-paticka-text .rt-h1, .verejna-paticka-text .rt-h2, .verejna-paticka-text .rt-h3,
-  .verejna-paticka-text .rt-h4, .verejna-paticka-text .rt-h5 { color: #FFFFFF; font-size: 16px; margin: 0 0 8px; }
+  .verejna-paticka-text .rt-h4, .verejna-paticka-text .rt-h5 { color: #23281F; font-size: 16px; margin: 0 0 8px; }
   .verejna-paticka-odkazy { flex: 0 1 auto; display: flex; flex-direction: column; gap: 10px; }
   .verejna-paticka-odkazy h4 {
     font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase;
-    color: #7E958B; margin: 0 0 4px; font-weight: 600;
+    color: #838C86; margin: 0 0 4px; font-weight: 600;
   }
   .verejna-paticka-odkaz {
     appearance: none; background: none; border: 0; padding: 0; text-align: left;
-    font: inherit; font-size: 14px; color: #D8E5DF; cursor: pointer;
+    font: inherit; font-size: 14px; color: #3A423D; cursor: pointer;
   }
-  .verejna-paticka-odkaz:hover { color: #FFFFFF; text-decoration: underline; }
+  .verejna-paticka-odkaz:hover { color: #1F6F5C; text-decoration: underline; }
   .verejna-paticka-spodek {
     max-width: 1100px; margin: 30px auto 0; padding-top: 18px;
-    border-top: 1px solid #22332C; font-size: 12px; color: #7E958B;
+    border-top: 1px solid #D9DCD8; font-size: 12px; color: #838C86;
   }
-  .verejna-paticka a { color: #D8E5DF; }
+  .verejna-paticka a { color: #1F6F5C; }
 
   /* ======================================================================
      MILNÍK 26 (bod 2) — VYKRESLENÍ STRUKTUROVANÉHO TEXTU
@@ -3201,7 +3359,7 @@
           <span class="user-name" id="userNameLabel"></span>
           <span id="topbarAvatarSlot"></span>
         </button>
-        <button class="btn-ghost" id="logoutBtn" type="button">Odhlásit se</button>
+        <button class="logout-btn-x" id="logoutBtn" type="button" title="Odhlásit se" aria-label="Odhlásit se">&times;</button>
       </div>
     </div>
   </header>
@@ -3278,6 +3436,13 @@
            ROLE_TAB_ORDER, pozice v DOM je jen neutrální výchozí stav. -->
       <button class="tab" id="tabMarketingBtn" role="tab" type="button" aria-selected="false" hidden>Marketing</button>
       <button class="tab" id="tabWebBtn" role="tab" type="button" aria-selected="false" hidden>Správa webu</button>
+      <!-- Zadání (bod 7): Realitní akademie - tipařova výuková obrazovka
+           (lekce, progres, testy) a administrátorova obrazovka pro správu
+           jejího obsahu (kategorie/lekce/testy). Skutečné pořadí a
+           viditelnost řídí applyNavForRole() přes ROLE_TAB_ORDER, stejně
+           jako všechny ostatní záložky výš. -->
+      <button class="tab" id="tabAkademieBtn" role="tab" type="button" aria-selected="false" hidden>Realitní akademie</button>
+      <button class="tab" id="tabAkademieSpravaBtn" role="tab" type="button" aria-selected="false" hidden>Obsah akademie</button>
     </nav>
   </div>
 
@@ -4218,7 +4383,7 @@
             <p class="tdash-hero-lead">Nemusíte být makléř ani měnit svůj život. Předáte nám příležitost ze svého okolí, sledujete její cestu a učíte se o realitách vlastním tempem.</p>
             <div class="tdash-cta-row">
               <!-- Vizuálně primární akce, funkčně nic - bez posluchače. -->
-              <button class="btn-primary tdash-cta" type="button">+ Přidat nový tip</button>
+              <button class="btn-primary tdash-cta" type="button" id="tdashCtaNewTipBtn">+ Přidat nový tip</button>
               <span class="tdash-cta-note">Jednoduše, přibližně za 3 minuty</span>
             </div>
           </div>
@@ -4238,31 +4403,36 @@
           </div>
         </div>
 
-        <!-- ---------- řada čtyř statistik (bez vlastních rámečků) ---------- -->
+        <!-- ---------- řada čtyř statistik (bez vlastních rámečků) ----------
+             Zadání (bod 6): první tři dlaždice teď čtou skutečná data
+             (viz fetchTiparDashboardData/renderTiparDashboardStats) -
+             žádná další nejsou natvrdo v HTML, jen počáteční „—" než se
+             dotaz vrátí. Dlaždice „Akademie" zůstává zatím beze změny,
+             řeší ji samostatně nová karta Realitní akademie (bod 7). -->
         <div class="tdash-card">
           <div class="tdash-stats">
             <div class="tdash-stat">
               <div class="tdash-stat-label">Aktivní tipy</div>
-              <div class="tdash-stat-num">3</div>
-              <span class="tdash-stat-note">2 se tento týden posunuly</span>
+              <div class="tdash-stat-num" id="tdashStatAktivni">—</div>
+              <span class="tdash-stat-note" id="tdashStatAktivniNote"></span>
             </div>
             <!-- Částka MUSÍ zůstat viditelně označená jako nezaručená -
                  výslovný požadavek klienta z Milníku 16, ať nepůsobí jako
                  příslib ani garance. -->
             <div class="tdash-stat">
               <div class="tdash-stat-label">Možná odměna</div>
-              <div class="tdash-stat-num">42 500 Kč</div>
+              <div class="tdash-stat-num" id="tdashStatOdmena">—</div>
               <span class="tdash-stat-note">orientační částka, nikoli záruka — závisí na tom, zda a za kolik se obchod uzavře</span>
             </div>
             <div class="tdash-stat">
               <div class="tdash-stat-label">Vyplaceno</div>
-              <div class="tdash-stat-num">18 000 Kč</div>
+              <div class="tdash-stat-num" id="tdashStatVyplaceno">—</div>
               <span class="tdash-stat-note">z dokončených obchodů</span>
             </div>
-            <div class="tdash-stat">
+            <div class="tdash-stat" id="tdashStatAkademieWrap">
               <div class="tdash-stat-label">Akademie</div>
-              <div class="tdash-stat-num">3 / 6</div>
-              <span class="tdash-stat-note">lekcí v aktuální úrovni</span>
+              <div class="tdash-stat-num" id="tdashStatAkademie">—</div>
+              <span class="tdash-stat-note">lekcí dokončeno</span>
             </div>
           </div>
         </div>
@@ -4280,34 +4450,14 @@
                   <h3 class="tdash-section-title">Co se děje s vašimi tipy</h3>
                   <p class="tdash-section-sub">Nejdůležitější změny na jednom místě.</p>
                 </div>
-                <button class="tdash-link" type="button">Zobrazit všechny</button>
+                <button class="tdash-link" type="button" id="tdashTipyAllBtn">Zobrazit všechny</button>
               </div>
 
-              <div class="tdash-tip-row">
-                <span class="tdash-tip-dot" aria-hidden="true"></span>
-                <span class="tdash-tip-main">
-                  <span class="tdash-tip-name">Jana Nováková · byt 3+1 v Brně</span>
-                  <p class="tdash-tip-desc">Makléř ověřil kontakt a domlouvá první schůzku.</p>
-                </span>
-                <span class="tdash-chip tdash-chip-move">Nový posun</span>
-              </div>
-
-              <div class="tdash-tip-row">
-                <span class="tdash-tip-dot" aria-hidden="true"></span>
-                <span class="tdash-tip-main">
-                  <span class="tdash-tip-name">Petr Svoboda · rodinný dům v Kuřimi</span>
-                  <p class="tdash-tip-desc">Tip byl předán realitní kanceláři. Čekáme na zpětnou vazbu.</p>
-                </span>
-                <span class="tdash-chip tdash-chip-rk">Předáno RK</span>
-              </div>
-
-              <div class="tdash-tip-row">
-                <span class="tdash-tip-dot" aria-hidden="true"></span>
-                <span class="tdash-tip-main">
-                  <span class="tdash-tip-name">Marie Dvořáková · pozemek u Tišnova</span>
-                  <p class="tdash-tip-desc">Majitel zatím prodávat nechce. Tip zůstává v historii.</p>
-                </span>
-                <span class="tdash-chip">Uzavřeno</span>
+              <!-- Zadání (bod 6): řádky teď plní renderTiparDashboardTipy()
+                   ze skutečných vlastních tipů (sb.from("tips")...), žádné
+                   ukázkové jméno/klient tu už není napevno. -->
+              <div id="tdashTipyList">
+                <p class="dt-muted">Načítám…</p>
               </div>
             </div>
 
@@ -4338,69 +4488,42 @@
           <!-- PRAVÝ sloupec: sjednocená Akademie a budoucí tým -->
           <div class="tdash-col">
 
-            <!-- Jeden panel místo tří bloků z M16/M17: úrovně, progress,
-                 odemykání i „další lekce“ (včetně zbytku po kvízu) jsou
-                 nově pohromadě. -->
+            <!-- Zadání (bod 7): panel je od teď FUNKČNÍ, ne vizuální mockup
+                 - čte skutečná data z akademie_moje_akademie() (viz
+                 fetchTiparDashboardData -> renderTiparDashboardAkademie).
+                 Fake "3 úrovně/zamčeno" tracker z Milníku 18 je pryč - nic
+                 se dnes nezamyká (zadání výslovně: budování sítě je
+                 povolené i bez dokončení akademie), takže by bylo nepravdivé
+                 to tak zobrazovat. Místo tří pevných úrovní je tu reálných
+                 5 okruhů z Realitní akademie. -->
             <div class="tdash-card">
               <div class="tdash-acad-head">
                 <div>
                   <p class="tdash-eyebrow">Akademie realitního tipaře</p>
-                  <h3 class="tdash-section-title">Cesta k vlastnímu týmu</h3>
+                  <h3 class="tdash-section-title">Realitní akademie</h3>
                 </div>
-                <span class="tdash-acad-pct">50 %</span>
+                <span class="tdash-acad-pct" id="tdashAcadPct">—</span>
               </div>
-              <p class="tdash-acad-text">Naučíte se bezpečně předávat kvalitní tipy. Po dokončení Akademie a závěrečného testu si můžete vybudovat vlastní síť tipařů a získávat odměny z jejich úspěšných tipů.</p>
+              <p class="tdash-acad-text">Naučíte se, jak systém funguje, jak získat dobrý tip a jak budovat vlastní tým. U každé lekce je krátký test, který můžete i opakovat.</p>
 
               <div class="tdash-acad-row">
-                <span><strong>Úroveň 1 ze 3</strong> · Začátečník</span>
-                <span>3 z 6 lekcí</span>
+                <span id="tdashAcadProgressLabel">Načítám…</span>
+                <span id="tdashAcadRemainingTime"></span>
               </div>
-              <div class="tdash-progress" aria-hidden="true"><div class="tdash-progress-fill" style="width:50%;"></div></div>
-              <div class="tdash-acad-row tdash-acad-row-muted">
-                <span>Zbývají 3 lekce · asi 35 minut</span>
-                <span>Celkem asi 3 hodiny</span>
-              </div>
+              <div class="tdash-progress" aria-hidden="true"><div class="tdash-progress-fill" id="tdashAcadProgressFill" style="width:0%;"></div></div>
 
-              <div class="tdash-unlock">
-                <span class="tdash-unlock-icon" aria-hidden="true">★</span>
-                <span>
-                  <p class="tdash-unlock-title">Co dokončením odemknete</p>
-                  <p class="tdash-unlock-text">Možnost vybudovat vlastní síť tipařů a získávat týmové odměny z jejich uzavřených obchodů.</p>
-                </span>
-              </div>
-
-              <!-- Widget „další lekce“. Poznámka o kvízu je vše, co zbylo
-                   ze samostatné kvízové sekce z Milníku 16 - žádné otázky,
-                   žádné vyhodnocování. -->
-              <div class="tdash-lesson">
-                <p class="tdash-eyebrow">Další lekce · 8 minut</p>
+              <div class="tdash-lesson" id="tdashAcadNextWrap" hidden>
+                <p class="tdash-eyebrow" id="tdashAcadNextMeta">Další lekce</p>
                 <div class="tdash-lesson-row">
-                  <p class="tdash-lesson-title">Jak poznat opravdu použitelný realitní tip</p>
-                  <button class="tdash-lesson-btn" type="button">Pokračovat</button>
+                  <p class="tdash-lesson-title" id="tdashAcadNextTitle"></p>
+                  <button class="tdash-lesson-btn" type="button" id="tdashAcadNextBtn">Pokračovat</button>
                 </div>
-                <p class="tdash-lesson-note">Po lekci následuje krátký kvíz.</p>
               </div>
+              <p class="tdash-acad-text" id="tdashAcadHotovoText" hidden>Všechny lekce máte hotové. Kdykoli se můžete vrátit a test zopakovat.</p>
 
-              <!-- Třístupňový tracker. Zamčené stupně jsou ztlumené a
-                   současně popsané slovem „zamčeno“ - význam se nikdy
-                   nenese jen barvou. -->
-              <div class="tdash-track">
-                <div class="tdash-track-item">
-                  <div class="tdash-track-bar" aria-hidden="true"></div>
-                  <div class="tdash-track-name">1. Začátečník</div>
-                  <div class="tdash-track-sub">3/6 lekcí</div>
-                </div>
-                <div class="tdash-track-item tdash-track-locked">
-                  <div class="tdash-track-bar" aria-hidden="true"></div>
-                  <div class="tdash-track-name">2. Pokročilý</div>
-                  <div class="tdash-track-sub">zamčeno</div>
-                </div>
-                <div class="tdash-track-item tdash-track-locked">
-                  <div class="tdash-track-bar" aria-hidden="true"></div>
-                  <div class="tdash-track-name">3. Lídr týmu</div>
-                  <div class="tdash-track-sub">zamčeno</div>
-                </div>
-              </div>
+              <!-- Reálných 5 okruhů akademie - dřív fixní 3-stupňový tracker
+                   se "zamčenými" úrovněmi. -->
+              <div class="tdash-track" id="tdashAcadTrack"></div>
             </div>
 
             <!-- Panel „Váš budoucí tým“. Iniciály v kolečkách jsou
@@ -4856,6 +4979,34 @@
       <div id="webTableWrap"></div>
     </section>
 
+    <!-- ============== Zadání (bod 7): REALITNÍ AKADEMIE (tipař) ==============
+         Kategorie (okruhy) -> lekce -> jednoduchý opakovací test. Data i
+         zápis pokroku jdou přes RPC akademie_moje_akademie()/
+         akademie_dokoncit_lekci() - obě dostupné komukoli přihlášenému,
+         viz fetchMojeAkademie/renderMojeAkademie. -->
+    <section id="akademieScreen" class="page" hidden>
+      <div class="section-head">
+        <h2>Realitní akademie</h2>
+        <p>Naučte se, jak systém funguje a jak z něj dostat co nejvíc - vlastním tempem, s krátkým testem u každé lekce.</p>
+      </div>
+      <div id="akademieBanner"></div>
+      <div id="akademieWrap"></div>
+    </section>
+
+    <!-- ============== Zadání (bod 7): OBSAH AKADEMIE (administrátor) ==============
+         Správa kategorií a lekcí Realitní akademie - přidat/upravit/smazat,
+         přes RPC akademie_ulozit_kategorii/akademie_smazat_kategorii/
+         akademie_ulozit_lekci/akademie_smazat_lekci (všechny výhradně pro
+         administrátora, kontrola je uvnitř RPC). -->
+    <section id="akademieSpravaScreen" class="page" hidden>
+      <div class="section-head">
+        <h2>Obsah akademie</h2>
+        <p>Kategorie (okruhy) a lekce Realitní akademie, kterou vidí všichni tipaři. Volitelný jednoduchý test u každé lekce.</p>
+      </div>
+      <div id="akademieSpravaBanner"></div>
+      <div id="akademieSpravaWrap"></div>
+    </section>
+
     <!-- ============== MILNÍK 25 (bod 6): OBSAHOVÁ VEŘEJNÁ STRÁNKA ==============
          Jedna sdílená obrazovka pro VŠECHNY stránky z tabulky `webove_stranky`
          (dnes „O nás" a „Kontakty"). Obsah dodává anonymně volatelná RPC
@@ -4913,6 +5064,16 @@
      ostatní karty/formuláře - .card/.form-grid/.btn-primary). -->
 <div class="modal-overlay" id="addUserModalOverlay" hidden>
   <div class="modal-box card" id="addUserModalBox"></div>
+</div>
+
+<!-- ============== Zadání (bod 7): OBSAH AKADEMIE - editace okruhu/lekce ==============
+     Stejný vzorec jako #addUserModalOverlay (Milník 9), jen širší varianta
+     boxu (.modal-box-wide) - editace lekce obsahuje i stavitel testových
+     otázek, do 480px by se nevešel. Sdílený jedním modalem pro okruh i
+     lekci (nikdy neběží zároveň), viz openAkadKategorieModal/
+     openAkadLekceModal. -->
+<div class="modal-overlay" id="akadModalOverlay" hidden>
+  <div class="modal-box card modal-box-wide" id="akadModalBox"></div>
 </div>
 
 <!-- ============== LIGHTBOX NÁHLEDU DOKLADU (Milník 11, bod 4) ==============
@@ -7511,7 +7672,9 @@
     // MILNÍK 25 (body 8 a 10). Veřejné obrazovky (#verejnaStrankaScreen,
     // #rekrutaceScreen) tu ZÁMĚRNĚ NEJSOU - žijí mimo systém záložek,
     // stejně jako #authScreen, a řídí je hideVerejneScreens().
-    "marketingScreen", "webScreen"
+    "marketingScreen", "webScreen",
+    // Zadání (bod 7): Realitní akademie.
+    "akademieScreen", "akademieSpravaScreen"
   ];
   var TAB_SCREEN = {
     "new": "newTipScreen", list: "listScreen", network: "networkScreen", tipy: "tipyScreen",
@@ -7530,7 +7693,9 @@
     // tabsWrap.
     dashboard: "dashboardScreen",
     // MILNÍK 25 (body 8 a 10)
-    marketing: "marketingScreen", web: "webScreen"
+    marketing: "marketingScreen", web: "webScreen",
+    // Zadání (bod 7): Realitní akademie.
+    akademie: "akademieScreen", akademiesprava: "akademieSpravaScreen"
   };
   var TAB_BUTTON = {
     "new": "tabNewBtn", list: "tabListBtn", network: "tabNetworkBtn", tipy: "tabTipyBtn",
@@ -7547,7 +7712,9 @@
     // klikem na logo) - viz komentář u TAB_SCREEN.dashboard výš.
     dashboard: "tabDashboardBtn",
     // MILNÍK 25 (body 8 a 10)
-    marketing: "tabMarketingBtn", web: "tabWebBtn"
+    marketing: "tabMarketingBtn", web: "tabWebBtn",
+    // Zadání (bod 7): Realitní akademie.
+    akademie: "tabAkademieBtn", akademiesprava: "tabAkademieSpravaBtn"
   };
 
   function hideAllScreens() {
@@ -7703,6 +7870,11 @@
     // zástupný box, ale dynamicky plněný přehled — musí se tedy při vstupu
     // na záložku vyprázdnit dřív, než doběhne jeho fetch.
     dashboard: ["dashboardAdminPrehledWrap"],
+    // Zadání (bod 7): obě obrazovky Realitní akademie nesou údaje konkrétní
+    // identity (vlastní pokrok / plný obsah pro administrátora) - stejný
+    // důvod jako u "network"/"users" výš.
+    akademie: ["akademieWrap", "akademieBanner"],
+    akademiesprava: ["akademieSpravaWrap", "akademieSpravaBanner"],
     // MILNÍK 25 (body 8 a 10): obě nové obrazovky se plní dynamicky a nesou
     // údaje konkrétní identity (rekrutační odkaz / rozepsaný obsah stránky).
     marketing: ["marketingObsah", "marketingBanner"],
@@ -7731,11 +7903,22 @@
     // jako obsah tabulek (poučení z Milníku 15, bod 4.5).
     pendingTipyFilter = null;
     pendingUsersFilter = null;
+    pendingUserDetailId = null;
     leaderPrehled = null;
     // Milník 22 (bod 3): mapa tipů s existující výplatou (filtr „ch").
     tipyMaVyplatu = {};
     // Milník 22 (bod 2): načtené nastavení panelu (prahy lídra).
     panelNastaveni = null;
+    // Zadání (bod 7): data i rozbalený stav akademie nesou konkrétní
+    // identitu (vlastní pokrok / to, co administrátor zrovna upravoval) -
+    // stejný důvod jako pendingUserDetailId/leaderPrehled výš. `*Wired`
+    // příznaky NEnulovat - listenery zůstávají navázané na kontejnery,
+    // které samotné z DOM nezmizí (jen se jejich innerHTML přepíše).
+    akademieData = null;
+    akademieOtevrenaLekce = null;
+    akadSpravaKategorie = [];
+    akadSpravaLekce = [];
+    akadSpravaOtevrenaKategorie = null;
   }
 
   // Kompletní úklid všeho, co se plní podle role. Volá se při odhlášení i
@@ -7912,6 +8095,10 @@
     closeAddUserModal();
     closeKycLightbox();
     closeKycRejectModal();
+    // Zadání (bod 7): stejný důvod jako u ostatních modalů výše (Milník 15,
+    // bod 4.7, nález 1) - otevřený editor okruhu/lekce nesmí přežít
+    // odhlášení/změnu identity.
+    closeAkadModal();
     // closeKycLightbox() má early-return, když je overlay už schovaný -
     // signed URL na doklad totožnosti by tak mohla v `img.src` přežít.
     var lightboxImg = el("kycLightboxImg");
@@ -8234,12 +8421,16 @@
     if (tab === "web") fetchWebStranky();              // MILNÍK 25 (bod 10)
     if (tab === "kyc") fetchKycScreen();
     if (tab === "mykyc") fetchMyKycScreen();
+    // Zadání (bod 7): Realitní akademie.
+    if (tab === "akademie") fetchMojeAkademie();
+    if (tab === "akademiesprava") fetchAkademieSprava();
     // Milník 17 (bod 16): "dashboard" je nově DOSAŽITELNÝ TLAČÍTKEM v
     // navigaci (do Milníku 16 se na něj dalo jen klikem na logo, které si
     // showDashboardVariant() volalo samo). Bez tohohle řádku by po kliku na
     // záložku zůstaly OBA obaly skryté (clearRoleSpecificContainers je při
     // změně identity schovává) a uživatel by viděl prázdnou obrazovku.
-    // Žádná data se nenačítají - obsah dashboardu je celý statický v HTML.
+    // Zadání (bod 6): u role tipař showDashboardVariant() teď navíc spouští
+    // fetchTiparDashboardData() (skutečná data, viz komentář ve funkci).
     if (tab === "dashboard") showDashboardVariant(currentUser ? currentUser.role : null);
   }
 
@@ -8316,10 +8507,11 @@
     //   * tipař - "dashboard" je PRVNÍ, protože je to zároveň jeho nová
     //     landing page po přihlášení (viz handleSignedIn) i cíl kliku na
     //     logo. Domovská záložka, která není první, by byla matoucí.
-    //   * administrátor - "dashboard" zůstává na KONCI. Jeho landing page
-    //     se nemění ("tipy") a obsah dashboardu je u něj pořád jen
-    //     zástupný box "připravujeme"; dávat takovou obrazovku na první
-    //     místo by bylo horší než ji tam nechat vzadu.
+    //   * administrátor - "dashboard" byl původně na KONCI (viz historie
+    //     výše), ale podle výslovného zadání klienta je nyní PRVNÍ v pořadí
+    //     záložek (Dashboard, Tipy, Uživatelé, Struktura sítě, ...) - jen
+    //     pořadí tlačítek (CSS order), landing page po přihlášení se
+    //     neměnila a zůstává "tipy" (viz handleSignedIn).
     //   * leader "dashboard" ZÁMĚRNĚ nemá (a nedostává ho ani teď) -
     //     jeho skutečný dashboard je "Přehled leadra" na záložce
     //     "network", která už první je. Přidat mu tuhle záložku by
@@ -8332,7 +8524,10 @@
     // rekrutačním odkazu (bod 7), který ani jedna z těch rolí nemá
     // (verejna_rekrutacni_stranka() vrací „nenalezeno" pro roli
     // administrator i rk, ať už kód zná kdokoli).
-    tipar: ["dashboard", "new", "list", "network", "marketing", "profile", "mykyc"],
+    // Zadání (bod 7): "akademie" (Realitní akademie) - hned za "network",
+    // podobně jako se tipaři učí budovat síť; nemá na to žádný vliv na
+    // ostatní záložky, jen pořadí tlačítek.
+    tipar: ["dashboard", "new", "list", "network", "akademie", "marketing", "profile", "mykyc"],
     // Milník 15 (bod 3): pořadí záložek Leadera přesně podle výčtu klienta -
     // Přehled lídra, Tipy, Uživatelé, Obsah, Výplaty, Provizní schéma,
     // Realitní kanceláře, Historie akcí, Můj profil. Dvě položky, které
@@ -8343,13 +8538,20 @@
     // MILNÍK 24 (bod 5): „sitstrom" (Struktura sítě) přibývá OBĚMA rolím.
     // U lídra hned za Přehledem (obojí je pohled na síť), u administrátora
     // za Uživatele (tam se na lidi taky dívá).
-    leader: ["network", "sitstrom", "tipy", "users", "marketing", "obsah", "vyplaty", "provize", "rk", "audit", "profile", "new", "kyc"],
+    // Zadání (bod 7): "akademie" dostává i leader - obsah (jak získat tip,
+    // jak budovat tým) je pro něj stejně relevantní jako pro tipaře a RPC
+    // akademie_moje_akademie() nemá žádné omezení na roli, jen na přihlášení.
+    leader: ["network", "sitstrom", "tipy", "users", "akademie", "marketing", "obsah", "vyplaty", "provize", "rk", "audit", "profile", "new", "kyc"],
     // MILNÍK 25 (bod 10): „web" (Správa webu) VÝHRADNĚ administrátorovi -
     // klient mluvil o administrátorském účtu a obsah těch stránek je
     // jediné, co appka ukazuje nepřihlášenému světu, takže okruh lidí,
     // kteří ho mohou přepsat, má být co nejužší. Serverová RPC
     // upravit_webovou_stranku() to vynucuje nezávisle na tomhle poli.
-    administrator: ["tipy", "users", "sitstrom", "kyc", "rk", "provize", "vyplaty", "obsah", "web", "audit", "profile", "dashboard"],
+    // Zadání (bod 5): pořadí záložek administrátora - první čtyři musí být
+    // přesně Dashboard, Tipy, Uživatelé, Struktura sítě, zbytek beze změny.
+    // Zadání (bod 7): "akademiesprava" (Obsah akademie) přidána na konec -
+    // správa kategorií/lekcí/testů Realitní akademie, výhradně administrátor.
+    administrator: ["dashboard", "tipy", "users", "sitstrom", "kyc", "rk", "provize", "vyplaty", "obsah", "web", "audit", "profile", "akademiesprava"],
     // Milník 7 (Část I/1): role RK viděla VÝHRADNĚ jednu obrazovku.
     // Milník 19 (body 7 a 8): přibývají "rkprofile" (Profil realitní
     // kanceláře) a "rkprovize" (Provizní schéma), v tomhle pořadí za
@@ -8384,6 +8586,12 @@
     if (variant === "administrator") {
       renderLeaderPrehled("dashboardAdminPrehledWrap");
     }
+    // Zadání (bod 6): dashboard tipaře už taky NAČÍTÁ skutečná data
+    // (dřív čistě statický mockup, viz historie komentářů výše u
+    // #dashboardTiparWrap) - stejný vzor jako administrátorská větev.
+    if (variant === "tipar") {
+      fetchTiparDashboardData();
+    }
   }
 
   function logoNavigateHome() {
@@ -8398,9 +8606,9 @@
       return;
     }
     if (currentUser.role === "tipar") {
-      // Milník 16 (bod 6): místo zástupného boxu statický vizuální návrh
-      // (#dashboardTiparWrap). Žádná data se nenačítají - obsah je celý v
-      // HTML, takže tu není co fetchovat ani co po sobě uklízet.
+      // Milník 16 (bod 6): #dashboardTiparWrap. Od zadání (bod 6) už NENÍ
+      // čistě statický - showDashboardVariant("tipar") teď zároveň spouští
+      // fetchTiparDashboardData() (vlastní tipy + vlastní vyplaty).
       showDashboardVariant("tipar");
       setActiveTab("dashboard");
       return;
@@ -8452,7 +8660,11 @@
     rkprovize: '<path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16V11"/><path d="M12 16V8"/><path d="M16 16v-3"/>',
     // MILNÍK 25 (bod 8): megafon. (bod 10): zeměkoule.
     marketing: '<path d="M4 9.5v5h3.5l6 3.5V6l-6 3.5z"/><path d="M17 9.2a4 4 0 0 1 0 5.6"/><path d="M19.4 6.8a7.5 7.5 0 0 1 0 10.4"/>',
-    web:       '<circle cx="12" cy="12" r="8.4"/><path d="M3.6 12h16.8"/><path d="M12 3.6c2.2 2.3 3.3 5.2 3.3 8.4s-1.1 6.1-3.3 8.4c-2.2-2.3-3.3-5.2-3.3-8.4S9.8 5.9 12 3.6z"/>'
+    web:       '<circle cx="12" cy="12" r="8.4"/><path d="M3.6 12h16.8"/><path d="M12 3.6c2.2 2.3 3.3 5.2 3.3 8.4s-1.1 6.1-3.3 8.4c-2.2-2.3-3.3-5.2-3.3-8.4S9.8 5.9 12 3.6z"/>',
+    // Zadání (bod 7): otevřená kniha - Realitní akademie (leader ji od teď
+    // má v ROLE_TAB_ORDER, viz výš). "akademiesprava" ikonu nepotřebuje -
+    // jen administrátor, a ten je mimo ROLE_S_IKONAMI.
+    akademie:  '<path d="M12 6.5c-1.8-1.3-4-2-6.5-2v11c2.5 0 4.7.7 6.5 2 1.8-1.3 4-2 6.5-2v-11c-2.5 0-4.7.7-6.5 2z"/><path d="M12 6.5v11"/>'
   };
 
   // Bod 9: klient výslovně zmínil jen lídra, ostatní role se zatím nemění.
@@ -9468,6 +9680,811 @@
       initialSortKey: "datum",
       initialSortDir: "desc"
     });
+  }
+
+  // ---------------- Zadání (bod 6): Dashboard tipaře — skutečná data ----------------
+  //
+  // Nahrazuje ukázková čísla z Milníku 18 (bod 2) v #dashboardTiparWrap:
+  // tři statistiky (Aktivní tipy / Možná odměna / Vyplaceno) a seznam
+  // "Co se děje s vašimi tipy" teď čtou vlastní tipy (tips.autor_id =
+  // aktuální uživatel — stejná RLS politika, jaká už dovoluje "list") a
+  // vlastní vyplaty (vyplaty.prijemce_id = aktuální uživatel — RLS "Prijemce
+  // vidi vlastni vyplaty"). Karta "Akademie" a panel "Cesta k vlastnímu
+  // týmu" se tady záměrně nemění - ty dostávají skutečná data samostatně
+  // (Realitní akademie).
+  //
+  // "Aktivní tip" = tip, který ještě NENÍ uzavřený: stav != "zamitnuto" a
+  // rk_stav (je-li vyplněný) není žádný z konečných stavů RK
+  // (prodano / klient_nepristoupil_ke_koupi / spoluprace_nenavazena).
+  var TDASH_RK_STAV_KONECNE = ["prodano", "klient_nepristoupil_ke_koupi", "spoluprace_nenavazena"];
+
+  function tdashTipJeAktivni(t) {
+    if (t.stav === "zamitnuto") return false;
+    if (t.rk_stav && TDASH_RK_STAV_KONECNE.indexOf(t.rk_stav) !== -1) return false;
+    return true;
+  }
+
+  async function fetchTiparDashboardData() {
+    var g = authGen; // Milník 15 (bod 4.5) — stejný vzor jako ostatní fetch* funkce
+    var userId = currentUser ? currentUser.id : null;
+    if (!userId) return;
+
+    // Zadání (bod 7): karta Akademie na dashboardu teď taky čte skutečná
+    // data - stejná RPC jako záložka Realitní akademie (akademie_moje_akademie),
+    // volaná tu samostatně, protože dashboard nepotřebuje stav kvízu, jen
+    // souhrn (viz renderTiparDashboardAkademie).
+    var davka = await Promise.all([
+      sb.from("tips").select("id,jmeno_klienta,typ_nemovitosti,lokalita,stav,rk_stav,odhadovana_provize,konecna_provize,provize_je_konecna,vlozeno_kdy").eq("autor_id", userId).order("vlozeno_kdy", { ascending: false }),
+      sb.from("vyplaty").select("castka_celkem,stav").eq("prijemce_id", userId),
+      sb.rpc("akademie_moje_akademie")
+    ]);
+    if (g !== authGen) return; // identita se během dotazu změnila
+
+    var tipyResult = davka[0];
+    var vyplatyResult = davka[1];
+    var akademieResult = davka[2];
+
+    if (tipyResult.error) {
+      console.error("Chyba při načítání tipů pro dashboard:", tipyResult.error);
+      var listWrapErr = el("tdashTipyList");
+      if (listWrapErr) listWrapErr.innerHTML = '<p class="dt-muted">Tipy se nepodařilo načíst.</p>';
+    } else {
+      renderTiparDashboardStats(tipyResult.data || [], vyplatyResult.error ? [] : (vyplatyResult.data || []));
+      renderTiparDashboardTipy(tipyResult.data || []);
+    }
+    if (vyplatyResult.error) {
+      console.error("Chyba při načítání vyplat pro dashboard:", vyplatyResult.error);
+    }
+    if (akademieResult.error) {
+      console.error("Chyba při načítání akademie pro dashboard:", akademieResult.error);
+    } else {
+      renderTiparDashboardAkademie(akademieResult.data || []);
+    }
+  }
+
+  function renderTiparDashboardStats(tipy, vyplaty) {
+    var aktivni = tipy.filter(tdashTipJeAktivni);
+    var moznaOdmena = aktivni.reduce(function (soucet, t) {
+      // Jen tipy, u kterých provize ještě NENÍ konečná - jakmile je
+      // konečná, patří do "Vyplaceno" (po skutečné výplatě), ne do odhadu.
+      if (t.provize_je_konecna) return soucet;
+      var v = Number(t.odhadovana_provize);
+      return soucet + (isNaN(v) ? 0 : v);
+    }, 0);
+    var vyplaceno = vyplaty.filter(function (v) { return v.stav === "vyplaceno"; })
+      .reduce(function (soucet, v) { var c = Number(v.castka_celkem); return soucet + (isNaN(c) ? 0 : c); }, 0);
+
+    var elAktivni = el("tdashStatAktivni");
+    var elAktivniNote = el("tdashStatAktivniNote");
+    var elOdmena = el("tdashStatOdmena");
+    var elVyplaceno = el("tdashStatVyplaceno");
+    if (elAktivni) elAktivni.textContent = String(aktivni.length);
+    if (elAktivniNote) elAktivniNote.textContent = tipy.length === 0 ? "zatím žádný vložený tip" : (aktivni.length === tipy.length ? "žádný zatím uzavřený" : (tipy.length - aktivni.length) + " už uzavřen" + ((tipy.length - aktivni.length) === 1 ? "" : "o"));
+    if (elOdmena) elOdmena.textContent = formatCena(moznaOdmena);
+    if (elVyplaceno) elVyplaceno.textContent = formatCena(vyplaceno);
+  }
+
+  // Chip u řádku "Co se děje s vašimi tipy" - vlastní jednodušší varianta
+  // stavPillHtml() (bez CSS třídy `pill`, ať sedí do vzhledu .tdash-chip
+  // z mockupu), ale STEJNÁ barevná logika/popisky jako všude jinde v appce
+  // (žádné druhé, konkurenční mapování stavů).
+  function tdashChipHtml(t) {
+    var trida = "tdash-chip";
+    if (t.stav === "zamitnuto") trida += " tdash-chip-zamitnuto";
+    else if (t.rk_stav === "prodano") trida += " tdash-chip-ok";
+    else if (t.rk_stav && TDASH_RK_STAV_KONECNE.indexOf(t.rk_stav) !== -1) trida += " tdash-chip-zamitnuto";
+    else if (t.stav === "predano_rk" || t.rk_stav) trida += " tdash-chip-rk";
+    else if (t.stav === "tip_overen_hledame_rk") trida += " tdash-chip-move";
+    var text = t.rk_stav ? rkStavLabel(t.rk_stav) : stavLabel(t.stav);
+    return '<span class="' + trida + '">' + escapeHtml(text) + '</span>';
+  }
+
+  function renderTiparDashboardTipy(tipy) {
+    var wrap = el("tdashTipyList");
+    if (!wrap) return;
+    if (tipy.length === 0) {
+      wrap.innerHTML = '<p class="dt-muted">Zatím jste nevložili žádný tip. Až nějaký přidáte, uvidíte tady jeho průběh.</p>';
+      return;
+    }
+    // Nejdůležitější/nejnovější tři vlastní tipy - řazeno podle data
+    // vložení (žádná časová osa jednotlivých posunů stavu tu není, viz
+    // report Kroku 6 v STAV.md - Milník 3 s tip_status_history byl v
+    // Milníku 4 nahrazen volným stavovým modelem bez přechodové tabulky).
+    var top = tipy.slice(0, 3);
+    wrap.innerHTML = top.map(function (t) {
+      var nazev = escapeHtml(t.jmeno_klienta || "(bez jména)") + " · " + escapeHtml(tipNemovitostLokalita(t) || "—");
+      return '<div class="tdash-tip-row tdash-tip-row-click" data-tdash-tip-id="' + escapeHtml(t.id) + '" role="button" tabindex="0">' +
+        '<span class="tdash-tip-dot" aria-hidden="true"></span>' +
+        '<span class="tdash-tip-main">' +
+          '<span class="tdash-tip-name">' + nazev + '</span>' +
+          '<p class="tdash-tip-desc">Vloženo ' + escapeHtml(formatDatumZCasu(t.vlozeno_kdy) || "—") + '</p>' +
+        '</span>' +
+        tdashChipHtml(t) +
+      '</div>';
+    }).join("");
+    wrap.querySelectorAll("[data-tdash-tip-id]").forEach(function (row) {
+      var otevriDetail = function () { openTipDetail(row.getAttribute("data-tdash-tip-id"), "dashboard"); };
+      row.addEventListener("click", otevriDetail);
+      row.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); otevriDetail(); } });
+    });
+  }
+
+  // =========================================================================
+  // Zadání (bod 7): REALITNÍ AKADEMIE
+  // -------------------------------------------------------------------------
+  // Tři místa v appce čtou/píšou stejná data:
+  //  1) karta „Realitní akademie" na dashboardu tipaře (souhrn, viz
+  //     fetchTiparDashboardData výš -> renderTiparDashboardAkademie),
+  //  2) záložka „Realitní akademie" tipaře - plný seznam okruhů/lekcí,
+  //     obsah lekce a opakovací test (fetchMojeAkademie/renderMojeAkademie),
+  //  3) záložka „Obsah akademie" administrátora - CRUD nad okruhy a lekcemi
+  //     (fetchAkademieSprava/renderAkademieSprava).
+  // Body 1 a 2 čtou přes RPC akademie_moje_akademie() (jen AKTIVNÍ okruhy/
+  // lekce, s vlastním pokrokem - viz komentář u migrace v report souboru).
+  // Bod 3 čte přímo z tabulek akademie_kategorie/akademie_lekce (RLS SELECT
+  // je „true" pro kohokoli přihlášeného - administrátor tak vidí i
+  // NEAKTIVNÍ obsah, který RPC záměrně vynechává), zápis jde vždy přes RPC
+  // akademie_ulozit_kategorii/akademie_smazat_kategorii/akademie_ulozit_lekci/
+  // akademie_smazat_lekci - všechny čtyři si oprávnění hlídají samy
+  // (je_administrator() uvnitř), klient žádnou kontrolu netuší.
+  //
+  // Zjednodušení, které stojí za vysvětlení: odpovědi testu (test_otazky,
+  // včetně příznaku spravna: true/false) se posílají klientovi a
+  // vyhodnocují se TAM - normálně bezpečnostní chyba, tady akceptovatelné,
+  // protože test AKTUÁLNĚ nic negatuje (zadání výslovně: budování sítě je
+  // povolené bez ohledu na stav akademie). Kdyby test měl v budoucnu
+  // opravdu něco blokovat, tohle je první věc, kterou by bylo nutné
+  // přepracovat na server-side vyhodnocení (RPC by dostávala jen vybrané
+  // indexy odpovědí, ne jejich správnost).
+  // =========================================================================
+
+  // Sloučí ploché řádky z akademie_moje_akademie() do pole kategorií -
+  // { id, nazev, lekce: [...] } - v pořadí, v jakém je RPC vrátila (řadí
+  // podle kategorie.poradi, lekce.poradi). Používá dashboard i celá
+  // záložka, proto samostatná funkce.
+  function akademieSeskupitPodleKategorie(rows) {
+    var mapa = {};
+    var poradi = [];
+    (rows || []).forEach(function (r) {
+      if (!mapa[r.kategorie_id]) {
+        mapa[r.kategorie_id] = { id: r.kategorie_id, nazev: r.kategorie_nazev, popis: r.kategorie_popis, povinna: r.kategorie_povinna, lekce: [] };
+        poradi.push(r.kategorie_id);
+      }
+      mapa[r.kategorie_id].lekce.push(r);
+    });
+    return poradi.map(function (id) { return mapa[id]; });
+  }
+
+  // ---------------- karta na dashboardu (souhrn) ----------------
+  function renderTiparDashboardAkademie(rows) {
+    rows = rows || [];
+    var kategorie = akademieSeskupitPodleKategorie(rows);
+    var celkem = rows.length;
+    var hotovo = rows.filter(function (r) { return r.dokonceno; }).length;
+    var pct = celkem === 0 ? 0 : Math.round((hotovo / celkem) * 100);
+    var zbyvaMin = rows.filter(function (r) { return !r.dokonceno; })
+      .reduce(function (s, r) { var m = Number(r.odhad_minut); return s + (isNaN(m) ? 0 : m); }, 0);
+
+    var elStat = el("tdashStatAkademie");
+    if (elStat) elStat.textContent = celkem === 0 ? "—" : (hotovo + " / " + celkem);
+
+    var elPct = el("tdashAcadPct");
+    if (elPct) elPct.textContent = celkem === 0 ? "—" : (pct + " %");
+
+    var elLabel = el("tdashAcadProgressLabel");
+    if (elLabel) elLabel.textContent = celkem === 0 ? "Obsah akademie se zatím připravuje." : (hotovo + " z " + celkem + " lekcí hotovo");
+
+    var elRemaining = el("tdashAcadRemainingTime");
+    if (elRemaining) elRemaining.textContent = (celkem === 0 || zbyvaMin === 0) ? "" : ("≈ " + zbyvaMin + " min zbývá");
+
+    var elFill = el("tdashAcadProgressFill");
+    if (elFill) elFill.style.width = pct + "%";
+
+    var dalsi = rows.filter(function (r) { return !r.dokonceno; })[0];
+    var wrapDalsi = el("tdashAcadNextWrap");
+    var textHotovo = el("tdashAcadHotovoText");
+    if (dalsi) {
+      if (wrapDalsi) wrapDalsi.hidden = false;
+      if (textHotovo) textHotovo.hidden = true;
+      var elMeta = el("tdashAcadNextMeta");
+      if (elMeta) elMeta.textContent = dalsi.kategorie_nazev || "Další lekce";
+      var elTitle = el("tdashAcadNextTitle");
+      if (elTitle) elTitle.textContent = dalsi.lekce_nazev || "";
+    } else {
+      if (wrapDalsi) wrapDalsi.hidden = true;
+      if (textHotovo) textHotovo.hidden = celkem === 0;
+    }
+
+    var trackEl = el("tdashAcadTrack");
+    if (trackEl) {
+      trackEl.innerHTML = kategorie.map(function (k) {
+        var kCelkem = k.lekce.length;
+        var kHotovo = k.lekce.filter(function (r) { return r.dokonceno; }).length;
+        var kPct = kCelkem === 0 ? 0 : Math.round((kHotovo / kCelkem) * 100);
+        var trida = "tdash-track-item" + (kCelkem > 0 && kHotovo === kCelkem ? " tdash-track-item-done" : "");
+        return '<div class="' + trida + '">' +
+          '<div class="tdash-track-bar" style="width:' + kPct + '%;"></div>' +
+          '<div class="tdash-track-name">' + escapeHtml(k.nazev || "") + '</div>' +
+          '<div class="tdash-track-sub">' + kHotovo + '/' + kCelkem + ' lekcí</div>' +
+        '</div>';
+      }).join("");
+    }
+  }
+
+  // ---------------- záložka Realitní akademie (tipař) ----------------
+  async function fetchMojeAkademie() {
+    var g = authGen; // Milník 15 (bod 4.5) — stejný vzor jako ostatní fetch*
+    var result = await sb.rpc("akademie_moje_akademie");
+    if (g !== authGen) return;
+    if (result.error) {
+      console.error("Chyba při načítání akademie:", result.error);
+      showBanner(el("akademieBanner"), "error", "Obsah akademie se nepodařilo načíst. Zkuste to prosím znovu.");
+      return;
+    }
+    akademieData = result.data || [];
+    renderMojeAkademie();
+  }
+
+  function akadKvizFormHtml(l) {
+    var otazky = Array.isArray(l.test_otazky) ? l.test_otazky : [];
+    return '<div id="akadLekceBanner-' + escapeHtml(l.lekce_id) + '"></div>' +
+      '<form class="akad-quiz" data-akad-quiz="' + escapeHtml(l.lekce_id) + '">' +
+        otazky.map(function (o, oi) {
+          var moznosti = Array.isArray(o.moznosti) ? o.moznosti : [];
+          return '<div class="akad-quiz-otazka">' +
+            '<p class="akad-quiz-otazka-text">' + (oi + 1) + '. ' + escapeHtml(o.otazka || "") + '</p>' +
+            moznosti.map(function (m, mi) {
+              var idAtr = "akadQ" + oi + "M" + mi + "-" + l.lekce_id;
+              return '<label class="akad-quiz-moznost" for="' + escapeHtml(idAtr) + '">' +
+                '<input type="radio" name="akad-otazka-' + oi + '" id="' + escapeHtml(idAtr) + '" value="' + mi + '">' +
+                '<span>' + escapeHtml(m.text || "") + '</span>' +
+              '</label>';
+            }).join("") +
+          '</div>';
+        }).join("") +
+        '<button class="btn-primary" type="submit" style="width:auto;">' + (l.dokonceno ? "Opakovat test" : "Odeslat test") + '</button>' +
+      '</form>' +
+      (l.dokonceno && l.pokusy ? '<p class="akad-lekce-hint">Pokusů celkem: ' + Number(l.pokusy) + '.</p>' : "");
+  }
+
+  function akadLekceObsahHtml(l) {
+    var html = '<div class="akad-lekce-obsah">' + odstavceHtml(l.lekce_obsah) + '</div>';
+    if (!l.ma_test) {
+      if (l.dokonceno) {
+        html += '<p class="akad-lekce-hint">Lekce bez testu - hotovo.</p>';
+      } else {
+        html += '<div id="akadLekceBanner-' + escapeHtml(l.lekce_id) + '"></div>' +
+          '<button class="btn-primary" type="button" style="width:auto;" data-akad-done="' + escapeHtml(l.lekce_id) + '">Označit jako hotovo</button>';
+      }
+      return html;
+    }
+    return html + akadKvizFormHtml(l);
+  }
+
+  function akadLekceHtml(l) {
+    var otevrena = akademieOtevrenaLekce === l.lekce_id;
+    var stavZnacka = l.dokonceno
+      ? '<span class="akad-lekce-stav akad-lekce-stav-ok">Hotovo' + (l.posledni_vysledek_pct != null ? " · " + Math.round(l.posledni_vysledek_pct) + " %" : "") + '</span>'
+      : '<span class="akad-lekce-stav">Nedokončeno</span>';
+    return '<div class="akad-lekce' + (l.dokonceno ? " akad-lekce-done" : "") + '">' +
+      '<button class="akad-lekce-head" type="button" data-akad-toggle="' + escapeHtml(l.lekce_id) + '" aria-expanded="' + (otevrena ? "true" : "false") + '">' +
+        '<span class="akad-lekce-title">' + escapeHtml(l.lekce_nazev || "") + '</span>' +
+        '<span class="akad-lekce-meta">' + Number(l.odhad_minut || 0) + ' min' + (l.ma_test ? " · test" : "") + '</span>' +
+        stavZnacka +
+        '<span class="akad-lekce-caret" aria-hidden="true">' + (otevrena ? "▲" : "▼") + '</span>' +
+      '</button>' +
+      (otevrena ? '<div class="akad-lekce-body">' + akadLekceObsahHtml(l) + '</div>' : "") +
+    '</div>';
+  }
+
+  function renderMojeAkademie() {
+    var wrap = el("akademieWrap");
+    if (!wrap) return;
+    var rows = akademieData || [];
+    if (rows.length === 0) {
+      wrap.innerHTML = '<p class="dt-muted">Obsah akademie zatím není připravený.</p>';
+      return;
+    }
+    var kategorie = akademieSeskupitPodleKategorie(rows);
+    var celkem = rows.length;
+    var hotovo = rows.filter(function (r) { return r.dokonceno; }).length;
+    var pct = celkem === 0 ? 0 : Math.round((hotovo / celkem) * 100);
+    var zbyvajici = rows.filter(function (r) { return !r.dokonceno; });
+    var zbyvaMin = zbyvajici.reduce(function (s, r) { var m = Number(r.odhad_minut); return s + (isNaN(m) ? 0 : m); }, 0);
+
+    var html = '<div class="tdash-card akad-summary">' +
+      '<div class="akad-summary-head">' +
+        '<div><p class="tdash-eyebrow">Váš postup</p><h3 class="tdash-section-title">' + hotovo + ' z ' + celkem + ' lekcí hotovo</h3></div>' +
+        '<span class="tdash-acad-pct">' + pct + ' %</span>' +
+      '</div>' +
+      '<div class="tdash-progress" aria-hidden="true"><div class="tdash-progress-fill" style="width:' + pct + '%;"></div></div>' +
+      (zbyvajici.length > 0
+        ? '<p class="akad-summary-note">Zbývá ' + zbyvajici.length + ' ' + (zbyvajici.length === 1 ? "lekce" : (zbyvajici.length < 5 ? "lekce" : "lekcí")) + ', odhadem ≈ ' + zbyvaMin + ' min.</p>'
+        : '<p class="akad-summary-note">Všechny lekce máte hotové - test u kterékoli si můžete kdykoli zopakovat.</p>') +
+    '</div>';
+
+    if (zbyvajici.length > 0) {
+      html += '<div class="tdash-card akad-remaining">' +
+        '<h3 class="tdash-section-title">Zbývající lekce</h3>' +
+        '<div class="akad-remaining-list">' +
+          zbyvajici.map(function (r) {
+            return '<div class="akad-remaining-row">' +
+              '<span class="akad-remaining-name">' + escapeHtml(r.lekce_nazev || "") + '</span>' +
+              '<span class="akad-remaining-cat">' + escapeHtml(r.kategorie_nazev || "") + '</span>' +
+              '<span class="akad-remaining-min">' + Number(r.odhad_minut || 0) + ' min</span>' +
+            '</div>';
+          }).join("") +
+        '</div>' +
+        '<p class="akad-remaining-total">Celkem zbývá odhadem ≈ ' + zbyvaMin + ' min.</p>' +
+      '</div>';
+    }
+
+    html += kategorie.map(function (k) {
+      var kCelkem = k.lekce.length;
+      var kHotovo = k.lekce.filter(function (r) { return r.dokonceno; }).length;
+      return '<div class="tdash-card akad-cat">' +
+        '<div class="akad-cat-head">' +
+          '<div><h3 class="tdash-section-title">' + escapeHtml(k.nazev || "") + '</h3>' +
+            (k.popis ? '<p class="akad-cat-desc">' + escapeHtml(k.popis) + '</p>' : "") +
+          '</div>' +
+          '<div class="akad-cat-head-right">' +
+            (k.povinna ? '<span class="akad-cat-povinna">povinné pro budování sítě</span>' : "") +
+            '<span class="akad-cat-pct">' + kHotovo + '/' + kCelkem + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="akad-lekce-list">' + k.lekce.map(akadLekceHtml).join("") + '</div>' +
+      '</div>';
+    }).join("");
+
+    wrap.innerHTML = html;
+    wireMojeAkademieEvents();
+  }
+
+  function wireMojeAkademieEvents() {
+    var wrap = el("akademieWrap");
+    if (!wrap || akademieWired) return;
+    akademieWired = true; // delegovaný listener - viz komentář u proměnné
+    wrap.addEventListener("click", function (e) {
+      var t = e.target.closest ? e.target.closest("[data-akad-toggle]") : null;
+      if (t) {
+        var id = t.getAttribute("data-akad-toggle");
+        akademieOtevrenaLekce = (akademieOtevrenaLekce === id) ? null : id;
+        renderMojeAkademie();
+        return;
+      }
+      var doneBtn = e.target.closest ? e.target.closest("[data-akad-done]") : null;
+      if (doneBtn) {
+        dokoncitAkadLekciBezTestu(doneBtn.getAttribute("data-akad-done"));
+      }
+    });
+    wrap.addEventListener("submit", function (e) {
+      var form = e.target.closest ? e.target.closest("[data-akad-quiz]") : null;
+      if (form) {
+        e.preventDefault();
+        odeslatAkadTest(form);
+      }
+    });
+  }
+
+  async function dokoncitAkadLekciBezTestu(lekceId) {
+    var g = authGen;
+    var result = await sb.rpc("akademie_dokoncit_lekci", { p_lekce_id: lekceId, p_vysledek_pct: null });
+    if (g !== authGen) return;
+    if (result.error) {
+      console.error("Chyba při označování lekce jako hotové:", result.error);
+      showBanner(el("akademieBanner"), "error", "Nepodařilo se uložit. Zkuste to prosím znovu.");
+      return;
+    }
+    fetchMojeAkademie();
+  }
+
+  async function odeslatAkadTest(form) {
+    var lekceId = form.getAttribute("data-akad-quiz");
+    var lekce = (akademieData || []).filter(function (r) { return r.lekce_id === lekceId; })[0];
+    if (!lekce) return;
+    var otazky = Array.isArray(lekce.test_otazky) ? lekce.test_otazky : [];
+    if (otazky.length === 0) return;
+
+    var bannerEl = el("akadLekceBanner-" + lekceId);
+    var spravneCelkem = 0;
+    var neodpovezeno = false;
+    otazky.forEach(function (o, oi) {
+      var vybranyInput = form.querySelector('input[name="akad-otazka-' + oi + '"]:checked');
+      if (!vybranyInput) { neodpovezeno = true; return; }
+      var moznosti = Array.isArray(o.moznosti) ? o.moznosti : [];
+      var vybrana = moznosti[Number(vybranyInput.value)];
+      if (vybrana && vybrana.spravna) spravneCelkem++;
+    });
+    if (neodpovezeno) {
+      if (bannerEl) showBanner(bannerEl, "error", "Odpovězte prosím na všechny otázky.");
+      return;
+    }
+
+    var pct = Math.round((spravneCelkem / otazky.length) * 100);
+    var g = authGen; // Milník 15 (bod 4.5)
+    var result = await sb.rpc("akademie_dokoncit_lekci", { p_lekce_id: lekceId, p_vysledek_pct: pct });
+    if (g !== authGen) return;
+    if (result.error) {
+      console.error("Chyba při odesílání testu akademie:", result.error);
+      if (bannerEl) showBanner(bannerEl, "error", "Test se nepodařilo uložit. Zkuste to prosím znovu.");
+      return;
+    }
+    var uspech = pct >= 70;
+    // Zpětná vazba do hlavního banneru záložky (přežije re-render, který
+    // fetchMojeAkademie() hned vyvolá - #akadLekceBanner-* naopak zmizí,
+    // protože se lekce zavře zpět do „hotovo" stavu jako všechny ostatní).
+    showBanner(el("akademieBanner"), uspech ? "ok" : "error",
+      "Výsledek testu: " + spravneCelkem + " z " + otazky.length + " (" + pct + " %)" +
+      (uspech ? " — lekce je splněná." : " — pro splnění je potřeba aspoň 70 %, zkuste to prosím znovu."));
+    fetchMojeAkademie();
+  }
+
+  // ---------------- záložka Obsah akademie (administrátor) ----------------
+  async function fetchAkademieSprava() {
+    var g = authGen;
+    // Přímo z tabulek (ne přes akademie_moje_akademie(), která záměrně
+    // vynechává neaktivní obsah) - RLS SELECT na obou tabulkách je "true"
+    // pro kohokoli přihlášeného, viz komentář v hlavičce sekce výš.
+    var davka = await Promise.all([
+      sb.from("akademie_kategorie").select("id,nazev,popis,poradi,povinna_pro_stavbu_site,aktivni").order("poradi"),
+      sb.from("akademie_lekce").select("id,kategorie_id,nazev,obsah,poradi,odhad_minut,test_otazky,aktivni").order("poradi")
+    ]);
+    if (g !== authGen) return;
+    var katResult = davka[0];
+    var lekResult = davka[1];
+    if (katResult.error || lekResult.error) {
+      console.error("Chyba při načítání obsahu akademie:", katResult.error || lekResult.error);
+      showBanner(el("akademieSpravaBanner"), "error", "Obsah akademie se nepodařilo načíst.");
+      return;
+    }
+    akadSpravaKategorie = katResult.data || [];
+    akadSpravaLekce = lekResult.data || [];
+    renderAkademieSprava();
+  }
+
+  function akadSpravaLekceRadekHtml(l) {
+    var otazek = Array.isArray(l.test_otazky) ? l.test_otazky.length : 0;
+    return '<div class="akad-sprava-lekce-radek">' +
+      '<span class="akad-sprava-lekce-poradi">' + Number(l.poradi || 0) + '</span>' +
+      '<span class="akad-sprava-lekce-nazev">' + escapeHtml(l.nazev || "(bez názvu)") + (l.aktivni ? "" : '<span class="akad-badge-neaktivni">neaktivní</span>') + '</span>' +
+      '<span class="dt-muted" style="font-size:12px;">' + Number(l.odhad_minut || 0) + ' min' + (otazek ? (" · " + otazek + " ot. testu") : " · bez testu") + '</span>' +
+      '<span class="akad-sprava-lekce-actions">' +
+        '<button class="btn-ghost" type="button" data-akadspr-edit-lekce="' + escapeHtml(l.id) + '">Upravit</button>' +
+        '<button class="btn-ghost" type="button" data-akadspr-smazat-lekce="' + escapeHtml(l.id) + '">Smazat</button>' +
+      '</span>' +
+    '</div>';
+  }
+
+  function renderAkademieSprava() {
+    var wrap = el("akademieSpravaWrap");
+    if (!wrap) return;
+    var html = '<div class="akad-sprava-head"><button class="btn-primary" type="button" style="width:auto;" id="akadNovaKategorieBtn">+ Nový okruh</button></div>';
+    var serazene = akadSpravaKategorie.slice().sort(function (a, b) { return Number(a.poradi || 0) - Number(b.poradi || 0); });
+    if (serazene.length === 0) {
+      html += '<p class="dt-muted">Zatím žádné okruhy - založte první tlačítkem výše.</p>';
+    } else {
+      html += serazene.map(function (k) {
+        var lekce = akadSpravaLekce.filter(function (l) { return l.kategorie_id === k.id; })
+          .sort(function (a, b) { return Number(a.poradi || 0) - Number(b.poradi || 0); });
+        var rozbaleno = akadSpravaOtevrenaKategorie === k.id;
+        return '<div class="tdash-card akad-sprava-kat' + (k.aktivni ? "" : " akad-sprava-neaktivni") + '">' +
+          '<div class="akad-sprava-kat-head">' +
+            '<button class="akad-sprava-kat-toggle" type="button" data-akadspr-toggle-kat="' + escapeHtml(k.id) + '">' +
+              '<span class="akad-lekce-caret" aria-hidden="true">' + (rozbaleno ? "▲" : "▼") + '</span>' +
+              '<span>' + escapeHtml(k.nazev || "(bez názvu)") + '</span>' +
+              (k.aktivni ? "" : '<span class="akad-badge-neaktivni">neaktivní</span>') +
+              (k.povinna_pro_stavbu_site ? '<span class="akad-badge-povinna">povinné</span>' : "") +
+            '</button>' +
+            '<div class="akad-sprava-kat-actions">' +
+              '<span class="dt-muted" style="font-size:12px;">' + lekce.length + ' lekcí · pořadí ' + Number(k.poradi || 0) + '</span>' +
+              '<button class="btn-ghost" type="button" data-akadspr-edit-kat="' + escapeHtml(k.id) + '">Upravit</button>' +
+              '<button class="btn-ghost" type="button" data-akadspr-smazat-kat="' + escapeHtml(k.id) + '">Smazat</button>' +
+            '</div>' +
+          '</div>' +
+          (rozbaleno ? (
+            '<div class="akad-sprava-kat-body">' +
+              (k.popis ? '<p class="dt-muted" style="margin-top:12px;">' + escapeHtml(k.popis) + '</p>' : "") +
+              '<div class="akad-sprava-lekce-list">' +
+                (lekce.length === 0 ? '<p class="dt-muted">Zatím žádné lekce v tomto okruhu.</p>' : lekce.map(akadSpravaLekceRadekHtml).join("")) +
+              '</div>' +
+              '<button class="btn-ghost" type="button" data-akadspr-nova-lekce="' + escapeHtml(k.id) + '">+ Přidat lekci</button>' +
+            '</div>'
+          ) : "") +
+        '</div>';
+      }).join("");
+    }
+    wrap.innerHTML = html;
+    wireAkademieSpravaEvents();
+  }
+
+  function wireAkademieSpravaEvents() {
+    var wrap = el("akademieSpravaWrap");
+    if (!wrap) return;
+    // Tlačítko je součástí přegenerovaného innerHTML - musí se navazovat
+    // znovu při KAŽDÉM renderu (starý element i s posluchačem zmizí spolu
+    // s přepsaným innerHTML). Delegovaný listener na `wrap` níže je naopak
+    // jednorázový - `wrap` samotný se nepřepisuje, jen jeho obsah.
+    var novyBtn = el("akadNovaKategorieBtn");
+    if (novyBtn) novyBtn.addEventListener("click", function () { openAkadKategorieModal(null); });
+    if (akademieSpravaWired) return;
+    akademieSpravaWired = true;
+    wrap.addEventListener("click", function (e) {
+      var t;
+      if ((t = e.target.closest("[data-akadspr-toggle-kat]"))) {
+        var id = t.getAttribute("data-akadspr-toggle-kat");
+        akadSpravaOtevrenaKategorie = (akadSpravaOtevrenaKategorie === id) ? null : id;
+        renderAkademieSprava();
+        return;
+      }
+      if ((t = e.target.closest("[data-akadspr-edit-kat]"))) {
+        var kat = akadSpravaKategorie.filter(function (k) { return k.id === t.getAttribute("data-akadspr-edit-kat"); })[0];
+        if (kat) openAkadKategorieModal(kat);
+        return;
+      }
+      if ((t = e.target.closest("[data-akadspr-smazat-kat]"))) {
+        var katId = t.getAttribute("data-akadspr-smazat-kat");
+        var katObj = akadSpravaKategorie.filter(function (k) { return k.id === katId; })[0];
+        var pocetLekci = akadSpravaLekce.filter(function (l) { return l.kategorie_id === katId; }).length;
+        if (!window.confirm('Opravdu smazat okruh „' + ((katObj && katObj.nazev) || "") + '“' +
+          (pocetLekci > 0 ? (" i se všemi jeho " + pocetLekci + " lekcemi a záznamy o dokončení uživatelů") : "") +
+          '? Tohle nejde vrátit.')) return;
+        smazatAkadKategorii(katId);
+        return;
+      }
+      if ((t = e.target.closest("[data-akadspr-nova-lekce]"))) {
+        openAkadLekceModal(null, t.getAttribute("data-akadspr-nova-lekce"));
+        return;
+      }
+      if ((t = e.target.closest("[data-akadspr-edit-lekce]"))) {
+        var lekId = t.getAttribute("data-akadspr-edit-lekce");
+        var lek = akadSpravaLekce.filter(function (l) { return l.id === lekId; })[0];
+        if (lek) openAkadLekceModal(lek, lek.kategorie_id);
+        return;
+      }
+      if ((t = e.target.closest("[data-akadspr-smazat-lekce]"))) {
+        var lekId2 = t.getAttribute("data-akadspr-smazat-lekce");
+        var lek2 = akadSpravaLekce.filter(function (l) { return l.id === lekId2; })[0];
+        if (!window.confirm('Opravdu smazat lekci „' + ((lek2 && lek2.nazev) || "") + '“ i se záznamy o dokončení uživatelů? Tohle nejde vrátit.')) return;
+        smazatAkadLekci(lekId2);
+        return;
+      }
+    });
+  }
+
+  async function smazatAkadKategorii(id) {
+    var g = authGen;
+    var result = await sb.rpc("akademie_smazat_kategorii", { p_id: id });
+    if (g !== authGen) return;
+    if (result.error) {
+      console.error("Chyba při mazání okruhu akademie:", result.error);
+      showBanner(el("akademieSpravaBanner"), "error", akadChybaText(result.error));
+      return;
+    }
+    fetchAkademieSprava();
+  }
+
+  async function smazatAkadLekci(id) {
+    var g = authGen;
+    var result = await sb.rpc("akademie_smazat_lekci", { p_id: id });
+    if (g !== authGen) return;
+    if (result.error) {
+      console.error("Chyba při mazání lekce akademie:", result.error);
+      showBanner(el("akademieSpravaBanner"), "error", akadChybaText(result.error));
+      return;
+    }
+    fetchAkademieSprava();
+  }
+
+  function akadChybaText(error) {
+    if (!error) return "Nastala neočekávaná chyba. Zkuste to prosím znovu.";
+    var msg = error.message || "";
+    if (error.code === "42501" || msg.indexOf("Nemate opravneni") !== -1) return "Nemáte oprávnění upravovat obsah akademie.";
+    if (msg.indexOf("je povinny") !== -1 || msg.indexOf("je povinna") !== -1) return "Vyplňte prosím všechna povinná pole.";
+    if (msg.indexOf("nenalezena") !== -1) return "Záznam nebyl nalezen - možná ho mezitím upravil nebo smazal někdo jiný.";
+    return "Nepodařilo se uložit (" + escapeHtml(msg || "neznámá chyba") + ").";
+  }
+
+  // ---------------- modal: editace okruhu ----------------
+  function closeAkadModal() {
+    el("akadModalOverlay").hidden = true;
+    el("akadModalBox").innerHTML = "";
+  }
+
+  function openAkadKategorieModal(kat) {
+    var jeNova = !kat;
+    el("akadModalBox").innerHTML =
+      '<h3 class="detail-section-title" style="margin-top:0;">' + (jeNova ? "Nový okruh" : "Upravit okruh") + '</h3>' +
+      '<div id="akadModalBanner"></div>' +
+      '<form id="akadKatForm" novalidate>' +
+        '<div class="form-grid">' +
+          '<div class="field col-span-2"><label for="akadKatNazev">Název *</label><input type="text" id="akadKatNazev" value="' + escapeHtml(kat ? kat.nazev : "") + '"></div>' +
+          '<div class="field col-span-2"><label for="akadKatPopis">Popis</label><textarea id="akadKatPopis" rows="2">' + escapeHtml(kat ? (kat.popis || "") : "") + '</textarea></div>' +
+          '<div class="field"><label for="akadKatPoradi">Pořadí</label><input type="number" id="akadKatPoradi" value="' + (kat ? Number(kat.poradi || 0) : (akadSpravaKategorie.length + 1) * 10) + '"></div>' +
+          '<div class="field"><label class="akad-checkbox-label"><input type="checkbox" id="akadKatAktivni"' + (!kat || kat.aktivni ? " checked" : "") + '> Aktivní (viditelné tipařům)</label></div>' +
+          '<div class="field col-span-2"><label class="akad-checkbox-label"><input type="checkbox" id="akadKatPovinna"' + (kat && kat.povinna_pro_stavbu_site ? " checked" : "") + '> Povinné pro budování sítě (zatím se nikde nevynucuje - nastavení pro budoucí použití)</label></div>' +
+        '</div>' +
+        '<div class="form-actions">' +
+          '<button class="btn-primary" type="submit" id="akadKatSaveBtn" style="width:auto;">Uložit</button>' +
+          '<button class="btn-ghost" type="button" id="akadKatCancelBtn">Zrušit</button>' +
+        '</div>' +
+      '</form>';
+    el("akadModalOverlay").hidden = false;
+    el("akadKatCancelBtn").addEventListener("click", closeAkadModal);
+    el("akadKatForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      submitAkadKategorieForm(kat ? kat.id : null);
+    });
+  }
+
+  async function submitAkadKategorieForm(id) {
+    var nazev = el("akadKatNazev").value.trim();
+    if (!nazev) { showBanner(el("akadModalBanner"), "error", "Název je povinný."); return; }
+    var popis = el("akadKatPopis").value.trim();
+    var poradi = Number(el("akadKatPoradi").value) || 0;
+    var povinna = el("akadKatPovinna").checked;
+    var aktivni = el("akadKatAktivni").checked;
+
+    var g = authGen;
+    var btn = el("akadKatSaveBtn");
+    btn.disabled = true;
+    showBanner(el("akadModalBanner"), null, null);
+    var result = await sb.rpc("akademie_ulozit_kategorii", {
+      p_id: id || null, p_nazev: nazev, p_popis: popis || null, p_poradi: poradi, p_povinna: povinna, p_aktivni: aktivni
+    });
+    if (g !== authGen) return;
+    btn.disabled = false;
+    if (result.error) {
+      console.error("Chyba při ukládání okruhu akademie:", result.error);
+      showBanner(el("akadModalBanner"), "error", akadChybaText(result.error));
+      return;
+    }
+    closeAkadModal();
+    fetchAkademieSprava();
+  }
+
+  // ---------------- modal: editace lekce (+ stavitel testových otázek) ----------------
+  function akadMoznostRadekHtml(otazkaIdx, moznost) {
+    moznost = moznost || { text: "", spravna: false };
+    return '<div class="akad-moznost-radek">' +
+      '<input type="radio" name="akad-spravna-' + otazkaIdx + '" data-role="moznost-spravna"' + (moznost.spravna ? " checked" : "") + '>' +
+      '<input type="text" class="akad-moznost-text" data-role="moznost-text" placeholder="Znění možnosti" value="' + escapeHtml(moznost.text || "") + '">' +
+      '<button type="button" class="akad-moznost-smazat" data-role="smazat-moznost" title="Smazat možnost">&times;</button>' +
+    '</div>';
+  }
+
+  function akadOtazkaBlokHtml(idx, otazka) {
+    otazka = otazka || { otazka: "", moznosti: [] };
+    var moznosti = (otazka.moznosti && otazka.moznosti.length) ? otazka.moznosti : [{ text: "", spravna: true }, { text: "", spravna: false }];
+    return '<div class="akad-otazka-blok" data-otazka-idx="' + idx + '">' +
+      '<div class="akad-otazka-head">' +
+        '<input type="text" class="akad-otazka-text" data-role="otazka-text" placeholder="Znění otázky" value="' + escapeHtml(otazka.otazka || "") + '">' +
+        '<button type="button" class="btn-ghost" data-role="smazat-otazku">Smazat otázku</button>' +
+      '</div>' +
+      '<div class="akad-moznosti-list" data-role="moznosti-list">' +
+        moznosti.map(function (m) { return akadMoznostRadekHtml(idx, m); }).join("") +
+      '</div>' +
+      '<button type="button" class="btn-ghost akad-pridat-moznost" data-role="pridat-moznost">+ Přidat možnost</button>' +
+    '</div>';
+  }
+
+  // Posbírá aktuální stav stavitele otázek přímo z DOM (ne z odděleného JS
+  // stavu) - přidávání/mazání otázek a možností se řeší přímou DOM
+  // manipulací (viz openAkadLekceModal), takže DOM je tu jediný zdroj
+  // pravdy. Vyhazuje Error se srozumitelnou českou hláškou při chybě
+  // validace - volající ji zachytí a zobrazí v banneru.
+  function akadModalSesbiratOtazky() {
+    var vysledek = [];
+    var bloky = document.querySelectorAll("#akadOtazkyList .akad-otazka-blok");
+    for (var i = 0; i < bloky.length; i++) {
+      var blok = bloky[i];
+      var otazkaText = blok.querySelector('[data-role="otazka-text"]').value.trim();
+      var moznosti = [];
+      var maSpravnou = false;
+      blok.querySelectorAll('[data-role="moznosti-list"] .akad-moznost-radek').forEach(function (radek) {
+        var text = radek.querySelector('[data-role="moznost-text"]').value.trim();
+        var spravna = radek.querySelector('[data-role="moznost-spravna"]').checked;
+        if (!text) return;
+        if (spravna) maSpravnou = true;
+        moznosti.push({ text: text, spravna: !!spravna });
+      });
+      if (!otazkaText && moznosti.length === 0) continue; // prázdný blok - přeskočit beze změny
+      if (!otazkaText) throw new Error("Otázka č. " + (i + 1) + " nemá znění.");
+      if (moznosti.length < 2) throw new Error('Otázka „' + otazkaText + '“ potřebuje aspoň dvě možnosti.');
+      if (!maSpravnou) throw new Error('U otázky „' + otazkaText + '“ vyberte kolečkem správnou odpověď.');
+      vysledek.push({ otazka: otazkaText, moznosti: moznosti });
+    }
+    return vysledek;
+  }
+
+  function openAkadLekceModal(lekce, kategorieId) {
+    var jeNova = !lekce;
+    akadOtazkaCounter = 0;
+    var otazky = (lekce && Array.isArray(lekce.test_otazky)) ? lekce.test_otazky : [];
+    var otazkyHtml = otazky.map(function (o) { return akadOtazkaBlokHtml(akadOtazkaCounter++, o); }).join("");
+    var vychoziPoradi = lekce ? Number(lekce.poradi || 0) : (akadSpravaLekce.filter(function (l) { return l.kategorie_id === kategorieId; }).length + 1) * 10;
+
+    el("akadModalBox").innerHTML =
+      '<h3 class="detail-section-title" style="margin-top:0;">' + (jeNova ? "Nová lekce" : "Upravit lekci") + '</h3>' +
+      '<div id="akadModalBanner"></div>' +
+      '<form id="akadLekceForm" novalidate>' +
+        '<div class="form-grid">' +
+          '<div class="field col-span-2"><label for="akadLekNazev">Název *</label><input type="text" id="akadLekNazev" value="' + escapeHtml(lekce ? lekce.nazev : "") + '"></div>' +
+          '<div class="field col-span-2"><label for="akadLekObsah">Obsah lekce *</label><textarea id="akadLekObsah" rows="7">' + escapeHtml(lekce ? (lekce.obsah || "") : "") + '</textarea></div>' +
+          '<div class="field"><label for="akadLekPoradi">Pořadí</label><input type="number" id="akadLekPoradi" value="' + vychoziPoradi + '"></div>' +
+          '<div class="field"><label for="akadLekMinuty">Odhad (minuty)</label><input type="number" id="akadLekMinuty" min="1" value="' + (lekce ? Number(lekce.odhad_minut || 5) : 5) + '"></div>' +
+          '<div class="field col-span-2"><label class="akad-checkbox-label"><input type="checkbox" id="akadLekAktivni"' + (!lekce || lekce.aktivni ? " checked" : "") + '> Aktivní (viditelná tipařům)</label></div>' +
+        '</div>' +
+        '<div class="akad-otazky-sekce">' +
+          '<div class="akad-otazky-head"><h4 style="margin:0;">Opakovací test (volitelný)</h4><button class="btn-ghost" type="button" id="akadPridatOtazkuBtn">+ Přidat otázku</button></div>' +
+          '<p class="dt-muted" style="margin-top:6px;">Bez otázek bude lekce bez testu - tipař ji jen označí jako hotovou. U každé otázky zvolte kolečkem správnou odpověď.</p>' +
+          '<div id="akadOtazkyList">' + otazkyHtml + '</div>' +
+        '</div>' +
+        '<div class="form-actions">' +
+          '<button class="btn-primary" type="submit" id="akadLekSaveBtn" style="width:auto;">Uložit</button>' +
+          '<button class="btn-ghost" type="button" id="akadLekCancelBtn">Zrušit</button>' +
+        '</div>' +
+      '</form>';
+    el("akadModalOverlay").hidden = false;
+
+    el("akadLekCancelBtn").addEventListener("click", closeAkadModal);
+    el("akadPridatOtazkuBtn").addEventListener("click", function () {
+      el("akadOtazkyList").insertAdjacentHTML("beforeend", akadOtazkaBlokHtml(akadOtazkaCounter++, null));
+    });
+    // Přidávání/mazání otázek a možností řeší přímá DOM manipulace
+    // (insertAdjacentHTML/remove) - kdyby šlo o plný re-render z JS pole,
+    // ztrácel by se rozepsaný text v ostatních polích při každém kliku.
+    el("akadOtazkyList").addEventListener("click", function (e) {
+      var btnSmazatOtazku = e.target.closest('[data-role="smazat-otazku"]');
+      if (btnSmazatOtazku) { btnSmazatOtazku.closest(".akad-otazka-blok").remove(); return; }
+      var btnPridatMoznost = e.target.closest('[data-role="pridat-moznost"]');
+      if (btnPridatMoznost) {
+        var blok = btnPridatMoznost.closest(".akad-otazka-blok");
+        var idx = blok.getAttribute("data-otazka-idx");
+        blok.querySelector('[data-role="moznosti-list"]').insertAdjacentHTML("beforeend", akadMoznostRadekHtml(idx, null));
+        return;
+      }
+      var btnSmazatMoznost = e.target.closest('[data-role="smazat-moznost"]');
+      if (btnSmazatMoznost) { btnSmazatMoznost.closest(".akad-moznost-radek").remove(); return; }
+    });
+    el("akadLekceForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      submitAkadLekceForm(lekce ? lekce.id : null, kategorieId);
+    });
+  }
+
+  async function submitAkadLekceForm(id, kategorieId) {
+    var nazev = el("akadLekNazev").value.trim();
+    if (!nazev) { showBanner(el("akadModalBanner"), "error", "Název je povinný."); return; }
+    var obsah = el("akadLekObsah").value.trim();
+    var poradi = Number(el("akadLekPoradi").value) || 0;
+    var minuty = Math.max(1, Number(el("akadLekMinuty").value) || 5);
+    var aktivni = el("akadLekAktivni").checked;
+
+    var otazky;
+    try {
+      otazky = akadModalSesbiratOtazky();
+    } catch (chybaValidace) {
+      showBanner(el("akadModalBanner"), "error", chybaValidace.message);
+      return;
+    }
+
+    var g = authGen;
+    var btn = el("akadLekSaveBtn");
+    btn.disabled = true;
+    showBanner(el("akadModalBanner"), null, null);
+    var result = await sb.rpc("akademie_ulozit_lekci", {
+      p_id: id || null, p_kategorie_id: kategorieId, p_nazev: nazev, p_obsah: obsah || null,
+      p_poradi: poradi, p_odhad_minut: minuty, p_test_otazky: otazky, p_aktivni: aktivni
+    });
+    if (g !== authGen) return;
+    btn.disabled = false;
+    if (result.error) {
+      console.error("Chyba při ukládání lekce akademie:", result.error);
+      showBanner(el("akadModalBanner"), "error", akadChybaText(result.error));
+      return;
+    }
+    closeAkadModal();
+    fetchAkademieSprava();
   }
 
   function subscribeRealtime(userId) {
@@ -10872,6 +11889,21 @@
   // přepnutím záložky uloží kategorii, kterou má seznam lidí zobrazit.
   // Stejný vzor i stejná pravidla úklidu jako `pendingTipyFilter`.
   var pendingUsersFilter = null;
+  // Zadání (bod 4): id tipaře, jehož Detail se má otevřít hned po přepnutí
+  // na záložku Uživatelé a doběhnutí fetchUsersTable() - nastavuje ho
+  // proklik z kolečka s fotkou ve Struktuře sítě (viz stOtevriDetailTipare).
+  var pendingUserDetailId = null;
+  // Zadání (bod 7): stav záložky Realitní akademie (tipař) a Obsah akademie
+  // (administrátor) - viz resetDataTableInstances() níž pro úklid při změně
+  // identity a fetchMojeAkademie/fetchAkademieSprava pro plnění.
+  var akademieData = null; // syrová data z akademie_moje_akademie() (VLASTNÍ pokrok)
+  var akademieOtevrenaLekce = null; // id rozbalené lekce v accordionu (jedna najednou)
+  var akademieWired = false; // delegovaný listener na #akademieWrap se váže jen jednou
+  var akadSpravaKategorie = []; // VŠECHNY kategorie (i neaktivní) - přímo z tabulky
+  var akadSpravaLekce = []; // VŠECHNY lekce (i neaktivní) - přímo z tabulky
+  var akadSpravaOtevrenaKategorie = null; // id rozbaleného okruhu v seznamu (jeden najednou)
+  var akademieSpravaWired = false; // delegovaný listener na #akademieSpravaWrap se váže jen jednou
+  var akadOtazkaCounter = 0; // čítač pro unikátní index otázky uvnitř otevřeného modalu editace lekce
   var usersRowsCache = []; // poslední načtení moje_uzivatele() - pro nabídku sponzora ve formuláři Upravit
   var usersById = {}; // lokální mapa jen pro tenhle formulář (NEpřepisuje sdílenou adminUsersById)
   var userFormTargetId = null;
@@ -11032,6 +12064,15 @@
     if (pendingUsersFilter) {
       usersTable.setFilterValue(pendingUsersFilter);
       pendingUsersFilter = null;
+    }
+
+    // Zadání (bod 4): proklik z koleček ve Struktuře sítě rovnou na Detail
+    // tipaře - stejný vzor jako pendingUsersFilter výše. usersById je teď
+    // hotové (viz začátek téhle funkce), takže je bezpečné otevřít detail.
+    if (pendingUserDetailId) {
+      var cilId = pendingUserDetailId;
+      pendingUserDetailId = null;
+      openUserDetail(cilId);
     }
   }
 
@@ -16363,23 +17404,36 @@
   // hodnotu > 0 (ti nesou informaci a patří do řazení), a ve shluku
   // zůstávají jen ti s nulou. Ve výchozím režimu „Jméno" se chování
   // z Milníku 24 nemění vůbec.
+  // Zadání (bod 4): přepínač už nemá tři polohy "Jméno/Počet tipů/Vyplacené
+  // provize", kde "Jméno" byla jen jedna z rovnocenných voleb, která
+  // NAHRAZOVALA obsah kolečka. Nově je "jméno" (fotka/iniciály) VŽDY v
+  // kolečku - beze změny - a tlačítka níž jsou zvýraznění/filtr, který se
+  // dá zapnout a zase vypnout (klik na aktivní tlačítko ho vypne). Zapnutý
+  // filtr přidá ke kolečku malý štítek S HODNOTOU VEDLE něj (stBadgeText)
+  // a seřadí uzly v úrovni sestupně podle zvolené veličiny - obojí beze
+  // změny oproti předchozímu chování, jen se to dřív dělo tím, že se
+  // přepsal obsah bubliny. Třetí volba "Nejrychleji rostoucí síť" je nová
+  // (bod 4) a čte novych_30 z sit_strom() (migrace
+  // zadani_sit_strom_novych_30).
   var ST_REZIMY = [
-    { kod: "jmeno",   label: "Jméno" },
     { kod: "tipy",    label: "Počet tipů" },
-    { kod: "provize", label: "Vyplacené provize" }
+    { kod: "provize", label: "Vyplacené provize" },
+    { kod: "rust",    label: "Nejrychleji rostoucí síť" }
   ];
-  var stRezim = "jmeno";
+  var stRezim = ""; // "" = výchozí, žádný filtr/zvýraznění aktivní
 
-  function stJeHodnotovyRezim() { return stRezim === "tipy" || stRezim === "provize"; }
+  function stJeHodnotovyRezim() { return stRezim === "tipy" || stRezim === "provize" || stRezim === "rust"; }
 
   function stHodnota(u) {
     if (stRezim === "tipy") return Number(u.pocet_tipu || 0);
     if (stRezim === "provize") return Number(u.vyplacene_provize || 0);
+    if (stRezim === "rust") return Number(u.novych_30 || 0);
     return 0;
   }
 
-  // Do kolečka o 38–74 px se „1 250 000 Kč" nevejde. Bublina při najetí
-  // myší proto nese PLNOU částku (viz stPopis) a v kolečku je zkrácený tvar.
+  // Do kolečka o 38–74 px se „1 250 000 Kč" nevejde - proto zůstává
+  // zkrácený tvar i teď, kdy hodnota nejde DO kolečka, ale do štítku vedle
+  // něj (ten má omezenou šířku, ať strom nezabírá zbytečně místo).
   function stKompaktniCastka(v) {
     var n = Number(v || 0);
     if (n >= 1000000) return String(Math.round(n / 100000) / 10).replace(".", ",") + " M";
@@ -16387,10 +17441,16 @@
     return String(Math.round(n));
   }
 
-  function stBublinaText(u) {
-    if (stRezim === "tipy") return String(Number(u.pocet_tipu || 0));
-    if (stRezim === "provize") return stKompaktniCastka(u.vyplacene_provize);
-    return stIniciály(u);
+  // Text štítku VEDLE kolečka (ne uvnitř něj) - jen když je aktivní některý
+  // z filtrů výše.
+  function stBadgeText(u) {
+    if (stRezim === "tipy") {
+      var t = Number(u.pocet_tipu || 0);
+      return t + " " + (t === 1 ? "tip" : (t < 5 && t > 0 ? "tipy" : "tipů"));
+    }
+    if (stRezim === "provize") return stKompaktniCastka(u.vyplacene_provize) + " Kč";
+    if (stRezim === "rust") return "+" + Number(u.novych_30 || 0) + " / 30 dní";
+    return "";
   }
 
   // Sestupně podle hodnoty; při shodě zůstává abecední pořadí ze serveru
@@ -16439,6 +17499,10 @@
     // MILNÍK 27 (bod 6): plná částka patří do bubliny — v kolečku je jen
     // zkrácený tvar („48 tis."), aby se do něj vešel.
     radky.push("vyplacené provize " + formatCena(u.vyplacene_provize || 0));
+    // Zadání (bod 4): růst je teď vidět v bublině VŽDY, ne jen ve filtru
+    // "Nejrychleji rostoucí síť" - filtr jen podle něj navíc řadí a přidá
+    // štítek vedle kolečka.
+    radky.push("+" + Number(u.novych_30 || 0) + " nových za posledních 30 dní");
     if (!u.aktivni) radky.push("označen jako vymazaný");
     return radky;
   }
@@ -16447,19 +17511,22 @@
   // Bublina s popisem je čistě CSS (:hover / :focus-within) — appka nemá
   // tooltip komponentu a `title` by u kolečka s iniciálami přišel pozdě
   // a bez formátování. `aria-label` nese totéž pro čtečky.
+  //
+  // Zadání (bod 4): kolečko VŽDY zůstává fotka/iniciály (dřív se v
+  // "hodnotovém" režimu přepisovalo číslem - to teď nese samostatný štítek
+  // .st-badge VEDLE kolečka, viz stBadgeText). Kolečko je navíc klikací -
+  // otevírá Detail tipaře (viz stOtevriDetailTipare a jeho zapojení v
+  // renderSitStrom).
   function stUzelHtml(u, varianta) {
     var radky = stPopis(u);
-    var trida = "st-node st-node-" + varianta + (u.aktivni ? "" : " st-node-neaktivni");
-    // MILNÍK 27 (bod 6): v hodnotovém režimu se do kolečka místo iniciál
-    // píše číslo. Fotka se v tom režimu ZÁMĚRNĚ nedotahuje (viz
-    // nacistFotkyStromu) — číslo pod fotkou by nebylo vidět.
+    var trida = "st-node st-node-" + varianta + (u.aktivni ? "" : " st-node-neaktivni") + " st-node-klikaci";
     var hodnotovy = stJeHodnotovyRezim();
-    return '<div class="' + trida + '" tabindex="0" data-st-id="' + escapeHtml(u.id) + '"' +
-        ' aria-label="' + escapeHtml(radky.join(" — ")) + '">' +
-        '<div class="st-avatar' + (hodnotovy ? ' st-avatar-hodnota' : '') + '"' +
-          (hodnotovy ? '' : ' data-st-avatar="' + escapeHtml(u.id) + '"') + '>' +
-          '<span class="st-initials">' + escapeHtml(stBublinaText(u)) + '</span>' +
+    return '<div class="' + trida + '" tabindex="0" role="button" data-st-id="' + escapeHtml(u.id) + '"' +
+        ' aria-label="' + escapeHtml(radky.join(" — ") + " — otevřít detail") + '">' +
+        '<div class="st-avatar" data-st-avatar="' + escapeHtml(u.id) + '">' +
+          '<span class="st-initials">' + escapeHtml(stIniciály(u)) + '</span>' +
         '</div>' +
+        (hodnotovy ? '<span class="st-badge">' + escapeHtml(stBadgeText(u)) + '</span>' : '') +
         '<div class="st-tip" role="tooltip">' +
           '<strong>' + escapeHtml(radky[0]) + '</strong>' +
           radky.slice(1).map(function (r) { return '<span>' + escapeHtml(r) + '</span>'; }).join("") +
@@ -16550,9 +17617,11 @@
             ' pod lídrem · ' + maxUroven + ' ' + (maxUroven === 1 ? "úroveň" : (maxUroven < 5 ? "úrovně" : "úrovní")) +
             ' do hloubky · ' + listu + ' zatím nikoho nepřivedlo</p>' +
         '</div></div>' +
-        // MILNÍK 27 (bod 6): přepínač obsahu bublin + řazení.
-        '<div class="st-prepinac" role="group" aria-label="Co se zobrazuje v kolečkách">' +
-          '<span class="st-prepinac-label">Zobrazit:</span>' +
+        // Zadání (bod 4): filtr/zvýraznění - klik na aktivní tlačítko ho
+        // vypne zpátky na výchozí stav (žádné tlačítko "Jméno" už není,
+        // jméno/fotka jsou v kolečku vždy, viz komentář u ST_REZIMY výš).
+        '<div class="st-prepinac" role="group" aria-label="Filtr a zvýraznění v síti">' +
+          '<span class="st-prepinac-label">Filtr:</span>' +
           ST_REZIMY.map(function (r) {
             return '<button type="button" class="st-prepinac-btn" data-st-rezim="' + escapeHtml(r.kod) + '"' +
               (stRezim === r.kod ? ' aria-pressed="true"' : ' aria-pressed="false"') + '>' +
@@ -16560,12 +17629,13 @@
           }).join("") +
         '</div>' +
         (stJeHodnotovyRezim()
-          ? '<p class="dt-muted" style="font-size:12.5px;margin:8px 0 0;">Uzly jsou v každé úrovni seřazené sestupně podle zvolené hodnoty. Jméno, role i plná částka zůstávají v bublině po najetí myší.</p>'
+          ? '<p class="dt-muted" style="font-size:12.5px;margin:8px 0 0;">Uzly jsou v každé úrovni seřazené sestupně podle zvolené hodnoty a mají u sebe štítek s číslem. Klikněte na zvýrazněné tlačítko znovu pro návrat k výchozímu zobrazení.</p>'
           : '') +
         '<div class="st-legenda">' +
           '<span><i class="st-legenda-vetev"></i> vede vlastní tým</span>' +
           '<span><i class="st-legenda-list"></i> zatím nikoho nepřivedl</span>' +
           '<span>šedivé kolečko = účet označený jako vymazaný</span>' +
+          '<span>klik na kolečko = detail tipaře</span>' +
         '</div>' +
         '<div class="st-plocha' + (stJeHodnotovyRezim() ? ' st-plocha-hodnoty' : '') + '">' +
           stPodstromHtml(koren, deti, 0) + '</div>' +
@@ -16574,14 +17644,33 @@
     wrap.querySelectorAll("[data-st-rezim]").forEach(function (b) {
       b.addEventListener("click", function () {
         var kod = b.getAttribute("data-st-rezim");
-        if (kod === stRezim) return;
-        stRezim = kod;
+        // Zadání (bod 4): klik na už aktivní tlačítko ho VYPNE (návrat na
+        // výchozí "" - dřív tu byl přepínač jmeno/tipy/provize, kde jedna
+        // z voleb byla vždy aktivní; teď je výchozí stav "žádný filtr").
+        stRezim = (kod === stRezim) ? "" : kod;
         renderSitStrom();
       });
     });
 
-    // Fotky jen ve výchozím režimu — v hodnotovém by překryly číslo.
-    if (!stJeHodnotovyRezim()) nacistFotkyStromu(rows);
+    // Zadání (bod 4): kolečko s fotkou je klikací -> Detail tipaře (na
+    // záložce Uživatelé - viz pendingUserDetailId a jeho zpracování v
+    // renderUsersTable). Klik i klávesa (Enter/mezerník, kolečko má
+    // tabindex="0" a role="button").
+    wrap.querySelectorAll("[data-st-id]").forEach(function (node) {
+      var otevri = function () {
+        pendingUserDetailId = node.getAttribute("data-st-id");
+        setActiveTab("users");
+      };
+      node.addEventListener("click", otevri);
+      node.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); otevri(); }
+      });
+    });
+
+    // Zadání (bod 4): kolečko teď VŽDY zůstává fotka/iniciály (viz
+    // stUzelHtml), takže se fotky dotahují ve všech režimech, ne jen ve
+    // výchozím.
+    nacistFotkyStromu(rows);
   }
 
   // Fotky: jedna podepsaná URL na uzel, „best effort". Selhání se NELOGUJE
@@ -17345,6 +18434,10 @@
     el("addUserModalOverlay").addEventListener("click", function (e) {
       if (e.target === el("addUserModalOverlay")) closeAddUserModal();
     });
+    // Zadání (bod 7): editor okruhu/lekce akademie - stejný vzorec.
+    el("akadModalOverlay").addEventListener("click", function (e) {
+      if (e.target === el("akadModalOverlay")) closeAkadModal();
+    });
     // Milník 12 (bod 1): vlastní modal pro důvod zamítnutí KYC.
     el("kycRejectForm").addEventListener("submit", function (e) {
       e.preventDefault();
@@ -17371,6 +18464,7 @@
       if (e.key === "Escape" || e.key === "Esc") {
         if (!el("kycLightboxOverlay").hidden) closeKycLightbox();
         if (!el("kycRejectModalOverlay").hidden) closeKycRejectModal();
+        if (!el("akadModalOverlay").hidden) closeAkadModal();
         return;
       }
       // Klávesnicová aktivace náhledu (Enter/mezerník), stejně jako klik -
@@ -17487,6 +18581,15 @@
 
     el("logoutBtn").addEventListener("click", doLogout);
 
+    // Zadání (bod 6): dvě tlačítka v dashboardu tipaře, která dřív byla
+    // vizuální bez obsluhy (viz komentář u #dashboardTiparWrap), teď
+    // reálně přepínají záložku.
+    if (el("tdashTipyAllBtn")) el("tdashTipyAllBtn").addEventListener("click", function () { setActiveTab("list"); });
+    if (el("tdashCtaNewTipBtn")) el("tdashCtaNewTipBtn").addEventListener("click", function () { setActiveTab("new"); });
+    // Zadání (bod 7): tlačítko „Pokračovat" u další lekce na dashboardu ->
+    // rovnou na záložku Realitní akademie.
+    if (el("tdashAcadNextBtn")) el("tdashAcadNextBtn").addEventListener("click", function () { setActiveTab("akademie"); });
+
     // Milník 4 (bod 9 zadání) — 10 možných záložek, dynamicky (ne)skryté
     // podle role přes applyNavForRole(); klik vždy jen setActiveTab(klíč).
     Object.keys(TAB_BUTTON).forEach(function (tabKey) {
@@ -17570,6 +18673,12 @@
       applyPendingInviteCodeToForm();
       navigateVerejna(null, null);
       showLoginView();
+      // Zadání (bod 1): tlačítko nemá jen skočit na začátek stránky, ale
+      // rovnou na přihlašovací okno (kotva místo pouhého přesměrování).
+      var authAnchor = el("authScreen");
+      if (authAnchor) {
+        authAnchor.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     });
 
     // MILNÍK 26 (bod 1): proklikávací logo v záhlaví VŠECH veřejných
