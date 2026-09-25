@@ -456,6 +456,33 @@
     padding: 12px 14px;
     margin-bottom: 6px;
   }
+
+  /* Zadání (bod 20): výsledky hledání sponzora - malý dropdown pod inputem. */
+  .sponsor-search-results {
+    position: relative;
+    margin-top: 4px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    background: var(--surface);
+    max-height: 260px;
+    overflow-y: auto;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  }
+  .sponsor-search-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 12px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 13.5px;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+  }
+  .sponsor-search-item:last-child { border-bottom: none; }
+  .sponsor-search-item:hover, .sponsor-search-item:focus { background: var(--surface-2); }
+  .sponsor-search-empty { padding: 10px 12px; font-size: 13px; color: var(--text-muted); }
   .field-checkbox.has-error { border-color: var(--danger); background: var(--danger-soft); }
   .field-checkbox input[type="checkbox"] { margin-top: 3px; width: 16px; height: 16px; accent-color: var(--accent); flex-shrink: 0; }
   .field-checkbox label { font-size: 13px; color: var(--text); cursor: pointer; }
@@ -2244,6 +2271,20 @@
   .detail-item .detail-label { font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; color: var(--text-muted); }
   .detail-item .detail-value { font-size: 14.5px; color: var(--text); margin-top: 2px; }
   .detail-section-title { font-size: 17px; margin: 26px 0 14px; }
+  /* Zadání (bod 13b): ve screenu "Ověření tipu" (Leader/Administrátor) mají
+     skutečná DATA vážit vizuálně víc než popisky - popisek je menší/tišší,
+     hodnota naopak větší a tučnější než všude jinde v appce. Modifikátor,
+     ne změna výchozího vzhledu detail-value (ten appka používá na desítkách
+     jiných obrazovek, kde tenhle důraz nedává smysl). */
+  .detail-item-vyrazna .detail-label { font-size: 10.5px; }
+  .detail-item-vyrazna .detail-value { font-size: 17px; font-weight: 700; }
+  /* Zadání (bod 13a): kompaktnější karta - menší mezery mezi položkami. */
+  .detail-card-kompakt .detail-item { margin-bottom: 8px; }
+  .detail-card-kompakt .detail-grid { gap: 2px 20px; }
+  /* Zadání (bod 13c): status dropdown vizuálně zvýrazněný, ať je na první
+     pohled jasné, že tohle je TA hlavní akce na obrazovce. */
+  .dt-stav-zvyrazneny { padding: 10px 12px; border-radius: 8px; border: 1.5px solid var(--accent); background: var(--accent-soft); }
+  .dt-stav-zvyrazneny label { font-weight: 700; }
 
   /* Milník 12 (bod 4): souhrn registračních údajů v Můj profil - stejný
      .detail-item vizuální jazyk jako Detail uživatele/Ověření totožnosti,
@@ -3404,7 +3445,7 @@
            ROLE_TAB_ORDER, pozice v DOM je jen neutrální výchozí stav. -->
       <button class="tab" id="tabSitStromBtn" role="tab" type="button" aria-selected="false" hidden>Struktura sítě</button>
       <button class="tab" id="tabTipyBtn" role="tab" type="button" aria-selected="false" hidden>Tipy</button>
-      <button class="tab" id="tabUsersBtn" role="tab" type="button" aria-selected="false" hidden>Uživatelé</button>
+      <button class="tab" id="tabUsersBtn" role="tab" type="button" aria-selected="false" hidden>Tipaři</button>
       <button class="tab" id="tabRkBtn" role="tab" type="button" aria-selected="false" hidden>Realitní kanceláře</button>
       <button class="tab" id="tabProvizeBtn" role="tab" type="button" aria-selected="false" hidden>Provizní schéma</button>
       <button class="tab" id="tabVyplatyBtn" role="tab" type="button" aria-selected="false" hidden>Výplaty</button>
@@ -3420,7 +3461,7 @@
            součást "Můj profil" (viz #myKycScreen). Jen role tipar - vzájemně
            se vylučuje s tabKycBtn výše (ten mají jen Leader/Administrator),
            takže stejný název tlačítka nikdy nekoliduje u jednoho uživatele. -->
-      <button class="tab" id="tabMyKycBtn" role="tab" type="button" aria-selected="false" hidden>Ověření totožnosti</button>
+      <button class="tab" id="tabMyKycBtn" role="tab" type="button" aria-selected="false" hidden>Ověření pro výplatu provize</button>
       <!-- Milník 7 (Část I): role RK měla do Milníku 18 JEDINOU obrazovku.
            Milník 19 (body 7 a 8) jí přidává další dvě - „Profil realitní
            kanceláře" a „Provizní schéma" (viz ROLE_TAB_ORDER.rk =
@@ -3598,6 +3639,11 @@
                  o duplicitě by neměl kam vést. -->
             <p class="switch-line">Nemáte účet? <button type="button" id="goRegisterBtn">Zaregistrujte se</button></p>
             <p class="switch-line"><button type="button" id="goResetBtn">Zapomenuté heslo?</button></p>
+            <!-- Zadání (bod 24): odkaz na veřejný (nepřihlášený) formulář
+                 pro realitní kanceláře, které chtějí spolupráci navrhnout
+                 samy - vede na ?stranka=rk-partnerstvi (vlastní routa, viz
+                 renderVerejnaRouta/readVerejnouRoutuZUrl). -->
+            <p class="switch-line"><button type="button" id="rkPartnerstviLink">Jste realitní kancelář? Staňte se partnerem</button></p>
           </div>
 
           <!-- OBNOVA HESLA (MILNÍK 26, bod 4) -->
@@ -3867,20 +3913,20 @@
         <form id="tipForm" novalidate>
           <div class="form-grid">
             <div class="field" id="f_JmenoKlienta">
-              <label for="in_JmenoKlienta">Jméno klienta *</label>
-              <input type="text" id="in_JmenoKlienta" placeholder="Jméno a příjmení klienta">
-              <span class="error-msg">Zadejte prosím jméno klienta.</span>
+              <label for="in_JmenoKlienta">Vlastník nemovitosti *</label>
+              <input type="text" id="in_JmenoKlienta" placeholder="Jméno a příjmení vlastníka nemovitosti">
+              <span class="error-msg">Zadejte prosím jméno vlastníka nemovitosti.</span>
             </div>
 
             <div class="field" id="f_Telefon">
               <label for="in_Telefon">Telefon *</label>
-              <input type="tel" id="in_Telefon" placeholder="např. 777 123 456" autocomplete="tel">
-              <span class="error-msg">Zadejte prosím telefonní číslo.</span>
+              <input type="tel" id="in_Telefon" placeholder="např. 777 123 456" autocomplete="tel" minlength="9">
+              <span class="error-msg" id="telefonError">Zadejte prosím telefonní číslo (nejméně 9 znaků).</span>
             </div>
 
             <div class="field" id="f_Email">
               <label for="in_Email">E-mail</label>
-              <input type="email" id="in_Email" placeholder="jméno@příklad.cz" autocomplete="email">
+              <input type="email" id="in_Email" placeholder="např. jan.novak@email.cz" autocomplete="email">
               <span class="error-msg">Zadejte prosím platný e-mail.</span>
             </div>
 
@@ -3917,13 +3963,14 @@
 
             <div class="field col-span-2" id="f_Popis">
               <label for="in_Popis">Stručný popis</label>
+              <p class="dt-muted" style="margin:2px 0 6px;font-size:12.5px;">Bylo už nabízeno realitní kanceláři? Bylo inzerováno? Proč to vlastník prodává? Jak s prodejem spěchá? — uveďte vše, co víte, ať to má leader při ověřování jednodušší.</p>
               <textarea id="in_Popis" rows="3" placeholder="Cokoliv důležitého pro Leadera a realitní kancelář…"></textarea>
             </div>
 
             <div class="col-span-2">
               <div class="field-checkbox" id="f_Souhlas">
                 <input type="checkbox" id="in_Souhlas">
-                <label for="in_Souhlas">Klient souhlasí se zpracováním osobních údajů a předáním kontaktu realitní kanceláři *</label>
+                <label for="in_Souhlas">Vlastník nemovitosti souhlasí se zpracováním osobních údajů a předáním kontaktu realitní kanceláři *</label>
               </div>
               <span class="error-msg" id="souhlasError">Bez souhlasu klienta nelze tip odeslat.</span>
             </div>
@@ -4017,6 +4064,16 @@
            místa dělající totéž byla matoucí duplicita. -->
 
       <div class="stat-row" id="networkStats"></div>
+
+      <!-- Zadání (bod 3c): jméno + kontakt + fotka (nebo iniciály)
+           sponzora volajícího, nad tabulkou. Jen role tipar (viz JS). -->
+      <div id="networkSponsorCard"></div>
+
+      <!-- Zadání (bod 3a): export Excelu, stejná sdílená funkce/sloupce
+           jako má leader/administrátor v záložce "Tipaři". -->
+      <div class="toolbar-row-end" id="networkExportBtnWrap" hidden>
+        <button class="btn-small" id="networkExportBtn" type="button">Export do Excelu</button>
+      </div>
 
       <!-- Milník 15 (bod 4): NEUTRÁLNÍ (rolí nepodmíněný) placeholder, který
            se zobrazí v okamžiku vstupu na obrazovku a zmizí teprve až
@@ -4112,7 +4169,7 @@
          (upravit_uzivatele RPC). -->
     <section id="usersScreen" class="page" hidden>
       <div class="section-head">
-        <h2>Uživatelé</h2>
+        <h2>Tipaři</h2>
         <p>Správa uživatelů, sponzorů a stavu účtu. Úprava vyžaduje povinný důvod a je vidět v auditním logu.</p>
       </div>
 
@@ -4174,6 +4231,13 @@
       </div>
 
       <div id="rkFormWrap"></div>
+
+      <!-- Zadání (bod 24): žádosti z veřejného formuláře ?stranka=rk-partnerstvi
+           - nedůvěryhodné, dokud je Leader/Administrátor ručně neschválí
+           (schválením vznikne NEAKTIVNÍ RK, viz schvalit_zadost_o_partnerstvi).
+           Panel se sám schová, když čekajících žádostí není žádná
+           (viz renderRkZadosti). -->
+      <div class="card detail-card" id="rkZadostiWrap" hidden></div>
 
       <div id="rkTableWrap"></div>
     </section>
@@ -4723,15 +4787,25 @@
             <input type="checkbox" id="pfJeFirma">
             <label for="pfJeFirma">Jednám jako firma (adresa = sídlo firmy, vyžaduje IČO)</label>
           </div>
+          <!-- Zadání (bod 7): dřív se pole IČO/DIČ schovávala/objevovala
+               UPROSTŘED obecné adresní mřížky, takže nebylo na první pohled
+               jasné, že patří k zaškrtávátku výš. Teď se objeví HNED POD
+               ním, viditelně odsazená a orámovaná jako vlastní skupina. -->
+          <div class="form-grid" id="pfFirmaFieldsWrap" style="margin-top:10px;padding:10px 12px;border-left:3px solid var(--accent-soft, #c7d2fe);background:rgba(99,102,241,0.05);border-radius:6px;">
+            <div class="field" id="pfIcoField"><label for="pfIco">IČO *</label><input type="text" id="pfIco"></div>
+            <div class="field" id="pfDicField"><label for="pfDic">DIČ (nepovinné)</label><input type="text" id="pfDic"></div>
+          </div>
           <!-- Milník 11 (bod 1): sloupce adresa_* beze změny = TRVALÁ adresa
                / sídlo firmy. -->
           <div class="form-grid" style="margin-top:10px;">
-            <div class="field col-span-2"><label for="pfUlice">Ulice a číslo popisné *</label><input type="text" id="pfUlice" placeholder="např. Hlavní 123"></div>
+            <!-- Zadání (bod 8): "Ulice a číslo popisné" rozdělené na dvě
+                 samostatná pole - ulice bez čísla a číslo domu zvlášť
+                 (sloupec profiles.adresa_cislo). -->
+            <div class="field"><label for="pfUlice">Ulice *</label><input type="text" id="pfUlice" placeholder="např. Hlavní"></div>
+            <div class="field"><label for="pfUliceCislo">Číslo domu *</label><input type="text" id="pfUliceCislo" placeholder="např. 123"></div>
             <div class="field"><label for="pfMesto">Město *</label><input type="text" id="pfMesto"></div>
             <div class="field"><label for="pfPsc">PSČ *</label><input type="text" id="pfPsc" placeholder="např. 110 00"></div>
             <div class="field"><label for="pfStat">Stát</label><input type="text" id="pfStat" value="Česká republika"></div>
-            <div class="field" id="pfIcoField"><label for="pfIco">IČO *</label><input type="text" id="pfIco"></div>
-            <div class="field" id="pfDicField"><label for="pfDic">DIČ (nepovinné)</label><input type="text" id="pfDic"></div>
             <!-- Milník 11 (bod 2.1): datum narození - podmínka pro
                  "Odeslat k ověření" (viz renderKycSection). Zvoleno stejné
                  formulář jako adresa (jednodušší UX než samostatná
@@ -4751,7 +4825,8 @@
             <label for="pfDorucovaciStejna">Doručovací adresa je stejná jako trvalá</label>
           </div>
           <div class="form-grid" id="pfDorucovaciFields" style="margin-top:10px;" hidden>
-            <div class="field col-span-2"><label for="pfDorUlice">Ulice a číslo popisné *</label><input type="text" id="pfDorUlice" placeholder="např. Hlavní 123"></div>
+            <div class="field"><label for="pfDorUlice">Ulice *</label><input type="text" id="pfDorUlice" placeholder="např. Hlavní"></div>
+            <div class="field"><label for="pfDorUliceCislo">Číslo domu *</label><input type="text" id="pfDorUliceCislo" placeholder="např. 123"></div>
             <div class="field"><label for="pfDorMesto">Město *</label><input type="text" id="pfDorMesto"></div>
             <div class="field"><label for="pfDorPsc">PSČ *</label><input type="text" id="pfDorPsc" placeholder="např. 110 00"></div>
             <div class="field"><label for="pfDorStat">Stát</label><input type="text" id="pfDorStat" value="Česká republika"></div>
@@ -4763,6 +4838,12 @@
                (bod 19) - je to totéž tlačítko, ne dvě. "Zrušit" zahodí
                neuložené změny (formulář se přepíše zpět z currentUser) a
                vrátí read-only zobrazení; žádné částečné uložení. -->
+          <!-- Zadání (bod 6): chybová hláška (např. chybějící IČO u firmy)
+               se dřív zobrazovala v #profileBanner úplně nahoře stránky,
+               daleko od tlačítka Uložit - nebylo jasné, proč se neuloží.
+               Vlastní banner formuláře je hned VEDLE tlačítka, jako
+               ostatní validace v appce. -->
+          <div id="addressFormBanner"></div>
           <div class="form-actions">
             <button class="btn-primary" type="submit" id="addressSaveBtn" style="width:auto;">Uložit</button>
             <button class="btn-ghost" type="button" id="addressCancelBtn">Zrušit</button>
@@ -5007,8 +5088,10 @@
          záložku vůbec nemají (viz applyNavForRole/ROLE_TAB_ORDER). -->
     <section id="myKycScreen" class="page" hidden>
       <div class="section-head">
-        <h2>Ověření totožnosti</h2>
-        <p>Jednorázové ověření totožnosti nutné před výplatou provize - na podání tipu ani na cokoliv jiného to vliv nemá.</p>
+        <!-- Zadání (bod 25): přejmenováno z "Ověření totožnosti" - jasnější
+             název, proč se to vlastně dělá. -->
+        <h2>Ověření pro výplatu provize</h2>
+        <p>Jednorázové ověření totožnosti a bankovního účtu, nutné před výplatou provize - na podání tipu ani na cokoliv jiného to vliv nemá.</p>
       </div>
 
       <div id="myKycBanner"></div>
@@ -5030,6 +5113,26 @@
         <p class="dt-muted" style="margin-top:0;" id="kycInstructionsWrap">Nahrajte prosím sken/foto obou stran dokladu totožnosti a vlastní fotografii, poté klikněte na „Odeslat k ověření“. Bez schváleného ověření vám nelze vyplatit provizi.</p>
         <div id="kycStatusWrap"></div>
         <div id="kycDocsWrap"></div>
+        <!-- Zadání (bod 25): číslo bankovního účtu pro výplatu provize -
+             POVINNÁ součást stejného toku (Odeslat k ověření to nově
+             vyžaduje, viz RPC odeslat_k_overeni_totoznosti a
+             kycChybejiciPolozky()). Vlastní tlačítko "Uložit číslo účtu",
+             protože se ukládá zvlášť (RPC ulozit_muj_bankovni_ucet), ne
+             až společně s odesláním k ověření - uživatel tak vidí hned,
+             že se uložilo, i kdyby dokumenty dolaďoval později. -->
+        <div class="kyc-doc-row" id="kycUcetRow">
+          <div class="kyc-doc-info" style="flex:1;">
+            <div class="kyc-doc-label">Číslo bankovního účtu pro výplatu provize</div>
+            <div class="field" style="margin:6px 0 0;max-width:320px;">
+              <input type="text" id="kycCisloUctu" placeholder="např. 123456789/0100" inputmode="text">
+            </div>
+            <div class="dt-muted" style="font-size:0.85em;margin-top:4px;">Formát: [předčíslí-]číslo účtu/kód banky, např. <strong>123456789/0100</strong>.</div>
+            <div id="kycUcetStav" class="kyc-doc-status" style="margin-top:6px;"></div>
+          </div>
+          <div class="kyc-doc-action" id="kycUcetActionWrap">
+            <button class="btn-secondary" type="button" id="kycUcetSaveBtn" style="width:auto;">Uložit číslo účtu</button>
+          </div>
+        </div>
         <!-- Milník 12 (bod 3): preventivní hláška PŘED klikem, ne až po
              chybě ze serveru - viz renderKycSection(). -->
         <div id="kycMissingWrap"></div>
@@ -5119,6 +5222,59 @@
       </div>
     </section>
 
+    <!-- ============== ZADÁNÍ (bod 24): VEŘEJNÝ FORMULÁŘ RK PARTNERSTVÍ =========
+         Adresa `?stranka=rk-partnerstvi`. NEPŘIHLÁŠENÝ, veřejně přístupný
+         formulář pro realitní kanceláře, které chtějí samy navrhnout
+         spolupráci - odesílá se anonymně volatelnou RPC
+         podat_zadost_o_partnerstvi().
+
+         BEZPEČNOSTNĚ KRITICKÉ: odeslání zakládá VÝHRADNĚ nedůvěryhodnou
+         žádost čekající na ruční schválení Leaderem/Administrátorem (viz
+         tabulka rk_partnerske_zadosti a komentář u migrace
+         zadani_rk_partnerske_zadosti) - NIKDY rovnou aktivní/důvěryhodný
+         záznam realitní kanceláře. Text na obrazovce je záměrně formulovaný
+         tak, aby tohle nezastíral - žádné "okamžité", "ověřeno" ani
+         podobné tvrzení, dokud to není pravda. -->
+    <section id="rkPartnerstviScreen" hidden>
+      <div class="verejna-stranka-wrap">
+        <div>
+          <h1>Staňte se partnerskou realitní kanceláří</h1>
+          <p class="dt-muted">Spolupracujeme s realitními kancelářemi po celé ČR - naši tipaři vám předávají prověřené tipy na prodej nemovitostí. Vyplňte prosím údaje o vaší kanceláři, ozveme se vám.</p>
+          <div class="banner banner-info" style="text-align:left;">
+            Odesláním formuláře <strong>nevzniká žádný účet ani přístup do systému.</strong>
+            Žádost si nejdřív ručně projde náš Administrátor nebo Lídr a teprve po schválení se ozveme
+            s dalším postupem. Nejde o automatické ani okamžité ověření.
+          </div>
+          <div id="rkPartnerstviBanner"></div>
+          <div id="rkPartnerstviFormWrap">
+            <form id="rkPartnerstviForm" novalidate>
+              <div class="form-grid">
+                <div class="field col-span-2"><label for="rkpNazev">Název realitní kanceláře *</label><input type="text" id="rkpNazev" placeholder="např. Realitní kancelář Novák s.r.o." maxlength="200"></div>
+                <div class="field" id="rkpIcoField"><label for="rkpIco">IČO</label><input type="text" id="rkpIco"><span class="error-msg">Zadané IČO není platné (nesedí kontrolní číslice).</span></div>
+                <div class="field"><label for="rkpDic">DIČ</label><input type="text" id="rkpDic"></div>
+                <div class="field"><label for="rkpUlice">Ulice</label><input type="text" id="rkpUlice"></div>
+                <div class="field"><label for="rkpCislo">Číslo domu</label><input type="text" id="rkpCislo"></div>
+                <div class="field"><label for="rkpMesto">Město</label><input type="text" id="rkpMesto"></div>
+                <div class="field"><label for="rkpPsc">PSČ</label><input type="text" id="rkpPsc" placeholder="např. 110 00"></div>
+                <div class="field"><label for="rkpKontakt">Kontaktní osoba</label><input type="text" id="rkpKontakt"></div>
+                <div class="field" id="rkpTelefonField"><label for="rkpTelefon">Telefon *</label><input type="tel" id="rkpTelefon"><span class="error-msg">Zadejte prosím telefon.</span></div>
+                <div class="field" id="rkpEmailField"><label for="rkpEmail">E-mail *</label><input type="email" id="rkpEmail"><span class="error-msg">Zadejte prosím platný e-mail.</span></div>
+              </div>
+              <div class="form-actions">
+                <button class="btn-primary" type="submit" id="rkPartnerstviSubmitBtn" style="width:auto;">Odeslat žádost o spolupráci</button>
+              </div>
+            </form>
+          </div>
+          <div id="rkPartnerstviHotovoWrap" hidden>
+            <div class="banner banner-ok" style="text-align:left;">
+              <strong>Děkujeme, žádost jsme přijali.</strong><br>
+              Až si ji projde náš Administrátor nebo Lídr, ozveme se vám na uvedený kontakt. Prosíme o trpělivost - schválení je ruční, ne automatické.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ============== MILNÍK 25 (bod 7): VEŘEJNÁ REKRUTAČNÍ STRÁNKA ==============
          Adresa `?r=<pozvánkový kód>`. Obsah dodává anonymně volatelná RPC
          verejna_rekrutacni_stranka(kod), která vrací jen jméno, (u
@@ -5187,6 +5343,34 @@
   <img id="kycLightboxImg" class="lightbox-img" src="" alt="Náhled dokumentu">
 </div>
 
+<!-- ============== ZADÁNÍ (bod 12): FOTOAPARÁT PRO KYC DOKUMENTY ==============
+     Živý náhled kamery (getUserMedia) + snímek do <canvas>. Pro selfie je
+     tohle JEDINÁ cesta k nahrání (žádný <input type=file>, viz
+     renderKycSection) - bezpečnostní požadavek zadání, aby si uživatel
+     nemohl "nahrát cizí fotku" z galerie/disku místo skutečné selfie. U
+     dokladu totožnosti (přední/zadní strana) je fotoaparát DOPLNĚK k
+     běžnému nahrání souboru, ne náhrada - viz #kycFile_* input vedle. -->
+<div class="modal-overlay" id="kycCameraOverlay" hidden>
+  <div class="modal-box card detail-card" id="kycCameraBox">
+    <h3 class="detail-section-title" style="margin-top:0;" id="kycCameraTitle">Vyfotit dokument</h3>
+    <p class="dt-muted" id="kycCameraHint" style="margin-top:-6px;"></p>
+    <div id="kycCameraErrorWrap"></div>
+    <div id="kycCameraLiveWrap">
+      <video id="kycCameraVideo" autoplay playsinline muted style="width:100%;border-radius:var(--radius-s);background:#000;"></video>
+    </div>
+    <div id="kycCameraPreviewWrap" hidden>
+      <img id="kycCameraPreviewImg" alt="Náhled pořízené fotky" style="width:100%;border-radius:var(--radius-s);">
+    </div>
+    <canvas id="kycCameraCanvas" hidden></canvas>
+    <div class="form-actions">
+      <button class="btn-primary" type="button" id="kycCameraCaptureBtn" style="width:auto;">Vyfotit</button>
+      <button class="btn-small" type="button" id="kycCameraRetryBtn" style="width:auto;" hidden>Vyfotit znovu</button>
+      <button class="btn-primary" type="button" id="kycCameraUseBtn" style="width:auto;" hidden>Použít tuto fotku</button>
+      <button class="btn-ghost" type="button" id="kycCameraCloseBtn">Zrušit</button>
+    </div>
+  </div>
+</div>
+
 <!-- ============== DŮVOD ZAMÍTNUTÍ KYC (Milník 12, bod 1) ==============
      Dřív window.prompt() - nativní prohlížečový dialog mimo styl appky.
      Stejný vzorec jako #addUserModalOverlay (Milník 9). -->
@@ -5213,6 +5397,12 @@
 <!-- Milník 7 (Část H): SheetJS pro generování skutečných .xlsx souborů na
      klientovi - "Export" tlačítka u Uživatelé/Tipy/Výplaty. -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- Zadání (bod 26): SheetJS (výš) v téhle CDN verzi NEUMÍ zapisovat
+     buňkové styly (barvy/tučné písmo) do .xlsx - ověřeno (community edice).
+     Nový sdílený export uživatelů proto používá ExcelJS, který styly i
+     autofiltr do .xlsx skutečně zapisuje. Stávající exporty přes
+     exportToXlsx()/SheetJS zůstávají beze změny. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <!-- Milník 13 (bod 2): jsPDF pro generování PDF exportu KYC dokladů (fotky
      + jméno + číslo dokladu + datum) PŘED schválením ověření totožnosti -
      viz submitSchvalitKyc/generateKycApprovalPdf. Globál `window.jspdf.jsPDF`
@@ -5237,7 +5427,7 @@
   // Milník 14: číslo aktuální verze aplikace - MUSÍ odpovídat nejnovější položce
   // pole APP_CHANGELOG níže (položka na indexu 0). Při každém příštím milníku
   // se zvyšuje ROVNOU TADY i v APP_CHANGELOG - jsou to dvě navzájem závislá místa.
-  var APP_VERSION = "30.0";
+  var APP_VERSION = "31.0";
 
   // Milník 14 (bod 4): obsah panelu "Historie verzí" na přihlašovací
   // obrazovce - zrekonstruováno z reálné historie projektu (STAV.md,
@@ -5246,6 +5436,40 @@
   // pod tímto polem). Vykresluje se generickou šablonou renderAuthVersionAndChangelog()
   // - při dalším milníku se sem jen přidá nová položka na začátek pole.
   var APP_CHANGELOG = [
+    // ZADÁNÍ (31.0). Velké zadání z 26 bodů - viz jednotlivé "Zadání (bod N)"
+    // komentáře přímo u kódu a migrace pojmenované zadani_*. Poznámka k
+    // bodu 15: opraveno jen to, co šlo bezpečně ověřit (tlačítko na
+    // needitovatelném Detailu, limit 3 pokusů) - hlubší podezření na
+    // "poškozování data" z původního zadání se nepodařilo s jistotou
+    // dohledat, takže tahle položka NENÍ tvrzena jako kompletně vyřešená.
+    { verze: "31.0", datum: "25. 9. 2026", body: [
+      "Kč pole (nový tip, Detail tipu, provizní schéma RK) se teď při psaní formátují mezerami po tisících, jedním sdíleným mechanismem",
+      "Formulář „Nový tip“: „Jméno klienta“ přejmenováno na „Vlastníka nemovitosti“, jasnější nápověda u e-mailu i popisu, telefon vyžaduje aspoň 9 číslic, souhlas zmiňuje vlastníka nemovitosti",
+      "„Moje síť“ (tipař): export do Excelu, zrušené souhrnné dlaždice, karta se sponzorem (jméno, kontakt, fotka) nad tabulkou, opravená úroveň v síti u vlastního řádku",
+      "Opravený odkaz na vlastní náhled rekrutační stránky, který dřív skončil na hlavní stránce místo správné adresy",
+      "Tipař má v hlavní navigaci nově i záložku „Můj profil“",
+      "Chyba u IČO se ukazuje rovnou vedle tlačítka Uložit, ne nahoře na stránce",
+      "Přepínač „Firma ano/ne“ vizuálně seskupuje pole IČO/DIČ hned pod sebou",
+      "Adresa (vlastní i v Detailu uživatele) má nově zvlášť „Ulici“ a „Číslo domu“ místo jednoho pole",
+      "Živý náhled rekrutační stránky (text i fotka) se ukazuje rovnou při psaní, bez nutnosti uložit",
+      "Panel rekrutační stránky ukazuje rovnou uložený obsah, ne jen stavové značky",
+      "Vlastní pozvánkový kód: historie posledních kódů (pořád funkčních) a počet využitých změn se zobrazuje přímo v náhledu",
+      "Ověření totožnosti: dokumenty i selfie jde nově vyfotit rovnou fotoaparátem v appce; selfie JDE POUZE VYFOTIT (kvůli bezpečnosti nejde nahrát soubor) a appka žádá, ať je pořízená v den žádosti o ověření - žádnou automatickou/biometrickou kontrolu appka nedělá, totožnost pořád posuzuje ručně Leader/Administrátor",
+      "Obrazovka „Ověření tipu“ (Leader/Administrátor): kompaktnější karta, tlačítko Upravit nahoře, výraznější status a cena, zvýrazněný výběr stavu, stručná nápověda co se ptát při telefonickém ověření, a filtr Tipů má i stav „Předáno RK“",
+      "U statusu tipu (seznam, Detail, karty) se nově ukazuje i datum poslední změny stavu",
+      "„Zaznamenat další pokus o kontakt“ jde spustit jen po kliknutí na Upravit (ne rovnou v needitovatelném Detailu) a zastaví se po 3 pokusech",
+      "Přehled lídra: karta „Co se musí vyřídit“ ukazuje datum poslední změny a aktuální stav ověření u každé položky; „Nový tip čeká na první ověření“ zkráceno na „Nový tip“",
+      "Nové unikátní „ID RT“ (6místné číslo) pro každého tipaře/lídra, vidět všude, kde se tipař zobrazuje",
+      "Záložka „Uživatelé“ přejmenována na „Tipaři“ (tlačítko, nadpis i popisky v textu appky) pro leadera/administrátora",
+      "Detail tipaře (leader/administrátor) ukazuje kompletně všechny dostupné údaje včetně fotky a jména sponzora",
+      "Výběr sponzora je nově hledání podle jména/ID, ne rozbalovací seznam",
+      "Sloupec „Dny“ přejmenován na „Měsíce“ a hodnota se skutečně přepočítává z dní",
+      "Přibyla možnost sdílet přes Instagram (kopírování textu + otevření Instagramu - Instagram sám předvyplněný text z odkazu neumí)",
+      "Formulář „Přidat RK“ i Detail RK: adresa rozdělená na Ulici/číslo domu/Město/PSČ a skutečná kontrola kontrolní číslice IČO",
+      "Nová veřejná stránka pro realitní kanceláře, které chtějí samy navrhnout spolupráci - odeslání zakládá jen žádost čekající na ruční schválení Leaderem/Administrátorem, nikdy rovnou aktivní účet",
+      "Ověření pro výplatu provize (dřív „Ověření totožnosti“, tipař): přibylo povinné číslo bankovního účtu, Leader/Administrátor ho v přehledu žádosti vidí celé",
+      "Export uživatelů (leader/administrátor i nový export tipaře z „Moje síť“) má nové pořadí sloupců (sponzor s jeho ID RT, ID RT, jméno, pozice, čísla za tipaře i jeho síť, adresa po částech…), větší barevně odlišenou hlavičku a vestavěný filtr"
+    ] },
     // ZADÁNÍ (30.0). Sedm drobných úprav z jednoho zadání klienta - úklid
     // duplicitního sdílení na "Moje síť" tipaře, vlastní řádek v jeho síti,
     // sdílení bannerů i s obrázkem (kde to prohlížeč umí), kompletní export
@@ -6273,9 +6497,44 @@
   // Milník 11 (bod 1/4): jednořádkové formátování adresy (trvalé i
   // doručovací) - sdílený helper pro Detail uživatele (renderUserDetailCard) i
   // Leaderovu obrazovku Ověření totožnosti (renderKycList).
-  function adresaRadekHtml(ulice, mesto, psc, stat) {
+  // Zadání (bod 8): "Ulice a číslo popisné" je nyní dvě oddělená pole
+  // (ulice / adresa_cislo) - tahle funkce je pro zobrazení zase spojuje
+  // do jednoho čitelného řádku ("Hlavní 123, Praha, 110 00, ...").
+  // Zadání (bod 23): realitní kancelář má adresu ve VLASTNÍCH sloupcích
+  // (rk_ulice/rk_cislo/rk_mesto/rk_psc, tabulka realitni_kancelare má jiný
+  // tvar než profiles) - společný formát řádku ale chceme stejný jako u
+  // profilu. Fallback na starý volný text `adresa` u záznamů, které vznikly
+  // před touhle migrací a ještě nebyly přes nový formulář uloženy znovu.
+  function rkAdresaRadek(r) {
+    if (r.rk_ulice || r.rk_mesto || r.rk_psc) {
+      return adresaRadekHtml(r.rk_ulice, r.rk_cislo, r.rk_mesto, r.rk_psc, null);
+    }
+    return r.adresa || "—";
+  }
+
+  // Zadání (bod 23): skutečná kontrola kontrolní číslice českého IČO (mod
+  // 11), ne jen "8 číslic". Algoritmus dle standardní specifikace (např.
+  // ARES/ČSÚ): váhy 8..2 na prvních 7 číslic, zbytek po 11, mapování na
+  // kontrolní číslici. Vrací true i pro prázdný vstup - IČO je u RK
+  // nepovinné pole, prázdné se validuje jako "nevyplněno", ne jako chyba;
+  // volající kontroluje povinnost zvlášť.
+  function jePlatneIco(ico) {
+    var s = (ico || "").trim();
+    if (!s) return true;
+    if (!/^[0-9]{8}$/.test(s)) return false;
+    var digits = s.split("").map(Number);
+    var soucet = 0;
+    for (var i = 0; i < 7; i++) soucet += digits[i] * (8 - i);
+    var zbytek = soucet % 11;
+    var kontrolni = 11 - zbytek;
+    if (kontrolni >= 10) kontrolni -= 10;
+    return digits[7] === kontrolni;
+  }
+
+  function adresaRadekHtml(ulice, cislo, mesto, psc, stat) {
     var parts = [];
-    if (ulice) parts.push(ulice);
+    var uliceCislo = [ulice, cislo].filter(Boolean).join(" ");
+    if (uliceCislo) parts.push(uliceCislo);
     var mp = [mesto, psc].filter(Boolean).join(", ");
     if (mp) parts.push(mp);
     if (stat) parts.push(stat);
@@ -6325,6 +6584,133 @@
     var wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, sheetName.slice(0, 31));
     XLSX.writeFile(wb, filename);
+  }
+
+  // =========================================================================
+  // Zadání (bod 26) — SDÍLENÝ EXPORT UŽIVATELŮ DO EXCELU
+  // =========================================================================
+  // Používá ho leader/administrátor (záložka "Tipaři") i tipař ("Moje síť",
+  // bod 3a) - STEJNÁ sada sloupců, barevné skupiny i autofiltr. Data dodává
+  // sdílená RPC export_site_uzivatele() (self+podstrom pro tipaře/lídra,
+  // celá síť pro administrátora).
+  //
+  // Používá ExcelJS (ne SheetJS) - jde o JEDINÝ export v appce, který
+  // potřebuje skutečné buňkové styly (barevné hlavičky podle kategorie) a
+  // zvětšený hlavičkový řádek; ověřeno, že aktuální CDN verze SheetJS
+  // (community edice) buňkové styly do .xlsx nezapisuje.
+  var EXPORT_SLOUPCE = [
+    { klic: "sponsor", nadpis: "Sponsor", skupina: "identita" },
+    { klic: "id_rt", nadpis: "ID RT", skupina: "identita" },
+    { klic: "prijmeni", nadpis: "Příjmení", skupina: "identita" },
+    { klic: "jmeno", nadpis: "Jméno", skupina: "identita" },
+    { klic: "pozice", nadpis: "Pozice", skupina: "identita" },
+    { klic: "pocet_podrizenych", nadpis: "Počet podřízených", skupina: "sit" },
+    { klic: "mesicu_v_siti", nadpis: "Měsíců v síti", skupina: "sit" },
+    { klic: "tipu_celkem", nadpis: "Tipů celkem", skupina: "tipy" },
+    { klic: "tipu_uspesnych", nadpis: "Tipů úspěšných", skupina: "tipy" },
+    { klic: "tipu_podrizene_site", nadpis: "Tipů podřízené sítě", skupina: "tipy" },
+    { klic: "tipu_podrizene_site_uspesnych", nadpis: "Tipů podřízené sítě úspěšných", skupina: "tipy" },
+    { klic: "vyplaceno_uzivateli", nadpis: "Vyplaceno uživateli", skupina: "vyplaty" },
+    { klic: "vyplaceno_v_jeho_siti", nadpis: "Vyplaceno v jeho síti", skupina: "vyplaty" },
+    { klic: "progres_akademie_pct", nadpis: "Progres v akademii (%)", skupina: "akademie" },
+    { klic: "ulice", nadpis: "Ulice", skupina: "adresa" },
+    { klic: "cislo", nadpis: "číslo domu", skupina: "adresa" },
+    { klic: "mesto", nadpis: "město", skupina: "adresa" },
+    { klic: "psc", nadpis: "PSČ", skupina: "adresa" }
+  ];
+  // Barva podle kategorie sloupce - jen ČTYŘI/PĚT/ŠEST skupin, snadno
+  // rozlišitelné, ale ne křiklavé (pastelové tóny, tmavý text zůstává
+  // čitelný na všech).
+  var EXPORT_SKUPINA_BARVA = {
+    identita: "FFD9E8FF", // světle modrá
+    sit: "FFE6D9FF",      // světle fialová
+    tipy: "FFD9F2DD",     // světle zelená
+    vyplaty: "FFFFE7C2",  // světle oranžová
+    akademie: "FFD2F0EC", // světle tyrkysová
+    adresa: "FFE9E9E9"    // světle šedá
+  };
+
+  function exportRowMapper(r) {
+    var pozice = r.role === "leader" ? "Leader" : (r.role === "administrator" ? "Administrátor" : "Tipař");
+    var sponsorBunka = r.sponsor_id
+      ? ((r.sponsor_id_rt || "—") + " – " + [r.sponsor_jmeno, r.sponsor_prijmeni].filter(Boolean).join(" "))
+      : "—";
+    return {
+      sponsor: sponsorBunka,
+      id_rt: r.id_rt || "—",
+      prijmeni: r.prijmeni || "",
+      jmeno: r.jmeno || "",
+      pozice: pozice,
+      pocet_podrizenych: Number(r.pocet_podrizenych || 0),
+      mesicu_v_siti: Number(r.mesicu_v_siti || 0),
+      tipu_celkem: Number(r.tipu_celkem || 0),
+      tipu_uspesnych: Number(r.tipu_uspesnych || 0),
+      tipu_podrizene_site: Number(r.tipu_podrizene_site || 0),
+      tipu_podrizene_site_uspesnych: Number(r.tipu_podrizene_site_uspesnych || 0),
+      vyplaceno_uzivateli: Number(r.vyplaceno_uzivateli || 0),
+      vyplaceno_v_jeho_siti: Number(r.vyplaceno_v_jeho_siti || 0),
+      progres_akademie_pct: Number(r.progres_akademie_pct || 0),
+      ulice: r.adresa_ulice || "",
+      cislo: r.adresa_cislo || "",
+      mesto: r.adresa_mesto || "",
+      psc: r.adresa_psc || ""
+    };
+  }
+
+  async function exportSiteUzivateleXlsx(triggerBtn, bannerEl) {
+    if (typeof ExcelJS === "undefined") {
+      window.alert("Export se nepodařilo spustit (knihovna ExcelJS se nenačetla). Zkontrolujte prosím připojení k internetu a zkuste to znovu.");
+      return;
+    }
+    if (!sb) return;
+    if (triggerBtn) triggerBtn.disabled = true;
+    if (bannerEl) showBanner(bannerEl, null, null);
+    try {
+      var res = await sb.rpc("export_site_uzivatele");
+      if (res.error) {
+        console.error("Export uživatelů selhal:", res.error);
+        if (bannerEl) showBanner(bannerEl, "error", "Export se nepodařilo připravit. Zkuste to prosím znovu.");
+        return;
+      }
+      var rows = (res.data || []).map(exportRowMapper);
+
+      var wb = new ExcelJS.Workbook();
+      var ws = wb.addWorksheet("Uživatelé");
+      ws.columns = EXPORT_SLOUPCE.map(function (s) {
+        return { header: s.nadpis, key: s.klic, width: Math.max(12, s.nadpis.length + 4) };
+      });
+      rows.forEach(function (r) { ws.addRow(r); });
+
+      // Hlavička: větší a barevná podle kategorie sloupce.
+      var headerRow = ws.getRow(1);
+      headerRow.height = 26;
+      EXPORT_SLOUPCE.forEach(function (s, i) {
+        var cell = headerRow.getCell(i + 1);
+        cell.font = { bold: true, size: 12 };
+        cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
+        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: EXPORT_SKUPINA_BARVA[s.skupina] || "FFEFEFEF" } };
+      });
+
+      // Vestavěný Excel autofiltr na hlavičkovém řádku.
+      ws.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: EXPORT_SLOUPCE.length } };
+      ws.views = [{ state: "frozen", ySplit: 1 }];
+
+      var buffer = await wb.xlsx.writeBuffer();
+      var blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = "tipari.xlsx";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    } catch (e) {
+      console.error("Export uživatelů selhal:", e);
+      if (bannerEl) showBanner(bannerEl, "error", "Export se nepodařilo připravit. Zkuste to prosím znovu.");
+    } finally {
+      if (triggerBtn) triggerBtn.disabled = false;
+    }
   }
 
   function roleBadgeHtml(role) {
@@ -6428,8 +6814,20 @@
   function aktualniStavLabel(t) {
     return (t && t.rk_stav) ? rkStavLabel(t.rk_stav) : stavLabel(t && t.stav);
   }
+  // Zadání (bod 14): datum poslední změny stavu VEDLE pillu se stavem -
+  // JEDINÉ sdílené místo, kde appka status tipu vykresluje (seznam Tipy,
+  // Detail tipu, karty tipaře v jeho vlastním přehledu), takže úprava
+  // tady stačí na "všude" ze zadání. Zdroj dat je tips.posledni_zmena_stavu_kdy
+  // (trigger nad tip_status_history, viz migrace
+  // zadani_tips_posledni_zmena_stavu) - přichází automaticky se sloupcem
+  // `*` na tips, žádná RPC úprava nebyla potřeba.
   function aktualniStavPillHtml(t) {
-    return (t && t.rk_stav) ? rkStavPillHtml(t.rk_stav) : stavPillHtml(t && t.stav);
+    var pill = (t && t.rk_stav) ? rkStavPillHtml(t.rk_stav) : stavPillHtml(t && t.stav);
+    var kdy = t && t.posledni_zmena_stavu_kdy ? formatDatumZCasu(t.posledni_zmena_stavu_kdy) : "";
+    if (kdy) {
+      pill += '<div class="dt-muted" style="font-size:11px;margin-top:2px;white-space:nowrap;">od ' + escapeHtml(kdy) + '</div>';
+    }
+    return pill;
   }
 
   // Milník 21 (sekce E): KLIENTSKÉ ZRCADLO serverové SQL funkce
@@ -6470,11 +6868,77 @@
     return STAV_LABELS[stav] || RK_STAV_LABELS[stav] || stav || "?";
   }
 
+  // Zadání (bod 21): sloupec "Dny" přejmenován na "Měsíce" - a hodnota se
+  // teď SKUTEČNĚ přepočítává z dní na měsíce (ne jen přejmenovaný popisek).
+  // 30.44 = průměrná délka měsíce (365.25/12), zaokrouhleno na 1 desetinu.
+  function dnyNaMesice(dny) {
+    var d = Number(dny || 0);
+    if (!isFinite(d) || d < 0) d = 0;
+    return Math.round((d / 30.44) * 10) / 10;
+  }
+
   function formatCena(value) {
     if (value === null || value === undefined || value === "") return "—";
     var num = Number(value);
     if (isNaN(num)) return "—";
     return num.toLocaleString("cs-CZ") + " Kč";
+  }
+
+  // =========================================================================
+  // Zadání (bod 1) — SDÍLENÝ UTILITA PRO ŽIVÉ FORMÁTOVÁNÍ KČ VSTUPŮ
+  // =========================================================================
+  // `type="number"` neumí zobrazit mezery (prohlížeč je nepřijme jako platný
+  // číselný znak), proto se dotčené vstupy přepínají na `type="text"` +
+  // `inputmode="numeric"` a formátování (mezery po tisících + " Kč") se dělá
+  // ručně na `input` události, s dopočtem pozice kurzoru podle počtu číslic
+  // před ním (aby psaní uprostřed čísla neskákalo na konec).
+  function kcFormatDigits(digits) {
+    if (!digits) return "";
+    return digits.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  }
+
+  // Přečte "syrovou" číselnou hodnotu ze zformátovaného Kč vstupu (vrátí
+  // řetězec s čistými číslicemi, "" když je prázdný) - tohle je to, co se
+  // má posílat na server/ukládat, NIKDY naformátovaná hodnota s mezerami.
+  function kcRawValue(elOrId) {
+    var inp = typeof elOrId === "string" ? el(elOrId) : elOrId;
+    if (!inp) return "";
+    return String(inp.value || "").replace(/[^\d]/g, "");
+  }
+
+  function kcRawNumberOrNull(elOrId) {
+    var digits = kcRawValue(elOrId);
+    return digits === "" ? null : Number(digits);
+  }
+
+  // Napojí živé formátování na jeden Kč input. Idempotentní (bezpečné volat
+  // opakovaně po každém překreslení formuláře).
+  function wireKcInput(elOrId) {
+    var inp = typeof elOrId === "string" ? el(elOrId) : elOrId;
+    if (!inp || inp.dataset.kcWired) return;
+    inp.dataset.kcWired = "1";
+    inp.type = "text";
+    inp.setAttribute("inputmode", "numeric");
+    inp.setAttribute("autocomplete", "off");
+    function reformat() {
+      var pos = inp.selectionStart == null ? inp.value.length : inp.selectionStart;
+      var before = inp.value.slice(0, pos);
+      var digitsBefore = (before.match(/\d/g) || []).length;
+      var digits = inp.value.replace(/[^\d]/g, "");
+      var formatted = kcFormatDigits(digits);
+      inp.value = formatted ? formatted + " Kč" : "";
+      if (digits && document.activeElement === inp) {
+        var count = 0, newPos = formatted.length;
+        for (var i = 0; i < formatted.length; i++) {
+          if (/\d/.test(formatted[i])) count++;
+          if (count === digitsBefore) { newPos = i + 1; break; }
+        }
+        if (digitsBefore === 0) newPos = 0;
+        try { inp.setSelectionRange(newPos, newPos); } catch (e) {}
+      }
+    }
+    inp.addEventListener("input", reformat);
+    reformat(); // initial render podle vstupní hodnoty (může přijít z DB)
   }
 
   // =========================================================================
@@ -6968,7 +7432,7 @@
       { key: "nazev", label: "Název", get: function (r) { return r.nazev || ""; },
         render: function (r) { return '<span class="dt-strong">' + escapeHtml(r.nazev || "—") + '</span>'; } },
       { key: "ico", label: "IČO", get: function (r) { return r.ico || ""; }, render: function (r) { return escapeHtml(r.ico || "—"); } },
-      { key: "adresa", label: "Adresa", className: "dt-wrap dt-col-address", get: function (r) { return r.adresa || ""; }, render: function (r) { return escapeHtml(r.adresa || "—"); } },
+      { key: "adresa", label: "Adresa", className: "dt-wrap dt-col-address", get: function (r) { return rkAdresaRadek(r); }, render: function (r) { return escapeHtml(rkAdresaRadek(r)); } },
       { key: "kontaktni_osoba", label: "Kontaktní osoba", get: function (r) { return r.kontaktni_osoba || ""; }, render: function (r) { return escapeHtml(r.kontaktni_osoba || "—"); } },
       // Telefon ZÁMĚRNĚ BEZ .dt-col-phone (na rozdíl od tabulky Uživatelé):
       // RK mají telefon v mezinárodním tvaru s mezerami ("+420 777 000 111"),
@@ -7038,6 +7502,89 @@
     await fetchRkAktivniList();
     if (g !== authGen) return;
     await renderRkTable();
+    await fetchRkZadosti(); // Zadání (bod 24)
+  }
+
+  // ---------------------------------- Zadání (bod 24): žádosti o partnerství
+  var rkZadostiCache = [];
+
+  async function fetchRkZadosti() {
+    var g = authGen;
+    var res = await sb.rpc("moje_zadosti_o_partnerstvi");
+    if (g !== authGen) return;
+    if (res.error) {
+      console.error("Chyba při načítání žádostí o partnerství:", res.error);
+      return;
+    }
+    rkZadostiCache = (res.data || []).filter(function (z) { return z.stav === "nova"; });
+    renderRkZadosti();
+  }
+
+  function renderRkZadosti() {
+    var wrap = el("rkZadostiWrap");
+    if (!wrap) return;
+    if (!rkZadostiCache.length) { wrap.hidden = true; wrap.innerHTML = ""; return; }
+    wrap.hidden = false;
+    wrap.innerHTML =
+      '<h3 class="detail-section-title" style="margin-top:0;">Žádosti o partnerství (' + rkZadostiCache.length + ')</h3>' +
+      '<p class="dt-muted" style="margin-top:-6px;">Přišly z veřejného formuláře. Schválením vznikne NEAKTIVNÍ realitní kancelář - živou ji zapnete až přes Detail → Upravit → „Aktivní“.</p>' +
+      rkZadostiCache.map(function (z) {
+        return '<div class="detail-item" style="padding:10px 0;border-top:1px solid var(--border);">' +
+          '<div class="detail-value" style="font-weight:700;">' + escapeHtml(z.nazev) + '</div>' +
+          '<div class="dt-muted" style="font-size:13px;margin:2px 0 8px;">' +
+            [z.ico ? "IČO " + escapeHtml(z.ico) : "", z.kontaktni_osoba, z.telefon, z.email].filter(Boolean).map(escapeHtml).join(" · ") +
+            (z.rk_ulice || z.rk_mesto ? '<br>' + escapeHtml(adresaRadekHtml(z.rk_ulice, z.rk_cislo, z.rk_mesto, z.rk_psc, null)) : "") +
+            '<br>Podáno ' + escapeHtml(formatDatumZCasu(z.vytvoreno_kdy) || "—") +
+          '</div>' +
+          '<div class="form-actions" style="margin:0;">' +
+            '<button class="btn-small" type="button" data-zadost-schvalit="' + escapeHtml(z.id) + '">Schválit (založit jako neaktivní RK)</button>' +
+            '<button class="btn-small btn-small-ghost" type="button" data-zadost-zamitnout="' + escapeHtml(z.id) + '">Zamítnout</button>' +
+          '</div>' +
+        '</div>';
+      }).join("");
+
+    wrap.querySelectorAll("[data-zadost-schvalit]").forEach(function (btn) {
+      btn.addEventListener("click", function () { submitSchvalitZadost(btn.getAttribute("data-zadost-schvalit"), btn); });
+    });
+    wrap.querySelectorAll("[data-zadost-zamitnout]").forEach(function (btn) {
+      btn.addEventListener("click", function () { submitZamitnoutZadost(btn.getAttribute("data-zadost-zamitnout"), btn); });
+    });
+  }
+
+  async function submitSchvalitZadost(id, btn) {
+    var z = rkZadostiCache.filter(function (x) { return x.id === id; })[0];
+    if (!z) return;
+    if (!window.confirm('Schválit žádost „' + z.nazev + '“ a založit ji jako NOVOU (zatím neaktivní) realitní kancelář?')) return;
+    if (btn) btn.disabled = true;
+    var g = authGen;
+    var res = await sb.rpc("schvalit_zadost_o_partnerstvi", { p_id: id });
+    if (g !== authGen) return;
+    if (res.error) {
+      console.error("Chyba při schvalování žádosti o partnerství:", res.error);
+      showBanner(el("rkBanner"), "error", "Žádost se nepodařilo schválit. Zkuste to prosím znovu.");
+      if (btn) btn.disabled = false;
+      return;
+    }
+    showBanner(el("rkBanner"), "ok", "Žádost byla schválena a založena jako neaktivní realitní kancelář „" + z.nazev + "“. Aktivujte ji v Detailu, až budete připraveni jí předávat tipy.");
+    await refreshRkSection();
+  }
+
+  async function submitZamitnoutZadost(id, btn) {
+    var z = rkZadostiCache.filter(function (x) { return x.id === id; })[0];
+    if (!z) return;
+    if (!window.confirm('Zamítnout žádost „' + z.nazev + '“?')) return;
+    if (btn) btn.disabled = true;
+    var g = authGen;
+    var res = await sb.rpc("zamitnout_zadost_o_partnerstvi", { p_id: id, p_poznamka: null });
+    if (g !== authGen) return;
+    if (res.error) {
+      console.error("Chyba při zamítání žádosti o partnerství:", res.error);
+      showBanner(el("rkBanner"), "error", "Žádost se nepodařilo zamítnout. Zkuste to prosím znovu.");
+      if (btn) btn.disabled = false;
+      return;
+    }
+    showBanner(el("rkBanner"), "ok", "Žádost byla zamítnuta.");
+    await refreshRkSection();
   }
 
   function closeRkForm() {
@@ -7066,9 +7613,13 @@
         '<form id="rkFormPanel" novalidate>' +
           '<div class="form-grid">' +
             '<div class="field"><label for="rkfNazev">Název *</label><input type="text" id="rkfNazev" value="' + escapeHtml(target ? target.nazev || "" : "") + '" placeholder="např. Realitní kancelář Novák s.r.o."></div>' +
-            '<div class="field"><label for="rkfIco">IČO</label><input type="text" id="rkfIco" value="' + escapeHtml(target ? target.ico || "" : "") + '"></div>' +
+            '<div class="field" id="rkfIcoField"><label for="rkfIco">IČO</label><input type="text" id="rkfIco" value="' + escapeHtml(target ? target.ico || "" : "") + '"><span class="error-msg">Zadané IČO není platné (nesedí kontrolní číslice).</span></div>' +
             '<div class="field"><label for="rkfDic">DIČ</label><input type="text" id="rkfDic" value="' + escapeHtml(target ? target.dic || "" : "") + '"></div>' +
-            '<div class="field col-span-2"><label for="rkfAdresa">Adresa</label><input type="text" id="rkfAdresa" value="' + escapeHtml(target ? target.adresa || "" : "") + '"></div>' +
+            // Zadání (bod 23): adresa rozdělená na Ulice / číslo domu / Město / PSČ.
+            '<div class="field"><label for="rkfUlice">Ulice</label><input type="text" id="rkfUlice" value="' + escapeHtml(target ? target.rk_ulice || "" : "") + '"></div>' +
+            '<div class="field"><label for="rkfCislo">Číslo domu</label><input type="text" id="rkfCislo" value="' + escapeHtml(target ? target.rk_cislo || "" : "") + '"></div>' +
+            '<div class="field"><label for="rkfMesto">Město</label><input type="text" id="rkfMesto" value="' + escapeHtml(target ? target.rk_mesto || "" : "") + '"></div>' +
+            '<div class="field"><label for="rkfPsc">PSČ</label><input type="text" id="rkfPsc" value="' + escapeHtml(target ? target.rk_psc || "" : "") + '" placeholder="např. 110 00"></div>' +
             '<div class="field"><label for="rkfKontakt">Kontaktní osoba</label><input type="text" id="rkfKontakt" value="' + escapeHtml(target ? target.kontaktni_osoba || "" : "") + '"></div>' +
             '<div class="field"><label for="rkfTelefon">Telefon</label><input type="tel" id="rkfTelefon" value="' + escapeHtml(target ? target.telefon || "" : "") + '"></div>' +
             '<div class="field"><label for="rkfEmail">E-mail</label><input type="email" id="rkfEmail" value="' + escapeHtml(target ? target.email || "" : "") + '"></div>' +
@@ -7095,11 +7646,25 @@
       showBanner(el("rkBanner"), "error", "Zadejte prosím název realitní kanceláře.");
       return;
     }
+    // Zadání (bod 23): skutečná kontrola kontrolní číslice IČO, ne jen
+    // počet číslic - viz jePlatneIco().
+    var ico = el("rkfIco").value.trim();
+    if (!jePlatneIco(ico)) {
+      setFieldError(el("rkfIcoField"), true);
+      showBanner(el("rkBanner"), "error", "Zadané IČO není platné (nesedí kontrolní číslice).");
+      el("rkfIco").focus();
+      return;
+    }
+    setFieldError(el("rkfIcoField"), false);
     var payload = {
       nazev: nazev,
-      ico: el("rkfIco").value.trim() || null,
+      ico: ico || null,
       dic: el("rkfDic").value.trim() || null,
-      adresa: el("rkfAdresa").value.trim() || null,
+      // Zadání (bod 23): adresa rozdělená na Ulice / číslo domu / Město / PSČ.
+      rk_ulice: el("rkfUlice").value.trim() || null,
+      rk_cislo: el("rkfCislo").value.trim() || null,
+      rk_mesto: el("rkfMesto").value.trim() || null,
+      rk_psc: el("rkfPsc").value.trim() || null,
       kontaktni_osoba: el("rkfKontakt").value.trim() || null,
       telefon: el("rkfTelefon").value.trim() || null,
       email: el("rkfEmail").value.trim() || null,
@@ -7271,7 +7836,7 @@
           detailItemBold("Název", r.nazev) +
           detailItemBold("IČO", r.ico) +
           detailItemBold("DIČ", r.dic) +
-          detailItemBold("Adresa", r.adresa) +
+          detailItemBold("Adresa", rkAdresaRadek(r)) +
           detailItemBold("Telefon kanceláře", r.telefon) +
           detailItemBold("E-mail", r.email) +
           detailItemBold("Kontaktní osoba", r.kontaktni_osoba) +
@@ -7295,9 +7860,15 @@
     return '<form id="rkDetailForm" novalidate>' +
         '<div class="form-grid">' +
           '<div class="field"><label for="rkdNazev">Název *</label><input type="text" id="rkdNazev" value="' + escapeHtml(r.nazev || "") + '"></div>' +
-          '<div class="field"><label for="rkdIco">IČO</label><input type="text" id="rkdIco" value="' + escapeHtml(r.ico || "") + '"></div>' +
+          '<div class="field" id="rkdIcoField"><label for="rkdIco">IČO</label><input type="text" id="rkdIco" value="' + escapeHtml(r.ico || "") + '"><span class="error-msg">Zadané IČO není platné (nesedí kontrolní číslice).</span></div>' +
           '<div class="field"><label for="rkdDic">DIČ</label><input type="text" id="rkdDic" value="' + escapeHtml(r.dic || "") + '"></div>' +
-          '<div class="field col-span-2"><label for="rkdAdresa">Adresa</label><input type="text" id="rkdAdresa" value="' + escapeHtml(r.adresa || "") + '"></div>' +
+          // Zadání (bod 23): adresa rozdělená na Ulice / číslo domu / Město / PSČ
+          // - stejný formát jako formulář "Přidat RK", ať editace nevrací
+          // údaje zpátky do jednoho volného textového pole.
+          '<div class="field"><label for="rkdUlice">Ulice</label><input type="text" id="rkdUlice" value="' + escapeHtml(r.rk_ulice || "") + '"></div>' +
+          '<div class="field"><label for="rkdCislo">Číslo domu</label><input type="text" id="rkdCislo" value="' + escapeHtml(r.rk_cislo || "") + '"></div>' +
+          '<div class="field"><label for="rkdMesto">Město</label><input type="text" id="rkdMesto" value="' + escapeHtml(r.rk_mesto || "") + '"></div>' +
+          '<div class="field"><label for="rkdPsc">PSČ</label><input type="text" id="rkdPsc" value="' + escapeHtml(r.rk_psc || "") + '" placeholder="např. 110 00"></div>' +
           '<div class="field"><label for="rkdTelefon">Telefon kanceláře</label><input type="tel" id="rkdTelefon" value="' + escapeHtml(r.telefon || "") + '"></div>' +
           '<div class="field"><label for="rkdEmail">E-mail</label><input type="email" id="rkdEmail" value="' + escapeHtml(r.email || "") + '"></div>' +
           '<div class="field col-span-2"><label for="rkdKontakt">Kontaktní osoba</label><input type="text" id="rkdKontakt" value="' + escapeHtml(r.kontaktni_osoba || "") + '" placeholder="např. Jana Nováková"></div>' +
@@ -7516,11 +8087,23 @@
     // dvě pole, která dosud uměla měnit jen RK přes vlastní RPC
     // (kontaktni_osoba_telefon, kontaktni_osoba_funkce); politika je pouštěla
     // vždycky, jen nebyly ve formuláři (viz m24_04, úvodní komentář).
+    // Zadání (bod 23): stejná kontrolní číslice IČO jako u "Přidat RK".
+    var icoDetail = el("rkdIco").value.trim();
+    if (!jePlatneIco(icoDetail)) {
+      setFieldError(el("rkdIcoField"), true);
+      showBanner(el("rkBanner"), "error", "Zadané IČO není platné (nesedí kontrolní číslice).");
+      el("rkdIco").focus();
+      return;
+    }
+    setFieldError(el("rkdIcoField"), false);
     var payload = {
       nazev: nazev,
-      ico: el("rkdIco").value.trim() || null,
+      ico: icoDetail || null,
       dic: el("rkdDic").value.trim() || null,
-      adresa: el("rkdAdresa").value.trim() || null,
+      rk_ulice: el("rkdUlice").value.trim() || null,
+      rk_cislo: el("rkdCislo").value.trim() || null,
+      rk_mesto: el("rkdMesto").value.trim() || null,
+      rk_psc: el("rkdPsc").value.trim() || null,
       telefon: el("rkdTelefon").value.trim() || null,
       email: el("rkdEmail").value.trim() || null,
       kontaktni_osoba: el("rkdKontakt").value.trim() || null,
@@ -8273,6 +8856,7 @@
     // (nově se skrývají u nefiremního profilu) a pro chybovou značku u
     // data narození.
     var jeFirma = el("pfJeFirma");
+    if (el("pfFirmaFieldsWrap") && jeFirma) el("pfFirmaFieldsWrap").hidden = !jeFirma.checked; // Zadání (bod 7)
     if (el("pfIcoField") && jeFirma) el("pfIcoField").hidden = !jeFirma.checked;
     if (el("pfDicField") && jeFirma) el("pfDicField").hidden = !jeFirma.checked;
     setFieldError(el("pfDatumNarozeniField"), false);
@@ -8301,6 +8885,10 @@
     // dokladů (viz kycPosledniFileByTyp). Nese informaci o tom, co měl
     // nahrané PŘEDCHOZÍ tipař, takže musí pryč spolu se zbytkem KYC karty.
     kycPosledniFileByTyp = null;
+    // Zadání (bod 12): při změně identity/odhlášení se kamera (pokud
+    // zrovna běžela) MUSÍ vypnout - jinak by běžela dál na pozadí na cizí
+    // účet a svítilo by světýlko kamery v prohlížeči bezdůvodně.
+    zavritKycKameru();
   }
 
   // Jediný vstupní bod třetí kategorie (viz komentář výš).
@@ -8555,7 +9143,38 @@
     el("fpConfirm").value = "";
   }
 
+  // Zadání (bod 4) — oprava chyby: přihlášený uživatel, který otevře
+  // odkaz na VLASTNÍ veřejnou rekrutační stránku (náhled), skončil na
+  // domovské obrazovce místo na té stránce - showAppScreen() dřív
+  // BEZPODMÍNEČNĚ nulovala verejnaRouta a schovávala veřejné obrazovky,
+  // takže jakmile doběhl async onAuthStateChange (přihlášení bylo v
+  // localStorage z jiné karty/dřívější session), náhled zmizel.
+  function jeVlastniRekrutacniNahled() {
+    return !!(verejnaRouta && verejnaRouta.typ === "rekrutace" && currentUser && currentUser.invite_code &&
+      String(verejnaRouta.hodnota || "").toLowerCase() === String(currentUser.invite_code).toLowerCase());
+  }
+
+  function zobrazitVlastniRekrutacniNahled() {
+    renderVerejnaRouta();
+    var bar = el("rekrutaceNahledBar");
+    if (!bar) {
+      bar = document.createElement("div");
+      bar.id = "rekrutaceNahledBar";
+      bar.style.cssText = "position:sticky;top:0;z-index:500;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;padding:10px 16px;background:#111827;color:#fff;font-size:13.5px;text-align:center;";
+      bar.innerHTML = '<span>Toto je náhled vaší veřejné rekrutační stránky přesně tak, jak ji vidí návštěvníci.</span>' +
+        '<button type="button" id="rekrutaceNahledZpetBtn" class="btn-primary" style="width:auto;flex:none;">Zpět do aplikace</button>';
+      document.body.insertBefore(bar, document.body.firstChild);
+      el("rekrutaceNahledZpetBtn").addEventListener("click", function () {
+        if (bar && bar.parentNode) bar.parentNode.removeChild(bar);
+        verejnaRouta = null;
+        try { history.replaceState({}, "", location.pathname); } catch (e) { /* nepodstatné */ }
+        showAppScreen();
+      });
+    }
+  }
+
   function showAppScreen() {
+    if (jeVlastniRekrutacniNahled()) { zobrazitVlastniRekrutacniNahled(); return; }
     el("topbar").hidden = false;
     el("tabsWrap").hidden = false;
     el("authScreen").hidden = true;
@@ -8854,7 +9473,11 @@
   //     „Přidat nový tip" na Přehledu lídra (ldAddTipBtn). Tipař si
   //     záložku PONECHÁVÁ (klient mluvil výslovně jen o lídrovi).
   var ROLE_TAB_BEZ_TLACITKA = {
-    tipar: ["profile"],
+    // Zadání (bod 5): tipař dostává "Můj profil" jako PLNOHODNOTNOU
+    // záložku v navigaci (dřív šlo jen o klik na jméno/fotku v záhlaví -
+    // obrazovka i její renderovací funkce jsou TYTÉŽ, mění se jen to, že
+    // teď má i vlastní tlačítko). Leader/administrátor beze změny.
+    tipar: [],
     leader: ["profile", "new"],
     administrator: ["profile"],
     rk: []
@@ -8961,7 +9584,7 @@
     // applyNavForRole() při každém přihlášení/odhlášení nepřepsal opravený
     // statický text z HTML zpátky na starý.
     el("networkScreenSubtitle").textContent = isLeader
-      ? "Souhrnný přehled vaší sítě. Seznam jednotlivých uživatelů je v záložce „Uživatelé“."
+      ? "Souhrnný přehled vaší sítě. Seznam jednotlivých tipařů je v záložce „Tipaři“."
       : "Tabulka lidí, které jste (přímo i nepřímo) přivedli. Svůj pozvánkový odkaz a sdílení najdete v záložce „Marketing“.";
 
     // Milník 21 (sekce B a P): leaderovi se obecná hlavička obrazovky i
@@ -9557,7 +10180,11 @@
       // profil". Nemají žádný vliv na fázi registrace ani na KYC.
       // MILNÍK 23 (bod 10): + rk_id — potřebuje ho dotaz na logo kanceláře
       // hned pod tímhle blokem (role `rk`).
-      .select("jmeno, prijmeni, role, telefon, invite_code, vytvoreno_kdy, adresa_ulice, adresa_mesto, adresa_psc, adresa_stat, je_firma, ico, dic, adresa_vyplnena_kdy, autentizace_stav, autentizace_duvod_zamitnuti, autentizace_overeno_kdy, cislo_dokladu_totoznosti, vyzadovat_zmenu_hesla, profese, koniceky, profilova_fotka_cesta, rk_id")
+      // Zadání: + id_rt (bod 17), cislo_uctu (bod 25), adresa_cislo/
+      // dorucovaci_cislo (bod 8), invite_code_historie/invite_code_zmeny_pocet
+      // (bod 11), dorucovaci_* + datum_narozeni (chyběly úplně, přestože se
+      // z currentUser čtou na řadě míst - Detail adresy, KYC podmínky atd.)
+      .select("jmeno, prijmeni, role, telefon, invite_code, invite_code_historie, invite_code_zmeny_pocet, vytvoreno_kdy, adresa_ulice, adresa_cislo, adresa_mesto, adresa_psc, adresa_stat, je_firma, ico, dic, adresa_vyplnena_kdy, dorucovaci_je_stejna, dorucovaci_ulice, dorucovaci_cislo, dorucovaci_mesto, dorucovaci_psc, dorucovaci_stat, datum_narozeni, autentizace_stav, autentizace_duvod_zamitnuti, autentizace_overeno_kdy, cislo_dokladu_totoznosti, cislo_uctu, vyzadovat_zmenu_hesla, profese, koniceky, profilova_fotka_cesta, rk_id, id_rt, sponsor_id")
       .eq("id", user.id).single();
     // Milník 15 (bod 4.5): i samotné přihlášení má svůj `await` - kdyby se
     // během něj identita znovu změnila (rychlé přepnutí demo účtů, dvě
@@ -9758,7 +10385,7 @@
       (currentUser.autentizace_duvod_zamitnuti ? (" — důvod: " + currentUser.autentizace_duvod_zamitnuti) : "") + ".";
     // Milník 13 (bod 1): odkaz teď míří na vlastní záložku "Ověření
     // totožnosti" (#myKycScreen), ne na "Můj profil" - KYC už tam není.
-    el2.innerHTML = escapeHtml(text) + ' <button type="button" class="link-btn" id="kycRejectedBannerLinkBtn">Přejít na Ověření totožnosti</button>';
+    el2.innerHTML = escapeHtml(text) + ' <button type="button" class="link-btn" id="kycRejectedBannerLinkBtn">Přejít na Ověření pro výplatu provize</button>';
     var btn = el("kycRejectedBannerLinkBtn");
     if (btn) btn.addEventListener("click", function () { setActiveTab("mykyc"); });
   }
@@ -9875,9 +10502,19 @@
     setFieldError(el("f_JmenoKlienta"), !jmeno);
     if (!jmeno) { valid = false; firstInvalid = firstInvalid || el("in_JmenoKlienta"); }
 
+    // Zadání (bod 2d): telefon musí mít nejméně 9 znaků (počítáno z
+    // číslic, ať kontrola funguje i s mezerami mezi trojicemi).
     var telefon = el("in_Telefon").value.trim();
-    setFieldError(el("f_Telefon"), !telefon);
-    if (!telefon) { valid = false; firstInvalid = firstInvalid || el("in_Telefon"); }
+    var telefonCislice = telefon.replace(/\D/g, "");
+    var telefonOk = !!telefon && telefonCislice.length >= 9;
+    setFieldError(el("f_Telefon"), !telefonOk);
+    var telefonErrEl = el("telefonError");
+    if (telefonErrEl) {
+      telefonErrEl.textContent = !telefon
+        ? "Zadejte prosím telefonní číslo (nejméně 9 znaků)."
+        : "Telefonní číslo musí mít nejméně 9 znaků.";
+    }
+    if (!telefonOk) { valid = false; firstInvalid = firstInvalid || el("in_Telefon"); }
 
     var email = el("in_Email").value.trim();
     var emailOk = !email || isValidEmail(email);
@@ -9905,7 +10542,7 @@
     var submitBtn = el("tipSubmitBtn");
     submitBtn.disabled = true;
 
-    var pozadovanaCenaRaw = el("in_PozadovanaCena").value;
+    var pozadovanaCenaRaw = kcRawValue("in_PozadovanaCena");
     var payload = {
       autor_id: currentUser.id,
       jmeno_klienta: el("in_JmenoKlienta").value.trim(),
@@ -10073,7 +10710,7 @@
     // volaná tu samostatně, protože dashboard nepotřebuje stav kvízu, jen
     // souhrn (viz renderTiparDashboardAkademie).
     var davka = await Promise.all([
-      sb.from("tips").select("id,jmeno_klienta,typ_nemovitosti,lokalita,stav,rk_stav,odhadovana_provize,konecna_provize,provize_je_konecna,vlozeno_kdy").eq("autor_id", userId).order("vlozeno_kdy", { ascending: false }),
+      sb.from("tips").select("id,jmeno_klienta,typ_nemovitosti,lokalita,stav,rk_stav,odhadovana_provize,konecna_provize,provize_je_konecna,vlozeno_kdy,posledni_zmena_stavu_kdy").eq("autor_id", userId).order("vlozeno_kdy", { ascending: false }),
       sb.from("vyplaty").select("castka_celkem,stav").eq("prijemce_id", userId),
       sb.rpc("akademie_moje_akademie")
     ]);
@@ -10127,6 +10764,11 @@
   // stavPillHtml() (bez CSS třídy `pill`, ať sedí do vzhledu .tdash-chip
   // z mockupu), ale STEJNÁ barevná logika/popisky jako všude jinde v appce
   // (žádné druhé, konkurenční mapování stavů).
+  // Zadání (bod 14, oprava po revizi): datum poslední změny stavu chybělo -
+  // toto je samostatný, dřívější renderer, na který centralizace v
+  // aktualniStavPillHtml() nedosáhla (jiná CSS třída/layout). Stejný zdroj
+  // dat (t.posledni_zmena_stavu_kdy) a stejné formátování (formatDatumZCasu),
+  // jen vykreslené pod chip namísto pod pill.
   function tdashChipHtml(t) {
     var trida = "tdash-chip";
     if (t.stav === "zamitnuto") trida += " tdash-chip-zamitnuto";
@@ -10135,7 +10777,11 @@
     else if (t.stav === "predano_rk" || t.rk_stav) trida += " tdash-chip-rk";
     else if (t.stav === "tip_overen_hledame_rk") trida += " tdash-chip-move";
     var text = t.rk_stav ? rkStavLabel(t.rk_stav) : stavLabel(t.stav);
-    return '<span class="' + trida + '">' + escapeHtml(text) + '</span>';
+    var chip = '<span class="' + trida + '">' + escapeHtml(text) + '</span>';
+    var kdy = t && t.posledni_zmena_stavu_kdy ? formatDatumZCasu(t.posledni_zmena_stavu_kdy) : "";
+    if (!kdy) return chip;
+    return '<span style="flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:3px;">' +
+      chip + '<span class="dt-muted" style="font-size:11px;white-space:nowrap;">od ' + escapeHtml(kdy) + '</span></span>';
   }
 
   function renderTiparDashboardTipy(tipy) {
@@ -10893,6 +11539,38 @@
   // agregovaný dashboard (stat-row). Tipař má obojí beze změny - plochý
   // seznam vlastní sítě zůstává, protože bod 3 zadání uživatele mluví
   // výslovně jen o Leaderovi ("Leader — Moje síť → …").
+  // Zadání (bod 3c): jméno, kontakt a fotka (nebo iniciály) sponzora
+  // volajícího, nad tabulkou "Moje síť". Fotka je VÝHRADNĚ veřejná
+  // rekrutační fotka sponzora (viz muj_sponzor()) - NIKDY jeho soukromá
+  // profilová fotka, aby appka nezradila příslib "Fotku vidíte jen vy".
+  async function renderNetworkSponsorCard() {
+    var wrap = el("networkSponsorCard");
+    if (!wrap || !sb) return;
+    wrap.innerHTML = "";
+    var g = authGen;
+    var res = await sb.rpc("muj_sponzor");
+    if (g !== authGen) return;
+    if (res.error || !res.data || !res.data.nalezeno) return; // administrátor jako sponzor apod. - prostě se nezobrazí
+    var s = res.data;
+    var fotoUrl = s.foto_cesta ? verejnaFotoUrl(s.foto_cesta) : null;
+    var fotoHtml = fotoUrl
+      ? '<img class="rekrut-preview-foto" style="width:52px;height:52px;" src="' + escapeHtml(fotoUrl) + '" alt="">'
+      : '<div class="rekrut-preview-foto-empty" style="width:52px;height:52px;font-size:18px;" aria-hidden="true">' + escapeHtml(inicialyUzivatele(s)) + '</div>';
+    wrap.innerHTML =
+      '<div class="card detail-card" style="display:flex;gap:14px;align-items:center;">' +
+        fotoHtml +
+        '<div>' +
+          '<div class="dt-muted" style="font-size:12px;">Váš sponzor' + (s.id_rt ? ' · ID RT ' + escapeHtml(s.id_rt) : '') + '</div>' +
+          '<div class="dt-strong" style="font-size:16px;">' + escapeHtml(celeJmeno(s) || "—") + '</div>' +
+          '<div class="dt-muted" style="font-size:13px;">' +
+            (s.telefon ? escapeHtml(formatTelefon(s.telefon) || s.telefon) : "") +
+            (s.telefon && s.email ? " · " : "") +
+            (s.email ? escapeHtml(s.email) : "") +
+          '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
   async function fetchMyNetworkTable() {
     if (!currentUser) return;
     // Milník 15 (bod 4.5): generační pojistka - přesně tahle funkce byla
@@ -10950,6 +11628,12 @@
       return;
     }
 
+    // Zadání (bod 3c): karta sponzora nad tabulkou + (bod 3a) tlačítko
+    // exportu - obojí jen pro roli tipar (leader se vrací dřív výš).
+    renderNetworkSponsorCard();
+    var exportWrap = el("networkExportBtnWrap");
+    if (exportWrap) exportWrap.hidden = false;
+
     var result = await sb.rpc("moje_sit");
     // Milník 15 (bod 4.5): KLÍČOVÝ řádek celé opravy. Bez něj se níž
     // vyhodnotí `currentUser.role` UŽ NAD NOVOU identitou a leaderova
@@ -10970,26 +11654,11 @@
     isLeader = currentUser.role === "leader";
     if (networkLoading) networkLoading.hidden = true;
 
-    var direct = 0;
-    var celkemTipu = 0;
-    // Zadání: moje_sit() teď vrací i řádek volajícího samotného (uroven 0),
-    // ať appka může tipaře zobrazit v jeho vlastní tabulce "Moje síť".
-    // Statistika "celkem v mé síti" ale dál znamená "kolik lidí jsem
-    // (přímo i nepřímo) přivedl" - proto počítá jen uroven >= 1, ne
-    // rows.length, aby se sám sebou nezvětšila o jednoho.
-    var velikostSite = 0;
-    rows.forEach(function (r) {
-      if (!r) return;
-      if (r.uroven === 1) direct++;
-      if (r.uroven > 0) velikostSite++;
-      celkemTipu += (r.pocet_tipu != null) ? Number(r.pocet_tipu) : 0;
-    });
-    // Milník 13 (bod 5): stejné obrácené pořadí label→num jako statTileHtml()
-    // níže - popisek nahoře velký/tučný, číslo pod ním menší/muted.
-    el("networkStats").innerHTML =
-      '<div class="stat-tile"><div class="stat-label">přímo pozvaní</div><div class="stat-num">' + direct + '</div></div>' +
-      '<div class="stat-tile"><div class="stat-label">celkem v mé síti</div><div class="stat-num">' + velikostSite + '</div></div>' +
-      (isLeader ? '<div class="stat-tile"><div class="stat-label">tipů v celé síti</div><div class="stat-num">' + celkemTipu + '</div></div>' : '');
+    // Zadání (bod 3b): dlaždice "Přímo pozváni" a "Celkem v mé síti" byly
+    // ODSTRANĚNY (klient je označil za matoucí/zbytečné) - tahle obrazovka
+    // je jen pro roli tipar (leader se vrací dřív, viz výš), takže
+    // #networkStats se tu prostě nechává prázdný.
+    el("networkStats").innerHTML = "";
 
     if (isLeader) {
       // Bod 3 zadání: žádný plochý seznam pro Leadera - jen dashboard
@@ -11031,6 +11700,10 @@
     // adresu ani doklady vidět nemá, takže má vlastní lehkou read-only
     // kartu nad přesně těmi poli, která jsou i ve sloupcích tabulky.
     var columns = [
+      // Zadání (bod 17): "ID RT" - jedinečné 6místné číslo, zobrazuje se
+      // před jménem VŠUDE, kde appka ukazuje tipaře/lídra.
+      { key: "id_rt", label: "ID RT", className: "dt-col-mini", get: function (r) { return r.id_rt || ""; },
+        render: function (r) { return escapeHtml(r.id_rt || "—"); } },
       { key: "jmeno", label: "Jméno", className: "dt-col-name", get: function (r) { return r.jmeno || ""; },
         render: function (r) {
           return '<span class="dt-strong">' + escapeHtml(r.jmeno || "—") + '</span>' +
@@ -11039,7 +11712,13 @@
       { key: "prijmeni", label: "Příjmení", className: "dt-col-name", get: function (r) { return r.prijmeni || ""; },
         render: function (r) { return '<span class="dt-strong">' + escapeHtml(r.prijmeni || "—") + '</span>'; } },
       { key: "uroven", label: "Úroveň", className: "dt-col-mini", get: function (r) { return r.uroven != null ? r.uroven : 0; },
-        render: function (r) { return escapeHtml(r.uroven === 0 ? "vy" : "úroveň " + (r.uroven != null ? r.uroven : "?")); } },
+        // Zadání (bod 3d): OPRAVA - dřív se vlastní řádek (uroven === 0,
+        // tehdy self-relativní definice) natvrdo popisoval jako "vy" místo
+        // skutečné hloubky v síti. moje_sit() teď vrací ABSOLUTNÍ úroveň
+        // (stejná definice jako sit_strom()/moje_uzivatele() - 0 = první
+        // lídr, dál +1 na sponzorský krok dolů), takže se ukazuje vždy
+        // skutečné číslo, i pro vlastní řádek (typicky > 0).
+        render: function (r) { return escapeHtml("úroveň " + (r.uroven != null ? r.uroven : "?")); } },
       // MILNÍK 24 (bod 7): zobrazení jde přes sdílené telefonBunkaHtml()
       // („777 555 222", plná hodnota v title). `get` schválně vrací OBA
       // tvary - řadí se podle uloženého (stabilní), ale hledat jde i podle
@@ -11059,7 +11738,7 @@
       { key: "podrizeni", label: "Podřízení", className: "dt-col-mini",
         get: function (r) { return Number(r.velikost_tymu || 0); },
         render: function (r) { return escapeHtml(String(Number(r.primych_podrizenych || 0)) + "/" + String(Number(r.velikost_tymu || 0))); } },
-      { key: "dny", label: "Dny", className: "dt-col-narrow", get: function (r) { return Number(r.dny_spoluprace || 0); } },
+      { key: "dny", label: "Měsíce", className: "dt-col-narrow", get: function (r) { return dnyNaMesice(r.dny_spoluprace); } },
       { key: "tipy", label: "Tipy", className: "dt-col-narrow", get: function (r) { return Number(r.pocet_tipu || 0); } },
       { key: "plati_dph", label: "Plátce", className: "dt-col-mini", get: function (r) { return r.plati_dph ? "Ano" : ""; },
         render: function (r) { return r.plati_dph ? '<span class="dt-tag-ok">Plátce</span>' : '<span class="dt-muted">—</span>'; } },
@@ -11147,6 +11826,7 @@
       '<div class="card detail-card">' +
         '<h3 class="detail-section-title" style="margin-top:0;">Detail — ' + escapeHtml(celeJmeno(r) || userId) + '</h3>' +
         '<div class="detail-grid">' +
+          detailItem("ID RT", r.id_rt) +
           detailItem("Jméno", r.jmeno) +
           detailItem("Příjmení", r.prijmeni) +
           detailItem("Úroveň v mé síti", r.uroven != null ? ("úroveň " + r.uroven) : "—") +
@@ -11154,7 +11834,7 @@
           detailItem("E-mail", r.email) +
           detailItem("Fáze registrace", registraceText) +
           detailItem("Podřízení (přímí/celkem)", String(Number(r.primych_podrizenych || 0)) + "/" + String(Number(r.velikost_tymu || 0))) +
-          detailItem("Dny spolupráce", String(Number(r.dny_spoluprace || 0))) +
+          detailItem("Měsíců spolupráce", String(dnyNaMesice(r.dny_spoluprace))) +
           detailItem("Počet tipů", String(Number(r.pocet_tipu || 0))) +
           detailItem("Plátce DPH", r.plati_dph ? "Ano" : "Ne") +
           detailItem("Stav", r.aktivni ? "Aktivní" : "Vymazán") +
@@ -11348,6 +12028,13 @@
     M22_UKONCENI_CODES.forEach(function (kod) {
       statusOptions.push({ value: "faze:" + kod, label: "Ukončené — " + M22_FAZE_LABELS[kod] });
     });
+    // Zadání (bod 13e): ve filtru chyběla volba "Předáno RK" - `tips.stav`
+    // zůstává 'predano_rk' natrvalo i poté, co realitní kancelář posune
+    // svůj `rk_stav` dál (jsou to dvě nezávislé osy), takže devítipoložková
+    // fázová taxonomie tenhle pohled ("úplně všechno, co jsem kdy předal
+    // RK") neumí - f4_rk_schuzka zachytí jen tu ÚVODNÍ fázi. Samostatná
+    // volba filtruje přímo podle `tips.stav`, ne podle fáze.
+    statusOptions.push({ value: "stav:predano_rk", label: "Předáno RK (vše)" });
 
     if (tipyTable) {
       tipyTable.setRows(rows);
@@ -11367,6 +12054,7 @@
           // ale skutečné porovnání dělá `matches`.
           get: function (r) { return r.rk_stav === "prodano" ? "prodano" : r.stav; },
           matches: function (r, v) {
+            if (v.indexOf("stav:") === 0) return r.stav === v.slice(5); // Zadání (bod 13e)
             if (v.indexOf("faze:") !== 0) return false;
             var kod = v.slice(5);
             // Milník 22 (bod 3, dlaždice „ch"): „Čeká na vyplacení" není
@@ -11674,10 +12362,13 @@
       var rkPrevzalaInfo = t.rk_stav
         ? '<p class="dt-muted" style="margin:6px 0 0;">Tip je u realitní kanceláře - aktuální živý stav obchodu („' + escapeHtml(rkStavLabel(t.rk_stav)) + '") je v kartě „Stav u realitní kanceláře" níže.</p>'
         : '';
-      // MILNÍK 24 (bod 6): pokusy o zastižení jsou SAMOSTATNÁ AKCE, ne
-      // editace pole - „Zaznamenat další pokus" proto zůstává dostupné i
-      // v režimu jen pro čtení. Blok se skládá jednou a používá se v obou
-      // větvích, aby se nemohly rozejít.
+      // Zadání (bod 15): OPRAVA - "Zaznamenat další pokus" už NENÍ dostupné
+      // v needitovatelném režimu Detailu (tam dřív šlo omylem prokliknout
+      // a tiše přepsat stav tipu, aniž by uživatel cokoli "upravoval" -
+      // to je přesně ten nahlášený bug). Dostupné je TEPRVE po kliknutí na
+      // "Upravit". Blok se skládá jednou, ale používá se JEN v editační
+      // větvi (viz editHtml níž).
+      var pokusyDosazenLimit = Number(t.pocet_pokusu_kontakt || 0) >= 3;
       var pokusyHtml = (["ceka_na_overeni", "probiha_overeni", "nepodarilo_se_zastihnout",
           "potrebujeme_doplnit_informace"].indexOf(t.stav) !== -1)
         ? '<div class="detail-item" style="margin-top:12px;">' +
@@ -11687,7 +12378,7 @@
               (t.posledni_pokus_kdy ? ' · poslední ' + escapeHtml(formatDatumZCasu(t.posledni_pokus_kdy) || "—") : ' · zatím žádný') +
             '</div>' +
             '<p class="dt-muted" style="font-size:12px;margin:4px 0 6px;">Ukončit tip s důvodem „Vlastníka se dlouhodobě nepodařilo zastihnout" jde až po 3 pokusech nebo po 7 dnech od posledního pokusu.</p>' +
-            '<button type="button" class="btn-small" id="dtPokusBtn">Zaznamenat další pokus</button>' +
+            '<button type="button" class="btn-small" id="dtPokusBtn"' + (pokusyDosazenLimit ? ' disabled title="Dosažen limit 3 pokusů."' : '') + '>Zaznamenat další pokus</button>' +
           '</div>'
         : '';
 
@@ -11703,15 +12394,27 @@
              (t.duvod_ukonceni_leader_poznamka ? (" — " + t.duvod_ukonceni_leader_poznamka) : ""))
           : "";
         editHtml = '' +
-          '<div class="card detail-card">' +
-            '<h3 class="detail-section-title" style="margin-top:0;">Ověření tipu</h3>' +
-            '<p class="dt-muted" style="margin-top:-6px;">Údaje jsou jen ke čtení. Upravovat je můžete po kliknutí na „Upravit“.</p>' +
+          '<div class="card detail-card detail-card-kompakt">' +
+            // Zadání (bod 13a): "Upravit" přesunuto NAHORU, vedle nadpisu -
+            // dřív bylo jediné tlačítko úplně dole pod všemi poli, u
+            // delšího tipu tak mizelo mimo obrazovku.
+            '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px;">' +
+              '<h3 class="detail-section-title" style="margin:0;">Ověření tipu</h3>' +
+              '<button class="btn-primary" type="button" id="dtEditBtn" style="width:auto;flex-shrink:0;">Upravit</button>' +
+            '</div>' +
+            '<p class="dt-muted" style="margin-top:-4px;">Údaje jsou jen ke čtení. Upravovat je můžete tlačítkem „Upravit“ výš.</p>' +
+            // Zadání (bod 13d): stručná nápověda, na co se při telefonickém
+            // ověřování vlastníka zeptat - ne formální postup, jen
+            // připomínka toho hlavního, co se má zjistit/potvrdit.
+            '<div class="banner banner-info" style="text-align:left;margin:8px 0 14px;font-size:13px;">' +
+              '<strong>Při telefonickém ověření se zeptejte:</strong> je nemovitost skutečně na prodej a kdo o tom rozhoduje? souhlasí adresa a stav nemovitosti s tím, co zapsal tipař? odpovídá požadovaná cena očekávání vlastníka? je vlastník srozuměn s tím, že se s ním ozve realitní kancelář?' +
+            '</div>' +
             '<div class="detail-grid">' +
-              '<div class="detail-item"><div class="detail-label">Status ověření</div>' +
+              '<div class="detail-item detail-item-vyrazna"><div class="detail-label">Status ověření</div>' +
                 '<div class="detail-value">' + aktualniStavPillHtml(t) + '</div></div>' +
               (duvodText ? detailItem("Důvod ukončení tipu", duvodText) : "") +
               detailItem("Realitní kancelář", rkNazevById(t.rk_id)) +
-              detailItem("Požadovaná cena", formatCena(t.pozadovana_cena)) +
+              '<div class="detail-item detail-item-vyrazna"><div class="detail-label">Požadovaná cena</div><div class="detail-value">' + escapeHtml(formatCena(t.pozadovana_cena) || "—") + '</div></div>' +
               detailItem("Odhadovaná cena", formatCena(t.odhadovana_cena)) +
               detailItem("Ověřená adresa", t.overena_adresa) +
               detailItem("Stav nemovitosti", t.stav_nemovitosti) +
@@ -11723,16 +12426,12 @@
               ? '<div class="detail-item"><div class="detail-label">Poznámka Leadera</div><div class="detail-value" style="white-space:pre-wrap;">' + escapeHtml(t.poznamka_leadera) + '</div></div>'
               : detailItem("Poznámka Leadera", "")) +
             (rkPrevzalaInfo || '') +
-            pokusyHtml +
             (detailTipByloProdano
               ? '<div class="banner banner-error" style="text-align:left;margin-top:14px;">' +
                   '<strong>Tento tip už byl jednou prodaný.</strong><br>' +
                   'Jakákoli další změna se bude muset zdůvodnit a výslovně potvrdit — zápis se uloží do časové osy tipu i do Historie akcí.' +
                 '</div>'
               : '') +
-            '<div class="form-actions">' +
-              '<button class="btn-primary" type="button" id="dtEditBtn" style="width:auto;">Upravit</button>' +
-            '</div>' +
           '</div>';
       } else {
       editHtml = '' +
@@ -11740,7 +12439,7 @@
           '<h3 class="detail-section-title" style="margin-top:0;">Ověření tipu</h3>' +
           '<form id="detailSaveForm" novalidate>' +
             '<div class="form-grid">' +
-              '<div class="field"><label for="dtStavSelect">Status ověření *</label><select id="dtStavSelect">' + stavSelectOptionsHtml(t.stav) + '</select></div>' +
+              '<div class="field dt-stav-zvyrazneny"><label for="dtStavSelect">Status ověření *</label><select id="dtStavSelect">' + stavSelectOptionsHtml(t.stav) + '</select></div>' +
               (rkPrevzalaInfo ? '<div class="col-span-2">' + rkPrevzalaInfo + '</div>' : '') +
               // Milník 21 (sekce F): ukončení tipu při ověřování lídrem má
               // nově POVINNÝ STRUKTUROVANÝ důvod z pevného číselníku -
@@ -12009,11 +12708,6 @@
   // funkčně). RPC opravit_stav_tipu zůstává v DB nedotčená pro budoucí
   // použití, jen se odsud nevolá (viz docs/milnik5_ux_opravy.md).
   function wireDetailEditForm() {
-    // Milník 21 (sekce C/F): „Zaznamenat další pokus" přímo v detailu tipu.
-    // MILNÍK 24 (bod 6): existuje v OBOU režimech (je to akce, ne editace).
-    var pokusBtn = el("dtPokusBtn");
-    if (pokusBtn) pokusBtn.addEventListener("click", function () { submitPokusOKontakt(detailTip.id); });
-
     // MILNÍK 24 (bod 6): v režimu jen pro čtení žádný formulář neexistuje —
     // jen tlačítko, které do editace přepne.
     if (!detailEditMode) {
@@ -12030,6 +12724,12 @@
     var kodSel = el("dtDuvodKodSelect");
     if (kodSel) kodSel.addEventListener("change", updateDetailConditionalFields);
     updateDetailConditionalFields();
+    wireKcInput("dtPozadovanaCena"); // Zadání (bod 1): živé formátování Kč
+
+    // Zadání (bod 15): „Zaznamenat další pokus" je teď dostupné VÝHRADNĚ
+    // v editačním režimu (viz pokusyHtml výš) - proto se i wire-uje jen tady.
+    var pokusBtn = el("dtPokusBtn");
+    if (pokusBtn) pokusBtn.addEventListener("click", function () { submitPokusOKontakt(detailTip.id); });
 
     var cancelBtn = el("dtCancelBtn");
     if (cancelBtn) cancelBtn.addEventListener("click", function () {
@@ -12097,7 +12797,7 @@
       showBanner(el("detailBanner"), "error", 'U „jiného důvodu“ je poznámka povinná.');
       return;
     }
-    var pozadovanaCena = el("dtPozadovanaCena").value;
+    var pozadovanaCena = kcRawValue("dtPozadovanaCena");
     // Milník 17 (bod 22a/22b): #dtOdhadovanaCena jako <input> UŽ NEEXISTUJE
     // a p_odhadovana_cena se ani neposílá. Server ho stejně ignoruje
     // (posunout_stav_tipu vždy zapíše původní hodnotu), takže vynucení
@@ -12295,6 +12995,9 @@
       // nejdelší hodnoty a braly šířku akčnímu sloupci vpravo. TÁŽ třída je
       // i na Jméno/Příjmení v tipařově "Moje síť" (bod 5), ať jsou obě
       // tabulky se stejnými sloupci i stejně široké.
+      // Zadání (bod 17): "ID RT" před jménem.
+      { key: "id_rt", label: "ID RT", className: "dt-col-mini", get: function (r) { return r.id_rt || ""; },
+        render: function (r) { return escapeHtml(r.id_rt || "—"); } },
       { key: "jmeno", label: "Jméno", className: "dt-col-name", get: function (r) { return r.jmeno || ""; },
         render: function (r) { return '<span class="dt-strong">' + escapeHtml(r.jmeno || "—") + '</span>'; } },
       { key: "prijmeni", label: "Příjmení", className: "dt-col-name", get: function (r) { return r.prijmeni || ""; },
@@ -12327,7 +13030,7 @@
       { key: "podrizeni", label: "Podřízení", className: "dt-col-mini",
         get: function (r) { return Number(r.velikost_tymu || 0); },
         render: function (r) { return escapeHtml(String(Number(r.primych_podrizenych || 0)) + "/" + String(Number(r.velikost_tymu || 0))); } },
-      { key: "dny", label: "Dny", className: "dt-col-narrow", get: function (r) { return Number(r.dny_spoluprace || 0); } },
+      { key: "dny", label: "Měsíce", className: "dt-col-narrow", get: function (r) { return dnyNaMesice(r.dny_spoluprace); } },
       { key: "tipy", label: "Tipy", className: "dt-col-narrow", get: function (r) { return Number(r.pocet_tipu || 0); } },
       { key: "plati_dph", label: "Plátce", className: "dt-col-mini", get: function (r) { return r.plati_dph ? "Ano" : ""; },
         render: function (r) { return r.plati_dph ? '<span class="dt-tag-ok">Plátce</span>' : '<span class="dt-muted">—</span>'; } },
@@ -12528,7 +13231,11 @@
   // je neaktivní. Kdyby vypadl, `selected` by se neuplatnilo, prohlížeč by
   // předvybral první položku v pořadí a uložení formuláře by SPONZORA TIŠE
   // ZMĚNILO, aniž by to kdokoli chtěl.
-  function sponsorCandidateOptionsHtml(target) {
+  // Zadání (bod 20): vytažené ze sponsorCandidateOptionsHtml() do vlastní
+  // funkce, ať ji může použít i nové hledání (viz wireSponsorSearch) -
+  // stejná množina kandidátů, jen jiné vykreslení (řádky s ID RT namísto
+  // <option> prvků <select>u).
+  function sponsorCandidateList(target) {
     var candidateOptions = usersRowsCache
       .filter(function (o) {
         if (!o || o.id === target.id || o.role === "administrator") return false;
@@ -12536,14 +13243,12 @@
         return true;
       })
       .map(function (o) {
-        return { id: o.id, label: (celeJmeno(o) || o.id) + (o.aktivni === false ? " (neaktivní)" : "") };
+        return { id: o.id, id_rt: o.id_rt || "", label: (celeJmeno(o) || o.id) + (o.aktivni === false ? " (neaktivní)" : "") };
       });
     if (currentUser.role === "leader") {
-      candidateOptions.unshift({ id: currentUser.id, label: celeJmeno(currentUser) + " (já)" });
+      candidateOptions.unshift({ id: currentUser.id, id_rt: currentUser.id_rt || "", label: celeJmeno(currentUser) + " (já)" });
     }
-    return candidateOptions.map(function (o) {
-      return '<option value="' + escapeHtml(o.id) + '"' + (o.id === target.sponsor_id ? ' selected' : '') + '>' + escapeHtml(o.label) + '</option>';
-    }).join("");
+    return candidateOptions;
   }
 
   // Vstupní bod z tabulky (tlačítko "Detail"). Vykreslí obě karty v
@@ -12597,10 +13302,10 @@
     var adresaInfoHtml = !includeAdresa ? "" :
       '<div class="detail-grid">' +
       '<div class="detail-item"><div class="detail-label">Trvalá adresa' + (target.je_firma ? ' (sídlo firmy)' : '') + '</div><div class="detail-value">' +
-        escapeHtml(adresaRadekHtml(target.adresa_ulice, target.adresa_mesto, target.adresa_psc, target.adresa_stat)) + '</div></div>' +
+        escapeHtml(adresaRadekHtml(target.adresa_ulice, target.adresa_cislo, target.adresa_mesto, target.adresa_psc, target.adresa_stat)) + '</div></div>' +
       (target.dorucovaci_je_stejna === false
         ? '<div class="detail-item"><div class="detail-label">Doručovací adresa (liší se)</div><div class="detail-value">' +
-            escapeHtml(adresaRadekHtml(target.dorucovaci_ulice, target.dorucovaci_mesto, target.dorucovaci_psc, target.dorucovaci_stat)) + '</div></div>'
+            escapeHtml(adresaRadekHtml(target.dorucovaci_ulice, target.dorucovaci_cislo, target.dorucovaci_mesto, target.dorucovaci_psc, target.dorucovaci_stat)) + '</div></div>'
         : '') +
       (target.je_firma
         ? '<div class="detail-item"><div class="detail-label">IČO / DIČ</div><div class="detail-value">' +
@@ -12658,14 +13363,29 @@
       // Milník 17 (bod 12): řádek "Role" je odsud PRYČ - tuhle informaci
       // nese nově tříbodový ukazatel + samotná role je vidět ve formuláři
       // Upravit (jen administrátor ji smí měnit).
+      // Zadání (bod 19): Detail má ukazovat VŠECHNA známá data o tipaři,
+      // včetně fotky a jména sponzora/nadřízeného - dřív bylo vidět jen
+      // šest základních polí a zbytek (adresa, IČO, doklad...) šel vidět
+      // jen po kliknutí na "Upravit".
+      var sponzorTxt = target.sponsor_id ? (celeJmeno(usersById[target.sponsor_id]) || "—") : "— (bez sponzora)";
       telo =
+        '<div id="userDetailFotoWrap" class="dt-muted" style="margin-bottom:10px;">Načítám fotku…</div>' +
         '<div class="detail-grid">' +
+          detailItemHtml("ID RT", target.id_rt) +
           detailItemHtml("Jméno", target.jmeno) +
           detailItemHtml("Příjmení", target.prijmeni) +
+          detailItemHtml("Sponzor / nadřízený", sponzorTxt) +
           detailItemTelefon("Telefon", target.telefon) +
           detailItemHtml("E-mail", target.email) +
           detailItemHtml("Aktivní", target.aktivni ? "Ano" : "Ne (označen jako „Vymazán“)") +
           detailItemHtml("Plátce DPH", target.plati_dph ? "Ano" : "Ne") +
+          detailItemHtml("Datum narození", target.datum_narozeni) +
+          detailItemHtml("Adresa", adresaRadekHtml(target.adresa_ulice, target.adresa_cislo, target.adresa_mesto, target.adresa_psc, target.adresa_stat)) +
+          (target.je_firma ? detailItemHtml("IČO", target.ico) : "") +
+          (target.je_firma ? detailItemHtml("DIČ", target.dic) : "") +
+          detailItemHtml("Doklad totožnosti", target.typ_dokladu ? (target.typ_dokladu + (target.cislo_dokladu_totoznosti ? " · " + target.cislo_dokladu_totoznosti : "")) : "—") +
+          detailItemHtml("Bankovní účet", target.cislo_uctu) +
+          detailItemHtml("Stav ověření totožnosti", target.autentizace_stav) +
         '</div>' +
         (cilJeAdministrator
           ? '<p class="dt-muted" id="userDetailAdminNote" style="margin-bottom:0;">Administrátor upravuje svůj profil v záložce „Můj profil“.</p>' +
@@ -12704,7 +13424,8 @@
           '<div class="field-checkbox"><input type="checkbox" id="ufJeFirma"' + (target.je_firma ? ' checked' : '') + '>' +
             '<label for="ufJeFirma">Jedná jako firma (adresa = sídlo firmy, vyžaduje IČO)</label></div>' +
           '<div class="form-grid" style="margin-top:10px;">' +
-            '<div class="field col-span-2"><label for="ufUlice">Ulice a číslo popisné</label><input type="text" id="ufUlice" value="' + escapeHtml(target.adresa_ulice || "") + '"></div>' +
+            '<div class="field"><label for="ufUlice">Ulice</label><input type="text" id="ufUlice" value="' + escapeHtml(target.adresa_ulice || "") + '"></div>' +
+            '<div class="field"><label for="ufUliceCislo">Číslo domu</label><input type="text" id="ufUliceCislo" value="' + escapeHtml(target.adresa_cislo || "") + '"></div>' +
             '<div class="field"><label for="ufMesto">Město</label><input type="text" id="ufMesto" value="' + escapeHtml(target.adresa_mesto || "") + '"></div>' +
             '<div class="field"><label for="ufPsc">PSČ</label><input type="text" id="ufPsc" value="' + escapeHtml(target.adresa_psc || "") + '"></div>' +
             '<div class="field"><label for="ufStat">Stát</label><input type="text" id="ufStat" value="' + escapeHtml(target.adresa_stat || "Česká republika") + '"></div>' +
@@ -12716,7 +13437,8 @@
           '<div class="field-checkbox"><input type="checkbox" id="ufDorucovaciStejna"' + (dorStejna ? ' checked' : '') + '>' +
             '<label for="ufDorucovaciStejna">Doručovací adresa je stejná jako trvalá</label></div>' +
           '<div class="form-grid" id="ufDorucovaciFields" style="margin-top:10px;"' + (dorStejna ? " hidden" : "") + '>' +
-            '<div class="field col-span-2"><label for="ufDorUlice">Ulice a číslo popisné *</label><input type="text" id="ufDorUlice" value="' + escapeHtml(target.dorucovaci_ulice || "") + '"></div>' +
+            '<div class="field"><label for="ufDorUlice">Ulice *</label><input type="text" id="ufDorUlice" value="' + escapeHtml(target.dorucovaci_ulice || "") + '"></div>' +
+            '<div class="field"><label for="ufDorUliceCislo">Číslo domu *</label><input type="text" id="ufDorUliceCislo" value="' + escapeHtml(target.dorucovaci_cislo || "") + '"></div>' +
             '<div class="field"><label for="ufDorMesto">Město *</label><input type="text" id="ufDorMesto" value="' + escapeHtml(target.dorucovaci_mesto || "") + '"></div>' +
             '<div class="field"><label for="ufDorPsc">PSČ *</label><input type="text" id="ufDorPsc" value="' + escapeHtml(target.dorucovaci_psc || "") + '"></div>' +
             '<div class="field"><label for="ufDorStat">Stát</label><input type="text" id="ufDorStat" value="' + escapeHtml(target.dorucovaci_stat || "Česká republika") + '"></div>' +
@@ -12751,6 +13473,7 @@
         });
       }
       el("userDetailCloseBtn").addEventListener("click", closeUserForm);
+      nacistFotkuDoUserDetailu(target); // Zadání (bod 19)
     } else {
       // "Zrušit" vrací na Detail, NEZAVÍRÁ celý panel - uživatel se tak
       // dostane zpátky k údajům, kvůli kterým si detail otevřel.
@@ -12808,8 +13531,16 @@
       telo =
         '<form id="userSponsorForm" novalidate>' +
           '<div class="form-grid">' +
-            '<div class="field col-span-2"><label for="usSponsor">Nový sponzor</label>' +
-              '<select id="usSponsor"><option value="">— bez sponzora —</option>' + sponsorCandidateOptionsHtml(target) + '</select></div>' +
+            // Zadání (bod 20): <select> nahrazen hledáním jméno+ID -
+            // s desítkami/stovkami podobně znějících jmen v síti byl
+            // dlouhý dropdown prakticky nepoužitelný. Skutečná hodnota
+            // zůstává ve skrytém #usSponsor (stejné id, submit se nemění).
+            '<div class="field col-span-2"><label for="usSponsorSearch">Nový sponzor</label>' +
+              '<input type="text" id="usSponsorSearch" placeholder="Hledat podle jména nebo ID RT…" autocomplete="off">' +
+              '<input type="hidden" id="usSponsor" value="' + escapeHtml(target.sponsor_id || "") + '">' +
+              '<div id="usSponsorResults" class="sponsor-search-results" hidden></div>' +
+              '<p class="dt-muted" style="font-size:12px;margin:4px 0 0;">Vybráno: <span id="usSponsorVybrano">' + escapeHtml(sponsorDisplayName(target.sponsor_id)) + '</span></p>' +
+            '</div>' +
             '<div class="field col-span-2"><label for="usDuvod">Důvod změny sponzora *</label>' +
               '<input type="text" id="usDuvod" placeholder="Povinné zdůvodnění pro auditní log — samostatné od důvodu běžné úpravy"></div>' +
           '</div>' +
@@ -12843,7 +13574,65 @@
         e.preventDefault();
         submitZmenitSponzora(userFormTargetId);
       });
+      wireSponsorSearch(target);
     }
+  }
+
+  // Zadání (bod 20): hledání sponzora podle jména/příjmení/ID RT namísto
+  // dlouhého <select>u. Klik na výsledek zapíše id do skrytého #usSponsor
+  // (na to submitZmenitSponzora spoléhá beze změny).
+  function wireSponsorSearch(target) {
+    var input = el("usSponsorSearch");
+    var results = el("usSponsorResults");
+    var hidden = el("usSponsor");
+    var vybranoEl = el("usSponsorVybrano");
+    if (!input || !results || !hidden) return;
+    var candidates = sponsorCandidateList(target);
+
+    function vykreslitVysledky(seznam) {
+      if (!seznam.length) {
+        results.innerHTML = '<div class="sponsor-search-empty">Nikdo nenalezen.</div>';
+        results.hidden = false;
+        return;
+      }
+      results.innerHTML = seznam.slice(0, 20).map(function (o) {
+        return '<button type="button" class="sponsor-search-item" data-sponsor-id="' + escapeHtml(o.id) + '">' +
+          (o.id_rt ? '<span class="dt-muted" style="font-size:12px;">ID RT ' + escapeHtml(o.id_rt) + '</span> ' : '') +
+          escapeHtml(o.label) + '</button>';
+      }).join("") +
+      '<button type="button" class="sponsor-search-item" data-sponsor-id="">— bez sponzora —</button>';
+      results.hidden = false;
+      results.querySelectorAll("[data-sponsor-id]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var id = btn.getAttribute("data-sponsor-id") || "";
+          hidden.value = id;
+          if (vybranoEl) vybranoEl.textContent = id ? btn.textContent : "— bez sponzora —";
+          input.value = "";
+          results.hidden = true;
+        });
+      });
+    }
+
+    input.addEventListener("input", function () {
+      var q = input.value.trim().toLowerCase();
+      if (!q) { results.hidden = true; return; }
+      var filtr = candidates.filter(function (o) {
+        return o.label.toLowerCase().indexOf(q) !== -1 || (o.id_rt && o.id_rt.indexOf(q) !== -1);
+      });
+      vykreslitVysledky(filtr);
+    });
+    input.addEventListener("focus", function () {
+      if (input.value.trim()) input.dispatchEvent(new Event("input"));
+    });
+    // Karta se při každém otevření editace překresluje (nové DOM uzly), takže
+    // starý posluchač na `document` musí zmizet, jinak by se hromadily.
+    if (wireSponsorSearch._zavritHandler) {
+      document.removeEventListener("click", wireSponsorSearch._zavritHandler);
+    }
+    wireSponsorSearch._zavritHandler = function (e) {
+      if (!results.contains(e.target) && e.target !== input) results.hidden = true;
+    };
+    document.addEventListener("click", wireSponsorSearch._zavritHandler);
   }
 
   // Milník 16 (bod 3e): vlastní RPC zmenit_sponzora() - jediná cesta, kterou
@@ -12905,6 +13694,7 @@
     // server v upravit_uzivatele().
     var jeFirma = el("ufJeFirma").checked;
     var ulice = el("ufUlice").value.trim();
+    var uliceCislo = el("ufUliceCislo").value.trim();
     var mesto = el("ufMesto").value.trim();
     var psc = el("ufPsc").value.trim();
     var stat = el("ufStat").value.trim();
@@ -12913,6 +13703,7 @@
     var datumNarozeni = el("ufDatumNarozeni").value || "";
     var dorStejna = el("ufDorucovaciStejna").checked;
     var dorUlice = el("ufDorUlice").value.trim();
+    var dorUliceCislo = el("ufDorUliceCislo").value.trim();
     var dorMesto = el("ufDorMesto").value.trim();
     var dorPsc = el("ufDorPsc").value.trim();
     var dorStat = el("ufDorStat").value.trim();
@@ -12972,7 +13763,10 @@
       p_dorucovaci_mesto: dorStejna ? null : (dorMesto || null),
       p_dorucovaci_psc: dorStejna ? null : (dorPsc || null),
       p_dorucovaci_stat: dorStejna ? null : (dorStat || null),
-      p_datum_narozeni: datumNarozeni || null
+      p_datum_narozeni: datumNarozeni || null,
+      // Zadání (bod 8): oddělené "číslo domu" u trvalé i doručovací adresy.
+      p_adresa_cislo: uliceCislo || null,
+      p_dorucovaci_cislo: dorStejna ? null : (dorUliceCislo || null)
     });
     if (g !== authGen) return; // identita se během dotazu změnila
 
@@ -14054,7 +14848,13 @@
           detailItemBold("Podíl Realitního tipu", t.podil_rt_kc != null
             ? (formatCena(t.podil_rt_kc) + (t.podil_rt_pct != null ? (" (" + t.podil_rt_pct + " %)") : "")
                + (t.zaklad_typ === "nabidkova" ? " (odhad)" : "")) : null) +
-          detailItem("Status RK", rkStavLabel(t.rk_stav)) +
+          // Zadání (bod 14, oprava po revizi): datum poslední změny stavu i
+          // tady - detailItem() escapuje hodnotu jako prostý text (žádné
+          // HTML uvnitř), takže se datum připojuje přímo do popisku stavu,
+          // stejnou logikou/formátováním (formatDatumZCasu) jako
+          // aktualniStavPillHtml() jinde v appce.
+          detailItem("Status RK", rkStavLabel(t.rk_stav) +
+            (t.posledni_zmena_stavu_kdy ? (" (od " + formatDatumZCasu(t.posledni_zmena_stavu_kdy) + ")") : "")) +
           (duvodText ? detailItem("Důvod nenavázání spolupráce", duvodText) : "") +
           detailItem("Datum prodeje", formatDateOnly(t.datum_prodeje)) +
           detailItem("Kupní cena", t.kupni_cena != null ? formatCena(t.kupni_cena) : null) +
@@ -14143,6 +14943,10 @@
     }
     el("rpfStav").addEventListener("change", updateConditional);
     el("rpfDuvodKod").addEventListener("change", updateConditional);
+    // Zadání (bod 1): živé formátování Kč vstupů RK portálu.
+    wireKcInput("rpfOdhadCena");
+    wireKcInput("rpfCena");
+    wireKcInput("rpfKupni");
 
     el("rkPortalCancelBtn").addEventListener("click", closeRkPortalForm);
     el("rkPortalFormPanel").addEventListener("submit", function (e) {
@@ -14153,15 +14957,16 @@
   }
 
   async function submitRkPortalForm(tipId) {
-    var cenaRaw = el("rpfCena").value;
-    var odhadCenaRaw = el("rpfOdhadCena").value; // Milník 17 (bod 22c)
+    var cenaRaw = kcRawValue("rpfCena");
+    var odhadCenaRaw = kcRawValue("rpfOdhadCena"); // Milník 17 (bod 22c)
     var marzeTyp = el("rpfMarzeTyp").value;
     var marzeHodnotaRaw = el("rpfMarzeHodnota").value;
     var stav = el("rpfStav").value || null;
     var datumEl = el("rpfDatum");
     var kupniEl = el("rpfKupni");
     var datum = (stav === "prodano" && datumEl) ? (datumEl.value || null) : null;
-    var kupni = (stav === "prodano" && kupniEl && kupniEl.value !== "") ? Number(kupniEl.value) : null;
+    var kupniRaw = (stav === "prodano" && kupniEl) ? kcRawValue(kupniEl) : "";
+    var kupni = (stav === "prodano" && kupniRaw !== "") ? Number(kupniRaw) : null;
 
     if (stav === "prodano" && (!datum || kupni == null)) {
       showBanner(el("rkPortalBanner"), "error", 'Pro stav „Prodáno" je nutné vyplnit datum prodeje i kupní cenu.');
@@ -14309,7 +15114,7 @@
           detailItemBold("Název", r.nazev) +
           detailItemBold("IČO", r.ico) +
           detailItemBold("DIČ", r.dic) +
-          detailItemBold("Adresa", r.adresa) +
+          detailItemBold("Adresa", rkAdresaRadek(r)) +
           detailItemBold("Telefon kanceláře", r.telefon) +
           detailItemBold("E-mail", r.email) +
           detailItemBold("Stav", r.aktivni ? "Aktivní" : "Neaktivní") +
@@ -14787,10 +15592,16 @@
     rkProvizeDraft.forEach(function (d, i) {
       var od = el("rpsRowOd_" + i), doo = el("rpsRowDo_" + i);
       var typ = el("rpsRowTyp_" + i), hod = el("rpsRowHod_" + i);
-      if (od) d.min_hodnota = od.value === "" ? null : Number(od.value);
-      if (doo) d.max_hodnota = doo.value === "" ? null : Number(doo.value);
+      // Zadání (bod 1): Od/Do jsou teď formátované Kč vstupy (mezery po
+      // tisících) - kcRawNumberOrNull() přečte čisté číslice, NIKDY
+      // Number(el.value) přímo (to by na "1 000" vrátilo NaN kvůli mezeře).
+      if (od) d.min_hodnota = kcRawNumberOrNull(od);
+      if (doo) d.max_hodnota = kcRawNumberOrNull(doo);
       if (typ) d.typ = typ.value;
-      if (hod) d.hodnota = hod.value === "" ? null : Number(hod.value);
+      // Hodnota je formátovaná (Kč) JEN u typu "fix" - u "procento" zůstává
+      // obyčejné desetinné číslo (viz komentář u jeFix ve
+      // renderRkProvizeTable), takže se čte přímo Number(el.value).
+      if (hod) d.hodnota = (typ && typ.value === "fix") ? kcRawNumberOrNull(hod) : (hod.value === "" ? null : Number(hod.value));
     });
   }
 
@@ -14801,18 +15612,29 @@
         var posledni = (i === rkProvizeDraft.length - 1);
         // MILNÍK 24 (bod 3): řádek bez `id` je NOVÉ, dosud neuložené pásmo.
         var novy = !d.id;
+        // Zadání (bod 1): "Od"/"Do" jsou VŽDY Kč - živě formátované mezerami
+        // po tisících (type=text+inputmode=numeric, viz wireKcInput níž).
+        // "Hodnota" je Kč JEN u typu "fix" (pevná částka) - u "procento" jde
+        // o desetinné procento (step 0.01, např. "2.5") a formátovat by ho
+        // nešlo (kcRawValue by uřízla desetinnou tečku a "2.5" by se
+        // změnilo na "25" - proto zůstává obyčejný type=number, NIKDY se
+        // pro procento nevolá wireKcInput).
+        var jeFix = d.typ === "fix";
         return '<tr' + (novy ? ' class="rps-row-novy"' : '') + '>' +
-          '<td><input type="number" id="rpsRowOd_' + i + '" class="rps-row-input" data-rps-i="' + i + '" data-rps-pole="od" min="0" step="1" value="' +
-            (d.min_hodnota == null ? "" : escapeHtml(String(d.min_hodnota))) + '"></td>' +
-          '<td><input type="number" id="rpsRowDo_' + i + '" class="rps-row-input" data-rps-i="' + i + '" data-rps-pole="do" min="0" step="1" placeholder="' +
+          '<td><input type="text" inputmode="numeric" id="rpsRowOd_' + i + '" class="rps-row-input" data-rps-i="' + i + '" data-rps-pole="od" value="' +
+            (d.min_hodnota == null ? "" : escapeHtml(kcFormatDigits(String(d.min_hodnota)))) + '"></td>' +
+          '<td><input type="text" inputmode="numeric" id="rpsRowDo_' + i + '" class="rps-row-input" data-rps-i="' + i + '" data-rps-pole="do" placeholder="' +
             (posledni ? "prázdné = bez horní hranice" : "") + '" value="' +
-            (d.max_hodnota == null ? "" : escapeHtml(String(d.max_hodnota))) + '"></td>' +
+            (d.max_hodnota == null ? "" : escapeHtml(kcFormatDigits(String(d.max_hodnota)))) + '"></td>' +
           '<td><select id="rpsRowTyp_' + i + '" class="rps-row-input" data-rps-i="' + i + '" data-rps-pole="typ">' +
             '<option value="procento"' + (d.typ !== "fix" ? " selected" : "") + '>Procento z ceny</option>' +
             '<option value="fix"' + (d.typ === "fix" ? " selected" : "") + '>Pevná částka (Kč)</option>' +
             '</select></td>' +
-          '<td><input type="number" id="rpsRowHod_' + i + '" class="rps-row-input" data-rps-i="' + i + '" data-rps-pole="hodnota" min="0" step="0.01" value="' +
-            (d.hodnota == null ? "" : escapeHtml(String(d.hodnota))) + '"></td>' +
+          (jeFix
+            ? '<td><input type="text" inputmode="numeric" id="rpsRowHod_' + i + '" class="rps-row-input" data-rps-i="' + i + '" data-rps-pole="hodnota" value="' +
+                (d.hodnota == null ? "" : escapeHtml(kcFormatDigits(String(d.hodnota)))) + '"></td>'
+            : '<td><input type="number" id="rpsRowHod_' + i + '" class="rps-row-input" data-rps-i="' + i + '" data-rps-pole="hodnota" min="0" step="0.01" value="' +
+                (d.hodnota == null ? "" : escapeHtml(String(d.hodnota))) + '"></td>') +
           // „Smazat" zůstává PER ŘÁDEK — přesně jak zadání říká. V editačním
           // režimu je ale vypnuté: mazání je samostatná serverová operace
           // (a u prostředního pásma dokonce vícekrokové přeskládání), takže
@@ -14829,6 +15651,27 @@
           '<th>Od (Kč)</th><th>Do (Kč)</th><th>Typ</th><th>Hodnota</th><th class="dt-col-mini">Akce</th>' +
         '</tr></thead><tbody>' + telo + '</tbody></table></div>';
 
+      // Zadání (bod 1): živé formátování mezerami pro Od/Do (vždy Kč) a pro
+      // Hodnotu jen u typu "fix" (viz jeFix výš) - MUSÍ se napojit dřív, než
+      // se přidá listener pro dorovnání sousedů níž, ať `nacistRkProvizeDraftZFormulare()`
+      // v tom listeneru čte hodnoty přes kcRawValue z JIŽ naformátovaného pole.
+      rkProvizeDraft.forEach(function (d, i) {
+        wireKcInput("rpsRowOd_" + i);
+        wireKcInput("rpsRowDo_" + i);
+        if (d.typ === "fix") wireKcInput("rpsRowHod_" + i);
+      });
+
+      // Zadání (bod 1, oprava): přepnutí typu (procento <-> fix) mění, jestli
+      // je pole "Hodnota" formátované Kč, nebo obyčejné desetinné číslo -
+      // BEZ překreslení by po přepnutí zůstalo pole ve starém (nesprávném)
+      // vzhledu/módu. `change` na <select> je tu spolehlivější než `input`.
+      el("rkProvizeTableWrap").querySelectorAll('[data-rps-pole="typ"]').forEach(function (sel) {
+        sel.addEventListener("change", function () {
+          nacistRkProvizeDraftZFormulare();
+          renderRkProvizeTable(rkProvizeRowsCache);
+        });
+      });
+
       // MILNÍK 23 (bod 11b): živé dorovnání sousedů. Napsáním horní hranice
       // se spodní hranice NÁSLEDUJÍCÍHO pásma přepíše na hodnotu o 1 Kč
       // vyšší — přesně to, co klient popsal.
@@ -14842,7 +15685,9 @@
             if (dalsi && d.max_hodnota != null && !isNaN(d.max_hodnota)) {
               dalsi.min_hodnota = d.max_hodnota + 1;
               var cil = el("rpsRowOd_" + (i + 1));
-              if (cil) cil.value = String(dalsi.min_hodnota);
+              // Zadání (bod 1): cíl je teď formátovaný Kč vstup - zápis
+              // syrového čísla by ho vizuálně "rozformátoval" bez mezer.
+              if (cil) cil.value = kcFormatDigits(String(dalsi.min_hodnota));
             }
           }
           // MILNÍK 24 (bod 3): jakmile přestane být POSLEDNÍ řádek prázdný,
@@ -15537,7 +16382,9 @@
       // Milník 11 (bod 1+2): + dorucovaci_* sloupce a datum_narozeni.
       // Milník 13 (bod 1, oprava po review): + autentizace_overeno_kdy a
       // cislo_dokladu_totoznosti - viz stejná poznámka u handleSignedIn().
-      .select("adresa_ulice, adresa_mesto, adresa_psc, adresa_stat, je_firma, ico, dic, adresa_vyplnena_kdy, autentizace_stav, autentizace_duvod_zamitnuti, autentizace_overeno_kdy, cislo_dokladu_totoznosti, dorucovaci_je_stejna, dorucovaci_ulice, dorucovaci_mesto, dorucovaci_psc, dorucovaci_stat, datum_narozeni")
+      // Zadání: + adresa_cislo/dorucovaci_cislo (bod 8), cislo_uctu (bod 25),
+      // invite_code_historie/invite_code_zmeny_pocet (bod 11), id_rt (bod 17).
+      .select("adresa_ulice, adresa_cislo, adresa_mesto, adresa_psc, adresa_stat, je_firma, ico, dic, adresa_vyplnena_kdy, autentizace_stav, autentizace_duvod_zamitnuti, autentizace_overeno_kdy, cislo_dokladu_totoznosti, cislo_uctu, dorucovaci_je_stejna, dorucovaci_ulice, dorucovaci_cislo, dorucovaci_mesto, dorucovaci_psc, dorucovaci_stat, datum_narozeni, invite_code, invite_code_historie, invite_code_zmeny_pocet, id_rt")
       .eq("id", currentUser.id).single();
     // Milník 15 (bod 4.5): bez tohohle řádku by se profil STARÉ identity
     // (dotaz odeslaný ještě za ní) nalil do `currentUser` NOVÉ identity -
@@ -16392,6 +17239,7 @@
     // nedá "protabovat" na input, který uživatel nevidí.
     if (ro) ro.hidden = profileEditMode;
     if (fw) fw.hidden = !profileEditMode;
+    showBanner(el("addressFormBanner"), null, null); // Zadání (bod 6): ať nezůstane viset stará chyba
   }
 
   // Read-only zobrazení TÝCHŽ údajů, které jsou ve formuláři. Zdrojem je
@@ -16402,10 +17250,10 @@
     if (!grid || !currentUser) return;
     var html =
       '<div class="detail-item"><div class="detail-label">Trvalá adresa' + (currentUser.je_firma ? ' (sídlo firmy)' : '') + '</div>' +
-        '<div class="detail-value">' + escapeHtml(adresaRadekHtml(currentUser.adresa_ulice, currentUser.adresa_mesto, currentUser.adresa_psc, currentUser.adresa_stat)) + '</div></div>';
+        '<div class="detail-value">' + escapeHtml(adresaRadekHtml(currentUser.adresa_ulice, currentUser.adresa_cislo, currentUser.adresa_mesto, currentUser.adresa_psc, currentUser.adresa_stat)) + '</div></div>';
     if (currentUser.dorucovaci_je_stejna === false) {
       html += '<div class="detail-item"><div class="detail-label">Doručovací adresa (liší se)</div>' +
-        '<div class="detail-value">' + escapeHtml(adresaRadekHtml(currentUser.dorucovaci_ulice, currentUser.dorucovaci_mesto, currentUser.dorucovaci_psc, currentUser.dorucovaci_stat)) + '</div></div>';
+        '<div class="detail-value">' + escapeHtml(adresaRadekHtml(currentUser.dorucovaci_ulice, currentUser.dorucovaci_cislo, currentUser.dorucovaci_mesto, currentUser.dorucovaci_psc, currentUser.dorucovaci_stat)) + '</div></div>';
     } else {
       html += '<div class="detail-item"><div class="detail-label">Doručovací adresa</div>' +
         '<div class="detail-value">Stejná jako trvalá</div></div>';
@@ -16423,6 +17271,7 @@
     if (!currentUser) return;
     el("pfJeFirma").checked = currentUser.je_firma;
     el("pfUlice").value = currentUser.adresa_ulice || "";
+    el("pfUliceCislo").value = currentUser.adresa_cislo || "";
     el("pfMesto").value = currentUser.adresa_mesto || "";
     el("pfPsc").value = currentUser.adresa_psc || "";
     el("pfStat").value = currentUser.adresa_stat || "Česká republika";
@@ -16440,6 +17289,7 @@
     el("pfDorucovaciStejna").checked = dorStejna;
     el("pfDorucovaciFields").hidden = dorStejna;
     el("pfDorUlice").value = currentUser.dorucovaci_ulice || "";
+    el("pfDorUliceCislo").value = currentUser.dorucovaci_cislo || "";
     el("pfDorMesto").value = currentUser.dorucovaci_mesto || "";
     el("pfDorPsc").value = currentUser.dorucovaci_psc || "";
     el("pfDorStat").value = currentUser.dorucovaci_stat || "Česká republika";
@@ -16447,8 +17297,10 @@
     // Milník 11: IČO/DIČ se ukazuje jen u firmy (stejná podmíněnost jako
     // v Detailu uživatele od Milníku 17, bod 11).
     var jeFirma = !!currentUser.je_firma;
+    var firmaWrap = el("pfFirmaFieldsWrap"); // Zadání (bod 7)
     var icoField = el("pfIcoField");
     var dicField = el("pfDicField");
+    if (firmaWrap) firmaWrap.hidden = !jeFirma;
     if (icoField) icoField.hidden = !jeFirma;
     if (dicField) dicField.hidden = !jeFirma;
   }
@@ -16623,16 +17475,27 @@
     var docs = [
       { typ: "op_predni", label: "Doklad totožnosti — přední strana" },
       { typ: "op_zadni", label: "Doklad totožnosti — zadní strana" },
-      { typ: "foto", label: "Vlastní fotografie" }
+      // Zadání (bod 12): selfie je POUZE fotoaparátem - popisek to říká
+      // rovnou, ať to není překvapení až u tlačítka.
+      { typ: "foto", label: "Selfie (jen fotoaparátem, ne nahráním souboru)" }
     ];
     var fileByTyp = pickLatestFileByTyp(files, docs);
 
     var html = "";
     docs.forEach(function (d) {
       var f = fileByTyp[d.typ];
+      var jeSelfie = d.typ === "foto";
       html += '<div class="kyc-doc-row">' +
         '<div class="kyc-doc-info">' +
           '<div class="kyc-doc-label">' + escapeHtml(d.label) + '</div>' +
+          // Zadání (bod 12): u selfie se instrukce k aktuálnosti ukazuje
+          // VŽDY, ne jen uvnitř modalu s fotoaparátem - ať ji uživatel vidí
+          // dřív, než na tlačítko vůbec klikne. Žádné tvrzení o
+          // automatickém/biometrickém ověření (viz KYC_CAMERA_NAPOVEDA) -
+          // jen požadavek, že snímek musí vzniknout právě teď.
+          (jeSelfie && editovatelne
+            ? '<p class="dt-muted" style="font-size:12.5px;margin:2px 0 6px;">Vyfoťte se prosím teď, v den registrace/žádosti o ověření - ne starší fotku z galerie.</p>'
+            : '') +
           // Milník 15 (bod 1): ve stavu "schvaleno" už soubory ve Storage
           // fyzicky nejsou - schvalit_autentizaci() je po schválení maže
           // (Milník 13, bod 2). Prosté "Nenahráno" by tam působilo jako
@@ -16654,11 +17517,17 @@
         // .kyc-doc-status/.kyc-doc-preview výše. Input se renderuje JEN
         // v editovatelném stavu (bod 2) - po odeslání/schválení žádný
         // input není, jen status + náhled.
+        // Zadání (bod 12): "Vyfotit" tlačítko je u dokladu DOPLNĚK vedle
+        // nahrání souboru; u selfie (jeSelfie) je JEDINÁ akce - žádný
+        // <input type=file> se pro ni nevykresluje vůbec (bezpečnostní
+        // požadavek zadání, ne jen UI preference).
         (editovatelne
           ? '<div class="kyc-doc-action">' +
-              '<label class="kyc-file-btn">' + (f ? "Vybrat jiný soubor" : "Vybrat soubor") +
-                '<input type="file" id="kycFile_' + d.typ + '" accept="image/jpeg,image/png,image/webp,application/pdf" class="kyc-file-input-hidden" data-typ="' + d.typ + '">' +
-              '</label>' +
+              (jeSelfie ? '' :
+                '<label class="kyc-file-btn">' + (f ? "Vybrat jiný soubor" : "Vybrat soubor") +
+                  '<input type="file" id="kycFile_' + d.typ + '" accept="image/jpeg,image/png,image/webp,application/pdf" class="kyc-file-input-hidden" data-typ="' + d.typ + '">' +
+                '</label>') +
+              '<button type="button" class="btn-small' + (jeSelfie ? '' : ' btn-small-ghost') + '" data-kyc-foto="' + d.typ + '">' + (jeSelfie ? "Vyfotit selfie" : "Vyfotit") + '</button>' +
             '</div>'
           : '') +
       '</div>';
@@ -16671,6 +17540,10 @@
           if (input.files && input.files[0]) uploadKycFile(input.getAttribute("data-typ"), input.files[0]);
         });
       });
+      // Zadání (bod 12): tlačítko "Vyfotit"/"Vyfotit selfie".
+      el("kycDocsWrap").querySelectorAll("[data-kyc-foto]").forEach(function (btn) {
+        btn.addEventListener("click", function () { otevritKycKameru(btn.getAttribute("data-kyc-foto")); });
+      });
     }
 
     // Náhledy nahraných dokumentů (bod 3, Milník 10) - krátkodobý signed
@@ -16680,6 +17553,29 @@
       var f = fileByTyp[d.typ];
       if (f) renderKycOwnPreview(d.typ, f.name);
     });
+
+    // Zadání (bod 25): řádek s číslem bankovního účtu - vlastní stav
+    // (nezávislý na dokumentech výš), ale STEJNÁ podmínka editovatelnosti
+    // (nevyplneno/zamitnuto).
+    var ucetInput = el("kycCisloUctu");
+    var ucetStavEl = el("kycUcetStav");
+    var ucetActionWrap = el("kycUcetActionWrap");
+    if (ucetInput) {
+      // Vstup se přepisuje jen když do něj uživatel zrovna nepíše (aby
+      // re-render po jiné akci nezahodil rozepsaný text) - stejný vzorec
+      // jako u ostatních "no-save-needed" formulářů v appce.
+      if (document.activeElement !== ucetInput) {
+        ucetInput.value = currentUser.cislo_uctu || "";
+      }
+      ucetInput.disabled = !editovatelne;
+      if (ucetActionWrap) ucetActionWrap.hidden = !editovatelne;
+      if (ucetStavEl) {
+        ucetStavEl.textContent = currentUser.cislo_uctu
+          ? ("✓ Uloženo: " + currentUser.cislo_uctu)
+          : (editovatelne ? "Zatím nevyplněno." : "Nevyplněno.");
+        ucetStavEl.className = "kyc-doc-status" + (currentUser.cislo_uctu ? " kyc-doc-status-ok" : "");
+      }
+    }
 
     // Milník 17 (bod 20a): viditelnost tlačítka "Odeslat k ověření" nově
     // vyžaduje VŠECHNY TŘI podmínky (dokumenty + adresa + datum narození),
@@ -16734,6 +17630,11 @@
     var chybi = [];
     if (!currentUser || !currentUser.adresa_vyplnena_kdy) chybi.push("adresu trvalého bydliště");
     if (!currentUser || !currentUser.datum_narozeni) chybi.push("datum narození");
+    // Zadání (bod 25): číslo bankovního účtu je od teď povinná podmínka
+    // pro odeslání k ověření - stejný zdroj pravdy jako RPC
+    // odeslat_k_overeni_totoznosti (viz migrace
+    // zadani_adresa_cislo_a_bankovni_ucet_rpc).
+    if (!currentUser || !currentUser.cislo_uctu) chybi.push("číslo bankovního účtu pro výplatu provize");
     var f = fileByTyp || {};
     if (!(f.op_predni && f.op_zadni && f.foto)) chybi.push("chybějící dokumenty totožnosti");
     return chybi;
@@ -16788,6 +17689,141 @@
     } else {
       slot.innerHTML = '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">📄 Zobrazit PDF v novém okně</a>';
     }
+  }
+
+  // ============================================================
+  // ZADÁNÍ (bod 12): fotoaparát pro KYC dokumenty (getUserMedia + canvas).
+  //
+  // U dokladu totožnosti (op_predni/op_zadni) jde o DOPLNĚK k nahrání
+  // souboru - uživatel si vybere, co je pro něj pohodlnější.
+  // U selfie (typ "foto") je tohle JEDINÁ cesta - žádný <input type=file>
+  // se pro ni vůbec nevykresluje (viz renderKycSection), aby nešlo nahrát
+  // cizí/starou fotku z galerie namísto skutečné aktuální selfie.
+  //
+  // DŮLEŽITÉ (bezpečnostně poctivý text, ne fabrikovaná automatická
+  // verifikace): appka žádnou biometrickou/živostní kontrolu neprovádí -
+  // jen VYŽADUJE, aby selfie vznikla přímo přes fotoaparát PRÁVĚ TEĎ
+  // (žádný upload) a instruuje uživatele, ať ji pořídí v den registrace.
+  // Skutečné posouzení dělá vždy člověk (Leader/Administrátor) v
+  // Ověření totožnosti.
+  // ============================================================
+  var kycCameraStream = null;
+  var kycCameraTyp = null;
+  var kycCameraBlob = null;
+
+  var KYC_CAMERA_NADPISY = {
+    op_predni: "Vyfotit doklad totožnosti — přední strana",
+    op_zadni: "Vyfotit doklad totožnosti — zadní strana",
+    foto: "Vyfotit selfie"
+  };
+  var KYC_CAMERA_NAPOVEDA = {
+    op_predni: "Vyfoťte přední stranu dokladu tak, ať jsou všechny údaje čitelné.",
+    op_zadni: "Vyfoťte zadní stranu dokladu tak, ať jsou všechny údaje čitelné.",
+    // Zadání (bod 12): instrukce k aktuálnosti selfie BEZ tvrzení o
+    // automatickém/biometrickém ověření - appka jen vyžaduje, aby snímek
+    // vznikl přímo teď přes fotoaparát, samotné posouzení dělá člověk.
+    foto: "Vyfoťte se prosím TEĎ, přímo v den registrace/žádosti o ověření - ne starší fotku z galerie. Skutečnou totožnost pak porovná Leader/Administrátor ručně s dokladem."
+  };
+
+  function kycKameraDostupna() {
+    return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  }
+
+  async function otevritKycKameru(typ) {
+    if (!currentUser) return;
+    kycCameraTyp = typ;
+    kycCameraBlob = null;
+    el("kycCameraTitle").textContent = KYC_CAMERA_NADPISY[typ] || "Vyfotit dokument";
+    el("kycCameraHint").textContent = KYC_CAMERA_NAPOVEDA[typ] || "";
+    el("kycCameraErrorWrap").innerHTML = "";
+    el("kycCameraLiveWrap").hidden = false;
+    el("kycCameraPreviewWrap").hidden = true;
+    el("kycCameraCaptureBtn").hidden = false;
+    el("kycCameraRetryBtn").hidden = true;
+    el("kycCameraUseBtn").hidden = true;
+    el("kycCameraOverlay").hidden = false;
+
+    if (!kycKameraDostupna()) {
+      el("kycCameraErrorWrap").innerHTML = '<div class="banner banner-error">Tento prohlížeč/zařízení nepodporuje přístup k fotoaparátu. Zkuste to prosím v jiném prohlížeči, nebo (u dokladu totožnosti) nahrajte soubor tlačítkem „Vybrat soubor“.</div>';
+      el("kycCameraCaptureBtn").hidden = true;
+      return;
+    }
+
+    try {
+      // Zadní kamera (environment) dává u dokladu/selfie smysluplnější
+      // výchozí volbu na mobilu než přední - "ideal", ne "exact", ať appka
+      // nespadne na zařízení bez zadní kamery (např. laptop).
+      kycCameraStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: typ === "foto" ? "user" : { ideal: "environment" } },
+        audio: false
+      });
+    } catch (e) {
+      console.error("Přístup ke kameře se nepodařilo získat:", e);
+      el("kycCameraErrorWrap").innerHTML = '<div class="banner banner-error">Přístup ke kameře se nepodařilo získat (zamítnutá oprávnění, nebo kamera není k dispozici).' +
+        (typ !== "foto" ? ' Zkuste to prosím znovu, nebo použijte tlačítko „Vybrat soubor“.' : ' Zkuste to prosím znovu - pro selfie appka soubor z disku nepřijímá.') + '</div>';
+      el("kycCameraCaptureBtn").hidden = true;
+      return;
+    }
+    var video = el("kycCameraVideo");
+    video.srcObject = kycCameraStream;
+  }
+
+  function zastavitKycKameruStream() {
+    if (kycCameraStream) {
+      kycCameraStream.getTracks().forEach(function (t) { t.stop(); });
+      kycCameraStream = null;
+    }
+    var video = el("kycCameraVideo");
+    if (video) video.srcObject = null;
+  }
+
+  function zavritKycKameru() {
+    zastavitKycKameruStream();
+    el("kycCameraOverlay").hidden = true;
+    kycCameraTyp = null;
+    kycCameraBlob = null;
+  }
+
+  function kycKameraVyfotit() {
+    var video = el("kycCameraVideo");
+    var canvas = el("kycCameraCanvas");
+    if (!video || !video.videoWidth) return; // stream ještě nenaběhl
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    var ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob(function (blob) {
+      if (!blob) return;
+      kycCameraBlob = blob;
+      var url = URL.createObjectURL(blob);
+      el("kycCameraPreviewImg").src = url;
+      el("kycCameraLiveWrap").hidden = true;
+      el("kycCameraPreviewWrap").hidden = false;
+      el("kycCameraCaptureBtn").hidden = true;
+      el("kycCameraRetryBtn").hidden = false;
+      el("kycCameraUseBtn").hidden = false;
+    }, "image/jpeg", 0.88);
+  }
+
+  function kycKameraVyfotitZnovu() {
+    kycCameraBlob = null;
+    el("kycCameraLiveWrap").hidden = false;
+    el("kycCameraPreviewWrap").hidden = true;
+    el("kycCameraCaptureBtn").hidden = false;
+    el("kycCameraRetryBtn").hidden = true;
+    el("kycCameraUseBtn").hidden = true;
+  }
+
+  async function kycKameraPouzitFotku() {
+    if (!kycCameraBlob || !kycCameraTyp) return;
+    var typ = kycCameraTyp;
+    var blob = kycCameraBlob;
+    zavritKycKameru();
+    // File (ne holý Blob) - uploadKycFile() čte file.name kvůli příponě;
+    // reálná snímaná fotka je vždy JPEG (canvas.toBlob výš), takže
+    // přípona je jistá, ne odhadovaná.
+    var file = new File([blob], typ + ".jpg", { type: "image/jpeg" });
+    await uploadKycFile(typ, file);
   }
 
   async function uploadKycFile(typ, file) {
@@ -16906,11 +17942,52 @@
     await renderKycSection();
   }
 
+  // Zadání (bod 25): uložení čísla bankovního účtu - samostatná RPC
+  // (ulozit_muj_bankovni_ucet), formát se validuje na serveru (zdroj
+  // pravdy), klientská kontrola je jen rychlá zpětná vazba.
+  function jePlatneCisloUctuKlient(s) {
+    return /^([0-9]{2,6}-)?[0-9]{2,10}\/[0-9]{4}$/.test((s || "").trim());
+  }
+
+  async function submitKycUcet() {
+    if (!currentUser) return;
+    var g = authGen;
+    var input = el("kycCisloUctu");
+    var cislo = (input.value || "").trim();
+    showBanner(el("myKycBanner"), null, null);
+
+    if (!jePlatneCisloUctuKlient(cislo)) {
+      showBanner(el("myKycBanner"), "error", "Číslo účtu není ve správném formátu (např. 123456789/0100).");
+      return;
+    }
+
+    var btn = el("kycUcetSaveBtn");
+    btn.disabled = true;
+    var result = await sb.rpc("ulozit_muj_bankovni_ucet", { p_cislo_uctu: cislo });
+    if (g !== authGen) return;
+    btn.disabled = false;
+
+    if (result.error) {
+      console.error("Chyba při ukládání čísla účtu:", result.error);
+      var msg = (result.error.message || "").indexOf("nelze menit") !== -1
+        ? "Číslo účtu teď nelze měnit - žádost o ověření už byla odeslána nebo je schválená."
+        : "Číslo účtu není ve správném formátu (např. 123456789/0100).";
+      showBanner(el("myKycBanner"), "error", msg);
+      return;
+    }
+
+    showBanner(el("myKycBanner"), "ok", "Číslo účtu bylo uloženo.");
+    await refreshOwnProfile();
+    if (g !== authGen) return;
+    await renderKycSection();
+  }
+
   async function submitAddressForm() {
     if (!currentUser) return;
     var g = authGen; // Milník 15 (bod 4.5) - `currentUser.role` se čte až po awaitu níž
     var jeFirma = el("pfJeFirma").checked;
     var ulice = el("pfUlice").value.trim();
+    var uliceCislo = el("pfUliceCislo").value.trim();
     var mesto = el("pfMesto").value.trim();
     var psc = el("pfPsc").value.trim();
     var stat = el("pfStat").value.trim();
@@ -16921,21 +17998,22 @@
     // Milník 11 (bod 1): doručovací adresa - vyplňuje se jen když se liší.
     var dorStejna = el("pfDorucovaciStejna").checked;
     var dorUlice = el("pfDorUlice").value.trim();
+    var dorUliceCislo = el("pfDorUliceCislo").value.trim();
     var dorMesto = el("pfDorMesto").value.trim();
     var dorPsc = el("pfDorPsc").value.trim();
     var dorStat = el("pfDorStat").value.trim();
 
-    showBanner(el("profileBanner"), null, null);
+    showBanner(el("addressFormBanner"), null, null);
     if (!ulice || !mesto || !psc) {
-      showBanner(el("profileBanner"), "error", "Vyplňte prosím ulici, město a PSČ.");
+      showBanner(el("addressFormBanner"), "error", "Vyplňte prosím ulici, město a PSČ.");
       return;
     }
     if (jeFirma && !ico) {
-      showBanner(el("profileBanner"), "error", "Pro firmu je vyplnění IČO povinné.");
+      showBanner(el("addressFormBanner"), "error", "Pro firmu je vyplnění IČO povinné.");
       return;
     }
     if (!dorStejna && (!dorUlice || !dorMesto || !dorPsc)) {
-      showBanner(el("profileBanner"), "error", "Pro odlišnou doručovací adresu vyplňte prosím ulici, město a PSČ.");
+      showBanner(el("addressFormBanner"), "error", "Pro odlišnou doručovací adresu vyplňte prosím ulici, město a PSČ.");
       return;
     }
     // Milník 17 (bod 19): datum narození je POVINNÉ. Do Milníku 16 se sem
@@ -16945,7 +18023,7 @@
     // vynucuje i RPC upravit_moji_adresu().
     if (!datumNarozeni) {
       setFieldError(el("pfDatumNarozeniField"), true, "Vyplňte prosím datum narození.");
-      showBanner(el("profileBanner"), "error", "Vyplňte prosím datum narození.");
+      showBanner(el("addressFormBanner"), "error", "Vyplňte prosím datum narození.");
       el("pfDatumNarozeni").focus();
       return;
     }
@@ -16961,7 +18039,10 @@
       p_dorucovaci_mesto: dorStejna ? null : (dorMesto || null),
       p_dorucovaci_psc: dorStejna ? null : (dorPsc || null),
       p_dorucovaci_stat: dorStejna ? null : (dorStat || null),
-      p_datum_narozeni: datumNarozeni || null
+      p_datum_narozeni: datumNarozeni || null,
+      // Zadání (bod 8): oddělené "číslo domu" u trvalé i doručovací adresy.
+      p_adresa_cislo: uliceCislo || null,
+      p_dorucovaci_cislo: dorStejna ? null : (dorUliceCislo || null)
     });
     if (g !== authGen) return; // Milník 15 (bod 4.5)
     btn.disabled = false;
@@ -16974,11 +18055,11 @@
         : (serverMsg.indexOf("Datum narozeni neni platne") !== -1
             ? "Zadané datum narození není platné."
             : "Adresu se nepodařilo uložit. Zkuste to prosím znovu.");
-      showBanner(el("profileBanner"), "error", msg);
+      showBanner(el("addressFormBanner"), "error", msg);
       return;
     }
 
-    showBanner(el("profileBanner"), "ok", "Adresa byla uložena.");
+    showBanner(el("addressFormBanner"), "ok", "Adresa byla uložena.");
     await refreshOwnProfile();
     if (g !== authGen) return; // Milník 15 (bod 4.5)
     // Milník 17 (bod 17): po úspěšném uložení zpátky do read-only režimu -
@@ -17027,15 +18108,21 @@
       '<div class="detail-item"><div class="detail-label">E-mail</div><div class="detail-value">' + escapeHtml(u.email || "—") + '</div></div>' +
       '<div class="detail-item"><div class="detail-label">Datum narození</div><div class="detail-value">' + escapeHtml(formatDateOnly(u.datum_narozeni) || "—") + '</div></div>' +
       '<div class="detail-item"><div class="detail-label">Trvalá adresa' + (u.je_firma ? ' (sídlo firmy)' : '') + '</div><div class="detail-value">' +
-        escapeHtml(adresaRadekHtml(u.adresa_ulice, u.adresa_mesto, u.adresa_psc, u.adresa_stat)) + '</div></div>';
+        escapeHtml(adresaRadekHtml(u.adresa_ulice, u.adresa_cislo, u.adresa_mesto, u.adresa_psc, u.adresa_stat)) + '</div></div>';
     if (u.dorucovaci_je_stejna === false) {
       html += '<div class="detail-item"><div class="detail-label">Doručovací adresa (liší se)</div><div class="detail-value">' +
-        escapeHtml(adresaRadekHtml(u.dorucovaci_ulice, u.dorucovaci_mesto, u.dorucovaci_psc, u.dorucovaci_stat)) + '</div></div>';
+        escapeHtml(adresaRadekHtml(u.dorucovaci_ulice, u.dorucovaci_cislo, u.dorucovaci_mesto, u.dorucovaci_psc, u.dorucovaci_stat)) + '</div></div>';
     }
     if (u.je_firma) {
       html += '<div class="detail-item"><div class="detail-label">IČO / DIČ</div><div class="detail-value">' +
         escapeHtml(u.ico || "—") + (u.dic ? ' / ' + escapeHtml(u.dic) : '') + '</div></div>';
     }
+    // Zadání (bod 25): plné číslo bankovního účtu MUSÍ být vidět v
+    // Leaderově/Adminově schvalovacím pohledu (na rozdíl od jiných screenů
+    // se tu NIC nemaskuje - Leader/Admin číslo účtu potřebuje celé, aby
+    // podle něj mohl reálně vyplatit provizi).
+    html += '<div class="detail-item"><div class="detail-label">Bankovní účet (pro výplatu provize)</div><div class="detail-value">' +
+      escapeHtml(u.cislo_uctu || "— nevyplněno") + '</div></div>';
     return html;
   }
 
@@ -18323,6 +19410,28 @@
     }
   }
 
+  // Zadání (bod 19): fotka v Detailu tipaře (leader/administrátor) -
+  // stejný "best effort" vzorec jako nacistFotkyStromu() výš, jen na
+  // jediného uživatele. Bez fotky se ukážou iniciály.
+  async function nacistFotkuDoUserDetailu(target) {
+    var wrap = el("userDetailFotoWrap");
+    if (!wrap) return;
+    if (!target.profilova_fotka_cesta) {
+      wrap.innerHTML = '<div class="rekrut-preview-foto-empty" style="width:56px;height:56px;font-size:18px;" aria-hidden="true">' + escapeHtml(inicialyUzivatele(target)) + '</div>';
+      return;
+    }
+    var g = authGen;
+    var signed = await sb.storage.from("profilove-fotky").createSignedUrl(target.profilova_fotka_cesta, 300);
+    if (g !== authGen) return;
+    var wrapNyni = el("userDetailFotoWrap");
+    if (!wrapNyni) return;
+    if (signed.error || !signed.data) {
+      wrapNyni.innerHTML = '<div class="rekrut-preview-foto-empty" style="width:56px;height:56px;font-size:18px;" aria-hidden="true">' + escapeHtml(inicialyUzivatele(target)) + '</div>';
+      return;
+    }
+    wrapNyni.innerHTML = '<img class="rekrut-preview-foto" style="width:56px;height:56px;" src="' + escapeHtml(signed.data.signedUrl) + '" alt="">';
+  }
+
   function ldRenderAll() {
     var wrap = el(ldWrapId);
     if (!wrap || !leaderPrehled) return;
@@ -18448,7 +19557,13 @@
         '<div class="ld-queue-time">' +
           '<div class="ld-queue-time-strong' + casCls + '">' + escapeHtml(hlavni) + '</div>' +
           (jePoTerminu ? '<div><span class="ld-queue-flag">po termínu</span></div>' : '') +
-          '<div class="ld-queue-time-note">' + escapeHtml(p.popis || p.stav_text || "") + '</div>' +
+          '<div class="ld-queue-time-note">' + escapeHtml(p.popis || "") + '</div>' +
+          // Zadání (bod 16): u každé položky fronty se má vidět AKTUÁLNÍ
+          // stav ověření a datum jeho POSLEDNÍ ZMĚNY - dřív se stav_text
+          // zobrazoval jen jako náhrada za chybějící popis (tedy skoro
+          // nikdy) a přesné datum vůbec ne, jen relativní "čeká X dní".
+          (p.stav_text ? '<div class="ld-queue-time-note">Stav: ' + escapeHtml(p.stav_text) + '</div>' : '') +
+          (p.ceka_od ? '<div class="ld-queue-time-note">Poslední změna: ' + escapeHtml(formatDatumZCasu(p.ceka_od) || "—") + '</div>' : '') +
           '<span class="sr-only">' + escapeHtml(n.label) + '</span>' +
         '</div>' +
         '<button type="button" class="ld-queue-btn' + (jePrimarni ? " ld-queue-btn-primary" : "") + '"' +
@@ -18717,7 +19832,7 @@
     var telo = jeAdmin
       ? '<p class="dt-muted" style="margin:18px 0;">Administrátor není součástí stromu sponzorství, ' +
         'takže vlastní úrovně sítě nemá. Strukturu celé sítě najdete v záložce ' +
-        '<strong>Uživatelé</strong>, souhrnná čísla jsou v ukazatelích výše.</p>'
+        '<strong>Tipaři</strong>, souhrnná čísla jsou v ukazatelích výše.</p>'
       : '<div class="ld-levels">' + radky + '</div>' +
         '<div class="ld-row" style="margin-top:16px;border-top:1px solid var(--border);">' +
           '<div class="ld-row-main"><div class="ld-row-note">Pozvánkový odkaz</div>' +
@@ -19001,6 +20116,17 @@
   // ---------------- wiring ----------------
 
   function wireEvents() {
+    // Zadání (bod 1): živé formátování Kč vstupů - statické pole
+    // #in_PozadovanaCena existuje v DOM hned od startu, wire se tedy tady;
+    // pole, která vznikají až v generovaném HTML formuláře (detail tipu,
+    // RK portál, provizní schéma) se wire-ují na místě svého vykreslení.
+    wireKcInput("in_PozadovanaCena");
+    // Zadání (bod 3a): export Excelu v "Moje síť" (tipař) - stejná sdílená
+    // funkce jako export leadera/administrátora v "Tipaři" (bod 26).
+    var netExportBtn = el("networkExportBtn");
+    if (netExportBtn) netExportBtn.addEventListener("click", function () {
+      exportSiteUzivateleXlsx(netExportBtn, el("networkBanner"));
+    });
     // Milník 12 (bod 11): klik na logo -> domovská obrazovka podle role.
     el("brandLogoBtn").addEventListener("click", logoNavigateHome);
     // Milník 22 (bod 7): klik na jméno NEBO na fotku v záhlaví -> „Můj profil".
@@ -19034,6 +20160,7 @@
     // profilu - stejná podmíněnost, jakou má formulář Upravit v Detailu
     // uživatele. Do Milníku 16 byla pole viditelná vždy.
     el("pfJeFirma").addEventListener("change", function () {
+      el("pfFirmaFieldsWrap").hidden = !this.checked; // Zadání (bod 7)
       el("pfIcoField").hidden = !this.checked;
       el("pfDicField").hidden = !this.checked;
     });
@@ -19089,6 +20216,15 @@
       if (e.target === el("kycLightboxOverlay")) closeKycLightbox();
     });
     el("kycLightboxCloseBtn").addEventListener("click", closeKycLightbox);
+
+    // Zadání (bod 12): fotoaparát pro KYC dokumenty/selfie.
+    el("kycCameraCaptureBtn").addEventListener("click", kycKameraVyfotit);
+    el("kycCameraRetryBtn").addEventListener("click", kycKameraVyfotitZnovu);
+    el("kycCameraUseBtn").addEventListener("click", kycKameraPouzitFotku);
+    el("kycCameraCloseBtn").addEventListener("click", zavritKycKameru);
+    el("kycCameraOverlay").addEventListener("click", function (e) {
+      if (e.target === el("kycCameraOverlay")) zavritKycKameru();
+    });
     document.addEventListener("click", function (e) {
       var trigger = e.target.closest ? e.target.closest(".kyc-lightbox-trigger") : null;
       if (trigger) openKycLightbox(trigger.getAttribute("data-lightbox-url"), trigger.getAttribute("data-lightbox-label"));
@@ -19098,6 +20234,7 @@
         if (!el("kycLightboxOverlay").hidden) closeKycLightbox();
         if (!el("kycRejectModalOverlay").hidden) closeKycRejectModal();
         if (!el("akadModalOverlay").hidden) closeAkadModal();
+        if (!el("kycCameraOverlay").hidden) zavritKycKameru(); // Zadání (bod 12)
         return;
       }
       // Klávesnicová aktivace náhledu (Enter/mezerník), stejně jako klik -
@@ -19108,6 +20245,7 @@
       }
     });
     el("kycSubmitBtn").addEventListener("click", submitOdeslatKOvereni);
+    el("kycUcetSaveBtn").addEventListener("click", submitKycUcet); // Zadání (bod 25)
 
     // Milník 12 (bod 13): wiring pro všechna demo tlačítka - jeden generický
     // listener na klíč DEMO_ACCOUNTS, žádné ruční opakování na každé
@@ -19240,6 +20378,19 @@
       });
     }
     if (el("smsOtpBackBtn")) el("smsOtpBackBtn").addEventListener("click", showLoginView);
+
+    // Zadání (bod 24): odkaz na veřejný formulář žádosti o partnerství RK.
+    if (el("rkPartnerstviLink")) {
+      el("rkPartnerstviLink").addEventListener("click", function () {
+        navigateVerejna("rk-partnerstvi", "rk-partnerstvi");
+      });
+    }
+    if (el("rkPartnerstviForm")) {
+      el("rkPartnerstviForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        submitRkPartnerstviForm();
+      });
+    }
 
     // MILNÍK 26 (bod 4): „Zapomenuté heslo?" a obnova hesla.
     el("goResetBtn").addEventListener("click", function () {
@@ -19525,29 +20676,21 @@
     // dál +1 na sponsorský krok dolů; u administrátora appka ukáže "—",
     // protože administrátor není součástí stromu sponzorů (viz komentář
     // "Milník 2: admin neni soucasti stromu").
+    // Zadání (bod 26): export přepracován na SDÍLENOU funkci
+    // exportSiteUzivateleXlsx() (nová sada sloupců, barevné hlavičky podle
+    // kategorie, autofiltr) - stejnou používá i tipařův export v "Moje síť"
+    // (bod 3a, viz networkExportBtn ve wireEvents). Dřív šlo o export
+    // aktuálně VYFILTROVANÝCH řádků tabulky (usersTable.getVisibleRows());
+    // nová RPC posílá vždy celou množinu, kterou volající smí vidět.
     el("usersExportBtn").addEventListener("click", function () {
-      if (!usersTable || !currentUser) return;
-      var rows = usersTable.getVisibleRows();
-      exportToXlsx(
-        "uzivatele.xlsx", "Uživatelé",
-        ["Jméno", "Příjmení", "Role", "Telefon", "E-mail", "Plátce DPH", "Úroveň v síti", "Přímí podřízení", "Velikost týmu", "Délka spolupráce (dny)", "Počet tipů", "Stav", "Sponzor"],
-        rows,
-        function (r) {
-          return [
-            r.jmeno || "", r.prijmeni || "", ROLE_LABELS_CAP[r.role] || r.role, r.telefon || "", r.email || "",
-            r.plati_dph ? "Ano" : "Ne", r.uroven != null ? Number(r.uroven) : "—",
-            Number(r.primych_podrizenych || 0), Number(r.velikost_tymu || 0),
-            Number(r.dny_spoluprace || 0), Number(r.pocet_tipu || 0), r.aktivni ? "Aktivní" : "Vymazán",
-            celeJmeno(usersById[r.sponsor_id]) || ""
-          ];
-        }
-      );
+      exportSiteUzivateleXlsx(el("usersExportBtn"), el("usersBanner"));
     });
 
     // Milník 17 (bod 10): handlery #tipyExportBtn a #vyplatyExportBtn tady
     // BYLY a jsou odstraněné spolu se svými tlačítky - export zůstává
-    // výhradně v záložce Uživatelé (#usersExportBtn výš). Sdílená funkce
-    // exportToXlsx() se NEODSTRAŇUJE, ten zbylý export ji používá.
+    // výhradně v záložce Tipaři (#usersExportBtn výš) a nově i v "Moje síť"
+    // (bod 3a). Sdílená funkce exportToXlsx() (SheetJS) se NEODSTRAŇUJE,
+    // používají ji ostatní exporty appky dál.
   }
 
   // =========================================================================
@@ -19644,6 +20787,11 @@
       var r = (params.get("r") || "").trim();
       if (r) { verejnaRouta = { typ: "rekrutace", hodnota: r }; return; }
       var st = (params.get("stranka") || "").trim().toLowerCase();
+      // Zadání (bod 24): "rk-partnerstvi" je VLASTNÍ typ routy (formulář),
+      // ne obsahová CMS stránka ze `webove_stranky` - kontrola MUSÍ být
+      // před obecnou větví "stranka" níž, jinak by slug šel do
+      // verejna_stranka() a appka by nenašla žádný obsah.
+      if (st === "rk-partnerstvi") { verejnaRouta = { typ: "rk-partnerstvi", hodnota: st }; return; }
       if (st && st !== "hlavni") { verejnaRouta = { typ: "stranka", hodnota: st }; return; }
       verejnaRouta = null;
     } catch (e) {
@@ -19662,9 +20810,11 @@
     var a = el("verejnaStrankaScreen");
     var b = el("rekrutaceScreen");
     var c = el("verejnyHeroScreen");   // MILNÍK 26 (bod 5)
+    var d = el("rkPartnerstviScreen"); // Zadání (bod 24)
     if (a) a.hidden = true;
     if (b) b.hidden = true;
     if (c) c.hidden = true;
+    if (d) d.hidden = true;
   }
 
   function showVerejneMenu(on) {
@@ -19702,6 +20852,14 @@
       el("verejnaStrankaScreen").hidden = false;
       oznacVerejneMenu(verejnaRouta.hodnota);
       fetchVerejnouStranku(verejnaRouta.hodnota);
+      return;
+    }
+    // Zadání (bod 24): veřejný formulář žádosti o partnerství RK.
+    if (verejnaRouta && verejnaRouta.typ === "rk-partnerstvi") {
+      el("rkPartnerstviScreen").hidden = false;
+      resetRkPartnerstviForm();
+      setDocumentTitle("Staňte se partnerskou realitní kanceláří");
+      setMetaPopis("Formulář pro realitní kanceláře, které chtějí spolupracovat s Realitním tipem.");
       return;
     }
     if (auth) auth.hidden = false;
@@ -20228,6 +21386,83 @@
     wrap.appendChild(telo);
   }
 
+  // ------------------------------------------- ZADÁNÍ (bod 24): žádost RK o partnerství
+  //
+  // Veřejný, nepřihlášený formulář - viz #rkPartnerstviScreen výš i
+  // bezpečnostní komentář u migrace zadani_rk_partnerske_zadosti.
+  // podat_zadost_o_partnerstvi() je anonymně volatelná a zakládá VÝHRADNĚ
+  // nedůvěryhodnou žádost, nikdy živý záznam RK.
+  function resetRkPartnerstviForm() {
+    var form = el("rkPartnerstviForm");
+    if (form) form.reset();
+    ["rkpIcoField", "rkpTelefonField", "rkpEmailField"].forEach(function (id) {
+      setFieldError(el(id), false);
+    });
+    showBanner(el("rkPartnerstviBanner"), null, null);
+    var wrap = el("rkPartnerstviFormWrap");
+    var hotovo = el("rkPartnerstviHotovoWrap");
+    if (wrap) wrap.hidden = false;
+    if (hotovo) hotovo.hidden = true;
+  }
+
+  var JEDNODUCHY_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  async function submitRkPartnerstviForm() {
+    var nazev = el("rkpNazev").value.trim();
+    var ico = el("rkpIco").value.trim();
+    var telefon = el("rkpTelefon").value.trim();
+    var email = el("rkpEmail").value.trim();
+
+    showBanner(el("rkPartnerstviBanner"), null, null);
+
+    if (!nazev) {
+      showBanner(el("rkPartnerstviBanner"), "error", "Zadejte prosím název realitní kanceláře.");
+      el("rkpNazev").focus();
+      return;
+    }
+    var icoOk = jePlatneIco(ico);
+    setFieldError(el("rkpIcoField"), !icoOk);
+    var telOk = telefon.replace(/\D/g, "").length >= 9;
+    setFieldError(el("rkpTelefonField"), !telOk);
+    var emailOk = JEDNODUCHY_EMAIL_RE.test(email);
+    setFieldError(el("rkpEmailField"), !emailOk);
+    if (!icoOk || !telOk || !emailOk) {
+      showBanner(el("rkPartnerstviBanner"), "error", "Zkontrolujte prosím zvýrazněná pole.");
+      return;
+    }
+
+    var btn = el("rkPartnerstviSubmitBtn");
+    btn.disabled = true;
+    var res = await sb.rpc("podat_zadost_o_partnerstvi", {
+      p_nazev: nazev,
+      p_ico: ico || null,
+      p_dic: el("rkpDic").value.trim() || null,
+      p_ulice: el("rkpUlice").value.trim() || null,
+      p_cislo: el("rkpCislo").value.trim() || null,
+      p_mesto: el("rkpMesto").value.trim() || null,
+      p_psc: el("rkpPsc").value.trim() || null,
+      p_kontaktni_osoba: el("rkpKontakt").value.trim() || null,
+      p_telefon: telefon,
+      p_email: email
+    });
+    btn.disabled = false;
+
+    if (res.error) {
+      console.error("Chyba při odesílání žádosti o partnerství:", res.error);
+      showBanner(el("rkPartnerstviBanner"), "error", "Žádost se nepodařilo odeslat. Zkuste to prosím znovu.");
+      return;
+    }
+
+    // Zadání (bod 24): potvrzení je VĚDOMĚ zdrženlivé - žádné "hotovo,
+    // jste ověřeni" ani podobné tvrzení, jen že žádost dorazila a čeká na
+    // ruční posouzení.
+    var wrap = el("rkPartnerstviFormWrap");
+    var hotovo = el("rkPartnerstviHotovoWrap");
+    if (wrap) wrap.hidden = true;
+    if (hotovo) hotovo.hidden = false;
+    try { hotovo.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (e) { /* nepodstatné */ }
+  }
+
   // ------------------------------------------- bod 7: rekrutační stránka
   //
   // Veřejná URL fotky. Bucket `verejne-rekrutace` je ZÁMĚRNĚ veřejný -
@@ -20415,6 +21650,10 @@
     x:        '<path fill="currentColor" stroke="none" d="M17.3 3h3.05l-6.66 7.62L21.5 21h-6.13l-4.8-6.28L4.98 21H1.93l7.12-8.14L1.8 3h6.28l4.34 5.74zM16.23 19.18h1.69L7.14 4.73H5.33z"/>',
     linkedin: '<path fill="currentColor" stroke="none" d="M6.94 8.6H3.9V21h3.04zM5.42 3.2a1.77 1.77 0 1 0 0 3.54 1.77 1.77 0 0 0 0-3.54M20.1 21v-6.8c0-3.42-1.83-5.01-4.26-5.01-1.97 0-2.85 1.08-3.34 1.84V8.6H9.46V21h3.04v-6.6c0-1.54.29-3.03 2.2-3.03 1.88 0 1.9 1.76 1.9 3.13V21z"/>',
     whatsapp: '<path fill="currentColor" stroke="none" d="M12.04 2.4a9.5 9.5 0 0 0-8.2 14.3L2.4 21.6l5.04-1.4a9.5 9.5 0 1 0 4.6-17.8m0 1.8a7.7 7.7 0 1 1-3.9 14.34l-.3-.18-2.9.8.8-2.84-.2-.3A7.7 7.7 0 0 1 12.04 4.2m-3.5 3.5c-.18 0-.47.07-.72.34-.25.27-.95.93-.95 2.26s.98 2.62 1.11 2.8c.14.18 1.9 3.02 4.68 4.11 2.31.91 2.78.73 3.28.68.5-.04 1.62-.66 1.85-1.3s.23-1.18.16-1.3c-.07-.1-.25-.17-.53-.3-.27-.14-1.62-.8-1.87-.9-.25-.08-.43-.13-.61.14s-.7.9-.86 1.08c-.16.18-.32.2-.59.07-.27-.14-1.15-.43-2.2-1.36-.81-.72-1.36-1.62-1.52-1.89-.16-.27-.02-.42.12-.55.12-.12.27-.32.4-.48.14-.16.18-.27.27-.45.09-.18.05-.34-.02-.48-.07-.13-.6-1.48-.83-2.02-.2-.5-.4-.44-.55-.44z"/>',
+    // Zadání (bod 22): Instagram nepodporuje sdílení s předvyplněným textem
+    // přes URL schéma jako FB/WhatsApp - tahle ikona proto jen zkopíruje
+    // text+odkaz do schránky a otevře Instagram (viz sdilInstagram níže).
+    instagram:'<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/>',
     mail:     '<rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="m3.6 7 8.4 6 8.4-6"/>',
     // „Dva překrývající se čtverce" — klasická ikona kopírování.
     kopirovat:'<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 6.2V5.6A1.6 1.6 0 0 0 13.4 4H5.6A1.6 1.6 0 0 0 4 5.6v7.8A1.6 1.6 0 0 0 5.6 15h.6"/>',
@@ -20463,6 +21702,13 @@
         ' title="' + escapeHtml(s.nazev) + '" aria-label="' + escapeHtml(s.nazev) + '">' +
         sdilIkonaSvg(s.kod) + '</a>';
     }).join("");
+    // Zadání (bod 22): Instagram - žádné URL schéma pro předvyplněný
+    // text neexistuje, takže tlačítko zkopíruje text+odkaz do schránky
+    // a rovnou otevře Instagram (viz sdilInstagram/wireSdileniKopirovani).
+    var popisIg = "Zkopírovat a otevřít Instagram";
+    html += '<button type="button" class="sdil-btn" data-sdil-instagram="' + escapeHtml(text + " " + url) + '"' +
+      ' title="' + escapeHtml(popisIg) + '" aria-label="' + escapeHtml(popisIg) + '">' +
+      sdilIkonaSvg("instagram") + '</button>';
     if (obrazekUrl) {
       var popisObr = "Sdílet i s obrázkem (WhatsApp, Instagram, e-mail…)";
       html += '<button type="button" class="sdil-btn" data-sdil-obrazek-url="' + escapeHtml(obrazekUrl) + '"' +
@@ -20517,6 +21763,18 @@
       b.addEventListener("click", function () {
         var klic = b.getAttribute("data-sdil-copy");
         copyTextToClipboard(sdileniTextyKeKopii[klic], bannerEl, "Zkopírováno do schránky.");
+      });
+    });
+    // Zadání (bod 22): Instagram - zkopíruje text a otevře Instagram
+    // (aplikaci přes instagram://, na desktopu web instagram.com), aby ho
+    // uživatel mohl vložit do storky/příspěvku/zprávy ručně.
+    wrap.querySelectorAll("[data-sdil-instagram]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var text = b.getAttribute("data-sdil-instagram") || "";
+        copyTextToClipboard(text, bannerEl, "Zkopírováno do schránky - vložte to do Instagramu.");
+        setTimeout(function () {
+          window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
+        }, 300);
       });
     });
     // Zadání (bod 3): tlačítko "Sdílet i s obrázkem" se v HTML vykresluje
@@ -20922,10 +22180,33 @@
     var wrap = el("pozvankovyKodReadonlyBody");
     if (!wrap || !currentUser) return;
     var kod = currentUser.invite_code || "";
-    wrap.innerHTML =
+    var html =
       detailItemHtml("Pozvánkový kód", kod || "—") +
       '<div class="detail-item"><div class="detail-label">Rekrutační stránka</div>' +
         '<div class="detail-value" style="word-break:break-all;">' + escapeHtml(mujRekrutacniOdkaz()) + '</div></div>';
+
+    // Zadání (bod 11): historie starých kódů - posledních 5 změn celkem,
+    // z toho poslední 3 kódy zůstávají "routovatelné" (fungují jako alias
+    // na aktuální kód, viz RPC verejna_rekrutacni_stranka - server je
+    // zdroj pravdy, tady se jen zobrazuje, co server sám udržuje v
+    // profiles.invite_code_historie).
+    // invite_code_historie je v DB uložená OD NEJNOVĚJŠÍHO (viz
+    // upravit_muj_pozvankovy_kod: nový záznam se vkládá na začátek,
+    // useknuto na max. 2 položky) - s aktuálním kódem to dá dohromady
+    // poslední 3 routovatelné kódy, žádné další otáčení pořadí netřeba.
+    var historie = (currentUser.invite_code_historie || []).filter(function (k) { return k && k !== kod; });
+    var zmenPocet = currentUser.invite_code_zmeny_pocet || 0;
+    if (historie.length) {
+      var poslednich = historie.slice(0, 2);
+      html += '<div class="detail-item col-span-2"><div class="detail-label">Dřívější kódy (stále fungují)</div>' +
+        '<div class="detail-value">' +
+          poslednich.map(function (k) { return '<code>' + escapeHtml(k) + '</code>'; }).join(', ') +
+        '</div></div>';
+    }
+    html += '<div class="detail-item"><div class="detail-label">Počet změn kódu</div>' +
+      '<div class="detail-value">' + zmenPocet + ' z 5 povolených</div></div>';
+
+    wrap.innerHTML = html;
   }
 
   function fillPozvankovyKodForm() {
@@ -21090,23 +22371,40 @@
     if (fw) fw.hidden = !rekrutEditMode;
   }
 
+  // Zadání (bod 10): panel dřív zobrazoval jen suché stavové odznaky
+  // ("Fotka: Nahraná") - teď rovnou ukazuje SKUTEČNÝ uložený obsah (fotku,
+  // titulek, text), stejnou vizuální podobou jako živý náhled v editaci
+  // (renderRekrutPreview), ať uživatel nemusí kliknout na Upravit, aby
+  // viděl, co je opravdu vidět venku.
   function renderRekrutReadonly() {
     var wrap = el("rekrutReadonlyBody");
     if (!wrap || !currentUser) return;
     var d = rekrutData || {};
     var url = mujRekrutacniOdkaz();
     var publikovano = d.publikovano === true && !!d.titulek;
+    var maObsah = !!(d.titulek || d.popis || d.foto_cesta);
+
+    var fotoUrl = d.foto_cesta ? verejnaFotoUrl(d.foto_cesta) : null;
+    var fotoHtml = fotoUrl
+      ? '<img class="rekrut-preview-foto" src="' + escapeHtml(fotoUrl) + '" alt="">'
+      : '<div class="rekrut-preview-foto-empty" aria-hidden="true">' + escapeHtml(inicialyUzivatele(currentUser)) + '</div>';
 
     wrap.innerHTML =
       '<div class="detail-grid">' +
         detailItemHtml("Stav", publikovano ? "Zveřejněná" : (d.titulek ? "Koncept (zatím nezveřejněná)" : "Zatím nevyplněná")) +
-        detailItemHtml("Titulek", d.titulek || "—") +
         '<div class="detail-item"><div class="detail-label">Adresa stránky</div>' +
           '<div class="detail-value" style="word-break:break-all;">' + escapeHtml(url) + '</div></div>' +
-        detailItemHtml("Fotografie", d.foto_cesta ? "Nahraná" : "Žádná") +
       '</div>' +
-      (d.popis ? '<div class="rekrut-preview"><p class="rekrut-preview-label">Text stránky</p>' +
-                 '<div class="rekrut-preview-telo">' + odstavceHtml(d.popis) + '</div></div>' : '') +
+      (maObsah
+        ? '<div class="rekrut-preview" style="margin-top:14px;">' +
+            '<p class="rekrut-preview-label">Aktuální obsah (přesně to, co vidí návštěvníci)</p>' +
+            '<div class="rekrut-preview-hero">' + fotoHtml +
+              '<div><h4>' + escapeHtml(d.titulek || REKRUT_VYCHOZI_TITULEK) + '</h4>' +
+              '<p>Zve vás ' + escapeHtml(celeJmeno(currentUser) || "") + '</p></div>' +
+            '</div>' +
+            (d.popis ? '<div class="rekrut-preview-telo">' + odstavceHtml(d.popis) + '</div>' : '') +
+          '</div>'
+        : '') +
       (publikovano
         ? '<p class="dt-muted" style="font-size:12.5px;margin:12px 0 0;">Stránku vidí kdokoli na internetu bez přihlášení.</p>'
         : '<p class="dt-muted" style="font-size:12.5px;margin:12px 0 0;">Stránka zatím není zveřejněná. Na její adrese se návštěvníkovi ukáže obecná pozvánka s vaším křestním jménem — registrace pod vámi funguje i tak.</p>');
