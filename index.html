@@ -3266,6 +3266,11 @@
   /* Milník 26 (bod 4): hlášení o duplicitě při registraci. */
   .reg-kolize { margin: 10px 0 0; }
   .reg-kolize-akce { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  /* Zadání: přepínač "E-mailem / Přes SMS" nad registračním formulářem -
+     dvě .btn-small vedle sebe, aktivní volba plná (výchozí .btn-small),
+     neaktivní jako .btn-small-ghost (viz setRegContactMethod()). */
+  .reg-method-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .reg-method-row .btn-small { flex: 1; }
 
   /* Milník 26 (bod 3): sloupec IP adresa v Historii akcí. */
   .audit-ip { font-family: var(--font-mono); font-size: 12px; }
@@ -3619,6 +3624,16 @@
                  samostatné sloupce v profiles, viz handle_new_user()
                  trigger. Přidáno i nepovinné Telefon - ukládá se stejným
                  způsobem jako invite_code, přes raw_user_meta_data. -->
+            <!-- Zadání: registrace teď nabízí DVĚ cesty ověření - e-mailem
+                 (výchozí, beze změny chování) nebo přes SMS (nová,
+                 ALTERNATIVA k e-mailu - ne navíc). Přepínač jen mění, které
+                 z polí E-mail/Telefon je POVINNÉ a jak appka po odeslání
+                 formuláře ověří údaj (potvrzovací e-mail vs. SMS kód) - obě
+                 pole zůstávají v HTML pořád stejná, viz setRegContactMethod(). -->
+            <div class="reg-method-row" id="regMethodRow" role="group" aria-label="Způsob registrace">
+              <button type="button" class="btn-small reg-method-btn" id="regMethodEmailBtn">E-mailem</button>
+              <button type="button" class="btn-small btn-small-ghost reg-method-btn" id="regMethodSmsBtn">Přes SMS</button>
+            </div>
             <form id="registerForm" novalidate>
               <div class="field" id="regNameField">
                 <label for="regName">Jméno</label>
@@ -3638,6 +3653,7 @@
               <div class="field" id="regPhoneField">
                 <label for="regPhone">Telefon (nepovinné)</label>
                 <input type="tel" id="regPhone" autocomplete="tel" placeholder="např. 777 123 456">
+                <span class="error-msg" id="regPhoneError">Zadejte prosím platné české telefonní číslo.</span>
               </div>
               <div class="field" id="regPasswordField">
                 <label for="regPassword">Heslo</label>
@@ -3683,6 +3699,31 @@
               zadali e-mail bez překlepu.
             </p>
             <button class="btn-primary" id="checkEmailBackBtn" type="button">Zpět na přihlášení</button>
+          </div>
+
+          <!-- Zadání: SMS OBDOBA #checkEmailView - po registraci telefonem
+               (contactMethod = "sms") appka rovnou nabídne zadání kódu,
+               žádné přesměrování na e-mail. sb.auth.signUp({phone,...}) bez
+               session = potvrzování telefonu je zapnuté (stejná logika jako
+               u e-mailu v doRegister()). Viz showSmsOtpView()/doVerifyRegistrationOtp(). -->
+          <div id="smsOtpView" hidden>
+            <div class="check-email-icon" aria-hidden="true">📱</div>
+            <h2 class="check-email-title">Zadejte kód ze SMS</h2>
+            <p class="check-email-text">
+              Na číslo <strong id="smsOtpPhone"></strong> jsme odeslali SMS s šestimístným kódem.
+              Opište ho prosím sem a registraci tím dokončíte.
+            </p>
+            <div id="smsOtpBanner"></div>
+            <form id="smsOtpForm" novalidate>
+              <div class="field" id="smsOtpCodeField">
+                <label for="smsOtpCode">Kód ze SMS</label>
+                <input type="text" id="smsOtpCode" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" maxlength="8">
+                <span class="error-msg">Zadejte prosím kód ze SMS.</span>
+              </div>
+              <button class="btn-primary" id="smsOtpSubmitBtn" type="submit">Potvrdit a dokončit registraci</button>
+            </form>
+            <p class="switch-line"><button type="button" id="smsOtpResendBtn">Poslat kód znovu</button></p>
+            <p class="switch-line"><button type="button" id="smsOtpBackBtn">Zpět na přihlášení</button></p>
           </div>
 
           <!-- Milník 18 (bod 4): patička #authFootnote s technickým popisem
@@ -3779,6 +3820,37 @@
             </div>
             <button class="btn-primary" id="fpSubmitBtn" type="submit">Nastavit heslo a pokračovat</button>
           </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== DVOUFÁZOVÉ OVĚŘENÍ (SMS) PŘI PŘIHLÁŠENÍ ==============
+         Zadání: dvoufázové ověření pro role leader/administrator (mimo demo
+         účty). Zobrazí se MÍSTO appky, pokud sb.auth.mfa.getAuthenticatorAssuranceLevel()
+         po přihlášení řekne nextLevel="aal2" a currentLevel je jiný - tedy
+         uživatel má zapnutou SMS 2FA, ale ještě v týhle relaci neprošel
+         druhým faktorem. Stejný vzor jako #forcedPasswordScreen - schválně
+         MIMO hideAllScreens()/ALL_SCREEN_IDS, viz handleSignedIn() a
+         showMfaChallengeScreen(). -->
+    <section id="mfaChallengeScreen" hidden>
+      <div class="auth-wrap">
+        <div class="auth-card">
+          <div class="auth-brand"><span class="brand" style="font-size:26px;">Realitní <em>tip</em></span></div>
+          <p class="auth-sub">Dvoufázové ověření — poslední krok přihlášení.</p>
+          <p class="dt-muted" style="font-size:13.5px;line-height:1.6;margin-top:0;">
+            Na číslo <strong id="mfaChallengePhone"></strong> jsme poslali SMS s šestimístným kódem. Opište ho prosím sem.
+          </p>
+          <div id="mfaChallengeBanner"></div>
+          <form id="mfaChallengeForm" novalidate>
+            <div class="field" id="mfaChallengeCodeField">
+              <label for="mfaChallengeCode">Kód ze SMS</label>
+              <input type="text" id="mfaChallengeCode" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" maxlength="8">
+              <span class="error-msg">Zadejte prosím kód ze SMS.</span>
+            </div>
+            <button class="btn-primary" id="mfaChallengeSubmitBtn" type="submit">Ověřit a pokračovat</button>
+          </form>
+          <p class="switch-line"><button type="button" id="mfaChallengeResendBtn">Poslat kód znovu</button></p>
+          <p class="switch-line"><button type="button" id="mfaChallengeLogoutBtn">Odhlásit se</button></p>
         </div>
       </div>
     </section>
@@ -4883,6 +4955,47 @@
           </form>
         </div>
       </div>
+
+      <!-- Zadání: dvoufázové ověření (SMS) - jen leader/administrátor, a i
+           u nich se karta schová u demo účtů (viz renderMfaCard() -
+           isDemoAccountEmail()), aby testovací tlačítka fungovala dál beze
+           změny. Tři podstavy karty: přečtený stav (zapnuto/vypnuto),
+           zápis telefonu + odeslání kódu, a potvrzení kódu - týž
+           dvourežimový duch jako ostatní karty tady, jen navíc s
+           mezikrokem "zadejte kód". -->
+      <div class="card detail-card" id="mfaCard" hidden>
+        <h3 class="detail-section-title" style="margin-top:0;">Dvoufázové ověření (SMS)</h3>
+        <p class="dt-muted" style="margin-top:-6px;">Při každém přihlášení appka navíc pošle SMS kód na váš telefon - i kdyby vám někdo uhodl nebo ukradl heslo, bez telefonu se nepřihlásí.</p>
+
+        <div id="mfaBanner"></div>
+
+        <div id="mfaStatusWrap"></div>
+
+        <div id="mfaEnrollWrap" hidden>
+          <div class="field" id="mfaEnrollPhoneField">
+            <label for="mfaEnrollPhone">Telefonní číslo pro SMS kódy</label>
+            <input type="tel" id="mfaEnrollPhone" autocomplete="tel" placeholder="např. 777 123 456">
+            <span class="error-msg">Zadejte prosím platné české telefonní číslo.</span>
+          </div>
+          <div class="form-actions">
+            <button class="btn-primary" type="button" id="mfaEnrollSendBtn" style="width:auto;">Odeslat SMS kód</button>
+            <button class="btn-ghost" type="button" id="mfaEnrollCancelBtn">Zrušit</button>
+          </div>
+        </div>
+
+        <div id="mfaVerifyWrap" hidden>
+          <p class="dt-muted" style="margin-top:0;">Na číslo <strong id="mfaVerifyPhone"></strong> jsme poslali SMS s kódem.</p>
+          <div class="field" id="mfaVerifyCodeField">
+            <label for="mfaVerifyCode">Kód ze SMS</label>
+            <input type="text" id="mfaVerifyCode" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" maxlength="8">
+            <span class="error-msg">Zadejte prosím kód ze SMS.</span>
+          </div>
+          <div class="form-actions">
+            <button class="btn-primary" type="button" id="mfaVerifySubmitBtn" style="width:auto;">Potvrdit a zapnout</button>
+            <button class="btn-ghost" type="button" id="mfaVerifyCancelBtn">Zrušit</button>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- ============== OVĚŘENÍ TOTOŽNOSTI (Milník 9, bod 5.6) ==============
@@ -5139,7 +5252,7 @@
   // Milník 14: číslo aktuální verze aplikace - MUSÍ odpovídat nejnovější položce
   // pole APP_CHANGELOG níže (položka na indexu 0). Při každém příštím milníku
   // se zvyšuje ROVNOU TADY i v APP_CHANGELOG - jsou to dvě navzájem závislá místa.
-  var APP_VERSION = "28.0";
+  var APP_VERSION = "29.0";
 
   // Milník 14 (bod 4): obsah panelu "Historie verzí" na přihlašovací
   // obrazovce - zrekonstruováno z reálné historie projektu (STAV.md,
@@ -5148,6 +5261,18 @@
   // pod tímto polem). Vykresluje se generickou šablonou renderAuthVersionAndChangelog()
   // - při dalším milníku se sem jen přidá nová položka na začátek pole.
   var APP_CHANGELOG = [
+    // ZADÁNÍ (29.0). Dvoufázové ověření (SMS) pro leader/administrator,
+    // registrace přes SMS jako alternativa k e-mailu, a mapování hlášek
+    // Supabase Auth pro chybějící SMS bránu. SMS funkce potřebují, aby
+    // administrátor v Supabase Dashboardu nejdřív nastavil SMS bránu (viz
+    // předaný návod) - do té doby appka u SMS registrace/přihlášení srozumitelně
+    // řekne, že SMS bránu ještě nemá appka nastavenou, místo aby jen tiše selhala.
+    { verze: "29.0", datum: "25. 9. 2026", body: [
+      "Nové dvoufázové ověření (SMS): leader a administrátor si v „Můj profil“ mohou zapnout, že appka při každém přihlášení navíc pošle SMS kód na telefon - testovací (demo) tlačítka Leader/Admin fungují dál beze změny, bez jakéhokoli SMS ověření",
+      "Registrace nabízí novou alternativu k e-mailu: „Přes SMS“ - appka pak místo potvrzovacího e-mailu pošle šestimístný kód SMS a registraci potvrdí jeho zadáním",
+      "Srozumitelnější hlášky, pokud SMS bránu (Twilio apod.) ještě nemá appka v Supabase nastavenou - dřív by appka jen tiše/nesrozumitelně selhala",
+      "Nefunkční potvrzovací e-mail: appka sama e-mail neposílá, posílá ho přímo Supabase Auth - příčina (a jak ji odstranit vlastním SMTP) je popsaná v předaném návodu, appka v tomhle release nemá žádnou kódovou změnu k e-mailu"
+    ] },
     // ZADÁNÍ (28.0). Sedm bodů z jednoho zadání klienta - kotva u
     // přihlášení, barva zápatí, odhlašovací tlačítko, přepracovaná
     // Struktura sítě, pořadí admin tabů, funkční dashboard tipaře a nová
@@ -5412,6 +5537,20 @@
     // pod klíčem `rk2` v řadě RK, viz komentář výše. Tlačítko „M" z řady
     // „Tipaři" se odstranilo i z HTML.
   };
+  // Zadání: SMS 2FA se týká JEN leader/administrator, ale demo tlačítka
+  // Leader/Admin (a všechny ostatní) musí dál fungovat bez jakéhokoli
+  // dvoufázového ověření - viz handleSignedIn() a renderMfaCard(). Kontrola
+  // je podle e-mailu (ne role), protože demo účty MAJÍ reálnou roli
+  // leader/administrator v `profiles` - jde přesně o TYTO konkrétní účty,
+  // ne o roli obecně.
+  function isDemoAccountEmail(email) {
+    if (!email) return false;
+    var e = String(email).toLowerCase();
+    return Object.keys(DEMO_ACCOUNTS).some(function (key) {
+      return DEMO_ACCOUNTS[key].email.toLowerCase() === e;
+    });
+  }
+
   var ROLE_LABELS = { tipar: "tipař", leader: "leader", administrator: "administrátor", rk: "RK" };
   var ROLE_LABELS_CAP = { tipar: "Tipař", leader: "Leader", administrator: "Administrátor", rk: "RK" };
 
@@ -5615,6 +5754,22 @@
   var sb = null;
   var currentUser = null; // { id, email, jmeno, role, invite_code }
   var currentUserId = null; // pro rozpoznání skutečné změny přihlášeného uživatele
+
+  // Zadání: která ze dvou cest registrace ("email"/"sms") je zrovna
+  // vybraná na #registerView - viz setRegContactMethod()/doRegister().
+  var regContactMethod = "email";
+
+  // Zadání: SMS 2FA (dvoufázové ověření) pro leader/administrator.
+  // mfaEnroll* = rozepsané ZAPÍNÁNÍ na "Můj profil" (#mfaCard, viz
+  // renderMfaCard()); mfaChallenge* = probíhající VÝZVA při přihlášení
+  // (#mfaChallengeScreen, viz showMfaChallengeScreen()) - dvě nezávislé
+  // dvojice factorId/challengeId, protože jde o dvě různé obrazovky, které
+  // se nikdy nezobrazují zároveň.
+  var mfaEnrollFactorId = null;
+  var mfaEnrollChallengeId = null;
+  var mfaChallengeFactorId = null;
+  var mfaChallengeChallengeId = null;
+  var mfaVerifiedFactor = null; // aktuálně ověřený telefonní faktor (nebo null), viz renderMfaCard()
 
   // ---------------- Milník 15 (bod 4.5): generační pojistka identity ----------------
   //
@@ -7611,6 +7766,26 @@
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
   }
 
+  // Zadání: registrace přes SMS + SMS 2FA - appka je jen pro český trh
+  // (celé UI je v češtině, DEMO_ACCOUNTS/RK jsou české firmy), takže
+  // normalizace telefonu počítá VÝHRADNĚ s předvolbou +420. Stejný duch
+  // jako SQL funkce normalizovat_telefon() (viz DB) - ta ale vrací jen
+  // holých 9 číslic pro porovnání duplicit, kdežto tahle funkce musí
+  // appce dát PLNÝ tvar E.164 (+420...), protože přesně ten čeká
+  // Supabase Auth v sb.auth.signUp({phone}) i sb.auth.mfa.enroll({phone}).
+  function normalizeCzechPhoneE164(raw) {
+    var digits = String(raw || "").replace(/[^0-9]/g, "");
+    if (!digits) return "";
+    if (digits.length > 9 && digits.slice(0, 5) === "00420") digits = digits.slice(5);
+    else if (digits.length > 9 && digits.slice(0, 3) === "420") digits = digits.slice(3);
+    if (digits.length !== 9) return ""; // neplatné - volající to pozná podle prázdného řetězce
+    return "+420" + digits;
+  }
+
+  function isValidCzechPhone(raw) {
+    return normalizeCzechPhoneE164(raw) !== "";
+  }
+
   // Překlad chyb Supabase Auth do srozumitelné češtiny. Branchujeme na
   // text hlášky, protože Supabase JS zatím nevrací stabilní strojové
   // kódy pro všechny tyto stavy stejně konzistentně jako status; pro
@@ -7660,6 +7835,30 @@
     }
     if (msg.indexOf("network") !== -1 || msg.indexOf("fetch") !== -1) {
       return "Nepodařilo se spojit se serverem. Zkontrolujte prosím připojení k internetu.";
+    }
+    // Zadání: registrace/2FA přes SMS - dokud administrátor v Supabase
+    // Dashboardu nenastaví SMS bránu (viz návod), GoTrue vrací některou
+    // z těchhle hlášek. Bez vlastního mapování by uživatel viděl jen
+    // "Nastala chyba (Unsupported phone provider)" - matoucí pro někoho,
+    // kdo netuší, že jde o chybějící nastavení, ne o svoji chybu.
+    if (msg.indexOf("unsupported phone provider") !== -1 || msg.indexOf("sms provider") !== -1 ||
+        msg.indexOf("error sending confirmation sms") !== -1 || msg.indexOf("error sending sms") !== -1) {
+      return "SMS bránu zatím nemá appka nastavenou (chybí SMS provider v Supabase). Použijte prosím zatím registraci e-mailem, nebo požádejte administrátora o dokončení nastavení SMS.";
+    }
+    if (msg.indexOf("phone_provider_disabled") !== -1 || msg.indexOf("phone signups are disabled") !== -1 || msg.indexOf("signups not allowed for otp") !== -1) {
+      return "Přihlašování přes SMS zatím není v appce zapnuté. Použijte prosím zatím registraci e-mailem.";
+    }
+    if (msg.indexOf("token has expired") !== -1 || msg.indexOf("otp_expired") !== -1) {
+      return "Platnost kódu vypršela. Pošlete si prosím nový kód a zkuste to znovu.";
+    }
+    if (msg.indexOf("invalid token") !== -1 || msg.indexOf("token is invalid") !== -1 || msg.indexOf("invalid otp") !== -1) {
+      return "Zadaný kód není správný. Zkontrolujte ho prosím a zkuste to znovu.";
+    }
+    if (msg.indexOf("phone") !== -1 && (msg.indexOf("invalid") !== -1 || msg.indexOf("unable to validate") !== -1)) {
+      return "Toto telefonní číslo se nepodařilo ověřit jako platné — zkontrolujte prosím, že je zadané bez překlepu.";
+    }
+    if (msg.indexOf("phone") !== -1 && (msg.indexOf("already registered") !== -1 || msg.indexOf("already exists") !== -1)) {
+      return "Toto telefonní číslo už je zaregistrované. Zkuste se rovnou přihlásit.";
     }
     return "Nastala chyba (" + (error.message || error.status || "neznámá") + "). Zkuste to prosím znovu.";
   }
@@ -8025,7 +8224,8 @@
   // výchozí stav formuláře, ne zbytek po předchozím uživateli.
   var IDENTITY_FORM_IDS = [
     "loginForm", "registerForm", "forcedPasswordForm",
-    "tipForm", "addressForm", "kycRejectForm"
+    "tipForm", "addressForm", "kycRejectForm",
+    "smsOtpForm", "mfaChallengeForm" // Zadání: SMS registrace + SMS 2FA
   ];
 
   // 3a-bis) Pole MIMO jakýkoli <form> - `form.reset()` se jich netýká.
@@ -8047,7 +8247,7 @@
   var HIDDEN_STATE_BANNER_IDS = ["addressDeadlineBanner", "kycRejectedBanner"];
 
   // 3d) Osamocené textContent prvky s osobními údaji.
-  var IDENTITY_TEXT_IDS = ["detailSubtitle", "checkEmailAddress"];
+  var IDENTITY_TEXT_IDS = ["detailSubtitle", "checkEmailAddress", "smsOtpPhone", "mfaChallengePhone"];
 
   // Milník 15 (bod 4.7, nález 5): skrytí banneru MUSÍ jít ruku v ruce s
   // vyprázdněním jeho obsahu - `hidden = true` sám o sobě nechává citlivý
@@ -8157,6 +8357,15 @@
     });
 
     resetKycCardState();
+
+    // Zadání: SMS 2FA - rozepsaný enroll (telefon/kód) i případná
+    // rozjetá výzva k přihlášení nesmí přežít odhlášení/změnu identity.
+    mfaEnrollFactorId = null;
+    mfaEnrollChallengeId = null;
+    setMfaEnrollMode("status");
+    mfaChallengeFactorId = null;
+    mfaChallengeChallengeId = null;
+    setRegContactMethod("email");
 
     // #regInviteCode NENÍ zbytek po předchozí identitě - pochází z URL
     // (?ref=KOD). form.reset() ho ale taky vymaže (a nechá pole v
@@ -8302,6 +8511,7 @@
     hideStateBanner(el("addressDeadlineBanner"));
     hideStateBanner(el("kycRejectedBanner"));
     el("forcedPasswordScreen").hidden = true;
+    el("mfaChallengeScreen").hidden = true; // Zadání: dvoufázové ověření
     hideAllScreens();
     // MILNÍK 25 (bod 6/7): která z nepřihlášených obrazovek je vidět
     // (#authScreen / #verejnaStrankaScreen / #rekrutaceScreen) rozhoduje
@@ -8336,6 +8546,7 @@
     hideStateBanner(el("addressDeadlineBanner"));
     hideStateBanner(el("kycRejectedBanner"));
     el("authScreen").hidden = true;
+    el("mfaChallengeScreen").hidden = true; // Zadání: dvoufázové ověření (obrazovky se nikdy nepřekrývají)
     hideAllScreens();
     el("forcedPasswordScreen").hidden = false;
     showBanner(el("forcedPasswordBanner"), null, null);
@@ -8348,6 +8559,7 @@
     el("tabsWrap").hidden = false;
     el("authScreen").hidden = true;
     el("forcedPasswordScreen").hidden = true;
+    el("mfaChallengeScreen").hidden = true; // Zadání: dvoufázové ověření
     // MILNÍK 25 (bod 6): po přihlášení veřejné menu i veřejné obrazovky mizí
     // a titulek se vrací na základní tvar.
     verejnaRouta = null;
@@ -8769,6 +8981,7 @@
     el("registerView").hidden = true;
     el("checkEmailView").hidden = true;
     el("resetView").hidden = true;          // MILNÍK 26 (bod 4)
+    el("smsOtpView").hidden = true;         // Zadání: SMS registrace
     renderRegKolize(false);
     // Milník 18 (bod 4): dřív se tu přepínala i viditelnost #authFootnote
     // (technický popis Supabase Auth/RLS). Odstavec je z HTML pryč, takže
@@ -8784,12 +8997,17 @@
     el("registerView").hidden = false;
     el("checkEmailView").hidden = true;
     el("resetView").hidden = true;          // MILNÍK 26 (bod 4)
+    el("smsOtpView").hidden = true;         // Zadání: SMS registrace
     renderRegKolize(false);
     // Milník 18 (bod 4): viz showLoginView - #authFootnote už neexistuje.
     el("authSubtitle").hidden = false;
     el("authSubtitle").textContent = "Založte si nový účet tipaře";
     showBanner(el("authBanner"), null, null);
     applyPendingInviteCodeToForm();
+    // Zadání: formulář vždy začíná v e-mailovém režimu (beze změny
+    // dosavadního chování), i kdyby uživatel předtím přepnul na SMS a
+    // odešel bez dokončení - viz setRegContactMethod().
+    setRegContactMethod("email");
   }
 
   // Milník 9 (bod 1): plnohodnotná obrazovka místo dřívějšího malého
@@ -8804,9 +9022,27 @@
     el("registerView").hidden = true;
     el("checkEmailView").hidden = false;
     el("resetView").hidden = true;          // MILNÍK 26 (bod 4)
+    el("smsOtpView").hidden = true;         // Zadání: SMS registrace
     renderRegKolize(false);
     el("authSubtitle").hidden = true;
     el("checkEmailAddress").textContent = email || "";
+    showBanner(el("authBanner"), null, null);
+  }
+
+  // Zadání: SMS obdoba showCheckEmailView() - po registraci telefonem
+  // (sb.auth.signUp({phone,...}) bez rovnou vrácené session) appka
+  // zobrazí pole pro zadání kódu ze SMS místo odkazu na e-mail.
+  function showSmsOtpView(phone) {
+    el("loginView").hidden = true;
+    el("registerView").hidden = true;
+    el("checkEmailView").hidden = true;
+    el("resetView").hidden = true;
+    el("smsOtpView").hidden = false;
+    renderRegKolize(false);
+    el("authSubtitle").hidden = true;
+    el("smsOtpPhone").textContent = phone || "";
+    el("smsOtpCode").value = "";
+    showBanner(el("smsOtpBanner"), null, null);
     showBanner(el("authBanner"), null, null);
   }
 
@@ -8816,6 +9052,7 @@
     el("loginView").hidden = true;
     el("registerView").hidden = true;
     el("checkEmailView").hidden = true;
+    el("smsOtpView").hidden = true;         // Zadání: SMS registrace
     el("resetView").hidden = false;
     renderRegKolize(false);
     el("authSubtitle").hidden = false;
@@ -9110,7 +9347,28 @@
     }
   }
 
-  async function doRegister(jmeno, prijmeni, telefon, email, password, inviteCode, bannerEl, submitBtn) {
+  // Zadání: registrace teď nabízí dvě cesty - "email" (výchozí, beze
+  // změny chování popsaného níž) nebo "sms" (nová - ALTERNATIVA k
+  // e-mailu, ne navíc). Přepínač jen mění, které pole formuláře (E-mail
+  // vs. Telefon) se posílá jako `email`/`phone` do sb.auth.signUp() - a
+  // tedy jestli appka po odeslání ukáže "Zkontrolujte e-mail", nebo
+  // rovnou pole pro SMS kód.
+  function setRegContactMethod(method) {
+    regContactMethod = method === "sms" ? "sms" : "email";
+    var emailBtn = el("regMethodEmailBtn");
+    var smsBtn = el("regMethodSmsBtn");
+    if (emailBtn) emailBtn.classList.toggle("btn-small-ghost", regContactMethod !== "email");
+    if (smsBtn) smsBtn.classList.toggle("btn-small-ghost", regContactMethod !== "sms");
+    var emailLabel = document.querySelector('label[for="regEmail"]');
+    var phoneLabel = document.querySelector('label[for="regPhone"]');
+    if (emailLabel) emailLabel.textContent = regContactMethod === "email" ? "E-mail" : "E-mail (nepovinné)";
+    if (phoneLabel) phoneLabel.textContent = regContactMethod === "sms" ? "Telefon" : "Telefon (nepovinné)";
+    setFieldError(el("regEmailField"), false);
+    setFieldError(el("regPhoneField"), false);
+    renderRegKolize(false);
+  }
+
+  async function doRegister(jmeno, prijmeni, telefon, email, password, inviteCode, contactMethod, bannerEl, submitBtn) {
     var puvodniText = submitBtn ? submitBtn.textContent : "";
     if (submitBtn) {
       submitBtn.disabled = true;
@@ -9124,21 +9382,36 @@
       if (telefon) meta.telefon = telefon;
       if (inviteCode) meta.invite_code = inviteCode; // server dohledá sponzora podle kódu, neplatný kód se jen ignoruje
 
-      var result = await sb.auth.signUp({
-        email: email,
-        password: password,
-        options: {
-          data: meta,
-          // Žádáme Supabase Auth o návrat na aktuální doménu appky (ne na
-          // výchozí Site URL z dashboardu, což bylo typicky localhost) - viz
-          // docs/milnik2_strom_role.md, sekce "Oprava po zpětné vazbě
-          // uživatele". POZOR: samo o sobě to nestačí - GoTrue tuto URL
-          // navíc vyžaduje mít v allow-listu "Redirect URLs" v Supabase
-          // dashboardu (Authentication -> URL Configuration), jinak se i
-          // tak použije jen Site URL. To je ruční krok mimo tento soubor.
-          emailRedirectTo: window.location.origin + window.location.pathname
-        }
-      });
+      var result;
+      if (contactMethod === "sms") {
+        // Zadání: registrace přes SMS. handle_new_user() na serveru bere
+        // jmeno/prijmeni/telefon/invite_code ze stejných klíčů
+        // raw_user_meta_data jako u e-mailové registrace (žádná úprava DB
+        // triggeru nebyla potřeba) - jediný rozdíl je, že appka teď posílá
+        // `phone` místo `email` a Supabase Auth ověřuje SMS kódem místo
+        // odkazu v e-mailu.
+        result = await sb.auth.signUp({
+          phone: normalizeCzechPhoneE164(telefon),
+          password: password,
+          options: { data: meta }
+        });
+      } else {
+        result = await sb.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: meta,
+            // Žádáme Supabase Auth o návrat na aktuální doménu appky (ne na
+            // výchozí Site URL z dashboardu, což bylo typicky localhost) - viz
+            // docs/milnik2_strom_role.md, sekce "Oprava po zpětné vazbě
+            // uživatele". POZOR: samo o sobě to nestačí - GoTrue tuto URL
+            // navíc vyžaduje mít v allow-listu "Redirect URLs" v Supabase
+            // dashboardu (Authentication -> URL Configuration), jinak se i
+            // tak použije jen Site URL. To je ruční krok mimo tento soubor.
+            emailRedirectTo: window.location.origin + window.location.pathname
+          }
+        });
+      }
 
       if (result.error) {
         showBanner(bannerEl, "error", authErrorMessage(result.error));
@@ -9146,12 +9419,12 @@
       }
 
       if (result.data && result.data.session) {
-        // Projekt nemá zapnuté potvrzování e-mailu - uživatel je rovnou
-        // přihlášený, o zbytek se postará onAuthStateChange.
+        // Projekt nemá zapnuté potvrzování e-mailu/telefonu - uživatel je
+        // rovnou přihlášený, o zbytek se postará onAuthStateChange.
         return;
       }
 
-      // Potvrzování e-mailu je zapnuté - session zatím není.
+      // Potvrzování e-mailu/telefonu je zapnuté - session zatím není.
       //
       // Milník 9 (bod 1, DIAGNÓZA): tady byl skutečný důvod, proč uživatel
       // po registraci neviděl VŮBEC ŽÁDNOU zprávu, ani ten dřívější malý
@@ -9165,8 +9438,14 @@
       // dedikovanou celoobrazovkovou "Zkontrolujte e-mail" (checkEmailView),
       // která žádný takový self-clear problém nemá a zůstává viditelná,
       // dokud uživatel sám neklikne zpět - viz showCheckEmailView().
+      // Zadání: v SMS režimu má analogickou roli showSmsOtpView() - rovnou
+      // pole pro kód, ne odkaz na e-mail.
       el("registerForm").reset();
-      showCheckEmailView(email);
+      if (contactMethod === "sms") {
+        showSmsOtpView(normalizeCzechPhoneE164(telefon));
+      } else {
+        showCheckEmailView(email);
+      }
     } catch (e) {
       // Neočekávaná výjimka (např. výpadek sítě uprostřed requestu) -
       // pojistka, ať tlačítko nezůstane navždy zamčené v "Vytváříme účet…".
@@ -9177,6 +9456,51 @@
         submitBtn.disabled = false;
         submitBtn.textContent = puvodniText || "Vytvořit účet";
       }
+    }
+  }
+
+  // Zadání: dokončení SMS registrace - uživatel opsal kód z #smsOtpView.
+  // sb.auth.verifyOtp({phone, token, type:'sms'}) při úspěchu vytvoří
+  // session sám (stejně jako klik na odkaz v potvrzovacím e-mailu) -
+  // zbytek (přepnutí na appku) řeší onAuthStateChange/handleSignedIn().
+  async function doVerifyRegistrationOtp(phone, code, bannerEl, submitBtn) {
+    var puvodni = submitBtn ? submitBtn.textContent : "";
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Ověřujeme kód…"; }
+    showBanner(bannerEl, null, null);
+    try {
+      var result = await sb.auth.verifyOtp({ phone: phone, token: code, type: "sms" });
+      if (result.error) {
+        showBanner(bannerEl, "error", authErrorMessage(result.error));
+        return;
+      }
+      // Úspěch dál řeší onAuthStateChange (stejně jako doLogin()).
+    } catch (e) {
+      console.error("Neočekávaná chyba při ověřování SMS kódu:", e);
+      showBanner(bannerEl, "error", "Nastala neočekávaná chyba. Zkontrolujte prosím připojení k internetu a zkuste to znovu.");
+    } finally {
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = puvodni || "Potvrdit a dokončit registraci"; }
+    }
+  }
+
+  // "Poslat kód znovu" na #smsOtpView - sb.auth.resend() je pro SMS obdoba
+  // toho, co appka u e-mailu nemá (potvrzovací e-mail se dal jen znovu
+  // vyžádat celou registrací) - GoTrue u telefonu rate-limituje samo
+  // (viz authErrorMessage - "too many"/"rate limit").
+  async function doResendRegistrationSmsOtp(phone, bannerEl, btn) {
+    var puvodni = btn ? btn.textContent : "";
+    if (btn) { btn.disabled = true; btn.textContent = "Posíláme…"; }
+    try {
+      var result = await sb.auth.resend({ type: "sms", phone: phone });
+      if (result.error) {
+        showBanner(bannerEl, "error", authErrorMessage(result.error));
+      } else {
+        showBanner(bannerEl, "ok", "Nový kód jsme poslali znovu na " + phone + ".");
+      }
+    } catch (e) {
+      console.error("Neočekávaná chyba při opětovném odeslání SMS kódu:", e);
+      showBanner(bannerEl, "error", "Nastala neočekávaná chyba. Zkontrolujte prosím připojení k internetu a zkuste to znovu.");
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = puvodni || "Poslat kód znovu"; }
     }
   }
 
@@ -9297,6 +9621,25 @@
     if (currentUser.vyzadovat_zmenu_hesla || passwordRecoveryMode) {
       showForcedPasswordScreen();
       return;
+    }
+
+    // Zadání: dvoufázové ověření (SMS) pro leader/administrator, MIMO
+    // demo účty (isDemoAccountEmail - testovací tlačítka musí fungovat
+    // beze změny). Kontrola AAL (Authenticator Assurance Level) je
+    // "rychlá, skoro vždy bez síťového volání" (dokumentace Supabase) -
+    // nextLevel="aal2" != currentLevel znamená "má zapnutou SMS 2FA, ale
+    // v týhle relaci ještě neprošel druhým faktorem". Gate je AŽ PO
+    // vynucené změně hesla (výše) - dočasné heslo je jednorázový vstupní
+    // krok, druhý faktor dává smysl řešit až s definitivním heslem.
+    if ((role === "leader" || role === "administrator") && !isDemoAccountEmail(user.email)) {
+      var aalResult = await sb.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (g !== authGen) return;
+      if (aalResult.error) {
+        console.error("Nepodařilo se zjistit úroveň ověření (AAL):", aalResult.error);
+      } else if (aalResult.data && aalResult.data.nextLevel === "aal2" && aalResult.data.nextLevel !== aalResult.data.currentLevel) {
+        showMfaChallengeScreen();
+        return;
+      }
     }
 
     // Milník 4 (bod 9 zadání) — "Administrace" jako sloučená záložka
@@ -15253,6 +15596,11 @@
     // MILNÍK 25 (bod 5): rekrutační stránka - jen tipař a lídr. Vlastní
     // generační pojistka uvnitř, karta se ostatním rolím sama skryje.
     await fetchRekrutacniStranku();
+
+    // Zadání: dvoufázové ověření (SMS) - jen leader/administrátor, mimo
+    // demo účty. Vlastní generační pojistka uvnitř, karta se ostatním
+    // (a demo účtům) sama schová.
+    await renderMfaCard();
   }
 
   // ---------------- Milník 19 (bod 2): kontaktní údaje na "Můj profil" ----------------
@@ -15751,6 +16099,256 @@
       return;
     }
     Object.assign(currentUser, r.data);
+  }
+
+  // ---------------- Zadání: dvoufázové ověření (SMS) na "Můj profil" ----------------
+  //
+  // Karta má TŘI podstavy, přepínané setMfaEnrollMode() ("status" / "enroll"
+  // / "verify") - obdoba read-only/Upravit/Uložit vzoru ostatních karet, jen
+  // s jedním mezikrokem navíc (odeslání SMS kódu). Na rozdíl od ostatních
+  // profilových formulářů appka NEUKLÁDÁ nic do `profiles` - celý stav
+  // (zapnuto/vypnuto, telefonní číslo) žije výhradně v Supabase Auth
+  // (auth.mfa_factors), proto se vždy čte čerstvě přes sb.auth.mfa.*.
+  function setMfaEnrollMode(mode) {
+    var statusWrap = el("mfaStatusWrap");
+    var enrollWrap = el("mfaEnrollWrap");
+    var verifyWrap = el("mfaVerifyWrap");
+    if (!statusWrap || !enrollWrap || !verifyWrap) return;
+    statusWrap.hidden = (mode !== "status");
+    enrollWrap.hidden = (mode !== "enroll");
+    verifyWrap.hidden = (mode !== "verify");
+    if (mode === "enroll") {
+      showBanner(el("mfaBanner"), null, null);
+      el("mfaEnrollPhone").value = (currentUser && currentUser.telefon) || "";
+      setFieldError(el("mfaEnrollPhoneField"), false);
+    }
+    if (mode === "verify") {
+      el("mfaVerifyCode").value = "";
+      setFieldError(el("mfaVerifyCodeField"), false);
+    }
+    if (mode === "status") {
+      mfaEnrollFactorId = null;
+      mfaEnrollChallengeId = null;
+    }
+  }
+
+  function renderMfaStatus() {
+    var wrap = el("mfaStatusWrap");
+    if (!wrap) return;
+    if (mfaVerifiedFactor) {
+      wrap.innerHTML =
+        '<p style="margin:0 0 10px;"><span class="pill pill-tip_overen_hledame_rk">Zapnuto</span> — kód chodí na ' +
+        escapeHtml(mfaVerifiedFactor.phone || "") + '</p>' +
+        '<div class="form-actions"><button class="btn-ghost" type="button" id="mfaUnenrollBtn">Vypnout dvoufázové ověření</button></div>';
+      var offBtn = el("mfaUnenrollBtn");
+      if (offBtn) offBtn.addEventListener("click", function () { unenrollMfa(mfaVerifiedFactor.id); });
+    } else {
+      wrap.innerHTML =
+        '<p style="margin:0 0 10px;"><span class="pill pill-zamitnuto">Vypnuto</span></p>' +
+        '<div class="form-actions"><button class="btn-primary" type="button" id="mfaEnrollStartBtn" style="width:auto;">Zapnout dvoufázové ověření</button></div>';
+      var onBtn = el("mfaEnrollStartBtn");
+      if (onBtn) onBtn.addEventListener("click", function () { setMfaEnrollMode("enroll"); });
+    }
+  }
+
+  // Zadání: karta se zobrazuje JEN leader/administrátor, a i u nich se
+  // schová u demo účtů (isDemoAccountEmail) - testovací tlačítka
+  // Leader/Admin musí dál fungovat úplně beze změny, viz zadání klienta.
+  async function renderMfaCard() {
+    var card = el("mfaCard");
+    if (!card || !currentUser) return;
+    var ukazatKartu = (currentUser.role === "leader" || currentUser.role === "administrator") &&
+      !isDemoAccountEmail(currentUser.email);
+    card.hidden = !ukazatKartu;
+    if (!ukazatKartu) return;
+
+    setMfaEnrollMode("status");
+    var g = authGen; // Milník 15 (bod 4.5)
+    var res = await sb.auth.mfa.listFactors();
+    if (g !== authGen) return;
+    if (res.error) {
+      console.error("Nepodařilo se načíst stav dvoufázového ověření:", res.error);
+      el("mfaStatusWrap").innerHTML = '<p class="dt-muted">Stav se nepodařilo načíst. Zkuste to prosím znovu.</p>';
+      return;
+    }
+    var phoneFactors = (res.data && res.data.phone) || [];
+    mfaVerifiedFactor = null;
+    for (var i = 0; i < phoneFactors.length; i++) {
+      if (phoneFactors[i].status === "verified") { mfaVerifiedFactor = phoneFactors[i]; break; }
+    }
+    renderMfaStatus();
+  }
+
+  // Krok 1 zapínání: založí nový telefonní faktor a rovnou pošle první SMS
+  // kód (enroll() sám žádný kód neposílá - to dělá až challenge()).
+  async function startMfaEnroll(phone) {
+    showBanner(el("mfaBanner"), null, null);
+    var btn = el("mfaEnrollSendBtn");
+    var puvodni = btn ? btn.textContent : "";
+    if (btn) { btn.disabled = true; btn.textContent = "Odesíláme…"; }
+    try {
+      var enrollRes = await sb.auth.mfa.enroll({ factorType: "phone", phone: phone });
+      if (enrollRes.error) {
+        showBanner(el("mfaBanner"), "error", authErrorMessage(enrollRes.error));
+        return;
+      }
+      mfaEnrollFactorId = enrollRes.data.id;
+      var challengeRes = await sb.auth.mfa.challenge({ factorId: mfaEnrollFactorId });
+      if (challengeRes.error) {
+        showBanner(el("mfaBanner"), "error", authErrorMessage(challengeRes.error));
+        // Nepovedený challenge nechává osiřelý neověřený faktor - uklidit
+        // ho rovnou, ať si uživatel při dalším pokusu nenarazí na
+        // "phone number already exists" kvůli tomuhle vlastnímu prvnímu
+        // (neúspěšnému) pokusu.
+        await sb.auth.mfa.unenroll({ factorId: mfaEnrollFactorId });
+        mfaEnrollFactorId = null;
+        return;
+      }
+      mfaEnrollChallengeId = challengeRes.data.id;
+      el("mfaVerifyPhone").textContent = phone;
+      setMfaEnrollMode("verify");
+    } catch (e) {
+      console.error("Neočekávaná chyba při zapínání dvoufázového ověření:", e);
+      showBanner(el("mfaBanner"), "error", "Nastala neočekávaná chyba. Zkontrolujte prosím připojení k internetu a zkuste to znovu.");
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = puvodni || "Odeslat SMS kód"; }
+    }
+  }
+
+  // Krok 2: potvrzení kódu - úspěch faktor OKAMŽITĚ aktivuje (viz Supabase
+  // dokumentace k mfa.verify()).
+  async function confirmMfaEnroll(code) {
+    var btn = el("mfaVerifySubmitBtn");
+    var puvodni = btn ? btn.textContent : "";
+    if (btn) { btn.disabled = true; btn.textContent = "Ověřujeme…"; }
+    showBanner(el("mfaBanner"), null, null);
+    try {
+      var res = await sb.auth.mfa.verify({ factorId: mfaEnrollFactorId, challengeId: mfaEnrollChallengeId, code: code });
+      if (res.error) {
+        showBanner(el("mfaBanner"), "error", authErrorMessage(res.error));
+        return;
+      }
+      setMfaEnrollMode("status");
+      await renderMfaCard();
+      showBanner(el("mfaBanner"), "ok", "Dvoufázové ověření přes SMS je zapnuté.");
+    } catch (e) {
+      console.error("Neočekávaná chyba při potvrzování dvoufázového ověření:", e);
+      showBanner(el("mfaBanner"), "error", "Nastala neočekávaná chyba. Zkontrolujte prosím připojení k internetu a zkuste to znovu.");
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = puvodni || "Potvrdit a zapnout"; }
+    }
+  }
+
+  // Vypnutí - stejný vzor jako ostatní destruktivní akce v appce
+  // (window.confirm(), viz např. smazání RK).
+  async function unenrollMfa(factorId) {
+    if (!window.confirm("Opravdu vypnout dvoufázové ověření? Při dalším přihlášení už appka nebude vyžadovat SMS kód.")) return;
+    showBanner(el("mfaBanner"), null, null);
+    try {
+      var res = await sb.auth.mfa.unenroll({ factorId: factorId });
+      if (res.error) {
+        showBanner(el("mfaBanner"), "error", authErrorMessage(res.error));
+        return;
+      }
+      await renderMfaCard();
+      showBanner(el("mfaBanner"), "ok", "Dvoufázové ověření je vypnuté.");
+    } catch (e) {
+      console.error("Neočekávaná chyba při vypínání dvoufázového ověření:", e);
+      showBanner(el("mfaBanner"), "error", "Nastala neočekávaná chyba. Zkontrolujte prosím připojení k internetu a zkuste to znovu.");
+    }
+  }
+
+  // ---------------- Zadání: dvoufázové ověření (SMS) při přihlášení ----------------
+  //
+  // #mfaChallengeScreen - obdoba showForcedPasswordScreen(), viz handleSignedIn().
+  // Rovnou při zobrazení pošle SMS kód na už ověřený faktor (žádné čekání
+  // na klik navíc - uživatel čeká na SMS stejně dlouho, ať klikne, nebo ne).
+  async function showMfaChallengeScreen() {
+    el("topbar").hidden = true;
+    el("tabsWrap").hidden = true;
+    verejnaRouta = null;
+    hideVerejneScreens();
+    showVerejneMenu(false);
+    hideStateBanner(el("addressDeadlineBanner"));
+    hideStateBanner(el("kycRejectedBanner"));
+    el("authScreen").hidden = true;
+    el("forcedPasswordScreen").hidden = true;
+    hideAllScreens();
+    el("mfaChallengeScreen").hidden = false;
+    showBanner(el("mfaChallengeBanner"), null, null);
+    el("mfaChallengeCode").value = "";
+
+    var g = authGen;
+    var factorsRes = await sb.auth.mfa.listFactors();
+    if (g !== authGen) return;
+    if (factorsRes.error) {
+      showBanner(el("mfaChallengeBanner"), "error", authErrorMessage(factorsRes.error));
+      return;
+    }
+    var phoneFactor = (factorsRes.data.phone || []).filter(function (f) { return f.status === "verified"; })[0];
+    if (!phoneFactor) {
+      // Nemělo by nastat (handleSignedIn() sem pošle jen když nextLevel
+      // je aal2), ale bez ověřeného faktoru appka nemá koho vyzvat -
+      // radši srozumitelná hláška než tichý zákys na prázdné obrazovce.
+      showBanner(el("mfaChallengeBanner"), "error", "Nenašli jsme žádný ověřený telefon pro dvoufázové ověření. Kontaktujte prosím administrátora.");
+      return;
+    }
+    mfaChallengeFactorId = phoneFactor.id;
+    el("mfaChallengePhone").textContent = phoneFactor.phone || "";
+    var challengeRes = await sb.auth.mfa.challenge({ factorId: mfaChallengeFactorId });
+    if (g !== authGen) return;
+    if (challengeRes.error) {
+      showBanner(el("mfaChallengeBanner"), "error", authErrorMessage(challengeRes.error));
+      return;
+    }
+    mfaChallengeChallengeId = challengeRes.data.id;
+  }
+
+  async function resendMfaChallenge() {
+    if (!mfaChallengeFactorId) return;
+    var btn = el("mfaChallengeResendBtn");
+    var puvodni = btn ? btn.textContent : "";
+    if (btn) { btn.disabled = true; btn.textContent = "Posíláme…"; }
+    try {
+      var res = await sb.auth.mfa.challenge({ factorId: mfaChallengeFactorId });
+      if (res.error) {
+        showBanner(el("mfaChallengeBanner"), "error", authErrorMessage(res.error));
+        return;
+      }
+      mfaChallengeChallengeId = res.data.id;
+      showBanner(el("mfaChallengeBanner"), "ok", "Nový kód jsme poslali znovu.");
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = puvodni || "Poslat kód znovu"; }
+    }
+  }
+
+  // Úspěšné mfa.verify() zvedne AAL relace na aal2, ale NEVYVOLÁ nové
+  // SIGNED_IN (jen tichý TOKEN_REFRESHED, který onAuthStateChange - viz
+  // boot() - u STEJNÉHO uživatele záměrně ignoruje, aby se zbytečně
+  // neopakoval fetch profilu). Proto appka po úspěchu ručně načte čerstvou
+  // session a znovu zavolá handleSignedIn() - ta gate podmínku (bod níž)
+  // podruhé vyhodnotí už s aal2 a propustí uživatele do appky.
+  async function doVerifyMfaChallenge(code) {
+    var btn = el("mfaChallengeSubmitBtn");
+    var puvodni = btn ? btn.textContent : "";
+    if (btn) { btn.disabled = true; btn.textContent = "Ověřujeme…"; }
+    showBanner(el("mfaChallengeBanner"), null, null);
+    try {
+      var res = await sb.auth.mfa.verify({ factorId: mfaChallengeFactorId, challengeId: mfaChallengeChallengeId, code: code });
+      if (res.error) {
+        showBanner(el("mfaChallengeBanner"), "error", authErrorMessage(res.error));
+        return;
+      }
+      var sessionRes = await sb.auth.getSession();
+      if (sessionRes.data && sessionRes.data.session) {
+        handleSignedIn(sessionRes.data.session);
+      }
+    } catch (e) {
+      console.error("Neočekávaná chyba při ověřování dvoufázového kódu:", e);
+      showBanner(el("mfaChallengeBanner"), "error", "Nastala neočekávaná chyba. Zkontrolujte prosím připojení k internetu a zkuste to znovu.");
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = puvodni || "Ověřit a pokračovat"; }
+    }
   }
 
   // ---------------- Milník 17 (bod 17): režimy obrazovky "Můj profil" ----------------
@@ -18542,13 +19140,35 @@
       setFieldError(el("regSurnameField"), !prijmeni);
       if (!prijmeni) ok = false;
 
+      // Zadání: SMS jako alternativa k e-mailu - v režimu "sms" je
+      // POVINNÝ telefon (a musí jít normalizovat na české číslo), e-mail
+      // je nepovinný (ale pokud je vyplněný, musí být platný). V režimu
+      // "email" (výchozí, beze změny dosavadního chování) je to přesně
+      // obráceně - viz setRegContactMethod().
       var emailValid = email && isValidEmail(email);
-      setFieldError(el("regEmailField"), !emailValid);
-      if (!emailValid) {
-        el("regEmailError").textContent = email
-          ? "Zadejte prosím platný e-mail."
-          : "Zadejte prosím e-mail.";
-        ok = false;
+      var phoneValid = telefon && isValidCzechPhone(telefon);
+      if (regContactMethod === "sms") {
+        setFieldError(el("regPhoneField"), !phoneValid);
+        if (!phoneValid) ok = false;
+        setFieldError(el("regEmailField"), email.length > 0 && !emailValid);
+        if (email.length > 0 && !emailValid) ok = false;
+      } else {
+        setFieldError(el("regEmailField"), !emailValid);
+        if (!emailValid) {
+          el("regEmailError").textContent = email
+            ? "Zadejte prosím platný e-mail."
+            : "Zadejte prosím e-mail.";
+          ok = false;
+        }
+        // Beze změny dosavadního chování: v e-mailovém režimu byl telefon
+        // odjakživa čistě nepovinný údaj BEZ validace formátu (ukládá se
+        // do raw_user_meta_data, appka ho nikde nepoužívá jako přihlašovací
+        // identifikátor) - kontrolor upozornil, že přidání validace by tu
+        // byla NEohlášená změna chování oproti zadání ("100% beze změny
+        // při ponechání na e-mailu"), proto se tu formát telefonu záměrně
+        // nekontroluje (na rozdíl od SMS režimu výše, kde je telefon
+        // POVINNÝ přihlašovací údaj a musí jít normalizovat).
+        setFieldError(el("regPhoneField"), false);
       }
 
       var passwordValid = password.length >= 6;
@@ -18572,9 +19192,32 @@
           try { el("regKolizeWrap").scrollIntoView({ behavior: "smooth", block: "nearest" }); } catch (e2) { /* nepodstatné */ }
           return;
         }
-        doRegister(jmeno, prijmeni, telefon, email, password, inviteCode, el("authBanner"), submitBtn);
+        doRegister(jmeno, prijmeni, telefon, email, password, inviteCode, regContactMethod, el("authBanner"), submitBtn);
       });
     });
+
+    // Zadání: přepínač "E-mailem / Přes SMS" nad registračním formulářem.
+    if (el("regMethodEmailBtn")) el("regMethodEmailBtn").addEventListener("click", function () { setRegContactMethod("email"); });
+    if (el("regMethodSmsBtn")) el("regMethodSmsBtn").addEventListener("click", function () { setRegContactMethod("sms"); });
+
+    // Zadání: #smsOtpView - dokončení registrace přes SMS.
+    if (el("smsOtpForm")) {
+      el("smsOtpForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var code = el("smsOtpCode").value.trim();
+        setFieldError(el("smsOtpCodeField"), !code);
+        if (!code) return;
+        var phone = el("smsOtpPhone").textContent.trim();
+        doVerifyRegistrationOtp(phone, code, el("smsOtpBanner"), el("smsOtpSubmitBtn"));
+      });
+    }
+    if (el("smsOtpResendBtn")) {
+      el("smsOtpResendBtn").addEventListener("click", function () {
+        var phone = el("smsOtpPhone").textContent.trim();
+        doResendRegistrationSmsOtp(phone, el("smsOtpBanner"), el("smsOtpResendBtn"));
+      });
+    }
+    if (el("smsOtpBackBtn")) el("smsOtpBackBtn").addEventListener("click", showLoginView);
 
     // MILNÍK 26 (bod 4): „Zapomenuté heslo?" a obnova hesla.
     el("goResetBtn").addEventListener("click", function () {
@@ -18593,6 +19236,47 @@
     });
 
     el("logoutBtn").addEventListener("click", doLogout);
+
+    // Zadání: karta "Dvoufázové ověření (SMS)" na "Můj profil".
+    if (el("mfaEnrollSendBtn")) {
+      el("mfaEnrollSendBtn").addEventListener("click", function () {
+        var phone = el("mfaEnrollPhone").value.trim();
+        var valid = isValidCzechPhone(phone);
+        setFieldError(el("mfaEnrollPhoneField"), !valid);
+        if (!valid) return;
+        startMfaEnroll(normalizeCzechPhoneE164(phone));
+      });
+    }
+    if (el("mfaEnrollCancelBtn")) el("mfaEnrollCancelBtn").addEventListener("click", function () { setMfaEnrollMode("status"); });
+    if (el("mfaVerifySubmitBtn")) {
+      el("mfaVerifySubmitBtn").addEventListener("click", function () {
+        var code = el("mfaVerifyCode").value.trim();
+        setFieldError(el("mfaVerifyCodeField"), !code);
+        if (!code) return;
+        confirmMfaEnroll(code);
+      });
+    }
+    if (el("mfaVerifyCancelBtn")) {
+      el("mfaVerifyCancelBtn").addEventListener("click", function () {
+        // Zrušení rozpracovaného zapnutí uklidí i osiřelý neověřený
+        // faktor, ať se při dalším pokusu neveze dál.
+        if (mfaEnrollFactorId) sb.auth.mfa.unenroll({ factorId: mfaEnrollFactorId });
+        setMfaEnrollMode("status");
+      });
+    }
+
+    // Zadání: #mfaChallengeScreen - dvoufázové ověření při přihlášení.
+    if (el("mfaChallengeForm")) {
+      el("mfaChallengeForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var code = el("mfaChallengeCode").value.trim();
+        setFieldError(el("mfaChallengeCodeField"), !code);
+        if (!code) return;
+        doVerifyMfaChallenge(code);
+      });
+    }
+    if (el("mfaChallengeResendBtn")) el("mfaChallengeResendBtn").addEventListener("click", resendMfaChallenge);
+    if (el("mfaChallengeLogoutBtn")) el("mfaChallengeLogoutBtn").addEventListener("click", doLogout);
 
     // Zadání (bod 6): dvě tlačítka v dashboardu tipaře, která dřív byla
     // vizuální bez obsluhy (viz komentář u #dashboardTiparWrap), teď
