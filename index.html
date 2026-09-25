@@ -3408,7 +3408,6 @@
       <button class="tab" id="tabRkBtn" role="tab" type="button" aria-selected="false" hidden>Realitní kanceláře</button>
       <button class="tab" id="tabProvizeBtn" role="tab" type="button" aria-selected="false" hidden>Provizní schéma</button>
       <button class="tab" id="tabVyplatyBtn" role="tab" type="button" aria-selected="false" hidden>Výplaty</button>
-      <button class="tab" id="tabObsahBtn" role="tab" type="button" aria-selected="false" hidden>Obsah</button>
       <!-- Milník 12 (bod 12): "Audit log" -> "Historie akcí" (přívětivější
            název, ať to nezní jako nástroj dozoru nad lidmi). -->
       <button class="tab" id="tabAuditBtn" role="tab" type="button" aria-selected="false" hidden>Historie akcí</button>
@@ -3982,7 +3981,7 @@
            beze změny. Viditelnost řídí applyNavForRole(), ne CSS. -->
       <div class="section-head" id="networkSectionHead">
         <h2 id="networkScreenTitle">Moje síť</h2>
-        <p id="networkScreenSubtitle">Váš pozvánkový odkaz a tabulka lidí, které jste (přímo i nepřímo) přivedli.</p>
+        <p id="networkScreenSubtitle">Tabulka lidí, které jste (přímo i nepřímo) přivedli. Svůj pozvánkový odkaz a sdílení najdete v záložce „Marketing“.</p>
       </div>
 
       <div id="networkBanner"></div>
@@ -4010,18 +4009,12 @@
         <button class="btn-primary" id="addTipNetworkBtn" type="button" style="width:auto;">+ Přidat nový tip</button>
       </div>
 
-      <div class="invite-box" id="inviteBoxWrap">
-        <code id="inviteLinkText"></code>
-        <button class="btn-small" id="copyInviteBtn" type="button">Zkopírovat odkaz</button>
-      </div>
-
-      <!-- MILNÍK 25 (bod 9): rozeslání odkazu na vlastní rekrutační stránku.
-           Klient sám napsal, že kopírování „už tam je" - proto se tlačítko
-           „Zkopírovat odkaz" výš NEDUPLIKUJE a zůstává jediné. Tahle řádka
-           přidává jen to, co chybělo: sociální sítě a e-mail. Plní ji
-           renderNetworkSdileni(); viditelnost řídí fetchMyNetworkTable()
-           (lídr má totéž v záložce „Marketing", kde má i bannery). -->
-      <div id="networkSdileniWrap" hidden></div>
+      <!-- Zadání: pozvánkový odkaz + sdílení rekrutační stránky (dřív tady
+           jako #inviteBoxWrap/#networkSdileniWrap, vyplněné copyInviteLink()/
+           renderNetworkSdileni()) byly ODSTRANĚNY - přesně tahle funkce už
+           existuje (a je bohatší - má i pozvánkový kód a bannery) v kartě
+           „Váš odkaz" na záložce „Marketing", kterou má tipař taky. Dvě
+           místa dělající totéž byla matoucí duplicita. -->
 
       <div class="stat-row" id="networkStats"></div>
 
@@ -4368,19 +4361,11 @@
            #rkProvizeSaveBtn. -->
     </section>
 
-    <!-- ============== OBSAH (placeholder, bod 9 zadání) ============== -->
-    <section id="obsahScreen" class="page" hidden>
-      <div class="section-head">
-        <h2>Obsah</h2>
-        <p>Novinky, školení, FAQ, smlouvy a šablony oznámení (sekce 8.6.5 zadání).</p>
-      </div>
-      <div class="placeholder-box">
-        <div class="placeholder-icon">🚧</div>
-        <p><strong>Tato část zatím není postavena</strong> — bude v budoucím milníku. Žádný CMS/editor obsahu zatím v appce neexistuje.</p>
-      </div>
-    </section>
+    <!-- Milník: karta "Obsah" (placeholder, prázdná) byla na výslovnou
+         žádost klienta ODSTRANĚNA - zbylé RPC/DB objekty (pokud existují)
+         se nemažou, jen UI záložka a její routování. -->
 
-    <!-- ============== DASHBOARD (Milník 12, bod 11) ==============
+<!-- ============== DASHBOARD (Milník 12, bod 11) ==============
          Nová "domovská" obrazovka dosažitelná kliknutím na logo v záhlaví -
          tipař i administrator (leader klikem na logo míří rovnou na
          "Přehled leadra"/"network", ten dashboard nepotřebuje). Zatím jen
@@ -5252,7 +5237,7 @@
   // Milník 14: číslo aktuální verze aplikace - MUSÍ odpovídat nejnovější položce
   // pole APP_CHANGELOG níže (položka na indexu 0). Při každém příštím milníku
   // se zvyšuje ROVNOU TADY i v APP_CHANGELOG - jsou to dvě navzájem závislá místa.
-  var APP_VERSION = "29.0";
+  var APP_VERSION = "30.0";
 
   // Milník 14 (bod 4): obsah panelu "Historie verzí" na přihlašovací
   // obrazovce - zrekonstruováno z reálné historie projektu (STAV.md,
@@ -5261,6 +5246,21 @@
   // pod tímto polem). Vykresluje se generickou šablonou renderAuthVersionAndChangelog()
   // - při dalším milníku se sem jen přidá nová položka na začátek pole.
   var APP_CHANGELOG = [
+    // ZADÁNÍ (30.0). Sedm drobných úprav z jednoho zadání klienta - úklid
+    // duplicitního sdílení na "Moje síť" tipaře, vlastní řádek v jeho síti,
+    // sdílení bannerů i s obrázkem (kde to prohlížeč umí), kompletní export
+    // uživatelů pro leadera i administrátora s úrovní v síti, zrušení
+    // prázdné karty "Obsah", oprava překrývajících se nadpisů v tabulce
+    // Tipy a nový sloupec "Celkem %" v modelaci provizního schématu.
+    { verze: "30.0", datum: "25. 9. 2026", body: [
+      "Karta „Moje síť“ (tipař) už neduplikuje pozvánkový odkaz a sdílení rekrutační stránky - obojí zůstává jen v záložce „Marketing“",
+      "V „Moje síť“ se nově zobrazuje i sám tipař (řádek „vy“) - dřív byla vidět jen jeho síť pod ním",
+      "Bannery v Marketingu jde nově sdílet i se skutečným obrázkem (WhatsApp, Instagram, e-mail…) přes nativní sdílení prohlížeče - funguje hlavně na mobilu; kde to prohlížeč neumí, appka nic nepředstírá a nabídne jen dosavadní sdílení odkazu",
+      "Export uživatelů v záložce „Uživatelé“ je nově kompletní i pro leadera (dřív jen jméno/příjmení/e-mail) a má nový sloupec „Úroveň v síti“",
+      "Odstraněna prázdná karta „Obsah“ (leader i administrátor) - zatím nic neobsahovala",
+      "V tabulce Tipy opraveno překrývání nadpisů sloupců „Datum vytvoření“ a „Klient“ - první je teď jen „Datum“",
+      "Karta „Provizní schéma“: modelace nově ukazuje i sloupec „Celkem %“ (součet sazeb tipař/sponzor/leader/marže jako číslo bez %)"
+    ] },
     // ZADÁNÍ (29.0). Dvoufázové ověření (SMS) pro leader/administrator,
     // registrace přes SMS jako alternativa k e-mailu, a mapování hlášek
     // Supabase Auth pro chybějící SMS bránu. SMS funkce potřebují, aby
@@ -7877,7 +7877,7 @@
     "newTipScreen", "listScreen", "networkScreen", "tipyScreen", "detailScreen",
     // MILNÍK 24 (bod 5)
     "sitStromScreen",
-    "usersScreen", "rkScreen", "provizeScreen", "vyplatyScreen", "obsahScreen", "auditScreen",
+    "usersScreen", "rkScreen", "provizeScreen", "vyplatyScreen", "auditScreen",
     // Milník 19 (body 7 a 8): dvě nové obrazovky role RK.
     "rkPortalScreen", "rkProfileScreen", "rkProvizeScreen",
     "profileScreen", "kycScreen", "myKycScreen", "dashboardScreen",
@@ -7893,7 +7893,7 @@
     // MILNÍK 24 (bod 5)
     sitstrom: "sitStromScreen",
     users: "usersScreen", rk: "rkScreen", provize: "provizeScreen", vyplaty: "vyplatyScreen",
-    obsah: "obsahScreen", audit: "auditScreen",
+    audit: "auditScreen",
     rkportal: "rkPortalScreen",
     // Milník 19 (body 7 a 8): druhá a třetí obrazovka role RK.
     rkprofile: "rkProfileScreen", rkprovize: "rkProvizeScreen",
@@ -7914,7 +7914,7 @@
     // MILNÍK 24 (bod 5)
     sitstrom: "tabSitStromBtn",
     users: "tabUsersBtn", rk: "tabRkBtn", provize: "tabProvizeBtn", vyplaty: "tabVyplatyBtn",
-    obsah: "tabObsahBtn", audit: "tabAuditBtn",
+    audit: "tabAuditBtn",
     rkportal: "tabRkPortalBtn",
     // Milník 19 (body 7 a 8).
     rkprofile: "tabRkProfileBtn", rkprovize: "tabRkProvizeBtn",
@@ -8024,8 +8024,9 @@
     // Ověření totožnosti - vlastní (tipař); mezi dvěma RŮZNÝMI tipaři by
     // jinak zůstaly viset názvy souborů dokladů toho předchozího
     "kycStatusWrap", "kycDocsWrap", "kycMissingWrap",
-    // pozvánkový odkaz (obsahuje invite_code předchozího uživatele)
-    "inviteLinkText",
+    // Zadání: "inviteLinkText" (#inviteBoxWrap byl na "Moje síť") tu bylo -
+    // element je ODSTRANĚNÝ (viz komentář u networkScreen v HTML), takže tu
+    // už nemá co uklízet.
     // Milník 15 (bod 4.6): notifikační bannery jednotlivých obrazovek.
     // #rkBanner je ten nahlášený (e-mail + heslo přístupu RK), zbytek
     // preventivně - viz komentář nad seznamem.
@@ -8052,7 +8053,7 @@
   // setActiveTab() (viz submitTipForm -> setActiveTab("list") -> #listBanner)
   // se nevymaže.
   var TAB_PRECLEAR = {
-    network: ["leaderDashboardWrap", "networkListWrap", "networkDetailWrap", "networkStats", "networkBanner", "inviteLinkText"],
+    network: ["leaderDashboardWrap", "networkListWrap", "networkDetailWrap", "networkStats", "networkBanner"],
     "new": ["tipFormBanner"],
     list: ["tipListWrap", "listBanner"],
     tipy: ["tipyTableWrap", "tipyBanner"],
@@ -8766,7 +8767,7 @@
     // Zadání (bod 7): "akademie" dostává i leader - obsah (jak získat tip,
     // jak budovat tým) je pro něj stejně relevantní jako pro tipaře a RPC
     // akademie_moje_akademie() nemá žádné omezení na roli, jen na přihlášení.
-    leader: ["network", "sitstrom", "tipy", "users", "akademie", "marketing", "obsah", "vyplaty", "provize", "rk", "audit", "profile", "new", "kyc"],
+    leader: ["network", "sitstrom", "tipy", "users", "akademie", "marketing", "vyplaty", "provize", "rk", "audit", "profile", "new", "kyc"],
     // MILNÍK 25 (bod 10): „web" (Správa webu) VÝHRADNĚ administrátorovi -
     // klient mluvil o administrátorském účtu a obsah těch stránek je
     // jediné, co appka ukazuje nepřihlášenému světu, takže okruh lidí,
@@ -8776,7 +8777,7 @@
     // přesně Dashboard, Tipy, Uživatelé, Struktura sítě, zbytek beze změny.
     // Zadání (bod 7): "akademiesprava" (Obsah akademie) přidána na konec -
     // správa kategorií/lekcí/testů Realitní akademie, výhradně administrátor.
-    administrator: ["dashboard", "tipy", "users", "sitstrom", "kyc", "rk", "provize", "vyplaty", "obsah", "web", "audit", "profile", "akademiesprava"],
+    administrator: ["dashboard", "tipy", "users", "sitstrom", "kyc", "rk", "provize", "vyplaty", "web", "audit", "profile", "akademiesprava"],
     // Milník 7 (Část I/1): role RK viděla VÝHRADNĚ jednu obrazovku.
     // Milník 19 (body 7 a 8): přibývají "rkprofile" (Profil realitní
     // kanceláře) a "rkprovize" (Provizní schéma), v tomhle pořadí za
@@ -8872,7 +8873,6 @@
     sitstrom:  '<circle cx="12" cy="4.4" r="2"/><path d="M12 6.4v3.1"/><path d="M6 12.6V9.5h12v3.1"/><circle cx="6" cy="14.6" r="2"/><circle cx="18" cy="14.6" r="2"/><path d="M3 20v-2.2h6V20"/><path d="M15 20v-2.2h6V20"/>',
     tipy:      '<path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="M12 12v9"/><path d="m4 7.5 8 4.5 8-4.5"/>',
     users:     '<circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16.5 6.2a3 3 0 0 1 0 5.6"/><path d="M17.5 14.4A5.5 5.5 0 0 1 20.5 19"/>',
-    obsah:     '<path d="M5 4h9l5 5v11H5z"/><path d="M14 4v5h5"/><path d="M8.5 13h7"/><path d="M8.5 16.5h5"/>',
     vyplaty:   '<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6.5 12h.01"/><path d="M17.5 12h.01"/>',
     provize:   '<path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16V11"/><path d="M12 16V8"/><path d="M16 16v-3"/>',
     rk:        '<path d="M4 20V9.5L12 4l8 5.5V20"/><path d="M9.5 20v-5h5v5"/><path d="M4 20h16"/>',
@@ -8956,20 +8956,23 @@
     // dlouhým í) - přesně tak, jak je uvedený v zadání i v návrhu.
     setTabLabel("network", isLeader ? "Přehled lídra" : "Moje síť", sIkonami);
     el("networkScreenTitle").textContent = isLeader ? "Přehled lídra" : "Moje síť";
+    // Zadání: pozvánkový odkaz na téhle obrazovce už není (viz komentář u
+    // networkScreen v HTML) - text tu proto o něm dál nemluví, aby
+    // applyNavForRole() při každém přihlášení/odhlášení nepřepsal opravený
+    // statický text z HTML zpátky na starý.
     el("networkScreenSubtitle").textContent = isLeader
-      ? "Váš pozvánkový odkaz a souhrnný přehled vaší sítě. Seznam jednotlivých uživatelů je v záložce „Uživatelé“."
-      : "Váš pozvánkový odkaz a tabulka lidí, které jste (přímo i nepřímo) přivedli.";
+      ? "Souhrnný přehled vaší sítě. Seznam jednotlivých uživatelů je v záložce „Uživatelé“."
+      : "Tabulka lidí, které jste (přímo i nepřímo) přivedli. Svůj pozvánkový odkaz a sdílení najdete v záložce „Marketing“.";
 
-    // Milník 21 (sekce B a P): leaderovi se obecná hlavička obrazovky,
-    // pozvánkový box i stará řádka stat-dlaždic SKRÝVAJÍ - celý obsah
-    // přehledu kreslí renderLeaderPrehled() do #leaderDashboardWrap ve
-    // vlastním pořadí panelů. Pozvánkový odkaz se tím ze záhlaví
-    // NEZTRÁCÍ: přesouvá se, méně výrazně, do panelu „Moje síť podle
-    // úrovní" (přesně jak zadání v sekci B vyžaduje).
+    // Milník 21 (sekce B a P): leaderovi se obecná hlavička obrazovky i
+    // stará řádka stat-dlaždic SKRÝVAJÍ - celý obsah přehledu kreslí
+    // renderLeaderPrehled() do #leaderDashboardWrap ve vlastním pořadí
+    // panelů. Pozvánkový odkaz se tím ze záhlaví NEZTRÁCÍ: přesouvá se,
+    // méně výrazně, do panelu „Moje síť podle úrovní" (přesně jak zadání
+    // v sekci B vyžaduje). #inviteBoxWrap sám (dřív skrytý jen leaderovi)
+    // je zadáním odstraněný úplně, viz komentář u networkScreen v HTML.
     var sectionHead = el("networkSectionHead");
     if (sectionHead) sectionHead.hidden = isLeader;
-    var inviteBox = el("inviteBoxWrap");
-    if (inviteBox) inviteBox.hidden = isLeader;
     var netStats = el("networkStats");
     if (netStats) netStats.hidden = isLeader;
   }
@@ -10877,22 +10880,9 @@
   // identity (viz clearRoleSpecificContainers -> resetNetworkPanelState).
   var mojeSitRowsCache = [];
 
-  function copyInviteLink() {
-    var text = el("inviteLinkText").textContent || "";
-    if (!text) return;
-    var done = function () {
-      showBanner(el("networkBanner"), "ok", "Odkaz zkopírován do schránky.");
-      setTimeout(function () { showBanner(el("networkBanner"), null, null); }, 3000);
-    };
-    var fail = function () {
-      showBanner(el("networkBanner"), "error", "Zkopírování se nepodařilo, zkopírujte odkaz prosím ručně.");
-    };
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(done, fail);
-    } else {
-      fail();
-    }
-  }
+  // Zadání: copyInviteLink() (dřív volaná #copyInviteBtn) byla ODSTRANĚNA
+  // spolu s #inviteBoxWrap - kopírování odkazu žije dál v záložce
+  // „Marketing" (#mktCopyOdkazBtn, funkce mktWire).
 
   // Bod 2 zadání (Milník 4) + bod 3 zadání (Milník 5): vlastní pozvánkový
   // odkaz + přehled sítě z moje_sit() RPC. ŽÁDNÉ tipy tady.
@@ -10927,16 +10917,10 @@
     var networkLoading = el("networkLoadingWrap");
     if (networkLoading) networkLoading.hidden = false;
 
-    el("inviteLinkText").textContent = location.origin + location.pathname + "?ref=" + (currentUser.invite_code || "");
-    // MILNÍK 25 (bod 9): řádka sdílení pod pozvánkovým odkazem. Lídr má
-    // pozvánkový box skrytý (viz applyNavForRole), takže tenhle obal
-    // dostává jen tipař - lídr má totéž i s bannery v záložce „Marketing".
-    var sdileniWrap = el("networkSdileniWrap");
-    if (sdileniWrap) {
-      var jeTipar = currentUser.role === "tipar";
-      sdileniWrap.hidden = !jeTipar;
-      if (jeTipar) renderNetworkSdileni(); else sdileniWrap.innerHTML = "";
-    }
+    // Zadání: #inviteLinkText/#inviteBoxWrap a #networkSdileniWrap (řádka
+    // sdílení pod pozvánkovým odkazem, MILNÍK 25 bod 9) byly odstraněny -
+    // viz komentář u networkScreen v HTML. Pozvánkový odkaz a sdílení má
+    // tipař (i lídr) v záložce „Marketing".
 
     // ------------------------------------------------------------------
     // MILNÍK 23 (bod 5, diagnostika zpomalení): LÍDR UŽ `moje_sit()` NEVOLÁ.
@@ -10988,15 +10972,23 @@
 
     var direct = 0;
     var celkemTipu = 0;
+    // Zadání: moje_sit() teď vrací i řádek volajícího samotného (uroven 0),
+    // ať appka může tipaře zobrazit v jeho vlastní tabulce "Moje síť".
+    // Statistika "celkem v mé síti" ale dál znamená "kolik lidí jsem
+    // (přímo i nepřímo) přivedl" - proto počítá jen uroven >= 1, ne
+    // rows.length, aby se sám sebou nezvětšila o jednoho.
+    var velikostSite = 0;
     rows.forEach(function (r) {
-      if (r && r.uroven === 1) direct++;
-      celkemTipu += (r && r.pocet_tipu != null) ? Number(r.pocet_tipu) : 0;
+      if (!r) return;
+      if (r.uroven === 1) direct++;
+      if (r.uroven > 0) velikostSite++;
+      celkemTipu += (r.pocet_tipu != null) ? Number(r.pocet_tipu) : 0;
     });
     // Milník 13 (bod 5): stejné obrácené pořadí label→num jako statTileHtml()
     // níže - popisek nahoře velký/tučný, číslo pod ním menší/muted.
     el("networkStats").innerHTML =
       '<div class="stat-tile"><div class="stat-label">přímo pozvaní</div><div class="stat-num">' + direct + '</div></div>' +
-      '<div class="stat-tile"><div class="stat-label">celkem v mé síti</div><div class="stat-num">' + rows.length + '</div></div>' +
+      '<div class="stat-tile"><div class="stat-label">celkem v mé síti</div><div class="stat-num">' + velikostSite + '</div></div>' +
       (isLeader ? '<div class="stat-tile"><div class="stat-label">tipů v celé síti</div><div class="stat-num">' + celkemTipu + '</div></div>' : '');
 
     if (isLeader) {
@@ -11028,6 +11020,11 @@
     // tabulce Uživatelé nedává smysl (tam jsou všichni "pod leaderem"),
     // zatímco tipařovi říká, jak hluboko pod ním člověk je.
     //
+    // Zadání: tabulka teď obsahuje i řádek tipaře SAMOTNÉHO (úroveň 0,
+    // dodává ho moje_sit(), viz migrace zadani_moje_sit_zahrnuje_sebe) -
+    // Jméno/Příjmení nesou navíc značku „(vy)" a akční sloupec pro tenhle
+    // řádek NEnabízí tlačítko Detail (duplicitní s „Můj profil"), viz níž.
+    //
     // Akční sloupec "Detail" ZÁMĚRNĚ neotvírá renderUserDetailCard() -
     // ta čeká bohatší data z moje_uzivatele() (adresa, IČO, doklad) a
     // nabízí Upravit + změnu sponzora. Tipař svou síť needituje a cizí
@@ -11035,11 +11032,14 @@
     // kartu nad přesně těmi poli, která jsou i ve sloupcích tabulky.
     var columns = [
       { key: "jmeno", label: "Jméno", className: "dt-col-name", get: function (r) { return r.jmeno || ""; },
-        render: function (r) { return '<span class="dt-strong">' + escapeHtml(r.jmeno || "—") + '</span>'; } },
+        render: function (r) {
+          return '<span class="dt-strong">' + escapeHtml(r.jmeno || "—") + '</span>' +
+            (currentUser && r.id === currentUser.id ? ' <span class="dt-muted" style="font-size:12px;">(vy)</span>' : '');
+        } },
       { key: "prijmeni", label: "Příjmení", className: "dt-col-name", get: function (r) { return r.prijmeni || ""; },
         render: function (r) { return '<span class="dt-strong">' + escapeHtml(r.prijmeni || "—") + '</span>'; } },
       { key: "uroven", label: "Úroveň", className: "dt-col-mini", get: function (r) { return r.uroven != null ? r.uroven : 0; },
-        render: function (r) { return escapeHtml("úroveň " + (r.uroven != null ? r.uroven : "?")); } },
+        render: function (r) { return escapeHtml(r.uroven === 0 ? "vy" : "úroveň " + (r.uroven != null ? r.uroven : "?")); } },
       // MILNÍK 24 (bod 7): zobrazení jde přes sdílené telefonBunkaHtml()
       // („777 555 222", plná hodnota v title). `get` schválně vrací OBA
       // tvary - řadí se podle uloženého (stabilní), ale hledat jde i podle
@@ -11067,6 +11067,11 @@
         render: function (r) { return statusDotHtml(r.aktivni); } },
       { key: "akce", label: "Akce", sortable: false, get: function () { return ""; },
         render: function (r) {
+          // Zadání: vlastní řádek (úroveň 0) nemá tlačítko Detail - stejné
+          // (a bohatší) informace o sobě má tipař v záložce "Můj profil".
+          if (currentUser && r.id === currentUser.id) {
+            return '<span class="dt-muted" style="font-size:12.5px;">— viz „Můj profil"</span>';
+          }
           return '<button type="button" class="btn-small btn-small-ghost sit-detail-btn" data-user-id="' + escapeHtml(r.id) + '">Detail</button>';
         } }
     ];
@@ -11263,7 +11268,10 @@
     var muzeMazat = !!currentUser && (currentUser.role === "leader" || currentUser.role === "administrator");
 
     var columns = [
-      { key: "vlozeno_kdy", label: "Datum vytvoření", className: "dt-col-date",
+      // Zadání: v hlavičce tabulky Tipy se "Datum vytvoření" a "Klient"
+      // vizuálně překrývaly (příliš úzký sloupec na dvouslovný nadpis) -
+      // zkráceno na "Datum", data/řazení/formát beze změny.
+      { key: "vlozeno_kdy", label: "Datum", className: "dt-col-date",
         get: function (r) { return r.vlozeno_kdy ? new Date(r.vlozeno_kdy).getTime() : 0; },
         render: function (r) { return escapeHtml(formatDatumZCasu(r.vlozeno_kdy) || "—"); } },
       { key: "jmeno_klienta", label: "Klient", get: function (r) { return r.jmeno_klienta || ""; } },
@@ -13372,7 +13380,10 @@
       { key: "sazba_sponzor", label: "Sponzor %", get: function (r) { return Number(r.sazba_sponzor); } },
       { key: "sazba_leader", label: "Leader %", get: function (r) { return Number(r.sazba_leader); } },
       { key: "sazba_marze", label: "Marže %", get: function (r) { return Number(r.sazba_marze); } },
-      { key: "soucet", label: "Součet %", get: function (r) { return provizeSoucet(r.sazba_tipar, r.sazba_sponzor, r.sazba_leader, r.sazba_marze); } },
+      { key: "soucet", label: "Součet %", get: function (r) { return provizeSoucet(r.sazba_tipar, r.sazba_sponzor, r.sazba_leader, r.sazba_marze); },
+        // Zadání: plain číslo bez znaku "%" (30 % -> "30") a bez zaokrouhlovacích
+        // artefaktů desetinných čísel (toLocaleString místo syrového Number).
+        render: function (r) { return escapeHtml(provizeSoucet(r.sazba_tipar, r.sazba_sponzor, r.sazba_leader, r.sazba_marze).toLocaleString("cs-CZ")); } },
       { key: "platne_od", label: "Platné od", get: function (r) { return r.platne_od ? new Date(r.platne_od).getTime() : 0; },
         render: function (r) { return escapeHtml(formatDateTime(r.platne_od)); } },
       { key: "platne_do", label: "Platné do", get: function (r) { return r.platne_do ? new Date(r.platne_do).getTime() : Number.MAX_SAFE_INTEGER; },
@@ -13525,6 +13536,14 @@
     // i tlačítko "Uložit jako novou verzi" fungují a založí první verzi.
     // Nevybraná RK znamená jen to, že neznáme marži RK; sazby se pořád
     // dají zadat a uložit, tabulka jen řekne, co jí chybí.
+    // Zadání: sloupec s procenty sečtenými z modelové sazby (tipař + sponzor
+    // + leader + marže) jako obyčejné číslo bez znaku "%" (30 % -> "30",
+    // 20 % -> "20") - stejná hodnota jako v textu "Součet sazeb" výš, jen
+    // navíc přímo v tabulce. Nezávisí na vybrané RK/pásmu, proto se počítá
+    // jednou předem a je vidět i v řádcích bez definovaného pásma.
+    var celkemProcent = provizeSoucet(v.tipar, v.sponzor, v.leader, v.marze);
+    var celkemProcentText = celkemProcent.toLocaleString("cs-CZ");
+
     var radky = PROVIZE_UKAZKA_HODNOTY.map(function (cena) {
       var schema = vybranaRkId ? najdiPasmoSchematuRk(cena) : null;
       if (!schema) {
@@ -13532,7 +13551,8 @@
         return '<tr><td>' + escapeHtml(formatCena(cena)) + '</td>' +
           '<td colspan="5" class="dt-muted">' +
           (vybranaRkId ? "Vybraná kancelář nemá pro tuhle cenu definované pásmo" : "Vyberte realitní kancelář (zdroj marže RK)") +
-          '</td></tr>';
+          '</td>' +
+          '<td>' + escapeHtml(celkemProcentText) + '</td></tr>';
       }
       var provizeRk = schema.typ === "procento" ? (cena * Number(schema.hodnota) / 100) : Number(schema.hodnota);
       var tipar = provizeRk * v.tipar / 100;
@@ -13546,6 +13566,7 @@
         '<td>' + escapeHtml(formatCena(sponzor)) + '</td>' +
         '<td>' + escapeHtml(formatCena(leader)) + '</td>' +
         '<td>' + escapeHtml(formatCena(marzeSystem)) + '</td>' +
+        '<td title="Součet modelových sazeb tipař + sponzor + leader + marže">' + escapeHtml(celkemProcentText) + '</td>' +
       '</tr>';
     }).join("");
 
@@ -13567,6 +13588,7 @@
           '<th>Sponzor (' + escapeHtml(String(v.sponzor)) + ' %)</th>' +
           '<th>Leader (' + escapeHtml(String(v.leader)) + ' %)</th>' +
           '<th>Marže RT (' + escapeHtml(String(v.marze)) + ' %)</th>' +
+          '<th>Celkem %</th>' +
         '</tr></thead>' +
         '<tbody>' + radky + '</tbody>' +
       '</table></div>' +
@@ -19295,8 +19317,6 @@
 
     el("detailBackBtn").addEventListener("click", closeTipDetail);
 
-    el("copyInviteBtn").addEventListener("click", copyInviteLink);
-
     el("tipForm").addEventListener("submit", function (e) {
       e.preventDefault();
       submitTipForm();
@@ -19489,35 +19509,39 @@
     el("rkProvizeCancelAllBtn").addEventListener("click", zrusitRkProvizeEditVse);
 
     // Milník 7 (Část H) — export do XLSX bere aktuálně vyfiltrovaná data
-    // z initDataTable (getVisibleRows). Rozsah sloupců u Uživatelé je
-    // vynucen podle role V JS (ne jen schováním tlačítka) - Leader jen
-    // jméno/příjmení/e-mail, Administrátor všechny sloupce (8.6.1).
+    // z initDataTable (getVisibleRows).
+    //
+    // Zadání (export kompletní databáze): dřív měl export jen Leader
+    // zúžený na jméno/příjmení/e-mail (8.6.1, pro hromadné rozesílání) -
+    // klient si výslovně vyžádal, ať jde stáhnout KOMPLETNÍ databáze
+    // uživatelů (délka spolupráce, počet tipů, stav, plátce DPH, počet
+    // podřízených, úroveň v síti atd.) i pro Leadera, ne jen pro
+    // Administrátora. Není to nový únik dat - přesně tahle pole vidí
+    // Leader už teď v tabulce Uživatelé a v Detailu uživatele (obojí
+    // stejná RPC moje_uzivatele(), stejná role_tab_order položka), export
+    // teď jen dorovnává to, co je vidět na obrazovce. Sloupec "Úroveň"
+    // (uroven) přibyl do moje_uzivatele() touto zadání - stejná definice
+    // jako ve „Struktura sítě" (sit_strom, Milník 24): 0 = první leader,
+    // dál +1 na sponsorský krok dolů; u administrátora appka ukáže "—",
+    // protože administrátor není součástí stromu sponzorů (viz komentář
+    // "Milník 2: admin neni soucasti stromu").
     el("usersExportBtn").addEventListener("click", function () {
       if (!usersTable || !currentUser) return;
       var rows = usersTable.getVisibleRows();
-      if (currentUser.role === "administrator") {
-        exportToXlsx(
-          "uzivatele.xlsx", "Uživatelé",
-          ["Jméno", "Příjmení", "Role", "Telefon", "E-mail", "Plátce DPH", "Přímí podřízení", "Velikost týmu", "Délka spolupráce (dny)", "Počet tipů", "Stav", "Sponzor"],
-          rows,
-          function (r) {
-            return [
-              r.jmeno || "", r.prijmeni || "", ROLE_LABELS_CAP[r.role] || r.role, r.telefon || "", r.email || "",
-              r.plati_dph ? "Ano" : "Ne", Number(r.primych_podrizenych || 0), Number(r.velikost_tymu || 0),
-              Number(r.dny_spoluprace || 0), Number(r.pocet_tipu || 0), r.aktivni ? "Aktivní" : "Vymazán",
-              celeJmeno(usersById[r.sponsor_id]) || ""
-            ];
-          }
-        );
-      } else {
-        // Leader (8.6.1 zadání): jen jméno/příjmení/e-mail, pro hromadné rozesílání.
-        exportToXlsx(
-          "uzivatele-emaily.xlsx", "E-maily",
-          ["Jméno", "Příjmení", "E-mail"],
-          rows,
-          function (r) { return [r.jmeno || "", r.prijmeni || "", r.email || ""]; }
-        );
-      }
+      exportToXlsx(
+        "uzivatele.xlsx", "Uživatelé",
+        ["Jméno", "Příjmení", "Role", "Telefon", "E-mail", "Plátce DPH", "Úroveň v síti", "Přímí podřízení", "Velikost týmu", "Délka spolupráce (dny)", "Počet tipů", "Stav", "Sponzor"],
+        rows,
+        function (r) {
+          return [
+            r.jmeno || "", r.prijmeni || "", ROLE_LABELS_CAP[r.role] || r.role, r.telefon || "", r.email || "",
+            r.plati_dph ? "Ano" : "Ne", r.uroven != null ? Number(r.uroven) : "—",
+            Number(r.primych_podrizenych || 0), Number(r.velikost_tymu || 0),
+            Number(r.dny_spoluprace || 0), Number(r.pocet_tipu || 0), r.aktivni ? "Aktivní" : "Vymazán",
+            celeJmeno(usersById[r.sponsor_id]) || ""
+          ];
+        }
+      );
     });
 
     // Milník 17 (bod 10): handlery #tipyExportBtn a #vyplatyExportBtn tady
@@ -20365,24 +20389,10 @@
 
   var SDILENI_VYCHOZI_TEXT = "Tipni nemovitost a vydělej s námi. Stačí vědět o někom, kdo prodává — zbytek zařídí Realitní tip.";
 
-  function sdileniOdkazyHtml(url, text, predmet) {
-    var u = encodeURIComponent(url);
-    var t = encodeURIComponent(text);
-    var site = [
-      { nazev: "Facebook", href: "https://www.facebook.com/sharer/sharer.php?u=" + u },
-      { nazev: "X", href: "https://twitter.com/intent/tweet?url=" + u + "&text=" + t },
-      { nazev: "LinkedIn", href: "https://www.linkedin.com/sharing/share-offsite/?url=" + u },
-      { nazev: "WhatsApp", href: "https://wa.me/?text=" + encodeURIComponent(text + " " + url) },
-      { nazev: "E-mailem", href: "mailto:?subject=" + encodeURIComponent(predmet || "Pozvánka do Realitního tipu") +
-          "&body=" + encodeURIComponent(text + "\n\n" + url) }
-    ];
-    return site.map(function (s) {
-      // `rel="noopener noreferrer"` u target="_blank" je povinnost, ne
-      // kosmetika - bez něj má otevřená stránka přístup na window.opener.
-      return '<a class="btn-small" href="' + escapeHtml(s.href) + '" target="_blank" rel="noopener noreferrer">' +
-        escapeHtml(s.nazev) + '</a>';
-    }).join("");
-  }
+  // Zadání: sdileniOdkazyHtml() (širší tlačítka s popisky) byla ODSTRANĚNA -
+  // jediné volání mělo v renderNetworkSdileni(), která sama zanikla spolu s
+  // #networkSdileniWrap (bod 1). Kompaktní varianta sdileniIkonyHtml() (M27,
+  // bod 7) zůstává a používá se dál v záložce Marketing.
 
   // =========================================================================
   // MILNÍK 27 (bod 7) — KOMPAKTNÍ IKONOVÁ ŘADA SDÍLENÍ
@@ -20407,7 +20417,10 @@
     whatsapp: '<path fill="currentColor" stroke="none" d="M12.04 2.4a9.5 9.5 0 0 0-8.2 14.3L2.4 21.6l5.04-1.4a9.5 9.5 0 1 0 4.6-17.8m0 1.8a7.7 7.7 0 1 1-3.9 14.34l-.3-.18-2.9.8.8-2.84-.2-.3A7.7 7.7 0 0 1 12.04 4.2m-3.5 3.5c-.18 0-.47.07-.72.34-.25.27-.95.93-.95 2.26s.98 2.62 1.11 2.8c.14.18 1.9 3.02 4.68 4.11 2.31.91 2.78.73 3.28.68.5-.04 1.62-.66 1.85-1.3s.23-1.18.16-1.3c-.07-.1-.25-.17-.53-.3-.27-.14-1.62-.8-1.87-.9-.25-.08-.43-.13-.61.14s-.7.9-.86 1.08c-.16.18-.32.2-.59.07-.27-.14-1.15-.43-2.2-1.36-.81-.72-1.36-1.62-1.52-1.89-.16-.27-.02-.42.12-.55.12-.12.27-.32.4-.48.14-.16.18-.27.27-.45.09-.18.05-.34-.02-.48-.07-.13-.6-1.48-.83-2.02-.2-.5-.4-.44-.55-.44z"/>',
     mail:     '<rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="m3.6 7 8.4 6 8.4-6"/>',
     // „Dva překrývající se čtverce" — klasická ikona kopírování.
-    kopirovat:'<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 6.2V5.6A1.6 1.6 0 0 0 13.4 4H5.6A1.6 1.6 0 0 0 4 5.6v7.8A1.6 1.6 0 0 0 5.6 15h.6"/>'
+    kopirovat:'<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 6.2V5.6A1.6 1.6 0 0 0 13.4 4H5.6A1.6 1.6 0 0 0 4 5.6v7.8A1.6 1.6 0 0 0 5.6 15h.6"/>',
+    // Zadání (bod 3): ikona nativního sdílení "i s obrázkem" (šipka nahoru
+    // z přihrádky) — stejný vizuální styl jako zbytek řady.
+    obrazek:  '<path d="M12 15V4"/><path d="M7.5 8.5 12 4l4.5 4.5"/><path d="M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/>'
   };
 
   function sdilIkonaSvg(kod) {
@@ -20420,7 +20433,18 @@
   // kopírovací tlačítko vezme text. Bez něj se ikona kopírování nevykreslí.
   var sdileniTextyKeKopii = {};
 
-  function sdileniIkonyHtml(url, text, predmet, copyId, copyPopis) {
+  // Zadání (bod 3): `obrazekUrl` (nepovinné) - veřejná adresa nahraného
+  // banneru. Facebook/X/LinkedIn/WhatsApp/e-mail sdílené přes URL schéma
+  // (odkazy výš) NEUMÍ přiložit obrázek jako soubor - to není omezení
+  // appky, ale toho, jak tyhle webové odkazy fungují (žádný z nich
+  // nepřijímá obrázek jako parametr). Jediný způsob, jak poslat SKUTEČNÝ
+  // soubor obrázku, je nativní sdílení prohlížeče (Web Share API,
+  // `navigator.share({files:[...]})`) - to otevře systémovou nabídku appek
+  // (WhatsApp, Messenger, Instagram, Mail…) a obrázek do ní vloží doopravdy.
+  // Podporují ho hlavně mobilní prohlížeče; tlačítko se proto vykreslí
+  // vždy, ale skryje se přes JS (mktWire), pokud ho prohlížeč neumí -
+  // needeme false sliby na desktopu, kde nefunguje nic z tohohle.
+  function sdileniIkonyHtml(url, text, predmet, copyId, copyPopis, obrazekUrl) {
     var u = encodeURIComponent(url);
     var t = encodeURIComponent(text);
     var site = [
@@ -20439,6 +20463,14 @@
         ' title="' + escapeHtml(s.nazev) + '" aria-label="' + escapeHtml(s.nazev) + '">' +
         sdilIkonaSvg(s.kod) + '</a>';
     }).join("");
+    if (obrazekUrl) {
+      var popisObr = "Sdílet i s obrázkem (WhatsApp, Instagram, e-mail…)";
+      html += '<button type="button" class="sdil-btn" data-sdil-obrazek-url="' + escapeHtml(obrazekUrl) + '"' +
+        ' data-sdil-obrazek-text="' + escapeHtml(text + " " + url) + '"' +
+        ' data-sdil-obrazek-predmet="' + escapeHtml(predmet || "Realitní tip") + '"' +
+        ' title="' + escapeHtml(popisObr) + '" aria-label="' + escapeHtml(popisObr) + '" hidden>' +
+        sdilIkonaSvg("obrazek") + '</button>';
+    }
     if (copyId) {
       var popis = copyPopis || "Zkopírovat text s odkazem";
       html += '<button type="button" class="sdil-btn" data-sdil-copy="' + escapeHtml(copyId) + '"' +
@@ -20446,6 +20478,36 @@
         sdilIkonaSvg("kopirovat") + '</button>';
     }
     return '<div class="sdil-rada">' + html + '</div>';
+  }
+
+  // Zadání (bod 3): skutečné odeslání obrázku bannerem přes nativní sdílení
+  // prohlížeče. Stáhne banner jako soubor (fetch → Blob → File) a předá ho
+  // `navigator.share`; ZAMÍTNUTÍ uživatelem (AbortError) není chyba.
+  async function sdilSObrazkem(btn, bannerEl) {
+    if (!btn || btn.disabled) return;
+    var obrazekUrl = btn.getAttribute("data-sdil-obrazek-url");
+    var text = btn.getAttribute("data-sdil-obrazek-text") || "";
+    var predmet = btn.getAttribute("data-sdil-obrazek-predmet") || "Realitní tip";
+    if (!obrazekUrl) return;
+    btn.disabled = true;
+    try {
+      var res = await fetch(obrazekUrl);
+      if (!res.ok) throw new Error("Stažení banneru selhalo (" + res.status + ")");
+      var blob = await res.blob();
+      var pripona = blob.type === "image/png" ? "png" : (blob.type === "image/webp" ? "webp" : "jpg");
+      var soubor = new File([blob], "banner." + pripona, { type: blob.type || "image/jpeg" });
+      if (!navigator.canShare || !navigator.canShare({ files: [soubor] })) {
+        showBanner(bannerEl, "error", "Tenhle prohlížeč neumí sdílet obrázek přímo. Stáhněte banner tlačítkem „Stáhnout banner“ a přiložte ho ručně.");
+        return;
+      }
+      await navigator.share({ files: [soubor], title: predmet, text: text });
+    } catch (e) {
+      if (e && e.name === "AbortError") return; // uživatel sdílení zrušil - není chyba
+      console.error("Sdílení banneru s obrázkem selhalo:", e);
+      showBanner(bannerEl, "error", "Sdílení s obrázkem se nepodařilo. Stáhněte banner tlačítkem „Stáhnout banner“ a přiložte ho ručně.");
+    } finally {
+      btn.disabled = false;
+    }
   }
 
   // Jedno místo, které obsluhuje VŠECHNY kopírovací ikony v daném kontejneru.
@@ -20456,6 +20518,17 @@
         var klic = b.getAttribute("data-sdil-copy");
         copyTextToClipboard(sdileniTextyKeKopii[klic], bannerEl, "Zkopírováno do schránky.");
       });
+    });
+    // Zadání (bod 3): tlačítko "Sdílet i s obrázkem" se v HTML vykresluje
+    // rovnou se `hidden` (viz sdileniIkonyHtml) - tady se teprve odkryje,
+    // a to jen když ho prohlížeč skutečně umí (feature-detect, ne
+    // user-agent sniffing). Beze změny na desktopu, kde `navigator.share`
+    // většinou chybí - žádné rozbité tlačítko, žádný falešný slib.
+    var podporujeNativniSdileni = !!(navigator.share && navigator.canShare);
+    wrap.querySelectorAll("[data-sdil-obrazek-url]").forEach(function (b) {
+      if (!podporujeNativniSdileni) return;
+      b.hidden = false;
+      b.addEventListener("click", function () { sdilSObrazkem(b, bannerEl); });
     });
   }
 
@@ -20478,26 +20551,9 @@
     }
   }
 
-  function renderNetworkSdileni() {
-    var wrap = el("networkSdileniWrap");
-    if (!wrap || !currentUser) return;
-    // Sdílí se REKRUTAČNÍ stránka (?r=), ne holý registrační odkaz (?ref=) -
-    // příjemce tak nejdřív uvidí stránku s textem a fotkou a teprve z ní
-    // jde na registraci. Samotný `?ref=` odkaz zůstává beze změny nad tím.
-    var url = mujRekrutacniOdkaz();
-    wrap.innerHTML =
-      '<div class="sdileni-row">' +
-        '<span class="dt-muted" style="font-size:13px;">Sdílet rekrutační stránku:</span>' +
-        sdileniOdkazyHtml(url, SDILENI_VYCHOZI_TEXT, "Pozvánka do Realitního tipu") +
-        '<button type="button" class="btn-small" id="networkOpenRekrutBtn">Otevřít</button>' +
-      '</div>';
-    var openBtn = el("networkOpenRekrutBtn");
-    if (openBtn) {
-      openBtn.addEventListener("click", function () {
-        window.open(url, "_blank", "noopener,noreferrer");
-      });
-    }
-  }
+  // Zadání: renderNetworkSdileni() (dřív plnila #networkSdileniWrap) byla
+  // ODSTRANĚNA - stejné sdílení rekrutační stránky žije dál v záložce
+  // „Marketing" (mktVykreslit/mktWire).
 
   // =========================================================================
   // MILNÍK 25 (bod 8) → MILNÍK 27 (bod 7) — ZÁLOŽKA MARKETING
@@ -20615,7 +20671,7 @@
               : '') +
             '<p class="mkt-rozmer">' + escapeHtml(n.podnadpis || "") + '</p>' +
             '<p class="mkt-text">' + escapeHtml(plnyText) + '</p>' +
-            sdileniIkonyHtml(url, n.text_nabidky, n.nadpis, klic, "Zkopírovat text s odkazem") +
+            sdileniIkonyHtml(url, n.text_nabidky, n.nadpis, klic, "Zkopírovat text s odkazem", mktObrazekUrl(n.obrazek_cesta)) +
             // MILNÍK 27 (bod 7): nahraný banner je skutečný soubor na veřejné
             // adrese, takže se dá otevřít a uložit. U zástupné grafiky takový
             // odkaz ZÁMĚRNĚ není — neexistuje soubor, na který by vedl.
@@ -20658,7 +20714,13 @@
             // ty mají pořád jen grafický návrh vykreslený v aplikaci. Text to
             // musí rozlišit, ne mlčet ani slibovat víc, než appka umí.
             '<p class="dt-muted" style="margin-top:-6px;">Hotové texty s vaším odkazem. Klikněte na ikonu sítě, nebo si text zkopírujte ikonou dvou čtverců. ' +
-              '<strong>U nabídek s nahraným bannerem jde obrázek otevřít a uložit odkazem „Stáhnout banner“. Nabídky bez nahraného obrázku mají jen grafický návrh vykreslený v aplikaci — ten se jako soubor stáhnout nedá.</strong></p>' +
+              '<strong>U nabídek s nahraným bannerem jde obrázek otevřít a uložit odkazem „Stáhnout banner“. Nabídky bez nahraného obrázku mají jen grafický návrh vykreslený v aplikaci — ten se jako soubor stáhnout nedá.</strong> ' +
+              // Zadání (bod 3): pravdivě - odkazy na Facebook/X/LinkedIn/WhatsApp/
+              // e-mail neumí přiložit soubor obrázku (to neumožňuje jejich vlastní
+              // webové rozhraní, ne appka). Ikona šipky z přihrádky u nabídek s
+              // nahraným bannerem NA PODPOROVANÝCH PROHLÍŽEČÍCH (většinou mobilní)
+              // otevře systémovou nabídku sdílení, která obrázek skutečně vloží do
+              // zprávy/příspěvku/e-mailu.</p>' +
           '</div>' +
           (spravce
             ? '<button type="button" class="btn-small" id="mktNovaBtn">+ Přidat nabídku</button>'
