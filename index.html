@@ -446,6 +446,26 @@
     font-weight: 500;
   }
 
+  /* Zadání (bod 1): trvalé klikací tlačítko "@" vedle e-mailového pole v
+     "Nový tip" - pro lidi, jimž mobilní klávesnice ztěžuje napsání
+     zavináče. Placeholder text sám o sobě nepomáhá (zmizí po prvním
+     stisku klávesy), proto skutečné tlačítko, ne jen nápověda. */
+  .field-inline-row { display: flex; gap: 6px; align-items: stretch; }
+  .field-inline-row input { flex: 1; min-width: 0; }
+  .field-at-btn {
+    flex-shrink: 0;
+    width: auto;
+    padding: 0 14px;
+    font-size: 16px;
+    font-weight: 700;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    color: var(--accent);
+    cursor: pointer;
+  }
+  .field-at-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
+
   .field-checkbox {
     display: flex;
     align-items: flex-start;
@@ -456,6 +476,41 @@
     padding: 12px 14px;
     margin-bottom: 6px;
   }
+
+  /* Zadání (bod 7): skutečný přepínač (toggle switch) místo prostého
+     zaškrtávátka pro "Jednám jako firma" a "Doručovací adresa je stejná" -
+     dřívější pokus zůstal jen u přejmenování/přeuspořádání kolem obyčejného
+     <input type="checkbox">, ne u skutečné komponenty. Stejný .field-toggle
+     obal jako .field-checkbox (spacing/pozadí), jen vlevo místo čtverečku
+     zaoblený přepínač. Podkladem je pořád <input type="checkbox"> (stejné
+     id, stejné .checked čtení v JS) - mění se čistě VZHLED, ne logika. */
+  .field-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    padding: 12px 14px;
+    margin-bottom: 6px;
+  }
+  .toggle-switch { position: relative; display: inline-flex; flex-shrink: 0; cursor: pointer; }
+  .toggle-switch input[type="checkbox"] {
+    position: absolute; opacity: 0; width: 44px; height: 24px; margin: 0; cursor: pointer;
+  }
+  .toggle-switch .toggle-track {
+    width: 44px; height: 24px; background: var(--border);
+    border-radius: 999px; transition: background .15s ease; position: relative;
+  }
+  .toggle-switch .toggle-thumb {
+    position: absolute; top: 2px; left: 2px; width: 20px; height: 20px;
+    border-radius: 50%; background: #fff; transition: transform .15s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,.35);
+  }
+  .toggle-switch input:checked ~ .toggle-track { background: var(--accent); }
+  .toggle-switch input:checked ~ .toggle-track .toggle-thumb { transform: translateX(20px); }
+  .toggle-switch input:focus-visible ~ .toggle-track { box-shadow: 0 0 0 3px var(--accent-soft); }
+  .field-toggle .toggle-label-text { font-size: 13.5px; color: var(--text); cursor: pointer; }
 
   /* Zadání (bod 20): výsledky hledání sponzora - malý dropdown pod inputem. */
   .sponsor-search-results {
@@ -1357,6 +1412,17 @@
   .ld-queue-time { text-align: right; min-width: 150px; }
   .ld-queue-time-strong { font-size: 14px; font-weight: 700; }
   .ld-queue-time-note { font-size: 13px; color: var(--text-muted); }
+  /* Zadání (bod 14, oprava po revizi): stav teď kreslí STEJNOU pill
+     komponentu jako tabulka Tipy (dřív jen prostý text stav_text). */
+  .ld-queue-pill-wrap { margin: 4px 0 2px; display: flex; justify-content: flex-end; }
+  /* Zadání (bod 14, oprava po revizi): "Počet pokusů" a "Poslední změna"
+     jako VLASTNÍ SLOUPCE vedle sebe, ne stackované pod sebou v jedné buňce. */
+  .ld-queue-stats {
+    display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap;
+    margin-top: 2px;
+  }
+  .ld-queue-stat { font-size: 12.5px; color: var(--text-muted); white-space: nowrap; }
+  .ld-queue-stat-value { color: var(--text); font-weight: 600; }
   .ld-time-late { color: var(--danger); }
   .ld-time-today { color: var(--warn); }
   /* MILNÍK 27 (bod 4b): „po termínu" je nově PŘÍZNAK VEDLE doby čekání, ne
@@ -2131,6 +2197,16 @@
   }
   .dt-table th.dt-col-narrow, .dt-table th.dt-col-mini { white-space: normal; line-height: 1.25; }
 
+  /* Zadání (bod 2): peněžní sloupce (Kč) se zarovnávají doprava - stejná
+     konvence jako číselné .dt-col-narrow/.dt-col-mini výš, ale bez omezení
+     šířky (částky mají různou délku a nesmí se zalamovat/ořezávat). Platí
+     jak pro initDataTable sloupce (className), tak pro ručně psané <th>/<td>
+     v tabulkách mimo initDataTable (provizní schéma, pásma apod.). */
+  .dt-table th.dt-col-money, .dt-table td.dt-col-money,
+  table th.dt-col-money, table td.dt-col-money {
+    text-align: right;
+  }
+
   /* Milník 16 (bod 4): dvě další šířkové třídy pro tabulku Uživatelé -
      stejný vzor jako .dt-col-narrow/.dt-col-mini výš, jen pro TEXTOVÉ
      sloupce, takže zůstávají zarovnané doleva (ne doprava jako číselné).
@@ -2281,6 +2357,12 @@
   /* Zadání (bod 13a): kompaktnější karta - menší mezery mezi položkami. */
   .detail-card-kompakt .detail-item { margin-bottom: 8px; }
   .detail-card-kompakt .detail-grid { gap: 2px 20px; }
+  /* Zadání (bod 12, oprava po revizi): stejná komprese odstupů i pro
+     EDITAČNÍ formulář "Ověření tipu" (.field), ne jen pro read-only
+     .detail-item/.detail-grid výš - i formulář byl "roztažený", ne jen
+     read-only zobrazení. */
+  .detail-card-kompakt .field { margin-bottom: 10px; }
+  .detail-card-kompakt .form-grid { row-gap: 2px; }
   /* Zadání (bod 13c): status dropdown vizuálně zvýrazněný, ať je na první
      pohled jasné, že tohle je TA hlavní akce na obrazovce. */
   .dt-stav-zvyrazneny { padding: 10px 12px; border-radius: 8px; border: 1.5px solid var(--accent); background: var(--accent-soft); }
@@ -3384,11 +3466,11 @@
         <!-- Milník 9 (bod 6) -> Milník 11 (bod 5): tlačítko "+ Přidat
              uživatele" bylo tady v záhlaví (viditelné pro
              tipař/leader/administrator) - klient chtěl přesunout do
-             záložky Uživatelé. Natrvalo ODSTRANĚNO odsud, nahrazeno dvěma
-             tlačítky blíž kontextu: #addUserUsersBtn (usersScreen, pro
-             leader/administrator) a #addUserNetworkBtn (networkScreen, pro
-             tipaře - ten záložku Uživatelé vůbec nemá, viz report Milníku
-             11 bod 5 pro zdůvodnění, proč tipař tlačítko NEZTRÁCÍ). -->
+             záložky Uživatelé. Natrvalo ODSTRANĚNO odsud, nahrazeno
+             tlačítkem #addUserUsersBtn (usersScreen, pro
+             leader/administrator). Zadání (oprava po revizi): sesterské
+             tlačítko pro tipaře (#addUserNetworkBtn, networkScreen) bylo
+             později odstraněno úplně - tipař nezakládá cizí účty ručně. -->
         <!-- Milník 20 (bod 4): malá kulatá ikona - nahraná profilová fotka,
              jinak iniciály. Pro VŠECHNY čtyři role. Vykresluje
              renderTopbarUserInfo(); prázdný obal tady zůstává jen jako
@@ -3914,7 +3996,11 @@
           <div class="form-grid">
             <div class="field" id="f_JmenoKlienta">
               <label for="in_JmenoKlienta">Vlastník nemovitosti *</label>
-              <input type="text" id="in_JmenoKlienta" placeholder="Jméno a příjmení vlastníka nemovitosti">
+              <!-- Zadání (bod 1): autocomplete="off" - jde o jméno TŘETÍ
+                   osoby (vlastníka nemovitosti), ne tipaře samotného, takže
+                   pole nesmí nabízet/vyplňovat uloženou identitu
+                   přihlášeného tipaře z jeho prohlížeče. -->
+              <input type="text" id="in_JmenoKlienta" placeholder="Jméno a příjmení vlastníka nemovitosti" autocomplete="off" name="vlastnik-nemovitosti-jmeno">
               <span class="error-msg">Zadejte prosím jméno vlastníka nemovitosti.</span>
             </div>
 
@@ -3926,7 +4012,14 @@
 
             <div class="field" id="f_Email">
               <label for="in_Email">E-mail</label>
-              <input type="email" id="in_Email" placeholder="např. jan.novak@email.cz" autocomplete="email">
+              <!-- Zadání (bod 1): trvalé tlačítko "@" vedle pole (ne jen v
+                   placeholderu, který po prvním stisku klávesy zmizí) -
+                   pomáhá lidem, kterým mobilní klávesnice ztěžuje napsání
+                   zavináče. Viz wireEvents() -> insertAtSignIntoEmail(). -->
+              <div class="field-inline-row">
+                <input type="email" id="in_Email" placeholder="např. jan.novak@email.cz" autocomplete="email">
+                <button type="button" class="field-at-btn" id="in_EmailAtBtn" title="Vložit znak @" aria-label="Vložit znak @ do e-mailu">@</button>
+              </div>
               <span class="error-msg">Zadejte prosím platný e-mail.</span>
             </div>
 
@@ -3972,7 +4065,7 @@
                 <input type="checkbox" id="in_Souhlas">
                 <label for="in_Souhlas">Vlastník nemovitosti souhlasí se zpracováním osobních údajů a předáním kontaktu realitní kanceláři *</label>
               </div>
-              <span class="error-msg" id="souhlasError">Bez souhlasu klienta nelze tip odeslat.</span>
+              <span class="error-msg" id="souhlasError">Bez souhlasu vlastníka nemovitosti nelze tip odeslat.</span>
             </div>
 
             <div class="col-span-2 required-note">* povinné pole</div>
@@ -4033,15 +4126,12 @@
 
       <div id="networkBanner"></div>
 
-      <!-- Milník 11 (bod 5): tipař nemá záložku "Uživatelé" (viz
-           ROLE_TAB_ORDER.tipar), takže tlačítko "+ Přidat uživatele" z
-           topbaru pro něj přistálo sem - nejbližší smysluplné místo, kde
-           tipař vidí svou síť/lidi pod sebou. Leader tenhle wrap nevidí
-           (má tlačítko v Uživatelé, #addUserUsersBtn) - viditelnost řídí
-           JS v handleSignedIn (jen role === "tipar"). -->
-      <div class="toolbar-row-end" id="networkAddUserBtnWrap" hidden>
-        <button class="btn-small" id="addUserNetworkBtn" type="button">+ Přidat uživatele</button>
-      </div>
+      <!-- Zadání (oprava po revizi): tlačítko "+ Přidat uživatele"
+           (#addUserNetworkBtn, dřív tady pro roli tipar) bylo NATRVALO
+           ODSTRANĚNO - karta "Moje síť" tipaře smí ukazovat jen jeho
+           vlastní síť/pozvánky, ne přímé ruční založení cizího účtu (to
+           zůstává výsadou leadera/administrátora v záložce "Uživatelé",
+           #addUserUsersBtn, sdílející openAddUserModal()). -->
 
       <!-- Milník 15 (bod 3): dobře viditelné tlačítko "Přidat nový tip"
            přímo na Přehledu lídra (landing page Leadera) - vede na
@@ -4178,9 +4268,9 @@
       <!-- Milník 11 (bod 5): "+ Přidat uživatele" přesunuto sem z topbaru
            (#addUserTopBtn odstraněn) - Leader/Administrator ho teď mají
            přímo u tabulky uživatelů, stejný vzor jako "+ Přidat RK" v
-           Realitní kanceláře. Sdílí openAddUserModal() se sesterským
-           tlačítkem #addUserNetworkBtn (Moje síť, jen role tipar - ta tuhle
-           záložku vůbec nemá, viz report). -->
+           Realitní kanceláře. Zadání (oprava po revizi): dřívější sesterské
+           tlačítko #addUserNetworkBtn (Moje síť, tipar) bylo odstraněno
+           úplně - openAddUserModal() teď volá jen tohle tlačítko. -->
       <div class="toolbar-row-end">
         <button class="btn-small" id="addUserUsersBtn" type="button">+ Přidat uživatele</button>
         <button class="btn-small" id="usersExportBtn" type="button">Export</button>
@@ -4706,6 +4796,15 @@
       <div id="profileBanner"></div>
       <div id="profileRegistraceStavWrap" style="margin-bottom:16px;"></div>
 
+      <!-- Zadání (bod 6): kontakt na sponzora - JEDEN řádek "Jméno
+           Příjmení, telefon, e-mail" na kartě Můj profil. Sdílí RPC
+           muj_sponzor() s kartou v "Moje síť" (renderNetworkSponsorCard) -
+           tady se ale vykresluje samostatně (renderProfileSponsorCard),
+           protože jde o jinou obrazovku s vlastním life-cyclem
+           (fetchProfileScreen). Skryje se sama, když uživatel sponzora
+           nemá (viz nalezeno:false z RPC). -->
+      <div id="profileSponsorCard" style="margin-bottom:16px;" hidden></div>
+
       <!-- Milník 12 (bod 4): souhrnná karta registračních údajů - jen pro
            roli tipař (leader/administrator výslovně vyjmuti klientem), na
            PRVNÍM místě před adresou/KYC. Čistě přehledová (read-only) -
@@ -4757,7 +4856,7 @@
         </div>
       </div>
 
-      <div class="card detail-card">
+      <div class="card detail-card" id="addressCardWrap">
         <!-- Milník 11 (bod 1): "Adresa" -> "Adresa a osobní údaje", protože
              formulář teď nese i trvalou adresu, doručovací adresu (jen
              pokud se liší) a datum narození (bod 2, podmínka pro odeslání
@@ -4783,9 +4882,12 @@
 
         <div id="addressFormWrap" hidden>
         <form id="addressForm" novalidate>
-          <div class="field-checkbox">
-            <input type="checkbox" id="pfJeFirma">
-            <label for="pfJeFirma">Jednám jako firma (adresa = sídlo firmy, vyžaduje IČO)</label>
+          <div class="field-toggle">
+            <label class="toggle-switch" for="pfJeFirma">
+              <input type="checkbox" id="pfJeFirma">
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+            <label class="toggle-label-text" for="pfJeFirma">Jednám jako firma (adresa = sídlo firmy, vyžaduje IČO)</label>
           </div>
           <!-- Zadání (bod 7): dřív se pole IČO/DIČ schovávala/objevovala
                UPROSTŘED obecné adresní mřížky, takže nebylo na první pohled
@@ -4820,9 +4922,12 @@
           <!-- Milník 11 (bod 1): doručovací adresa - vyplňuje se JEN pokud
                se liší od trvalé (výchozí = stejná, pole schovaná). -->
           <h3 class="detail-section-title">Doručovací adresa</h3>
-          <div class="field-checkbox">
-            <input type="checkbox" id="pfDorucovaciStejna" checked>
-            <label for="pfDorucovaciStejna">Doručovací adresa je stejná jako trvalá</label>
+          <div class="field-toggle">
+            <label class="toggle-switch" for="pfDorucovaciStejna">
+              <input type="checkbox" id="pfDorucovaciStejna" checked>
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+            <label class="toggle-label-text" for="pfDorucovaciStejna">Doručovací adresa je stejná jako trvalá</label>
           </div>
           <div class="form-grid" id="pfDorucovaciFields" style="margin-top:10px;" hidden>
             <div class="field"><label for="pfDorUlice">Ulice *</label><input type="text" id="pfDorUlice" placeholder="např. Hlavní"></div>
@@ -5130,12 +5235,33 @@
             <div id="kycUcetStav" class="kyc-doc-status" style="margin-top:6px;"></div>
           </div>
           <div class="kyc-doc-action" id="kycUcetActionWrap">
-            <button class="btn-secondary" type="button" id="kycUcetSaveBtn" style="width:auto;">Uložit číslo účtu</button>
+            <!-- Zadání (bod 10, oprava po revizi): `.btn-secondary` v CSS
+                 vůbec neexistuje - tlačítko se tak renderovalo jako
+                 nestylovaný výchozí prohlížečový <button>, vizuálně cizí
+                 vedle zbytku appky. `.btn-small` je stejná třída, jakou
+                 mají sesterská tlačítka "Vybrat soubor"/"Vyfotit" ve
+                 stejném řádku o pár pixelů výš. -->
+            <button class="btn-small" type="button" id="kycUcetSaveBtn" style="width:auto;">Uložit číslo účtu</button>
           </div>
         </div>
         <!-- Milník 12 (bod 3): preventivní hláška PŘED klikem, ne až po
-             chybě ze serveru - viz renderKycSection(). -->
+             chybě ze serveru - viz renderKycSection(). Zadání (bod 10,
+             oprava po revizi): tenhle text teď obsahuje SKUTEČNOU
+             klikací cestu k doplnění (ne jen strohé "doplňte adresu" bez
+             možnosti se tam dostat) - viz kycChybejiciVetaHtml(). -->
         <div id="kycMissingWrap"></div>
+        <!-- Zadání (bod 10, oprava po revizi): chybová hláška PO kliknutí
+             na "Odeslat k ověření" (server-side selhání/race condition) se
+             zobrazuje TADY, přímo nad tlačítkem - ne v #myKycBanner nahoře
+             obrazovky, který uživatel při krátkém scrollu dolů k tlačítku
+             přestává vidět. -->
+        <div id="kycSubmitBannerWrap"></div>
+        <!-- Zadání (bod 10, oprava po revizi): tlačítko je VIDĚT VŽDY v
+             editovatelném stavu, i když něco chybí - dřív úplně MIZELO a
+             nahradil ho jen text bez jakékoli akce (slepá ulička). Když
+             něco chybí, je jen `disabled` a text/odkaz výš řekne přesně
+             co a jak to doplnit - klik na tlačítko samotné navíc chybějící
+             položky taky ukáže (viz submitOdeslatKOvereni). -->
         <div class="form-actions" id="kycSubmitWrap" hidden>
           <button class="btn-primary" type="button" id="kycSubmitBtn" style="width:auto;">Odeslat k ověření</button>
         </div>
@@ -5427,7 +5553,7 @@
   // Milník 14: číslo aktuální verze aplikace - MUSÍ odpovídat nejnovější položce
   // pole APP_CHANGELOG níže (položka na indexu 0). Při každém příštím milníku
   // se zvyšuje ROVNOU TADY i v APP_CHANGELOG - jsou to dvě navzájem závislá místa.
-  var APP_VERSION = "31.0";
+  var APP_VERSION = "31.1";
 
   // Milník 14 (bod 4): obsah panelu "Historie verzí" na přihlašovací
   // obrazovce - zrekonstruováno z reálné historie projektu (STAV.md,
@@ -5436,6 +5562,30 @@
   // pod tímto polem). Vykresluje se generickou šablonou renderAuthVersionAndChangelog()
   // - při dalším milníku se sem jen přidá nová položka na začátek pole.
   var APP_CHANGELOG = [
+    // OPRAVA PO REVIZI (31.1). Klient otestoval dávku 31.0 a nahlásil 19
+    // bodů, kde buď nebylo hotovo vůbec, nebo to bylo hotové špatně/
+    // nedotažené. Viz jednotlivé "Zadání (bod N, oprava po revizi)"
+    // komentáře přímo u kódu a migrace pojmenované zadani_*.
+    { verze: "31.1", datum: "26. 9. 2026", body: [
+      "1) Formulář „Nový tip“: trvalé tlačítko „@“ vedle e-mailu, chybová hláška o chybějícím souhlasu teď mluví o „vlastníkovi nemovitosti“ (dřív o „klientovi“). Hlášené přednabízení pole „Vlastník nemovitosti“ se v kódu nepodařilo najít (nikam se do pole nezapisuje) - nejpravděpodobnější příčinou je auto-vyplňování PROHLÍŽEČE podle názvu pole, proto pole nově nese autocomplete=\"off\"; pokud problém přetrvá i tak, jde o chování konkrétního prohlížeče/zařízení, ne appky.",
+      "2) Kč/cena sloupce jsou teď vpravo zarovnané ve všech tabulkách appky (hlavičky i buňky).",
+      "3) Z karty „Moje síť“ zmizelo zbylé tlačítko/funkce „přidat uživatele“.",
+      "4) a 6) Sponzor (jméno + kontakt + fotka) je teď na JEDNOM řádku PŘED ID RT - v „Moje síť“ i v „Můj profil“.",
+      "5) ID RT přestává být sekvenční (dvě sekvenční čísla vedle sebe prozradí tempo růstu sítě, což je obchodní tajemství) - nově se přiděluje NÁHODNĚ (6místné číslo, kontrola kolize) a všechna dosud přidělená ID RT byla jednorázově přeházena na nové náhodné hodnoty (přiřazení k profilům zůstalo beze změny).",
+      "7) Přepínač „Firma ano/ne“ i „Doručovací adresa je jiná“ mají teď skutečný vzhled toggle-switche místo checkboxu.",
+      "8) První adresa v „Můj profil“ přejmenována na „Adresa trvalého bydliště“.",
+      "9) Historie pozvánkového kódu: opravena zastaralá data v appce hned po uložení nového kódu - DB logika (poslední 3 kódy, všechny funkční) i samotné zobrazení už byly ve skutečnosti v pořádku.",
+      "10) Obrazovka „Ověření pro výplatu provize“: tlačítko „Odeslat k ověření“ je teď vždy vidět dole, konkrétní chybová hláška je přímo u tlačítka a odkazuje na doplnění adresy, tlačítko „Uložit číslo účtu“ má sjednocený vzhled s ostatními tlačítky appky.",
+      "11) Opraven mobilní bug, kdy appka po nahrání každé KYC fotky přeskočila na Dashboard místo aby zůstala na záložce KYC.",
+      "12) Karta ověření tipu (Leader/Administrátor) je kompaktnější, chyby validace u „Uložit ověření“ se ukazují hned u tlačítka, ne nahoře stránky.",
+      "13) Datum poslední změny stavu je teď vlastní SLOUPEC vedle sloupce se stavem (tabulky Tipy i Moje tipy u tipaře), ne text pod stavem.",
+      "14) Přehled lídra, karta „Co musím vyřídit“: stav teď kreslí stejnou pill komponentu jako tabulka Tipy (ne jen text), počet pokusů a poslední změna jsou samostatné sloupce vedle sebe, ne stackované pod sebou.",
+      "15) V téže kartě je teď nahoře tučně skutečné jméno/označení tipu a status stavu až za ním (dřív to bylo obráceně - status vypadal jako by byl jméno tipu).",
+      "16) Obrazovka změny sponzora: chybová hláška je u tlačítka Uložit (ne nahoře stránky), nejde uložit bez vybraného sponzora, pole „Důvod změny sponzora“ se červeně orámuje, když zůstane prázdné.",
+      "17) Sloupec „Měsíce“ zaokrouhluje vždy na celé číslo, bez desetinných míst.",
+      "18) Jednotlivé ikony sítí u sdílení (Facebook/X/LinkedIn/WhatsApp/e-mail) teď při kliknutí navíc zkopírují text s odkazem do schránky a bannerem jasně řeknou, že obrázek banneru se k nim NIKDY nepřipojí automaticky - to neumožňuje žádný z těchhle odkazů, ne appka. U Facebooku a LinkedInu appka nově výslovně upozorní i na to, že jejich rozhraní ignoruje i předvyplněný text.",
+      "19) Formulář žádosti o partnerství RK měl jediný, těžko dohledatelný odkaz - dole na přihlašovací kartě pod řadou demo tlačítek. Nově je trvalá položka „Pro realitní kanceláře“ v hlavním veřejném menu, vidět na každé veřejné stránce."
+    ] },
     // ZADÁNÍ (31.0). Velké zadání z 26 bodů - viz jednotlivé "Zadání (bod N)"
     // komentáře přímo u kódu a migrace pojmenované zadani_*. Poznámka k
     // bodu 15: opraveno jen to, co šlo bezpečně ověřit (tlačítko na
@@ -6830,6 +6980,19 @@
     return pill;
   }
 
+  // Zadání (bod 13, oprava po revizi): v TABULKÁCH (initDataTable) chce
+  // klient datum poslední změny stavu jako VLASTNÍ SLOUPEC vedle stavu, ne
+  // navěšené pod pill uvnitř téže buňky (to dělá aktualniStavPillHtml()
+  // výš - ta zůstává beze změny pro netabulková místa, např. Detail tipu).
+  // Dvě malé funkce místo jedné sdílené, ať jde každá nezávisle do
+  // vlastního sloupce s vlastním `key`/`label`/řazením.
+  function aktualniStavPillOnlyHtml(t) {
+    return (t && t.rk_stav) ? rkStavPillHtml(t.rk_stav) : stavPillHtml(t && t.stav);
+  }
+  function posledniZmenaStavuText(t) {
+    return t && t.posledni_zmena_stavu_kdy ? (formatDatumZCasu(t.posledni_zmena_stavu_kdy) || "") : "";
+  }
+
   // Milník 21 (sekce E): KLIENTSKÉ ZRCADLO serverové SQL funkce
   // public.tip_faze(stav, rk_stav) z migrace m21_02. Používá se VÝHRADNĚ
   // pro filtrování už načtené tabulky Tipy podle fáze - žádný počet na
@@ -6870,11 +7033,14 @@
 
   // Zadání (bod 21): sloupec "Dny" přejmenován na "Měsíce" - a hodnota se
   // teď SKUTEČNĚ přepočítává z dní na měsíce (ne jen přejmenovaný popisek).
-  // 30.44 = průměrná délka měsíce (365.25/12), zaokrouhleno na 1 desetinu.
+  // 30.44 = průměrná délka měsíce (365.25/12).
+  // Zadání (oprava po revizi, bod 17): CELÉ číslo měsíců, žádné desetiny -
+  // dřív se zaokrouhlovalo na 1 desetinné místo (např. "3,2"), teď na celé
+  // měsíce (Math.round bez děleni deseti navíc).
   function dnyNaMesice(dny) {
     var d = Number(dny || 0);
     if (!isFinite(d) || d < 0) d = 0;
-    return Math.round((d / 30.44) * 10) / 10;
+    return Math.round(d / 30.44);
   }
 
   function formatCena(value) {
@@ -8661,7 +8827,7 @@
               "panelNastaveniReadonlyBody", "panelNastaveniFormBody", "panelNastaveniBanner",
               "pozvankovyKodReadonlyBody", "pozvankovyKodBanner",
               "rekrutReadonlyBody", "rekrutPreviewBody", "rekrutBanner"],
-    mykyc: ["kycStatusWrap", "kycDocsWrap", "kycMissingWrap", "myKycBanner"],
+    mykyc: ["kycStatusWrap", "kycDocsWrap", "kycMissingWrap", "myKycBanner", "kycSubmitBannerWrap"],
     // MILNÍK 23 (bod 6): administrátorův „Dashboard" už není statický
     // zástupný box, ale dynamicky plněný přehled — musí se tedy při vstupu
     // na záložku vyprázdnit dřív, než doběhne jeho fetch.
@@ -8739,7 +8905,7 @@
     // a #dashboardTiparWrap/#dashboardAdminWrap (obsah dashboardu podle
     // role) se řídí viditelností, ne obsahem - musí tedy zhasnout dřív, než
     // se potvrdí role nové identity.
-    ["kycSubmitWrap", "networkAddUserBtnWrap", "networkAddTipBtnWrap",
+    ["kycSubmitWrap", "networkAddTipBtnWrap",
      "profileRegSummaryCard", "networkLoadingWrap", "usersDemoResetWrap",
      "dashboardTiparWrap", "dashboardAdminWrap"].forEach(function (id) {
       var e = el(id);
@@ -10147,6 +10313,11 @@
     var g = authGen;
 
     var user = session.user;
+    // Zadání (bod 11, oprava po revizi): TATÁŽ identita jako už byla
+    // přihlášená (ne skutečně NOVÉ přihlášení) - viz použití níž u
+    // `activeTab`. Musí se zjistit HNED TEĎ, než se `currentUserId` o
+    // řádek níž přepíše.
+    var byliJsmeUzPrihlaseniStejneIdentity = (currentUserId === user.id);
     currentUserId = user.id;
 
     // Milník 15 (bod 4.3/4.4, defenzivní vrstva): PŘED jakýmkoli fetchem
@@ -10280,14 +10451,11 @@
     applyNavForRole(role);
 
     // Milník 9 (bod 6) -> Milník 11 (bod 5): "+ Přidat uživatele" bylo v
-    // topbaru pro tipař/leader/administrator (NE role rk) - teď žije u
+    // topbaru pro tipař/leader/administrator (NE role rk) - teď žije JEN u
     // #addUserUsersBtn (Uživatelé, vždy viditelné, tab i tak vidí jen
-    // leader/administrator) a #addUserNetworkBtn (Moje síť, JEN tipar -
-    // ten záložku Uživatelé nemá). Viditelnost je jen pohodlí v UI, RPC
-    // vytvorit_uzivatele_rucne si roli volajícího i cílovou roli ověřuje
-    // znovu na serveru.
-    var addUserNetworkWrap = el("networkAddUserBtnWrap");
-    if (addUserNetworkWrap) addUserNetworkWrap.hidden = (role !== "tipar");
+    // leader/administrator). Zadání (oprava po revizi): sesterské tlačítko
+    // #addUserNetworkBtn pro tipaře v "Moje síť" bylo odstraněno úplně -
+    // tipař nesmí zakládat cizí účty ručně, jen zvát přes vlastní odkaz.
 
     // Milník 15 (bod 3) → Milník 21 (sekce B): tlačítko „Přidat nový tip"
     // se PŘESUNULO do záhlaví přepracovaného Přehledu lídra (vpravo vedle
@@ -10318,7 +10486,23 @@
     // leader i administrátor mají svůj skutečný přehled právě tam a
     // přesměrovat je na obrazovku "dashboard" by pro leadera znamenalo
     // prázdno a pro administrátora zástupný box "připravujeme".
-    activeTab = isAdmin ? "tipy" : (role === "leader" ? "network" : (role === "rk" ? "rkportal" : "dashboard"));
+    // Zadání (bod 11, oprava po revizi, MOBILNÍ BUG): tenhle řádek dřív
+    // přepisoval `activeTab` na domovskou záložku role PŘI KAŽDÉM volání
+    // handleSignedIn() - i když šlo o TUTÉŽ, už přihlášenou identitu.
+    // Mobilní prohlížeče (zejména iOS Safari) po návratu z nativního
+    // fotoaparátu/kamerového promptu (getUserMedia, viz otevritKycKameru)
+    // běžně znovu vyšlou auth událost "SIGNED_IN" pro stejného uživatele -
+    // onAuthStateChange ji (schválně, kvůli PASSWORD_RECOVERY) nefiltruje
+    // a handleSignedIn() se tak spustí znovu uprostřed nahrávání KYC fotky.
+    // Výsledek: tipař po vyfocení dokladu/selfie skončil na "Dashboard"
+    // místo na "Ověření pro výplatu provize". Oprava: doména se resetuje
+    // JEN při skutečně NOVÉM přihlášení (jiná identita, viz
+    // `byliJsmeUzPrihlaseniStejneIdentity` výš) - re-běh pro stejnou
+    // identitu nechá `activeTab` tak, jak byl (uživatel zůstává tam, kde
+    // byl - typicky #myKycScreen).
+    if (!byliJsmeUzPrihlaseniStejneIdentity) {
+      activeTab = isAdmin ? "tipy" : (role === "leader" ? "network" : (role === "rk" ? "rkportal" : "dashboard"));
+    }
     // showAppScreen() -> setActiveTab(activeTab) už samo zavolá
     // fetchMyTips()/fetchTipyTable()/fetchMyNetworkTable() pro první
     // záložku - druhý explicitní fetch tady by byl jen zbytečný
@@ -10624,13 +10808,15 @@
     (ownResult.data || []).forEach(function (t) {
       if (!t || typeof t !== "object") return;
       rows.push({ kind: "own", id: t.id, ciLabel: mojeJmeno, klientLabel: t.jmeno_klienta || "(bez jména)",
-        typ_nemovitosti: t.typ_nemovitosti, lokalita: t.lokalita, stav: t.stav, datum: t.vlozeno_kdy });
+        typ_nemovitosti: t.typ_nemovitosti, lokalita: t.lokalita, stav: t.stav, datum: t.vlozeno_kdy,
+        posledni_zmena_stavu_kdy: t.posledni_zmena_stavu_kdy });
     });
     (subResult.data || []).forEach(function (t) {
       if (!t || typeof t !== "object") return;
       var subJmeno = celeJmeno({ jmeno: t.autor_jmeno, prijmeni: t.autor_prijmeni });
       rows.push({ kind: "sub", id: t.tip_id, ciLabel: subJmeno || "(neznámý)", klientLabel: "Klient " + (t.anon_klient || "?"),
-        typ_nemovitosti: t.typ_nemovitosti, lokalita: t.lokalita, stav: t.stav, datum: t.vlozeno_kdy });
+        typ_nemovitosti: t.typ_nemovitosti, lokalita: t.lokalita, stav: t.stav, datum: t.vlozeno_kdy,
+        posledni_zmena_stavu_kdy: t.posledni_zmena_stavu_kdy });
     });
 
     renderMojeTipyTable(rows);
@@ -10651,6 +10837,12 @@
         get: function (r) { return tipNemovitostLokalita(r); },
         render: function (r) { return escapeHtml(tipNemovitostLokalita(r) || "—"); } },
       { key: "stav", label: "Stav", get: function (r) { return stavLabel(r.stav); }, render: function (r) { return stavPillHtml(r.stav); } },
+      // Zadání (bod 13, oprava po revizi): datum poslední změny stavu jako
+      // vlastní sloupec hned za "Stav" - stejná konvence jako v tabulce
+      // Tipy (leader/administrátor), viz renderTipyTable.
+      { key: "posledni_zmena", label: "Poslední změna", className: "dt-col-date",
+        get: function (r) { return r.posledni_zmena_stavu_kdy ? new Date(r.posledni_zmena_stavu_kdy).getTime() : 0; },
+        render: function (r) { return escapeHtml(posledniZmenaStavuText(r) || "—"); } },
       // Milník 19 (bod 4.5): datum bez času (stejně jako sloupec "Datum
       // vytvoření" v tabulce Tipy od Milníku 17).
       { key: "datum", label: "Datum", className: "dt-col-date", get: function (r) { return r.datum ? new Date(r.datum).getTime() : 0; },
@@ -11556,18 +11748,58 @@
     var fotoHtml = fotoUrl
       ? '<img class="rekrut-preview-foto" style="width:52px;height:52px;" src="' + escapeHtml(fotoUrl) + '" alt="">'
       : '<div class="rekrut-preview-foto-empty" style="width:52px;height:52px;font-size:18px;" aria-hidden="true">' + escapeHtml(inicialyUzivatele(s)) + '</div>';
+    // Zadání (bod 4): jméno + kontakt + fotka/iniciály musí být V JEDNOM
+    // ŘÁDKU a musí stát PŘED ID RT (ne za ním) - dřív bylo "Váš sponzor ·
+    // ID RT …" na prvním řádku NAD jménem, tedy ID RT vizuálně první.
+    // Teď: fotka, pak jméno+kontakt na jednom flex řádku, ID RT až za tím.
     wrap.innerHTML =
-      '<div class="card detail-card" style="display:flex;gap:14px;align-items:center;">' +
+      '<div class="card detail-card" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;">' +
         fotoHtml +
-        '<div>' +
-          '<div class="dt-muted" style="font-size:12px;">Váš sponzor' + (s.id_rt ? ' · ID RT ' + escapeHtml(s.id_rt) : '') + '</div>' +
-          '<div class="dt-strong" style="font-size:16px;">' + escapeHtml(celeJmeno(s) || "—") + '</div>' +
-          '<div class="dt-muted" style="font-size:13px;">' +
-            (s.telefon ? escapeHtml(formatTelefon(s.telefon) || s.telefon) : "") +
-            (s.telefon && s.email ? " · " : "") +
-            (s.email ? escapeHtml(s.email) : "") +
-          '</div>' +
+        '<div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;flex:1;min-width:0;">' +
+          '<span class="dt-muted" style="font-size:12px;">Váš sponzor:</span>' +
+          '<span class="dt-strong" style="font-size:16px;">' + escapeHtml(celeJmeno(s) || "—") + '</span>' +
+          (s.telefon ? '<span class="dt-muted" style="font-size:13px;">' + escapeHtml(formatTelefon(s.telefon) || s.telefon) + '</span>' : '') +
+          (s.email ? '<span class="dt-muted" style="font-size:13px;">' + escapeHtml(s.email) + '</span>' : '') +
+          (s.id_rt ? '<span class="dt-muted" style="font-size:12px;margin-left:auto;">ID RT ' + escapeHtml(s.id_rt) + '</span>' : '') +
         '</div>' +
+      '</div>';
+  }
+
+  // Zadání (bod 6, doplněno po revizi 19bodové dávky - nezávislá kontrola
+  // našla, že tahle karta na rozdíl od renderNetworkSponsorCard() neměla
+  // fotku/iniciály ani ID RT): kontakt na sponzora na kartě "Můj profil" -
+  // JEDEN řádek "Jméno Příjmení, telefon, e-mail", navíc fotka/iniciály a
+  // ID RT stejně jako u sesterské karty v Moje síť. Sdílí RPC muj_sponzor()
+  // s renderNetworkSponsorCard() výš, ale je to samostatná karta/funkce -
+  // jiná obrazovka, jiné volací místo (fetchProfileScreen).
+  async function renderProfileSponsorCard() {
+    var wrap = el("profileSponsorCard");
+    if (!wrap || !sb) return;
+    wrap.hidden = true;
+    wrap.innerHTML = "";
+    var g = authGen;
+    var res = await sb.rpc("muj_sponzor");
+    if (g !== authGen) return;
+    if (res.error || !res.data || !res.data.nalezeno) return; // bez sponzora (kořen/administrátor) - karta se nezobrazí
+    var s = res.data;
+    var fotoUrl = s.foto_cesta ? verejnaFotoUrl(s.foto_cesta) : null;
+    var fotoHtml = fotoUrl
+      ? '<img class="rekrut-preview-foto" style="width:44px;height:44px;" src="' + escapeHtml(fotoUrl) + '" alt="">'
+      : '<div class="rekrut-preview-foto-empty" style="width:44px;height:44px;font-size:16px;" aria-hidden="true">' + escapeHtml(inicialyUzivatele(s)) + '</div>';
+    var castiKontaktu = [
+      celeJmeno(s) || "—",
+      s.telefon ? (formatTelefon(s.telefon) || s.telefon) : null,
+      s.email || null
+    ].filter(Boolean);
+    wrap.hidden = false;
+    wrap.innerHTML =
+      '<div class="card detail-card" style="display:flex;gap:12px;align-items:center;padding:14px 16px;">' +
+        fotoHtml +
+        '<div style="flex:1;min-width:0;">' +
+          '<div class="dt-muted" style="font-size:12px;margin-bottom:2px;">Kontakt na sponzora</div>' +
+          '<div class="dt-strong" style="font-size:15px;">' + escapeHtml(castiKontaktu.join(", ")) + '</div>' +
+        '</div>' +
+        (s.id_rt ? '<span class="dt-muted" style="font-size:12px;white-space:nowrap;">ID RT ' + escapeHtml(s.id_rt) + '</span>' : '') +
       '</div>';
   }
 
@@ -11975,7 +12207,13 @@
       // Milník 8 (Bug 2 oprava): jakmile má tip vyplněné rk_stav (RK na
       // něm už pracuje), zobrazí se tady její AKTUÁLNÍ rk_stav místo
       // zamrzlého "Předáno RK" - viz aktualniStavLabel/aktualniStavPillHtml.
-      { key: "stav", label: "Status ověření", get: function (r) { return aktualniStavLabel(r); }, render: function (r) { return aktualniStavPillHtml(r); } }
+      { key: "stav", label: "Status ověření", get: function (r) { return aktualniStavLabel(r); }, render: function (r) { return aktualniStavPillOnlyHtml(r); } },
+      // Zadání (bod 13, oprava po revizi): datum poslední změny stavu jako
+      // SAMOSTATNÝ sloupec hned za "Status ověření" - dřív bylo natlačené
+      // pod pillem ve stejné buňce (viz aktualniStavPillHtml výš).
+      { key: "posledni_zmena", label: "Poslední změna", className: "dt-col-date",
+        get: function (r) { return r.posledni_zmena_stavu_kdy ? new Date(r.posledni_zmena_stavu_kdy).getTime() : 0; },
+        render: function (r) { return escapeHtml(posledniZmenaStavuText(r) || "—"); } }
     ];
 
     if (muzeMazat) {
@@ -12327,12 +12565,18 @@
     // zobrazuje jen canEdit pohledu - z cache adminUsersById (naplněné
     // při návštěvě "Tipy"); pokud cache prázdná (Detail otevřen jinou
     // cestou), zobrazí se "—" místo hádání/UUID.
-    var infoHtml = '<div class="card detail-card"><div class="detail-grid">' +
-      detailItem("Klient", t.jmeno_klienta) +
-      detailItem("Telefon", t.telefon) +
+    // Zadání (bod 12, oprava po revizi): tohle je PRÁVĚ ta data, která má
+    // Leader/Administrátor ověřovat - dřív se ztrácela v běžně velkém
+    // detail-gridu mezi popisky stejné váhy jako zbytek obrazovky.
+    // `detail-card-kompakt` (menší odstupy) + zvýraznění (detailItemBold)
+    // klíčových identifikačních polí (Klient/Telefon/Lokalita), ať jsou
+    // na první pohled vidět i bez scrollování celé karty.
+    var infoHtml = '<div class="card detail-card detail-card-kompakt"><div class="detail-grid">' +
+      detailItemBold("Klient", t.jmeno_klienta) +
+      detailItemBold("Telefon", t.telefon) +
       detailItem("E-mail", t.email) +
       detailItem("Nemovitost", t.typ_nemovitosti) +
-      detailItem("Lokalita", t.lokalita) +
+      detailItemBold("Lokalita", t.lokalita) +
       detailItem("Typ transakce", t.typ_transakce) +
       (canEdit ? detailItem("Tipař (autor)", celeJmeno(adminUsersById[t.autor_id])) : detailItem("Požadovaná cena", formatCena(t.pozadovana_cena))) +
       detailItem("Vloženo", formatDateTime(t.vlozeno_kdy)) +
@@ -12435,7 +12679,7 @@
           '</div>';
       } else {
       editHtml = '' +
-        '<div class="card detail-card">' +
+        '<div class="card detail-card detail-card-kompakt">' +
           '<h3 class="detail-section-title" style="margin-top:0;">Ověření tipu</h3>' +
           '<form id="detailSaveForm" novalidate>' +
             '<div class="form-grid">' +
@@ -12503,8 +12747,14 @@
                   '<label for="dtPotvrzeniZmeny">Potvrzuji, že změna je v pořádku a je provedena vědomě.</label>' +
                 '</div>'
               : '') +
+            // Zadání (bod 12, oprava po revizi): chybová hláška při
+            // neúspěšném "Uložit ověření" se dřív ukazovala jen v
+            // #detailBanner NAHOŘE obrazovky - u tohohle dlouhého formuláře
+            // tak zůstávala mimo výhled od tlačítka. Vlastní banner TĚSNĚ
+            // NAD tlačítky (stejný vzor jako u bodů 10/16).
+            '<div id="dtSaveBannerWrap"></div>' +
             '<div class="form-actions">' +
-              '<button class="btn-primary" type="submit" id="dtSaveBtn">Uložit</button>' +
+              '<button class="btn-primary" type="submit" id="dtSaveBtn">Uložit ověření</button>' +
               '<button class="btn-ghost" type="button" id="dtCancelBtn">Zrušit</button>' +
             '</div>' +
           '</form>' +
@@ -12790,11 +13040,13 @@
     // (posunout_stav_tipu) i CHECK constraint v tabulce tips, takže se to
     // nedá obejít ani přímým voláním RPC (scénář S4/S10).
     if (stavVal === "zamitnuto" && !duvodKod) {
-      showBanner(el("detailBanner"), "error", "Vyberte prosím konkrétní důvod ukončení tipu.");
+      showBanner(el("dtSaveBannerWrap"), "error", "Vyberte prosím konkrétní důvod ukončení tipu.");
+      el("dtSaveBannerWrap").scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
     if (stavVal === "zamitnuto" && duvodKod === "jiny_duvod" && !duvodVal) {
-      showBanner(el("detailBanner"), "error", 'U „jiného důvodu“ je poznámka povinná.');
+      showBanner(el("dtSaveBannerWrap"), "error", 'U „jiného důvodu“ je poznámka povinná.');
+      el("dtSaveBannerWrap").scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
     var pozadovanaCena = kcRawValue("dtPozadovanaCena");
@@ -12819,18 +13071,20 @@
       duvodZmeny = duvodEl ? duvodEl.value.trim() : "";
       potvrzeno = !!(potvrzEl && potvrzEl.checked);
       if (!potvrzeno) {
-        showBanner(el("detailBanner"), "error", "Zaškrtněte prosím potvrzení, že změna prodaného tipu je v pořádku.");
+        showBanner(el("dtSaveBannerWrap"), "error", "Zaškrtněte prosím potvrzení, že změna prodaného tipu je v pořádku.");
+        el("dtSaveBannerWrap").scrollIntoView({ behavior: "smooth", block: "center" });
         return;
       }
       if (duvodZmeny.length < 10) {
-        showBanner(el("detailBanner"), "error", "Zdůvodněte prosím změnu prodaného tipu alespoň deseti znaky.");
+        showBanner(el("dtSaveBannerWrap"), "error", "Zdůvodněte prosím změnu prodaného tipu alespoň deseti znaky.");
+        el("dtSaveBannerWrap").scrollIntoView({ behavior: "smooth", block: "center" });
         return;
       }
     }
 
     var btn = el("dtSaveBtn");
     btn.disabled = true;
-    showBanner(el("detailBanner"), null, null);
+    showBanner(el("dtSaveBannerWrap"), null, null);
 
     var result = await sb.rpc("posunout_stav_tipu", {
       p_tip_id: detailTip.id,
@@ -12862,10 +13116,17 @@
 
     if (result.error) {
       console.error("Chyba při ukládání detailu tipu:", result.error);
-      showBanner(el("detailBanner"), "error", stavZmenaErrorMessage(result.error));
+      showBanner(el("dtSaveBannerWrap"), "error", stavZmenaErrorMessage(result.error));
+      el("dtSaveBannerWrap").scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
 
+    // Úspěch: karta se hned níž přepne zpátky do read-only režimu
+    // (renderTipDetail() přestaví celé #dtSaveBannerWrap pryč), takže
+    // potvrzení jde do PERZISTENTNÍHO #detailBanner nahoře (přežije
+    // re-render) - stejně jako dřív. Chybové hlášky výš zůstávají u
+    // tlačítka právě PROTO, že se karta v tom případě NEPŘEKRESLÍ a
+    // #dtSaveBannerWrap tedy zůstává vidět.
     showBanner(el("detailBanner"), "ok", "Uloženo.");
     setTimeout(function () { showBanner(el("detailBanner"), null, null); }, 4000);
 
@@ -13535,15 +13796,23 @@
             // s desítkami/stovkami podobně znějících jmen v síti byl
             // dlouhý dropdown prakticky nepoužitelný. Skutečná hodnota
             // zůstává ve skrytém #usSponsor (stejné id, submit se nemění).
-            '<div class="field col-span-2"><label for="usSponsorSearch">Nový sponzor</label>' +
+            '<div class="field col-span-2" id="usSponsorField"><label for="usSponsorSearch">Nový sponzor *</label>' +
               '<input type="text" id="usSponsorSearch" placeholder="Hledat podle jména nebo ID RT…" autocomplete="off">' +
               '<input type="hidden" id="usSponsor" value="' + escapeHtml(target.sponsor_id || "") + '">' +
               '<div id="usSponsorResults" class="sponsor-search-results" hidden></div>' +
               '<p class="dt-muted" style="font-size:12px;margin:4px 0 0;">Vybráno: <span id="usSponsorVybrano">' + escapeHtml(sponsorDisplayName(target.sponsor_id)) + '</span></p>' +
+              '<span class="error-msg">Musíte vybrat sponzora ze seznamu.</span>' +
             '</div>' +
-            '<div class="field col-span-2"><label for="usDuvod">Důvod změny sponzora *</label>' +
-              '<input type="text" id="usDuvod" placeholder="Povinné zdůvodnění pro auditní log — samostatné od důvodu běžné úpravy"></div>' +
+            '<div class="field col-span-2" id="usDuvodField"><label for="usDuvod">Důvod změny sponzora *</label>' +
+              '<input type="text" id="usDuvod" placeholder="Povinné zdůvodnění pro auditní log — samostatné od důvodu běžné úpravy">' +
+              '<span class="error-msg">Důvod změny sponzora je povinný.</span>' +
+            '</div>' +
           '</div>' +
+          // Zadání (bod 16, oprava po revizi): chybová hláška se dřív psala
+          // do banneru NAHOŘE celé stránky (#usersBanner) - odtud, dole na
+          // samostatné kartě "Sponzor", ji šlo snadno přehlédnout. Teď je
+          // hned vedle tlačítka Uložit.
+          '<div id="userSponsorBannerWrap"></div>' +
           '<div class="form-actions">' +
             '<button class="btn-primary" type="submit" id="userSponsorSaveBtn" style="width:auto;">Uložit</button>' +
             '<button class="btn-ghost" type="button" id="userSponsorCancelBtn">Zrušit</button>' +
@@ -13642,14 +13911,32 @@
   async function submitZmenitSponzora(targetId) {
     var novySponsor = el("usSponsor").value || null;
     var duvod = el("usDuvod").value.trim();
+    var bannerWrap = el("userSponsorBannerWrap");
+    var sponsorField = el("usSponsorField");
+    var duvodField = el("usDuvodField");
+    setFieldError(sponsorField, false);
+    setFieldError(duvodField, false);
+    showBanner(bannerWrap, null, null);
+
+    // Zadání (bod 16, oprava po revizi): nesmí jít uložit BEZ vybraného
+    // sponzora - dřív šlo tlačítkem „— bez sponzora —“ (nebo prostě
+    // ponecháním pole prázdného) odeslat formulář se sponzorem = null.
+    var chyby = [];
+    if (!novySponsor) {
+      setFieldError(sponsorField, true);
+      chyby.push("Musíte vybrat sponzora ze seznamu.");
+    }
     if (!duvod) {
-      showBanner(el("usersBanner"), "error", "Důvod změny sponzora je povinný.");
+      setFieldError(duvodField, true);
+      chyby.push("Důvod změny sponzora je povinný.");
+    }
+    if (chyby.length) {
+      showBanner(bannerWrap, "error", chyby.join(" "));
       return;
     }
 
     var submitBtn = el("userSponsorSaveBtn");
     if (submitBtn) submitBtn.disabled = true;
-    showBanner(el("usersBanner"), null, null);
 
     var g = authGen; // Milník 15 (bod 4.5) - níž se po awaitu píše do DOM
     var result = await sb.rpc("zmenit_sponzora", {
@@ -13663,7 +13950,10 @@
 
     if (result.error) {
       console.error("Chyba při změně sponzora:", result.error);
-      showBanner(el("usersBanner"), "error", upravitUzivateleErrorMessage(result.error));
+      // Zadání (bod 16, oprava po revizi): chyba z RPC dřív mířila na
+      // banner NAHOŘE stránky (#usersBanner), mimo dohled od tlačítka
+      // Uložit na téhle spodní kartě - teď zůstává vedle něj.
+      showBanner(bannerWrap, "error", upravitUzivateleErrorMessage(result.error));
       return;
     }
 
@@ -14342,7 +14632,7 @@
       var schema = vybranaRkId ? najdiPasmoSchematuRk(cena) : null;
       if (!schema) {
         // Ne chyba a ne nula tvářící se jako výsledek - výslovná informace.
-        return '<tr><td>' + escapeHtml(formatCena(cena)) + '</td>' +
+        return '<tr><td class="dt-col-money">' + escapeHtml(formatCena(cena)) + '</td>' +
           '<td colspan="5" class="dt-muted">' +
           (vybranaRkId ? "Vybraná kancelář nemá pro tuhle cenu definované pásmo" : "Vyberte realitní kancelář (zdroj marže RK)") +
           '</td>' +
@@ -14354,12 +14644,12 @@
       var leader = provizeRk * v.leader / 100;
       var marzeSystem = provizeRk * v.marze / 100;
       return '<tr>' +
-        '<td>' + escapeHtml(formatCena(cena)) + '</td>' +
-        '<td title="' + escapeHtml("Marže RK v tomto pásmu: " + rkProvizeHodnotaText(schema)) + '">' + escapeHtml(formatCena(provizeRk)) + '</td>' +
-        '<td>' + escapeHtml(formatCena(tipar)) + '</td>' +
-        '<td>' + escapeHtml(formatCena(sponzor)) + '</td>' +
-        '<td>' + escapeHtml(formatCena(leader)) + '</td>' +
-        '<td>' + escapeHtml(formatCena(marzeSystem)) + '</td>' +
+        '<td class="dt-col-money">' + escapeHtml(formatCena(cena)) + '</td>' +
+        '<td class="dt-col-money" title="' + escapeHtml("Marže RK v tomto pásmu: " + rkProvizeHodnotaText(schema)) + '">' + escapeHtml(formatCena(provizeRk)) + '</td>' +
+        '<td class="dt-col-money">' + escapeHtml(formatCena(tipar)) + '</td>' +
+        '<td class="dt-col-money">' + escapeHtml(formatCena(sponzor)) + '</td>' +
+        '<td class="dt-col-money">' + escapeHtml(formatCena(leader)) + '</td>' +
+        '<td class="dt-col-money">' + escapeHtml(formatCena(marzeSystem)) + '</td>' +
         '<td title="Součet modelových sazeb tipař + sponzor + leader + marže">' + escapeHtml(celkemProcentText) + '</td>' +
       '</tr>';
     }).join("");
@@ -14376,12 +14666,12 @@
       '<div class="dt-table-wrap" style="margin-top:10px;">' +
       '<table class="dt-table" id="provizeUkazkaTable">' +
         '<thead><tr>' +
-          '<th>Hodnota nemovitosti</th>' +
-          '<th>Provize RK</th>' +
-          '<th>Tipař (' + escapeHtml(String(v.tipar)) + ' %)</th>' +
-          '<th>Sponzor (' + escapeHtml(String(v.sponzor)) + ' %)</th>' +
-          '<th>Leader (' + escapeHtml(String(v.leader)) + ' %)</th>' +
-          '<th>Marže RT (' + escapeHtml(String(v.marze)) + ' %)</th>' +
+          '<th class="dt-col-money">Hodnota nemovitosti</th>' +
+          '<th class="dt-col-money">Provize RK</th>' +
+          '<th class="dt-col-money">Tipař (' + escapeHtml(String(v.tipar)) + ' %)</th>' +
+          '<th class="dt-col-money">Sponzor (' + escapeHtml(String(v.sponzor)) + ' %)</th>' +
+          '<th class="dt-col-money">Leader (' + escapeHtml(String(v.leader)) + ' %)</th>' +
+          '<th class="dt-col-money">Marže RT (' + escapeHtml(String(v.marze)) + ' %)</th>' +
           '<th>Celkem %</th>' +
         '</tr></thead>' +
         '<tbody>' + radky + '</tbody>' +
@@ -14580,7 +14870,7 @@
         render: function (r) { return escapeHtml(tipNemovitostLokalita(r) || "—"); } },
       { key: "typ_transakce", label: "Typ transakce", get: function (r) { return r.typ_transakce || ""; },
         render: function (r) { return escapeHtml(r.typ_transakce || "—"); } },
-      { key: "nabidkova_cena", label: "Nabídková cena", get: function (r) { return r.rk_nabidkova_cena != null ? Number(r.rk_nabidkova_cena) : -1; },
+      { key: "nabidkova_cena", label: "Nabídková cena", className: "dt-col-money", get: function (r) { return r.rk_nabidkova_cena != null ? Number(r.rk_nabidkova_cena) : -1; },
         render: function (r) { return escapeHtml(formatCena(r.rk_nabidkova_cena)); } },
 
       // MILNÍK 23 (bod 8): sloupec „Status RK" ukazuje ZKRÁCENÝ popisek,
@@ -14601,7 +14891,7 @@
       // zůstává ISO string, protože ten se řadí lexikograficky správně.
       { key: "datum_prodeje", label: "Datum prodeje", className: "dt-col-date", get: function (r) { return r.datum_prodeje || ""; },
         render: function (r) { return escapeHtml(formatDateOnly(r.datum_prodeje) || "—"); } },
-      { key: "kupni_cena", label: "Kupní cena", get: function (r) { return r.kupni_cena != null ? Number(r.kupni_cena) : -1; },
+      { key: "kupni_cena", label: "Kupní cena", className: "dt-col-money", get: function (r) { return r.kupni_cena != null ? Number(r.kupni_cena) : -1; },
         render: function (r) { return escapeHtml(formatCena(r.kupni_cena)); } },
       // ------------------- MILNÍK 23 (bod 11c): dva peněžní sloupce --------
       // Obě čísla POČÍTÁ SERVER (moje_rk_tipy, migrace m23_04) — klient si
@@ -14615,7 +14905,7 @@
       // sazba, ze které vznikla („210 000 Kč · 3,5 %"). Dvanáct sloupců by se
       // na běžné desktopové šířce už nevešlo a dvě čísla o téže marži vedle
       // sebe byla stejně matoucí. Žádná informace se neztratila.
-      { key: "marze_kc", label: "Velikost marže", className: "dt-wrap",
+      { key: "marze_kc", label: "Velikost marže", className: "dt-wrap dt-col-money",
         get: function (r) { return r.marze_kc != null ? Number(r.marze_kc) : -1; },
         render: function (r) {
           var sazba = (r.rk_marze_typ != null && r.rk_marze_hodnota != null)
@@ -14626,7 +14916,7 @@
           if (r.marze_kc == null) return '<span class="dt-muted">—</span>' + sazba;
           return escapeHtml(formatCena(r.marze_kc)) + sazba + rkPortalOdhadZnackaHtml(r);
         } },
-      { key: "podil_rt", label: "Podíl Realitního tipu", className: "dt-wrap",
+      { key: "podil_rt", label: "Podíl Realitního tipu", className: "dt-wrap dt-col-money",
         get: function (r) { return r.podil_rt_kc != null ? Number(r.podil_rt_kc) : -1; },
         render: function (r) {
           if (r.podil_rt_kc == null) {
@@ -15715,9 +16005,9 @@
 
     // ---------------------------- READ-ONLY REŽIM -------------------------
     var columns = [
-      { key: "od", label: "Od (Kč)", get: function (r) { return Number(r.min_hodnota || 0); },
+      { key: "od", label: "Od (Kč)", className: "dt-col-money", get: function (r) { return Number(r.min_hodnota || 0); },
         render: function (r) { return escapeHtml(formatCena(r.min_hodnota)); } },
-      { key: "do", label: "Do (Kč)",
+      { key: "do", label: "Do (Kč)", className: "dt-col-money",
         // Pásmo bez horní hranice se řadí až na konec, proto MAX_SAFE_INTEGER.
         get: function (r) { return r.max_hodnota == null ? Number.MAX_SAFE_INTEGER : Number(r.max_hodnota); },
         render: function (r) { return r.max_hodnota == null ? '<span class="dt-muted">bez horní hranice</span>' : escapeHtml(formatCena(r.max_hodnota)); } },
@@ -16117,8 +16407,8 @@
         } },
       { key: "prijemce", label: "Příjemce", get: function (r) { return celeJmeno(adminUsersById[r.prijemce_id]) || r.prijemce_id; } },
       { key: "role", label: "Role", get: function (r) { return VYPLATA_ROLE_LABELS[r.role_prijemce] || r.role_prijemce; } },
-      { key: "bez_dph", label: "Částka bez DPH", get: function (r) { return Number(r.castka_bez_dph); }, render: function (r) { return escapeHtml(formatCena(r.castka_bez_dph)); } },
-      { key: "s_dph", label: "Částka s DPH", get: function (r) { return Number(r.castka_celkem); }, render: function (r) { return escapeHtml(formatCena(r.castka_celkem)); } },
+      { key: "bez_dph", label: "Částka bez DPH", className: "dt-col-money", get: function (r) { return Number(r.castka_bez_dph); }, render: function (r) { return escapeHtml(formatCena(r.castka_bez_dph)); } },
+      { key: "s_dph", label: "Částka s DPH", className: "dt-col-money", get: function (r) { return Number(r.castka_celkem); }, render: function (r) { return escapeHtml(formatCena(r.castka_celkem)); } },
       { key: "splatnost", label: "Splatnost", get: function (r) { return r.splatnost_do || ""; },
         render: function (r) {
           var poSplatnosti = r.splatnost_do && r.splatnost_do < today && r.stav !== "vyplaceno";
@@ -16411,6 +16701,11 @@
     if (g !== authGen) return;
 
     el("profileRegistraceStavWrap").innerHTML = "Fáze registrace: " + registraceStavPillHtml(mujRegistraceStav());
+
+    // Zadání (bod 6): kontakt na sponzora, jeden řádek. Viz
+    // renderProfileSponsorCard() výš. Nezávisí na awaitu níž, ať se karta
+    // nezpožďuje za zbytkem obrazovky.
+    renderProfileSponsorCard();
 
     // Milník 12 (bod 4): souhrn registračních údajů - jen role tipar.
     // Milník 19 (bod 2): + role administrator, a to v EDITOVATELNÉ podobě.
@@ -17249,7 +17544,7 @@
     var grid = el("addressReadonlyGrid");
     if (!grid || !currentUser) return;
     var html =
-      '<div class="detail-item"><div class="detail-label">Trvalá adresa' + (currentUser.je_firma ? ' (sídlo firmy)' : '') + '</div>' +
+      '<div class="detail-item"><div class="detail-label">Adresa trvalého bydliště' + (currentUser.je_firma ? ' (sídlo firmy)' : '') + '</div>' +
         '<div class="detail-value">' + escapeHtml(adresaRadekHtml(currentUser.adresa_ulice, currentUser.adresa_cislo, currentUser.adresa_mesto, currentUser.adresa_psc, currentUser.adresa_stat)) + '</div></div>';
     if (currentUser.dorucovaci_je_stejna === false) {
       html += '<div class="detail-item"><div class="detail-label">Doručovací adresa (liší se)</div>' +
@@ -17577,36 +17872,58 @@
       }
     }
 
-    // Milník 17 (bod 20a): viditelnost tlačítka "Odeslat k ověření" nově
-    // vyžaduje VŠECHNY TŘI podmínky (dokumenty + adresa + datum narození),
-    // ne jen nahrané dokumenty. Do Milníku 16 se tlačítko zobrazilo i
-    // uživateli bez adresy/data narození, RPC ho pak odmítla a on dostal
-    // jen obecnou hlášku - zbytečné volání i zbytečná frustrace.
-    // Zdroj pravdy je pořád server (odeslat_k_overeni_totoznosti); tohle je
-    // UI pohodlí navíc, postavené nad TOUŽ sdílenou funkcí, která skládá i
-    // nápovědu pod tlačítkem a chybovou hlášku po neúspěšném odeslání.
+    // Zadání (bod 10, oprava po revizi): tlačítko "Odeslat k ověření" je
+    // VIDĚT VŽDY v editovatelném stavu - i když něco chybí. Dřív úplně
+    // MIZELO (`hidden = !(editovatelne && chybi.length === 0)`) a nahradil
+    // ho jen odstavec textu bez jakékoli akce - typická slepá ulička.
+    // Teď se jen DEAKTIVUJE (`disabled`), ať uživatel pořád vidí, KAM by
+    // měl kliknout, až věc doplní - a klik na něj i tak spustí kontrolu
+    // (viz submitOdeslatKOvereni), pro jistotu i kdyby náhodou disabled
+    // nezabralo (staré prohlížeče/asistenční technologie).
     kycPosledniFileByTyp = fileByTyp;
     var chybi = kycChybejiciPolozky(fileByTyp);
-    el("kycSubmitWrap").hidden = !(editovatelne && chybi.length === 0);
+    el("kycSubmitWrap").hidden = !editovatelne;
+    var submitBtnEl = el("kycSubmitBtn");
+    if (submitBtnEl) submitBtnEl.disabled = chybi.length > 0;
 
     // Milník 12 (bod 3): PREVENTIVNÍ hláška - co uživateli chybí k odeslání,
     // zobrazená ROVNOU vedle tlačítka (ne až po chybě z serveru po kliku).
-    // Reprodukováno na demo účtu Tipař B: uživatel nahrál dokumenty, ale
-    // neměl vyplněnou adresu/datum narození - server odmítnutí RPC sice
-    // vypsal (viz odeslatKOvereniErrorMessage), ale #profileBanner je
-    // nahoře obrazovky nad Adresou, mimo aktuální scroll pozici u tlačítka
-    // dole v KYC kartě, takže si toho uživatel reálně nevšiml. Tahle
-    // hláška se zobrazí VŽDY, když v editovatelném stavu něco chybí -
-    // nezávisle na tom, jestli je tlačítko zrovna vidět.
-    // Milník 17 (bod 20b): tenhle text i chybová hláška po neúspěšném
-    // odeslání vznikají ze STEJNÉ funkce (kycChybejiciVeta) - do Milníku 16
-    // to byly dvě nezávislé formulace, které se mohly rozejít.
+    // Zadání (bod 10, oprava po revizi): dřív to byla jen strohá věta
+    // ("Doplňte adresu trvalého bydliště...") BEZ ŽÁDNÉ cesty, jak se tam
+    // dostat - uživatel musel sám uhodnout, že má scrollovat nahoru na
+    // "Můj profil" a najít formulář. Teď má chybějící adresa/datum narození
+    // rovnou klikací tlačítko, které tam zavede a rovnou otevře editaci
+    // (viz navigovatNaVyplneniAdresy() níž) - přesně požadavek "žádná slepá
+    // ulička". Číslo účtu se dá vyplnit přímo tady na týž obrazovce (pole
+    // #kycCisloUctu výš), tam žádný odkaz netřeba.
     var missingWrap = el("kycMissingWrap");
     if (editovatelne && chybi.length) {
-      missingWrap.innerHTML = '<p class="dt-muted kyc-missing-note">' + escapeHtml(kycChybejiciVeta(fileByTyp)) + '</p>';
+      var potrebujeAdresu = !currentUser || !currentUser.adresa_vyplnena_kdy || !currentUser.datum_narozeni;
+      missingWrap.innerHTML = '<p class="dt-muted kyc-missing-note">' + escapeHtml(kycChybejiciVeta(fileByTyp)) + '</p>' +
+        (potrebujeAdresu ? '<button type="button" class="link-btn" id="kycMissingAdresaLinkBtn">Doplnit adresu / datum narození teď</button>' : '');
+      var adresaBtn = el("kycMissingAdresaLinkBtn");
+      if (adresaBtn) adresaBtn.addEventListener("click", navigovatNaVyplneniAdresy);
     } else {
       missingWrap.innerHTML = "";
     }
+  }
+
+  // Zadání (bod 10, oprava po revizi): skutečná cesta k doplnění adresy/
+  // data narození přímo z obrazovky KYC - přepne na "Můj profil", počká na
+  // dotažení čerstvého profilu a rovnou otevře formulář adresy v editaci
+  // (stejné chování jako klik na "Upravit"), pak k němu odscrolluje. Volba
+  // (a) ze zadání (fungující odkaz) - stejný vzor už appka používá u
+  // #addressBannerLinkBtn (banner "Adresu je potřeba do 30 dnů doplnit").
+  function navigovatNaVyplneniAdresy() {
+    setActiveTab("profile");
+    fetchProfileScreen().then(function () {
+      if (currentUser && (!currentUser.adresa_vyplnena_kdy || !currentUser.datum_narozeni)) {
+        fillAddressFormFromProfile();
+        setProfileEditMode(true);
+      }
+      var cardEl = el("addressCardWrap");
+      if (cardEl && cardEl.scrollIntoView) cardEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   }
 
   // ---------------- Milník 17 (bod 20): co uživateli chybí k odeslání KYC ----------------
@@ -17918,11 +18235,13 @@
   async function submitOdeslatKOvereni() {
     if (!currentUser) return;
     var g = authGen; // Milník 15 (bod 4.5)
-    // Milník 13 (bod 1): KYC karta žije na vlastní záložce #myKycScreen -
-    // banner cílí na #myKycBanner (na téhle krátké obrazovce je banner i
-    // tlačítko prakticky vždy v jednom pohledu, ale scrollIntoView z
-    // Milníku 12 bodu 3 zůstává jako obranná pojistka pro nižší obrazovky).
+    // Zadání (bod 10, oprava po revizi): hláška se dřív ukazovala v
+    // #myKycBanner NAHOŘE obrazovky - u delší obrazovky (např. po
+    // zamítnutí, s bannerem o důvodu) tak zůstávala mimo výhled od
+    // tlačítka dole. Teď cílí na #kycSubmitBannerWrap, který sedí PŘÍMO
+    // NAD tlačítkem "Odeslat k ověření" (stejný vzor jako u bodů 12/16).
     showBanner(el("myKycBanner"), null, null);
+    showBanner(el("kycSubmitBannerWrap"), null, null);
     var btn = el("kycSubmitBtn");
     btn.disabled = true;
     var result = await sb.rpc("odeslat_k_overeni_totoznosti");
@@ -17931,13 +18250,13 @@
 
     if (result.error) {
       console.error("Chyba při odesílání k ověření:", result.error);
-      showBanner(el("myKycBanner"), "error", odeslatKOvereniErrorMessage(result.error));
-      el("myKycBanner").scrollIntoView({ behavior: "smooth", block: "center" });
+      showBanner(el("kycSubmitBannerWrap"), "error", odeslatKOvereniErrorMessage(result.error));
+      el("kycSubmitBannerWrap").scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
 
-    showBanner(el("myKycBanner"), "ok", "Žádost o ověření totožnosti byla odeslána.");
-    el("myKycBanner").scrollIntoView({ behavior: "smooth", block: "center" });
+    showBanner(el("kycSubmitBannerWrap"), "ok", "Žádost o ověření totožnosti byla odeslána.");
+    el("kycSubmitBannerWrap").scrollIntoView({ behavior: "smooth", block: "center" });
     await refreshOwnProfile();
     await renderKycSection();
   }
@@ -19545,25 +19864,57 @@
     var hlavni = ldCekaText(p.ceka_hodin);
     var jePoTerminu = (p.nalehavost === "po_terminu");
     var casCls = jePoTerminu ? " ld-time-late" : (p.nalehavost === "dnes" ? " ld-time-today" : "");
-    var podnadpis = [p.jmeno, p.nemovitost].filter(Boolean).join(" · ");
+    // Zadání (bod 15, oprava po revizi): dřív tu jako "nadpis" (tučný,
+    // primární text) svítilo STATUSOVÉ slovo ("Nový tip", "Prodáno"...),
+    // jako by to bylo jméno/označení tipu - skutečné jméno klienta a
+    // nemovitost byly schované dole, malým šedým písmem. Teď je to obráceně:
+    // nahoře tučně skutečné označení tipu (jméno klienta), status/popis
+    // položky AŽ ZA ním; dole zůstává jen nemovitost.
+    var oznaceni = p.jmeno || "(bez jména)";
+    var titulek = oznaceni + (p.nadpis ? " — " + p.nadpis : "");
+
+    // Zadání (bod 14, oprava po revizi): stav teď kreslí STEJNOU pill
+    // komponentu jako sloupec "Status"/"Status RK" v tabulce Tipy (dřív jen
+    // hotový text stav_text) - stav_kod/rk_stav_kod k tomu dodává RPC
+    // leader_dashboard_prehled(). Položky fronty, co nemají odpovídající
+    // stav tipu (KYC, výplata, registrace), fallbackují na prostý text.
+    var stavHtml = "";
+    if (p.stav_kod) {
+      stavHtml = '<div class="ld-queue-pill-wrap">' + stavPillHtml(p.stav_kod) + '</div>';
+    } else if (p.rk_stav_kod) {
+      stavHtml = '<div class="ld-queue-pill-wrap">' + rkStavPillHtml(p.rk_stav_kod) + '</div>';
+    } else if (p.stav_text) {
+      stavHtml = '<div class="ld-queue-time-note">Stav: ' + escapeHtml(p.stav_text) + '</div>';
+    }
+
+    // Zadání (bod 14, oprava po revizi): "Počet pokusů" a "Poslední změna"
+    // jako SAMOSTATNÉ SLOUPCE vedle sebe (pocet_pokusu je teď vlastní číslo
+    // z RPC, ne zapečené v textu popisu).
+    var statyPolozky = [];
+    if (p.pocet_pokusu !== null && p.pocet_pokusu !== undefined) {
+      var zMax = ldNum(leaderPrehled && leaderPrehled.sla && leaderPrehled.sla.max_pokusu);
+      statyPolozky.push('<div class="ld-queue-stat">Pokusů: <span class="ld-queue-stat-value">' +
+        escapeHtml(String(p.pocet_pokusu)) + (zMax ? ' z ' + escapeHtml(String(zMax)) : '') + '</span></div>');
+    }
+    if (p.ceka_od) {
+      statyPolozky.push('<div class="ld-queue-stat">Poslední změna: <span class="ld-queue-stat-value">' +
+        escapeHtml(formatDatumZCasu(p.ceka_od) || "—") + '</span></div>');
+    }
+    var statyHtml = statyPolozky.length ? '<div class="ld-queue-stats">' + statyPolozky.join("") + '</div>' : "";
 
     return '<div class="ld-queue-row">' +
         // Tečka je čistě dekorace — informaci nese text vedle ní i napravo.
         '<span class="ld-dot ld-dot-' + n.cls + '" aria-hidden="true"></span>' +
         '<div class="ld-queue-main">' +
-          '<div class="ld-queue-nadpis">' + escapeHtml(p.nadpis || "") + '</div>' +
-          '<div class="ld-queue-meta">' + escapeHtml(podnadpis || "—") + '</div>' +
+          '<div class="ld-queue-nadpis">' + escapeHtml(titulek) + '</div>' +
+          '<div class="ld-queue-meta">' + escapeHtml(p.nemovitost || "—") + '</div>' +
         '</div>' +
         '<div class="ld-queue-time">' +
           '<div class="ld-queue-time-strong' + casCls + '">' + escapeHtml(hlavni) + '</div>' +
           (jePoTerminu ? '<div><span class="ld-queue-flag">po termínu</span></div>' : '') +
           '<div class="ld-queue-time-note">' + escapeHtml(p.popis || "") + '</div>' +
-          // Zadání (bod 16): u každé položky fronty se má vidět AKTUÁLNÍ
-          // stav ověření a datum jeho POSLEDNÍ ZMĚNY - dřív se stav_text
-          // zobrazoval jen jako náhrada za chybějící popis (tedy skoro
-          // nikdy) a přesné datum vůbec ne, jen relativní "čeká X dní".
-          (p.stav_text ? '<div class="ld-queue-time-note">Stav: ' + escapeHtml(p.stav_text) + '</div>' : '') +
-          (p.ceka_od ? '<div class="ld-queue-time-note">Poslední změna: ' + escapeHtml(formatDatumZCasu(p.ceka_od) || "—") + '</div>' : '') +
+          stavHtml +
+          statyHtml +
           '<span class="sr-only">' + escapeHtml(n.label) + '</span>' +
         '</div>' +
         '<button type="button" class="ld-queue-btn' + (jePrimarni ? " ld-queue-btn-primary" : "") + '"' +
@@ -20185,7 +20536,6 @@
     el("addUserUsersBtn").addEventListener("click", openAddUserModal);
     // Milník 16 (bod 5): dočasné testovací tlačítko (viz submitResetDemoUctu).
     el("usersDemoResetBtn").addEventListener("click", submitResetDemoUctu);
-    el("addUserNetworkBtn").addEventListener("click", openAddUserModal);
 
     // Milník 15 (bod 3): "+ Přidat nový tip" na Přehledu lídra -> záložka
     // "Nový tip". Používá standardní setActiveTab, takže se korektně
@@ -20471,6 +20821,23 @@
     el("tipForm").addEventListener("submit", function (e) {
       e.preventDefault();
       submitTipForm();
+    });
+
+    // Zadání (bod 1): tlačítko "@" vedle e-mailu v "Nový tip" - vloží
+    // zavináč na pozici kurzoru (nebo na konec, když input kurzor nemá)
+    // a vrátí fokus zpátky do pole.
+    el("in_EmailAtBtn").addEventListener("click", function () {
+      var input = el("in_Email");
+      var start = typeof input.selectionStart === "number" ? input.selectionStart : input.value.length;
+      var end = typeof input.selectionEnd === "number" ? input.selectionEnd : input.value.length;
+      var val = input.value || "";
+      input.value = val.slice(0, start) + "@" + val.slice(end);
+      var newPos = start + 1;
+      input.focus();
+      if (typeof input.setSelectionRange === "function") {
+        input.setSelectionRange(newPos, newPos);
+      }
+      input.dispatchEvent(new Event("input", { bubbles: true }));
     });
 
     // Milník 5 (bod 5 zadání) — "+ Přidat RK" nad tabulkou otevírá
@@ -20860,6 +21227,11 @@
       resetRkPartnerstviForm();
       setDocumentTitle("Staňte se partnerskou realitní kanceláří");
       setMetaPopis("Formulář pro realitní kanceláře, které chtějí spolupracovat s Realitním tipem.");
+      // Zadání (bod 19, oprava po revizi): dřív se tu menu nezvýraznilo
+      // vůbec (routa "rk-partnerstvi" chyběla mezi klíči, které
+      // oznacVerejneMenu zná) - nová položka „Pro realitní kanceláře" teď
+      // svítí jako aktivní, stejně jako u ostatních veřejných rout.
+      oznacVerejneMenu("__rk-partnerstvi");
       return;
     }
     if (auth) auth.hidden = false;
@@ -21118,12 +21490,21 @@
     if (ukazkovyRekrutacniKod) {
       html += '<button type="button" class="verejne-menu-link" data-verejna-klic="__rekrutace">Ukázková rekrutační stránka</button>';
     }
+    // Zadání (bod 19, oprava po revizi): formulář žádosti o partnerství RK
+    // (bod 24 předchozí dávky) byl ODSTRANIT DO NEDOHLEDNA - jediná cesta
+    // k němu byl malý textový odkaz úplně dole na přihlašovací kartě, pod
+    // řadou demo tlačítek. V hlavním veřejném menu (vidět na KAŽDÉ veřejné
+    // stránce, ne jen na přihlašovací) i v hlavičce landing page chyběl
+    // úplně. Tahle položka je STATICKÁ (na rozdíl od CMS položek výš) -
+    // formulář existuje vždycky, nezávisle na obsahu webove_stranky.
+    html += '<button type="button" class="verejne-menu-link" data-verejna-klic="__rk-partnerstvi">Pro realitní kanceláře</button>';
     nav.innerHTML = html;
     nav.querySelectorAll("[data-verejna-klic]").forEach(function (b) {
       b.addEventListener("click", function () {
         var klic = b.getAttribute("data-verejna-klic");
         zavriVerejneMenu();   // MILNÍK 27 (bod 2)
         if (klic === "__rekrutace") { navigateVerejna("rekrutace", ukazkovyRekrutacniKod); return; }
+        if (klic === "__rk-partnerstvi") { navigateVerejna("rk-partnerstvi", "rk-partnerstvi"); return; }
         if (klic === "hlavni") { navigateVerejna(null, null); return; }
         navigateVerejna("stranka", klic);
       });
@@ -21686,20 +22067,38 @@
   function sdileniIkonyHtml(url, text, predmet, copyId, copyPopis, obrazekUrl) {
     var u = encodeURIComponent(url);
     var t = encodeURIComponent(text);
+    // Zadání (bod 18, oprava po revizi): `textSePreda` = přenáší tahle síť
+    // vlastní odkaz VŮBEC nějaký text? Facebook a LinkedIn text u
+    // sharer/share-offsite odkazu DLOUHODOBĚ IGNORUJÍ (jejich vlastní
+    // rozhodnutí, ne omezení appky) - dřív appka tvářila, že se text
+    // předává, ale ve skutečnosti nikam nešel. X, WhatsApp a e-mail text
+    // v URL parametru skutečně přenášejí.
     var site = [
-      { kod: "facebook", nazev: "Sdílet na Facebooku", href: "https://www.facebook.com/sharer/sharer.php?u=" + u },
-      { kod: "x",        nazev: "Sdílet na X",         href: "https://twitter.com/intent/tweet?url=" + u + "&text=" + t },
-      { kod: "linkedin", nazev: "Sdílet na LinkedInu", href: "https://www.linkedin.com/sharing/share-offsite/?url=" + u },
-      { kod: "whatsapp", nazev: "Poslat přes WhatsApp", href: "https://wa.me/?text=" + encodeURIComponent(text + " " + url) },
-      { kod: "mail",     nazev: "Poslat e-mailem",
+      { kod: "facebook", nazev: "Sdílet na Facebooku", platforma: "Facebook", href: "https://www.facebook.com/sharer/sharer.php?u=" + u, textSePreda: false },
+      { kod: "x",        nazev: "Sdílet na X",         platforma: "X",        href: "https://twitter.com/intent/tweet?url=" + u + "&text=" + t, textSePreda: true },
+      { kod: "linkedin", nazev: "Sdílet na LinkedInu", platforma: "LinkedIn", href: "https://www.linkedin.com/sharing/share-offsite/?url=" + u, textSePreda: false },
+      { kod: "whatsapp", nazev: "Poslat přes WhatsApp", platforma: "WhatsApp", href: "https://wa.me/?text=" + encodeURIComponent(text + " " + url), textSePreda: true },
+      { kod: "mail",     nazev: "Poslat e-mailem",     platforma: "e-mail",
         href: "mailto:?subject=" + encodeURIComponent(predmet || "Pozvánka do Realitního tipu") +
-              "&body=" + encodeURIComponent(text + "\n\n" + url) }
+              "&body=" + encodeURIComponent(text + "\n\n" + url), textSePreda: true }
     ];
     var html = site.map(function (s) {
+      // Zadání (bod 18, oprava po revizi): ikona samotná NEUMÍ přiložit
+      // obrázek banneru (viz poznámka u `obrazekUrl` výš - žádný z těchhle
+      // odkazů to neumožňuje). Kdykoli je tu buď obrázek, nebo síť sama
+      // nepřevezme ani text, kliknutí navíc zkopíruje text+odkaz do
+      // schránky a ukáže bannerem, co přesně appka udělala/neudělala -
+      // ať uživatel neřeší, jestli se něco "ztratilo".
+      var doprovod = (obrazekUrl || !s.textSePreda)
+        ? ' data-sdil-doprovod="' + escapeHtml(text + " " + url) + '"' +
+          ' data-sdil-doprovod-platforma="' + escapeHtml(s.platforma) + '"' +
+          ' data-sdil-doprovod-text-preda="' + (s.textSePreda ? "1" : "0") + '"' +
+          ' data-sdil-doprovod-obrazek="' + (obrazekUrl ? "1" : "0") + '"'
+        : '';
       // `rel="noopener noreferrer"` u target="_blank" je povinnost, ne
       // kosmetika - bez něj má otevřená stránka přístup na window.opener.
       return '<a class="sdil-btn" href="' + escapeHtml(s.href) + '" target="_blank" rel="noopener noreferrer"' +
-        ' title="' + escapeHtml(s.nazev) + '" aria-label="' + escapeHtml(s.nazev) + '">' +
+        ' title="' + escapeHtml(s.nazev) + '" aria-label="' + escapeHtml(s.nazev) + '"' + doprovod + '>' +
         sdilIkonaSvg(s.kod) + '</a>';
     }).join("");
     // Zadání (bod 22): Instagram - žádné URL schéma pro předvyplněný
@@ -21787,6 +22186,38 @@
       if (!podporujeNativniSdileni) return;
       b.hidden = false;
       b.addEventListener("click", function () { sdilSObrazkem(b, bannerEl); });
+    });
+    // Zadání (bod 18, oprava po revizi): jednotlivé ikony sítí (Facebook/X/
+    // LinkedIn/WhatsApp/e-mail) NEUMÍ přiložit obrázek banneru - to
+    // neumožňuje žádný z jejich odkazů (vysvětleno u `obrazekUrl` výš).
+    // U Facebooku a LinkedInu navíc jejich sdílecí odkaz ignoruje i
+    // PŘEDVYPLNĚNÝ TEXT (i to je omezení jejich rozhraní, ne appky) - dřív
+    // appka nic z tohohle nesdělovala, jen otevřela odkaz a tvářila se, že
+    // je hotovo. Klik proto navíc (kde je co chybí) zkopíruje text+odkaz
+    // do schránky - PRO JISTOTU, ne že by to teď nutně dorazilo samo - a
+    // bannerem řekne přesně, co appka udělala a co je potřeba doplnit
+    // ručně, ať uživatel neřeší, jestli se něco automaticky "ztratilo".
+    wrap.querySelectorAll("[data-sdil-doprovod]").forEach(function (a) {
+      a.addEventListener("click", function () {
+        var text = a.getAttribute("data-sdil-doprovod") || "";
+        var platforma = a.getAttribute("data-sdil-doprovod-platforma") || "síť";
+        var textSePreda = a.getAttribute("data-sdil-doprovod-text-preda") === "1";
+        var maObrazek = a.getAttribute("data-sdil-doprovod-obrazek") === "1";
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).catch(function () {});
+        }
+        var zprava = "Otevírá se " + platforma + ".";
+        if (!textSePreda) {
+          zprava += " Text s odkazem tahle síť sama nepřevezme, proto jsme ho pro jistotu zkopírovali do schránky — vložte ho tam ručně.";
+        } else {
+          zprava += " Text s odkazem se předvyplní automaticky.";
+        }
+        if (maObrazek) {
+          zprava += " Obrázek banneru se ale NIKDY nepřipojí automaticky (to neumí žádný z těchhle odkazů) — stáhněte ho tlačítkem „Stáhnout banner“ a přiložte ručně.";
+        }
+        showBanner(bannerEl, "ok", zprava);
+        setTimeout(function () { showBanner(bannerEl, null, null); }, 9000);
+      });
     });
   }
 
@@ -22308,8 +22739,14 @@
       return;
     }
 
+    // Zadání (bod 9, oprava po revizi): RPC vrací i invite_code_historie a
+    // invite_code_zmeny_pocet, ale dřív se do currentUser zapisoval jen
+    // invite_code - historie i počítadlo změn tak v náhledu zůstávaly
+    // NEAKTUÁLNÍ (o jednu změnu pozadu) až do dalšího refreshOwnProfile().
     var novy = (res.data && res.data.invite_code) || raw.toLowerCase();
     currentUser.invite_code = novy;
+    if (res.data && res.data.invite_code_historie) currentUser.invite_code_historie = res.data.invite_code_historie;
+    if (res.data && res.data.invite_code_zmeny_pocet != null) currentUser.invite_code_zmeny_pocet = res.data.invite_code_zmeny_pocet;
     renderPozvankovyKodReadonly();
     fillPozvankovyKodForm();
     setPozvankovyKodEditMode(false);
