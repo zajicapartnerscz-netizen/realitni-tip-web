@@ -1414,10 +1414,45 @@
     display: flex; flex-direction: column; gap: 10px;
     padding-right: 4px;
   }
-  .chat-msg { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-m); padding: 10px 14px; }
-  .chat-msg-moje { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 24%, var(--border)); }
+  /* Zadání (bod 4): zarovnání bublin ve stylu WhatsAppu - `.chat-feed` je
+     flex sloupec (viz výš), takže `align-self` na jednotlivé bublině stačí:
+     cizí zpráva (bílá) zůstává u LEVÉHO okraje (výchozí `flex-start`),
+     vlastní zpráva (zelená, `.chat-msg-moje`) jde k PRAVÉMU okraji
+     (`flex-end`). `max-width` u obou zabrání tomu, aby krátká zpráva
+     natáhla bublinu přes celou šířku panelu - to by zarovnání překrylo. */
+  .chat-msg { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-m); padding: 10px 14px; max-width: 78%; align-self: flex-start; }
+  .chat-msg-moje { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 24%, var(--border)); align-self: flex-end; }
   .chat-msg-hlavicka { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12.5px; margin-bottom: 4px; }
   .chat-msg-text { white-space: pre-wrap; font-size: 14px; }
+
+  /* Zadání (bod 5): nástěnka byla "naprosto nedostatečná" - malé textarea
+     v půlce dvousloupcového gridu. Teď je to samostatná sekce PŘES CELOU
+     ŠÍŘKU (mimo `.ld-duo`, tedy min. tak široká jako celý panel - víc než
+     polovina `.page`), s lehkým WYSIWYG editorem (bod 5b, přes
+     `document.execCommand` - žádná těžká knihovna) a barevným rozlišením
+     podle role autora (bod 5c) - viz `[data-nastenka-autor]` níž. */
+  .ld-panel-nastenka { margin-top: 18px; }
+  .nastenka-toolbar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .nastenka-toolbar button {
+    min-width: 34px; padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius-s);
+    background: var(--surface); color: var(--text); font-size: 13px; cursor: pointer;
+  }
+  .nastenka-toolbar button:hover { border-color: var(--accent); background: var(--surface-2); }
+  .nastenka-toolbar button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .nastenka-editor {
+    min-height: 420px; max-height: 640px; overflow-y: auto;
+    border: 1px solid var(--border); border-radius: var(--radius-m);
+    background: var(--surface); padding: 14px 16px; font-size: 14px; line-height: 1.55;
+  }
+  .nastenka-editor:focus { outline: none; border-color: var(--accent); }
+  .nastenka-editor p { margin: 0 0 10px; }
+  .nastenka-editor p:last-child { margin-bottom: 0; }
+  .nastenka-editor ul, .nastenka-editor ol { margin: 0 0 10px; padding-left: 22px; }
+  .nastenka-editor h3 { margin: 0 0 8px; font-size: 16px; }
+  /* Modrá = administrátor, zelená = leader - recyklujeme existující tokeny
+     --info/--accent (mají definici i pro dark mode), žádné nové barvy. */
+  .nastenka-editor [data-nastenka-autor="administrator"] { color: var(--info); }
+  .nastenka-editor [data-nastenka-autor="leader"] { color: var(--accent); }
 
   /* --- pracovní fronta (sekce C) --- */
   .ld-queue-chips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 18px 0 4px; }
@@ -1812,6 +1847,27 @@
   .st-legenda i { display: inline-block; width: 11px; height: 11px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
   .st-legenda-vetev { background: var(--accent); }
   .st-legenda-list { background: var(--surface-2); box-shadow: 0 0 0 1.5px var(--border); }
+
+  /* Zadání (bod 3): tipař BEZ vlastních podřízených nevidí prázdný strom
+     (jen sám sebe), ale greyed-out UKÁZKOVÝ strom + výzvu k akademii - viz
+     stUkazkovyStromHtml() v JS. `.st-ukazka-strom` ztlumí a znehybní
+     přesně tytéž .st-* třídy, kterými se kreslí SKUTEČNÝ strom (žádná
+     druhá sada CSS pro totéž), takže ukázka vypadá jako strom, jen
+     viditelně "vypnutý". */
+  .st-ukazka-strom { opacity: .4; filter: grayscale(.3); pointer-events: none; user-select: none; }
+  .st-ukazka-strom .st-node-klikaci { cursor: default; }
+  .st-ukazka-wrap { position: relative; }
+  .st-ukazka-vyzva {
+    margin-top: 16px; padding: 16px 18px; border-radius: var(--radius-m);
+    background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .st-ukazka-vyzva-text { font-size: 14px; color: var(--text); max-width: 480px; }
+  .st-ukazka-stitek {
+    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .04em;
+    text-transform: uppercase; color: var(--accent); background: var(--surface);
+    border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px; margin-bottom: 10px;
+  }
 
   .ld-switch { display: inline-flex; gap: 2px; background: var(--surface-2); border-radius: 999px; padding: 3px; }
   .ld-switch button {
@@ -5714,7 +5770,7 @@
   // Milník 14: číslo aktuální verze aplikace - MUSÍ odpovídat nejnovější položce
   // pole APP_CHANGELOG níže (položka na indexu 0). Při každém příštím milníku
   // se zvyšuje ROVNOU TADY i v APP_CHANGELOG - jsou to dvě navzájem závislá místa.
-  var APP_VERSION = "31.2";
+  var APP_VERSION = "31.3";
 
   // Milník 14 (bod 4): obsah panelu "Historie verzí" na přihlašovací
   // obrazovce - zrekonstruováno z reálné historie projektu (STAV.md,
@@ -5723,6 +5779,17 @@
   // pod tímto polem). Vykresluje se generickou šablonou renderAuthVersionAndChangelog()
   // - při dalším milníku se sem jen přidá nová položka na začátek pole.
   var APP_CHANGELOG = [
+    // OPRAVA PO REVIZI (31.3). Klient po nasazení 31.2 nahlásil kritickou
+    // regresi (Přehled lídra/administrátora se vůbec nenačetl) a další 5
+    // bodů k chatu/nástěnce/struktuře sítě. Viz "Zadání (bod N)" komentáře
+    // u kódu a nové migrace zadani_*.
+    { verze: "31.3", datum: "26. 9. 2026", body: [
+      "1) KRITICKÁ OPRAVA: Přehled lídra i administrátora se po nasazení 31.2 vůbec nenačetl (appka zůstala trčet na „Načítání přehledu…“). Příčina: jedno z RPC volání v renderLeaderPrehled() mělo za sebou přímo řetězený .catch(), ale Supabase RPC volání (PostgrestBuilder) v aktuální verzi knihovny .catch() vůbec nemá (jen .then()) - volání proto vždy hodilo synchronní TypeError ještě předtím, než přišla jakákoli odpověď ze serveru. Opraveno obalením do Promise.resolve(...).catch(...).",
+      "2) VÝKON: „Struktura sítě“ se s rostoucí sítí načítala citelně pomaleji. sit_strom() dřív počítala velikost týmu a počet nových členů rekurzivním poddotazem PRO KAŽDÝ řádek zvlášť (O(n²)); přepsáno na jediný průchod (pole předků + GROUP BY). Přidán také chybějící index na profiles.sponsor_id, který rekurzi zpomaloval, a načítání fotek uzlů stromu na klientovi je teď paralelní (Promise.all), ne jedna za druhou.",
+      "3) Nová záložka „Struktura sítě“ je teď i pro roli tipař, ne jen pro lídra/administrátora. Tipař s vlastními podřízenými vidí svou vlastní větev (on + kdo je pod ním). Tipař bez podřízených vidí prokliknutelně neaktivní ukázkový strom („UKÁZKA“) s výzvou „Chcete budovat vlastní tým? Dokončete akademii“ a tlačítkem, které vede rovnou na Realitní akademii.",
+      "4) Bubliny na záložce „Chat“ (Leader ⇄ Administrátor) mají skutečné zarovnání ve stylu WhatsAppu - vlastní zpráva (zelená) je u pravého okraje, cizí (bílá) u levého - dřív se lišily jen barvou, ne polohou.",
+      "5) Sdílená nástěnka přepracována: je teď samostatná sekce přes celou šířku panelu (ne půlka dvousloupcového gridu) a citelně vyšší, má lehký formátovací panel (tučně/kurzíva/nadpis/seznamy) místo prostého textového pole a barevně rozlišuje, kdo který text napsal naposledy - administrátor modře, leader zeleně."
+    ] },
     // ZADÁNÍ (31.2). Dávka 18 bodů. Bod 17 (marketingové video) je VĚDOMĚ
     // VYNECHÁN na výslovnou žádost klienta (zatím neřešit) - stávající
     // zelený banner v „Marketing“ zůstává beze změny, nejde o opomenutí.
@@ -9737,7 +9804,12 @@
     // Zadání (bod 7): "akademie" (Realitní akademie) - hned za "network",
     // podobně jako se tipaři učí budovat síť; nemá na to žádný vliv na
     // ostatní záložky, jen pořadí tlačítek.
-    tipar: ["dashboard", "new", "list", "network", "akademie", "marketing", "profile", "mykyc"],
+    // Zadání (bod 3): "sitstrom" (Struktura sítě) dostává i tipař - hned za
+    // "network" ("Moje síť"), stejná logika umístění jako u lídra o pár
+    // řádků níž (obojí je pohled na síť, dává smysl je držet u sebe).
+    // sit_strom() RPC (viz migrace zadani_sit_strom_pro_vsechny_role) mu
+    // vrací jen JEHO VLASTNÍ větev, ne celou síť - viz renderSitStrom().
+    tipar: ["dashboard", "new", "list", "network", "sitstrom", "akademie", "marketing", "profile", "mykyc"],
     // Milník 15 (bod 3): pořadí záložek Leadera přesně podle výčtu klienta -
     // Přehled lídra, Tipy, Uživatelé, Obsah, Výplaty, Provizní schéma,
     // Realitní kanceláře, Historie akcí, Můj profil. Dvě položky, které
@@ -14677,6 +14749,81 @@
   // ulozit_nastenku/oznacit_precteno), tabulky mají vlastní RLS jen pro
   // leader/administrator (migrace zadani_lider_admin_chat_a_nastenka).
   var chatData = null;
+  // Zadání (bod 5): HTML nástěnky tak, jak bylo naposledy NAČTENO ze serveru
+  // (po sanitizaci) - slouží jako "základ" pro porovnání při ukládání, aby
+  // šlo poznat, které bloky uživatel skutečně změnil (viz oznacitNastenkaAutorstvi).
+  var chatNastenkaZaklad = "";
+
+  // Zadání (bod 5b): povolené tagy pro obsah nástěnky - jen základní
+  // formátování (tučně/kurzíva/nadpis/seznamy), žádné odkazy/obrázky/skripty.
+  var NASTENKA_POVOLENE_TAGY = { P: 1, BR: 1, B: 1, STRONG: 1, I: 1, EM: 1, U: 1, UL: 1, OL: 1, LI: 1, H3: 1, DIV: 1, SPAN: 1 };
+
+  // Zadání (bod 5): nástěnku ukládá/zobrazuje jak leader, tak administrátor
+  // (dvě různé úrovně oprávnění) přes `innerHTML` - obsah z DB proto musí projít
+  // allowlist sanitizací, ne jen escapeHtml (potřebujeme zachovat formátování).
+  // `<template>` je inertní (jeho obsah se NEVYKRESLUJE a neexekuuje), takže
+  // parsování sem je bezpečné i pro nedůvěryhodný vstup.
+  function sanitizeNastenkaHtml(html) {
+    var tpl = document.createElement("template");
+    tpl.innerHTML = String(html || "");
+
+    function ocistiPotomky(rodic) {
+      var deti = Array.prototype.slice.call(rodic.childNodes);
+      for (var i = 0; i < deti.length; i++) {
+        var d = deti[i];
+        if (d.nodeType === 1) {
+          ocistiPotomky(d); // nejdřív potomky, teprve pak rozhodnout o tomhle uzlu
+          if (!NASTENKA_POVOLENE_TAGY[d.tagName]) {
+            // Nepovolený tag (script/img/a/style/…) se ROZBALÍ - obsah
+            // zůstává (už vyčištěný), jen se smaže obalový element.
+            while (d.firstChild) rodic.insertBefore(d.firstChild, d);
+            rodic.removeChild(d);
+          } else {
+            var autor = d.getAttribute ? d.getAttribute("data-nastenka-autor") : null;
+            for (var j = d.attributes.length - 1; j >= 0; j--) {
+              d.removeAttribute(d.attributes[j].name);
+            }
+            if (autor === "leader" || autor === "administrator") {
+              d.setAttribute("data-nastenka-autor", autor);
+            }
+          }
+        } else if (d.nodeType !== 3) {
+          rodic.removeChild(d); // komentáře apod.
+        }
+      }
+    }
+    ocistiPotomky(tpl.content);
+    return tpl.innerHTML;
+  }
+
+  // Zadání (bod 5c): barevné rozlišení podle role autora. Ukládání je
+  // last-write-wins (žádné real-time spoluúpravy - to by zadání přeneslo
+  // do zbytečně složitého řešení), takže autorství se dopočítává při KAŽDÉM
+  // uložení na úrovni bloků (odstavec/nadpis/položka seznamu): blok, jehož
+  // text se od základu nezměnil, si ponechá PŮVODNÍ barvu; blok, který je
+  // nový nebo změněný, se označí barvou toho, kdo právě ukládá.
+  function oznacitNastenkaAutorstvi(aktualniHtml, zakladHtml, mojeRole) {
+    var tplAkt = document.createElement("template");
+    tplAkt.innerHTML = aktualniHtml || "";
+    var tplZaklad = document.createElement("template");
+    tplZaklad.innerHTML = zakladHtml || "";
+    var zakladBloky = Array.prototype.slice.call(tplZaklad.content.children);
+
+    function normText(u) { return (u.textContent || "").replace(/\s+/g, " ").trim(); }
+
+    Array.prototype.slice.call(tplAkt.content.children).forEach(function (blok, idx) {
+      var stary = zakladBloky[idx];
+      var stejny = stary && stary.tagName === blok.tagName && normText(stary) === normText(blok);
+      if (stejny) {
+        var predchoziAutor = stary.getAttribute("data-nastenka-autor");
+        if (predchoziAutor) blok.setAttribute("data-nastenka-autor", predchoziAutor);
+        else blok.removeAttribute("data-nastenka-autor");
+      } else {
+        blok.setAttribute("data-nastenka-autor", mojeRole === "administrator" ? "administrator" : "leader");
+      }
+    });
+    return tplAkt.innerHTML;
+  }
 
   async function fetchChatScreen() {
     if (!currentUser) return;
@@ -14728,6 +14875,13 @@
       ? 'Naposledy upravil(a) ' + escapeHtml(n.upravil_jmeno || "—") + ' · ' + escapeHtml(formatDatumZCasu(n.upraveno_kdy) || "")
       : "Zatím nikdo neupravil.";
 
+    // Zadání (bod 5): obsah nástěnky je teď HTML (kvůli WYSIWYG formátování +
+    // barvě podle autora) - projde sanitizací (nikdy syrové z DB do innerHTML)
+    // a uloží se jako "základ" pro pozdější rozpoznání změněných bloků.
+    var nastenkaHtml = sanitizeNastenkaHtml(n.text || "");
+    if (!nastenkaHtml) nastenkaHtml = "<p><br></p>"; // prázdný odstavec, ať má kam kliknout kurzor
+    chatNastenkaZaklad = nastenkaHtml;
+
     el("chatWrap").innerHTML =
       '<div class="ld-duo">' +
         '<section class="ld-panel">' +
@@ -14744,16 +14898,24 @@
             '</div>' +
           '</form>' +
         '</section>' +
-        '<section class="ld-panel">' +
-          '<h3 class="ld-panel-title" style="margin:0 0 4px;">Sdílená nástěnka</h3>' +
-          '<p class="ld-panel-sub" style="margin-bottom:10px;">Jedna společná poznámka - upraví ji kdokoli z vás dvou, uloží se poslední verze.</p>' +
-          '<textarea id="chatNastenkaInput" rows="8" placeholder="Sem napište cokoli, co má vidět i ta druhá role…">' + escapeHtml(n.text || "") + '</textarea>' +
-          '<div class="form-actions" style="margin-top:10px;">' +
-            '<button type="button" class="btn-primary" id="chatNastenkaSaveBtn" style="width:auto;">Uložit nástěnku</button>' +
-            '<span class="dt-muted" id="chatNastenkaInfo" style="margin-left:10px;">' + nastenkaInfo + '</span>' +
-          '</div>' +
-        '</section>' +
-      '</div>';
+      '</div>' +
+      '<section class="ld-panel ld-panel-nastenka">' +
+        '<h3 class="ld-panel-title" style="margin:0 0 4px;">Sdílená nástěnka</h3>' +
+        '<p class="ld-panel-sub" style="margin-bottom:10px;">Jedna společná poznámka - upraví ji kdokoli z vás dvou, uloží se poslední verze. Text administrátora se zobrazuje modře, text leadera zeleně.</p>' +
+        '<div class="nastenka-toolbar" id="chatNastenkaToolbar" role="toolbar" aria-label="Formátování nástěnky">' +
+          '<button type="button" data-nastenka-cmd="bold" title="Tučně"><strong>B</strong></button>' +
+          '<button type="button" data-nastenka-cmd="italic" title="Kurzíva"><em>I</em></button>' +
+          '<button type="button" data-nastenka-cmd="formatBlock" data-nastenka-arg="H3" title="Nadpis">H3</button>' +
+          '<button type="button" data-nastenka-cmd="formatBlock" data-nastenka-arg="P" title="Odstavec">¶</button>' +
+          '<button type="button" data-nastenka-cmd="insertUnorderedList" title="Odrážky">• Seznam</button>' +
+          '<button type="button" data-nastenka-cmd="insertOrderedList" title="Číslovaný seznam">1. Seznam</button>' +
+        '</div>' +
+        '<div class="nastenka-editor" id="chatNastenkaEditor" contenteditable="true" aria-label="Text nástěnky">' + nastenkaHtml + '</div>' +
+        '<div class="form-actions" style="margin-top:10px;">' +
+          '<button type="button" class="btn-primary" id="chatNastenkaSaveBtn" style="width:auto;">Uložit nástěnku</button>' +
+          '<span class="dt-muted" id="chatNastenkaInfo" style="margin-left:10px;">' + nastenkaInfo + '</span>' +
+        '</div>' +
+      '</section>';
 
     var feed = el("chatFeedWrap");
     if (feed) feed.scrollTop = feed.scrollHeight;
@@ -14767,6 +14929,22 @@
     });
     var saveBtn = el("chatNastenkaSaveBtn");
     if (saveBtn) saveBtn.addEventListener("click", function () { submitChatNastenku(); });
+
+    // Zadání (bod 5b): tlačítka toolbaru volají document.execCommand na
+    // #chatNastenkaEditor. `mousedown` + preventDefault (místo `click`) je
+    // nutné, jinak by kliknutí na tlačítko nejdřív odebralo selection/focus
+    // z contenteditable a formátovací příkaz by neměl na co působit.
+    var toolbar = el("chatNastenkaToolbar");
+    if (toolbar) {
+      Array.prototype.slice.call(toolbar.querySelectorAll("button[data-nastenka-cmd]")).forEach(function (tbBtn) {
+        tbBtn.addEventListener("mousedown", function (e) {
+          e.preventDefault();
+          var editor = el("chatNastenkaEditor");
+          if (editor) editor.focus();
+          document.execCommand(tbBtn.getAttribute("data-nastenka-cmd"), false, tbBtn.getAttribute("data-nastenka-arg") || undefined);
+        });
+      });
+    }
   }
 
   async function submitChatMessage() {
@@ -14792,8 +14970,13 @@
 
   async function submitChatNastenku() {
     var g = authGen; // Milník 15 (bod 4.5)
-    var input = el("chatNastenkaInput");
-    var text = input ? input.value : "";
+    var editor = el("chatNastenkaEditor");
+    var syrovyHtml = editor ? editor.innerHTML : "";
+    // Zadání (bod 5c): nejdřív dopočítat, které bloky se od základu opravdu
+    // změnily (ty se označí barvou aktuální role), pak teprve sanitizovat -
+    // sanitizace zachová jen `data-nastenka-autor` atribut, ne cizí atributy.
+    var oznaceny = oznacitNastenkaAutorstvi(syrovyHtml, chatNastenkaZaklad, (chatData && chatData.moje_role) || "");
+    var text = sanitizeNastenkaHtml(oznaceny);
     var btn = el("chatNastenkaSaveBtn");
     if (btn) btn.disabled = true;
     showBanner(el("chatBanner"), null, null);
@@ -19767,7 +19950,20 @@
       // Zadání (bod 18, 18bodová dávka): počet nepřečtených chatových zpráv -
       // samostatná lehká RPC, nesmí zpomalit/zablokovat zbytek Přehledu, kdyby
       // selhala (viz `.catch` níž - chyba se jen zaloguje, odznak zmizí).
-      sb.rpc("lider_admin_pocet_neprectenych").catch(function (e) { return { error: e }; })
+      //
+      // OPRAVA (kritická regrese nahlášená po nasazení): `sb.rpc(...)` NENÍ
+      // skutečný Promise, je to jen `PromiseLike` (viz
+      // @supabase/postgrest-js PostgrestBuilder - implementuje výhradně
+      // `.then()`, ne `.catch()`/`.finally()`). Volání `.catch()' přímo na
+      // něm proto vždy (ne občas - VŽDY, při každém vykreslení Přehledu)
+      // synchronně vyhodilo `TypeError: ...catch is not a function`, a to
+      // ještě PŘED tím, než se stihlo poslat samotné Promise.all pole pryč -
+      // celá funkce renderLeaderPrehled() tím shodila hned na začátku, těsně
+      // po vypsání "Načítání přehledu…", takže se obrazovka dál nikdy
+      // nedostala (přesně nahlášený příznak - lídr/administrátor viděli jen
+      // trvalý loading text). Oprava: `Promise.resolve(...)` napřed obalí
+      // `PromiseLike` do SKUTEČNÉHO Promise, který `.catch()` má.
+      Promise.resolve(sb.rpc("lider_admin_pocet_neprectenych")).catch(function (e) { return { error: e }; })
     ]);
     var result = vysledky[0];
     var prodane = vysledky[1];
@@ -19963,12 +20159,22 @@
   // .st-badge VEDLE kolečka, viz stBadgeText). Kolečko je navíc klikací -
   // otevírá Detail tipaře (viz stOtevriDetailTipare a jeho zapojení v
   // renderSitStrom).
+  //
+  // Zadání (bod 3, oprava po revizi): "otevřít detail" vede na záložku
+  // "users" (Uživatelé) - tu ale má v ROLE_TAB_ORDER jen leader/
+  // administrator. Odkdy "Struktura sítě" vidí i tipař (na SVÉ VLASTNÍ
+  // větvi), kolečko mu nesmí nabízet klik, který by ho poslal na záložku,
+  // kterou vůbec nemá (a RPC by mu ji stejně odmítla) - proto se
+  // data-st-id/tabindex/role="button" přidávají JEN leaderovi a
+  // administrátorovi. Tipařův strom zůstává čistě informativní.
   function stUzelHtml(u, varianta) {
     var radky = stPopis(u);
-    var trida = "st-node st-node-" + varianta + (u.aktivni ? "" : " st-node-neaktivni") + " st-node-klikaci";
+    var jeKlikatelny = !!currentUser && (currentUser.role === "leader" || currentUser.role === "administrator");
+    var trida = "st-node st-node-" + varianta + (u.aktivni ? "" : " st-node-neaktivni") + (jeKlikatelny ? " st-node-klikaci" : "");
     var hodnotovy = stJeHodnotovyRezim();
-    return '<div class="' + trida + '" tabindex="0" role="button" data-st-id="' + escapeHtml(u.id) + '"' +
-        ' aria-label="' + escapeHtml(radky.join(" — ") + " — otevřít detail") + '">' +
+    return '<div class="' + trida + '"' +
+        (jeKlikatelny ? ' tabindex="0" role="button" data-st-id="' + escapeHtml(u.id) + '"' : '') +
+        ' aria-label="' + escapeHtml(radky.join(" — ") + (jeKlikatelny ? " — otevřít detail" : "")) + '">' +
         '<div class="st-avatar" data-st-avatar="' + escapeHtml(u.id) + '">' +
           '<span class="st-initials">' + escapeHtml(stIniciály(u)) + '</span>' +
         '</div>' +
@@ -20030,12 +20236,73 @@
       '</div>';
   }
 
+  // Zadání (bod 3): ukázkový/neaktivní strom pro tipaře BEZ VLASTNÍCH
+  // PODŘÍZENÝCH - vizuálně stejný jako skutečný strom (stejné .st-* třídy,
+  // stejný layout), jen ztlumený (.st-ukazka-strom, viz CSS) a BEZ
+  // interakce (žádné data-st-id/tabindex - stKolecko níž je nikdy
+  // nepřidává). Data jsou natvrdo vymyšlená, ne z DB - "Ukázka" štítek a
+  // text výzvy dole to čtenáři jasně říkají, aby si to nikdo nespletl se
+  // skutečnými lidmi.
+  function stUkazkoveKolecko(iniciály, varianta) {
+    return '<div class="st-node st-node-' + varianta + '" aria-hidden="true">' +
+        '<div class="st-avatar"><span class="st-initials">' + escapeHtml(iniciály) + '</span></div>' +
+      '</div>';
+  }
+  function stUkazkovyStromHtml() {
+    return '<div class="st-ukazka-wrap">' +
+        '<span class="st-ukazka-stitek">Ukázka</span>' +
+        '<div class="st-plocha">' +
+          '<div class="st-ukazka-strom">' +
+            '<div class="st-vetev">' +
+              stUkazkoveKolecko("VY", "koren") +
+              '<div class="st-deti">' +
+                '<div class="st-vetev">' +
+                  stUkazkoveKolecko("JN", "vetev") +
+                  '<div class="st-deti">' +
+                    '<div class="st-vetev">' + stUkazkoveKolecko("MK", "list") + '</div>' +
+                    '<div class="st-vetev">' + stUkazkoveKolecko("PS", "list") + '</div>' +
+                  '</div>' +
+                '</div>' +
+                '<div class="st-vetev">' + stUkazkoveKolecko("AH", "list") + '</div>' +
+                '<div class="st-vetev">' + stUkazkoveKolecko("TB", "list") + '</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="st-ukazka-vyzva">' +
+          '<p class="st-ukazka-vyzva-text">Chcete budovat vlastní tým? Dokončete akademii a odemkněte pozvánky pro nové tipaře.</p>' +
+          '<button type="button" class="btn-primary" id="stUkazkaAkademieBtn">Otevřít Realitní akademii</button>' +
+        '</div>' +
+      '</div>';
+  }
+
   function renderSitStrom() {
     var wrap = el("sitStromWrap");
     if (!wrap) return;
     var rows = sitStromData || [];
     if (!rows.length) {
       wrap.innerHTML = '<div class="empty-state"><p>Strom se nedá vykreslit — v systému zatím není žádný lídr, od kterého by síť začínala.</p></div>';
+      return;
+    }
+
+    // Zadání (bod 3): tipař bez vlastních podřízených - sit_strom() (viz
+    // migrace zadani_sit_strom_pro_vsechny_role) mu v tomhle případě vrátí
+    // JEDINÝ řádek (on sám, žádní potomci). Skutečný strom by tu ukázal
+    // jedno osamocené kolečko, což samo o sobě nic neříká - místo něj se
+    // kreslí ukázka + výzva k dokončení akademie.
+    var jeTiparBezTymu = !!currentUser && currentUser.role === "tipar" &&
+      rows.length === 1 && !Number(rows[0].primych_podrizenych || 0);
+    if (jeTiparBezTymu) {
+      wrap.innerHTML =
+        '<section class="ld-panel">' +
+          '<div class="ld-panel-head"><div>' +
+            '<h3 class="ld-panel-title">Struktura sítě</h3>' +
+            '<p class="ld-panel-sub">Zatím ve své větvi nemáte nikoho pod sebou.</p>' +
+          '</div></div>' +
+          stUkazkovyStromHtml() +
+        '</section>';
+      var akadBtn = el("stUkazkaAkademieBtn");
+      if (akadBtn) akadBtn.addEventListener("click", function () { setActiveTab("akademie"); });
       return;
     }
 
@@ -20051,6 +20318,11 @@
       return;
     }
 
+    // Zadání (bod 3): nadpis a popisek se liší podle role - leader/
+    // administrator dál vidí "Celá síť" (kořenem je globální leader, viz
+    // sit_strom()), tipař vidí VLASTNÍ VĚTEV (kořenem je on sám) a text to
+    // musí říkat na rovinu, ať to nepůsobí jako by viděl cizí síť.
+    var jeTipar = !!currentUser && currentUser.role === "tipar";
     var celkem = rows.length - 1;
     var maxUroven = rows.reduce(function (m, r) { return Math.max(m, Number(r.uroven || 0)); }, 0);
     var listu = rows.filter(function (r) { return !r.je_koren && Number(r.primych_podrizenych || 0) === 0; }).length;
@@ -20058,9 +20330,9 @@
     wrap.innerHTML =
       '<section class="ld-panel">' +
         '<div class="ld-panel-head"><div>' +
-          '<h3 class="ld-panel-title">Celá síť</h3>' +
+          '<h3 class="ld-panel-title">' + (jeTipar ? "Moje větev" : "Celá síť") + '</h3>' +
           '<p class="ld-panel-sub">' + celkem + ' ' + (celkem === 1 ? "člověk" : (celkem < 5 ? "lidé" : "lidí")) +
-            ' pod lídrem · ' + maxUroven + ' ' + (maxUroven === 1 ? "úroveň" : (maxUroven < 5 ? "úrovně" : "úrovní")) +
+            (jeTipar ? ' ve vaší větvi · ' : ' pod lídrem · ') + maxUroven + ' ' + (maxUroven === 1 ? "úroveň" : (maxUroven < 5 ? "úrovně" : "úrovní")) +
             ' do hloubky · ' + listu + ' zatím nikoho nepřivedlo</p>' +
         '</div></div>' +
         // Zadání (bod 4): filtr/zvýraznění - klik na aktivní tlačítko ho
@@ -20081,7 +20353,7 @@
           '<span><i class="st-legenda-vetev"></i> vede vlastní tým</span>' +
           '<span><i class="st-legenda-list"></i> zatím nikoho nepřivedl</span>' +
           '<span>šedivé kolečko = účet označený jako vymazaný</span>' +
-          '<span>klik na kolečko = detail tipaře</span>' +
+          (jeTipar ? '' : '<span>klik na kolečko = detail tipaře</span>') +
         '</div>' +
         '<div class="st-plocha' + (stJeHodnotovyRezim() ? ' st-plocha-hodnoty' : '') + '">' +
           stPodstromHtml(koren, deti, 0) + '</div>' +
@@ -20122,18 +20394,27 @@
   // Fotky: jedna podepsaná URL na uzel, „best effort". Selhání se NELOGUJE
   // jako chyba appky — u většiny lidí je naprosto běžné, že fotku nemají,
   // a i odepřený přístup je legitimní stav (viz R5-FOTKY).
+  //
+  // OPRAVA (bod 2 zadání, výkon): dřív se sem pro sebe volalo `await` UVNITŘ
+  // `for` cyklu - jedna podepsaná URL se tedy natahovala AŽ PO dokončení
+  // předchozí, tedy N síťových obrátek ZA SEBOU (sériově). S rostoucí sítí
+  // (a tedy rostoucím počtem fotek) to viditelně prodlužovalo dobu, než
+  // strom dokreslil poslední kolečka - přesně to, co si klient stěžoval
+  // jako "načítá se mnohem pomaleji". Fotky na sobě navzájem nezávisí,
+  // takže není důvod na ně čekat postupně: `Promise.all` je pošle
+  // VŠECHNY najednou a strom se doplní tak rychle, jak dovolí ta
+  // NEJPOMALEJŠÍ jednotlivá odpověď, ne jejich součet.
   async function nacistFotkyStromu(rows) {
     var g = authGen;
     var sFotkou = rows.filter(function (r) { return r.profilova_fotka_cesta; });
-    for (var i = 0; i < sFotkou.length; i++) {
-      var r = sFotkou[i];
+    await Promise.all(sFotkou.map(async function (r) {
       var signed = await sb.storage.from("profilove-fotky").createSignedUrl(r.profilova_fotka_cesta, 300);
       if (g !== authGen) return;
-      if (signed.error || !signed.data) continue;
+      if (signed.error || !signed.data) return;
       var cil = document.querySelector('[data-st-avatar="' + r.id + '"]');
-      if (!cil) continue; // strom se mezitím překreslil
+      if (!cil) return; // strom se mezitím překreslil
       cil.innerHTML = '<img src="' + escapeHtml(signed.data.signedUrl) + '" alt="">';
-    }
+    }));
   }
 
   // Zadání (bod 19): fotka v Detailu tipaře (leader/administrátor) -
